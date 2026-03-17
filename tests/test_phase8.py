@@ -33,6 +33,11 @@ from compare_morphogenesis_large_mode_switched import evaluate_morphogenesis_lar
 from scripts.compare_sequential_transfer import evaluate_sequential_transfer
 from scripts.analyze_transfer_timecourse import _aggregate_latent_variant, _latent_timeline_summary
 from scripts.compare_latent_context import latent_signal_specs
+from scripts.neural_baseline import (
+    BaselineResult,
+    aggregate_results as aggregate_neural_results,
+    examples_to_criterion,
+)
 from scripts.compare_task_transfer import aggregate_transfer, transfer_metrics
 from phase8.consolidation import Phase8ConsolidationPipeline
 from real_core.types import CycleEntry, GCOStatus
@@ -1869,6 +1874,42 @@ class TestTransferHarness(unittest.TestCase):
         self.assertEqual(aggregate["avg_warm_full_task_b_wrong_transform_family"], 1.0)
         self.assertEqual(aggregate["avg_warm_substrate_task_b_identity_fallbacks"], 0.0)
         self.assertEqual(aggregate["avg_cold_task_b_stale_support_suspicions"], 1.0)
+
+
+class TestNeuralBaselineHarness(unittest.TestCase):
+    def test_examples_to_criterion_can_optionally_require_bit_accuracy(self) -> None:
+        exact_results = [True] * 7 + [False]
+        bit_accuracy_results = [0.90] * 8
+
+        self.assertEqual(examples_to_criterion(exact_results), 8)
+        self.assertIsNone(
+            examples_to_criterion(
+                exact_results,
+                bit_accuracy_results,
+                bit_accuracy_threshold=0.95,
+            )
+        )
+
+    def test_epoch_scan_aggregate_leaves_single_pass_metrics_unset(self) -> None:
+        result = BaselineResult(
+            variant="rnn-latent",
+            seed=0,
+            task_id="task_a",
+            exact_matches=None,
+            mean_bit_accuracy=None,
+            examples_to_criterion=162,
+            criterion_reached=True,
+            per_example_exact=[],
+            per_example_accuracy=[],
+            losses=[],
+        )
+
+        aggregate = aggregate_neural_results([result])
+
+        self.assertIsNone(aggregate["mean_exact_matches"])
+        self.assertIsNone(aggregate["mean_bit_accuracy"])
+        self.assertEqual(aggregate["criterion_rate"], 1.0)
+        self.assertEqual(aggregate["mean_examples_to_criterion"], 162)
 
 
 class TestMorphogenesis(unittest.TestCase):

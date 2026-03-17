@@ -1,6 +1,6 @@
 {
-  "title": "2026-03-17 1409 - neural baseline extended",
-  "timestamp": "2026-03-17T21:09:39.282797Z",
+  "title": "2026-03-17 1508 - neural baseline extended",
+  "timestamp": "2026-03-17T22:08:48.244712Z",
   "harness": "neural_baseline_extended",
   "seeds": [
     0
@@ -84,7 +84,7 @@
       "mean_exact_matches": 53.0,
       "mean_bit_accuracy": 0.6852,
       "criterion_rate": 1.0,
-      "mean_examples_to_criterion": null
+      "mean_examples_to_criterion": 81
     }
   },
   "metadata": {
