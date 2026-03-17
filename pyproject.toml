@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "REAL native substrate research prototype built from the generalized allostatic core and Phase 8 neural substrate experiments."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = ["numpy>=1.26"]
 
 [tool.setuptools]
 packages = ["real_core", "phase8"]
@@ -17,3 +17,7 @@ packages = ["real_core", "phase8"]
 real-phase8-demo = "run_phase8_demo:main"
 real-cold-warm = "compare_cold_warm:main"
 real-task-transfer = "compare_task_transfer:main"
+real-large-topology = "compare_large_topology:main"
+real-morphogenesis-large = "compare_morphogenesis_large:main"
+real-sequential-transfer = "compare_sequential_transfer:main"
+real-neural-baseline = "neural_baseline:main"

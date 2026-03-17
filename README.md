@@ -12,7 +12,7 @@ The repo is intentionally focused on non-backprop, non-global-loss experiments a
 - `real_core/`: reusable allostatic engine, selector, mesh, substrate, carryover, and shared types
 - `phase8/`: node agents, local routing environment, substrate mechanics, selectors, scenarios, and topology growth logic
 - `tests/`: standalone `real_core` tests plus Phase 8 unit and integration coverage
-- `docs/`: architecture notes, the cross-phase overview, and the first computational experiment spec
+- `docs/`: architecture notes, the cross-phase overview, the updated technical report, session synthesis, and selected trace documents
 
 ## Quickstart
 
@@ -32,6 +32,17 @@ python compare_task_transfer.py
 - `compare_task_transfer.py`: Task A to Task B transfer evaluation
 - `compare_transfer_matrix.py`: directional transfer matrix across nearby task variants
 - `analyze_transfer_timecourse.py`: latent/context timecourse analysis for transfer behavior
+- `compare_large_topology.py`: cold and warm evaluation on the 10-node, 36-packet large topology
+- `compare_morphogenesis_large.py`: large-topology morphogenesis benchmark
+- `compare_sequential_transfer.py`: sequential `A -> B -> C` transfer evaluation
+- `neural_baseline.py`: online MLP/RNN comparison harness for sample-efficiency checks
+
+## Reference Artifacts
+
+- `docs/technical_report.md`: current merged technical report
+- `docs/20260317_phase8_session_synthesis.md`: March 17 consolidated progress summary
+- `docs/traces/`: selected March 17 episodic traces for neural baselines and large-topology morphogenesis
+- `phase8_dashboard.html`: static Phase 8 dashboard snapshot carried over from the source workspace
 
 ## What Stayed In The Umbrella Repo
 

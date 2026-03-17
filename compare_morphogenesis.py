@@ -38,6 +38,17 @@ def benchmark_morphogenesis_config() -> MorphogenesisConfig:
         probation_feedback_threshold=0.12,
         seed_edge_support=0.40,
         seed_action_support=0.34,
+        # Gate budding until context confidence is resolved to prevent
+        # premature growth into unrouted topology (Priority 1 fix).
+        context_resolution_growth_gate=0.55,
+        # Lower upkeep so newly budded nodes survive the slow-start window,
+        # and allow growth when backlog builds before ATP surplus is reached.
+        dynamic_node_upkeep=0.012,
+        growth_grace_ticks=4,
+        anticipatory_growth_backlog_threshold=0.55,
+        # Require positive feedback signal before growth fires; prevents
+        # branch_pressure premature budding (routing_feedback_gate fix).
+        routing_feedback_gate=0.05,
     )
 
 

@@ -27,7 +27,14 @@ class MorphogenesisConfig:
     apoptosis_energy_threshold: float = -0.03
     traffic_value_scale: float = 0.04
     dynamic_edge_upkeep: float = 0.008
-    dynamic_node_upkeep: float = 0.018
+    dynamic_node_upkeep: float = 0.012
+    # Number of cycles after bud during which dynamic node upkeep is waived.
+    # Prevents premature apoptosis during the slow-start learning window.
+    growth_grace_ticks: int = 0
+    # When > 0.0, allow growth proposals on source nodes when ingress_backlog
+    # exceeds this fraction even without full ATP surplus.  This enables
+    # pre-provisioning before sustained-pressure overload.
+    anticipatory_growth_backlog_threshold: float = 0.0
     growth_queue_tolerance: int = 1
     growth_interrupt_urgency_threshold: float = 0.35
     edge_prune_ticks: int = 6
@@ -41,6 +48,10 @@ class MorphogenesisConfig:
     seed_action_support: float = 0.24
     growth_route_novelty_bonus: float = 0.12
     growth_route_probationary_bonus: float = 0.10
+    # When > 0.0, bud proposals are suppressed unless the node's
+    # feedback_recent meets this threshold.  Prevents growth before the node
+    # has demonstrated useful routing (positive feedback signal required).
+    routing_feedback_gate: float = 0.0
     # When > 0.0, bud_edge and bud_node proposals are suppressed while a node's
     # effective_context_confidence is below this value AND a task packet is
     # present.  Prevents structural growth during the context-inference window.
@@ -424,9 +435,16 @@ class TopologyState:
                 if self.edge_specs.get(_edge_id(node_id, neighbor_id)) is not None
                 and self.edge_specs[_edge_id(node_id, neighbor_id)].dynamic
             )
+            node_age = (cycle - spec.created_cycle) if cycle is not None else 0
+            in_grace = (
+                spec.dynamic
+                and config.growth_grace_ticks > 0
+                and node_age <= config.growth_grace_ticks
+            )
+            node_upkeep = 0.0 if in_grace else (config.dynamic_node_upkeep if spec.dynamic else 0.0)
             spec.structural_upkeep_recent = (
                 decay * spec.structural_upkeep_recent
-                + (config.dynamic_node_upkeep if spec.dynamic else 0.0)
+                + node_upkeep
                 + dynamic_outbound * config.dynamic_edge_upkeep
             )
             outbound_value = sum(

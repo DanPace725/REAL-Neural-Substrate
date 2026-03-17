@@ -8,6 +8,9 @@ from pathlib import Path
 from pprint import pprint
 
 from compare_cold_warm import SCENARIOS, aggregate, build_system, compare_for_seed, run_workload
+from compare_large_topology import evaluate_large_topology
+from compare_morphogenesis_large import evaluate_morphogenesis_large
+from compare_sequential_transfer import evaluate_sequential_transfer
 from compare_task_transfer import transfer_for_seed
 
 
@@ -223,14 +226,48 @@ def run_transfer_demo(seed: int) -> None:
     print(f"Substrate-only Task B delta: {result['delta_substrate_task_b']}")
 
 
+def run_large_topology_demo() -> None:
+    result = evaluate_large_topology()
+    print("Phase 8 Large Topology Demo")
+    print(f"Topology: {result['topology']}")
+    print(f"Signal set: {result['signal_set']}")
+    print()
+    pprint(result["aggregate"])
+
+
+def run_morphogenesis_large_demo() -> None:
+    result = evaluate_morphogenesis_large()
+    print("Phase 8 Large Topology Morphogenesis Demo")
+    print(f"Topology: {result['topology']}")
+    print(f"Signal set: {result['signal_set']}")
+    print()
+    print("Workload aggregates")
+    for scenario_name, scenario_result in result["scenarios"].items():
+        print(f"{scenario_name}:")
+        pprint(scenario_result["aggregate"])
+    print()
+    print("Transfer aggregate")
+    pprint(result["transfer"]["aggregate"])
+
+
+def run_sequential_transfer_demo() -> None:
+    result = evaluate_sequential_transfer()
+    print("Phase 8 Sequential Transfer Demo")
+    print(
+        f"Tasks: {result['task_a_scenario']} -> {result['task_b_scenario']} -> {result['task_c_scenario']}"
+    )
+    print()
+    pprint(result["aggregate"])
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Phase 8 multi-agent substrate demo")
     parser.add_argument("--seed", type=int, default=51, help="Deterministic demo seed")
     parser.add_argument(
         "--mode",
-        choices=("comparison", "detailed", "stress", "transfer"),
+        choices=("comparison", "detailed", "stress", "transfer", "large", "morph-large", "sequential"),
         default="stress",
-        help="Stress runs all comparison scenarios; comparison and detailed use a single scenario; transfer runs the first Task A -> Task B transfer check.",
+        help="Stress runs baseline scenarios; comparison and detailed use a single scenario; transfer runs Task A -> Task B; large, morph-large, and sequential run the March 17 expansion harnesses.",
     )
     parser.add_argument(
         "--scenario",
@@ -246,6 +283,12 @@ def main() -> None:
         run_detailed_trace(args.seed, args.scenario)
     elif args.mode == "transfer":
         run_transfer_demo(args.seed)
+    elif args.mode == "large":
+        run_large_topology_demo()
+    elif args.mode == "morph-large":
+        run_morphogenesis_large_demo()
+    elif args.mode == "sequential":
+        run_sequential_transfer_demo()
     else:
         run_stress_demo()
 

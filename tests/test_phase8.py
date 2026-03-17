@@ -22,6 +22,9 @@ from compare_morphogenesis import (
     growth_counts_as_earned,
     growth_counts_as_win,
 )
+from compare_large_topology import evaluate_large_topology
+from compare_morphogenesis_large import evaluate_morphogenesis_large
+from compare_sequential_transfer import evaluate_sequential_transfer
 from analyze_transfer_timecourse import _aggregate_latent_variant, _latent_timeline_summary
 from compare_latent_context import latent_signal_specs
 from compare_task_transfer import aggregate_transfer, transfer_metrics
@@ -2969,6 +2972,42 @@ class TestLatentTimecourseAnalysis(unittest.TestCase):
             aggregate["pre_effective_selector_summary"]["route_branch_counts"]["n1"],
             4,
         )
+
+
+class TestMarch17ExpansionHarnesses(unittest.TestCase):
+    def test_large_topology_catalog_includes_expanded_scenarios(self) -> None:
+        scenarios = phase8_scenarios()
+
+        self.assertIn("cvt1_task_a_large", scenarios)
+        self.assertIn("cvt1_task_b_large", scenarios)
+        self.assertIn("cvt1_task_c_large", scenarios)
+        self.assertEqual(scenarios["cvt1_task_a_large"].packet_ttl, 14)
+        self.assertGreater(
+            len(scenarios["cvt1_task_a_large"].signal_schedule_specs or {}),
+            len(scenarios["cvt1_task_a_stage1"].signal_schedule_specs or {}),
+        )
+
+    def test_large_topology_harness_runs_single_seed(self) -> None:
+        result = evaluate_large_topology(seeds=(13,))
+
+        self.assertEqual(result["topology"], "cvt1_large (10 nodes, 5-hop paths)")
+        self.assertIn("avg_task_b_cold_exact", result["aggregate"])
+        self.assertIn("avg_delta_b_exact", result["aggregate"])
+
+    def test_morphogenesis_large_harness_runs_single_seed(self) -> None:
+        result = evaluate_morphogenesis_large(seeds=(13,))
+
+        self.assertIn("transfer", result)
+        self.assertIn("aggregate", result["transfer"])
+        self.assertIn("avg_fixed_transfer_exact_matches", result["transfer"]["aggregate"])
+        self.assertIn("avg_growth_transfer_exact_matches", result["transfer"]["aggregate"])
+
+    def test_sequential_transfer_harness_runs_single_seed(self) -> None:
+        result = evaluate_sequential_transfer(seeds=(13,))
+
+        self.assertIn("aggregate", result)
+        self.assertIn("avg_delta_c_from_warm_b_exact", result["aggregate"])
+        self.assertIn("avg_delta_c_from_a_exact", result["aggregate"])
 
 
 if __name__ == "__main__":
