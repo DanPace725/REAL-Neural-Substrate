@@ -16,8 +16,10 @@ import uuid
 from pathlib import Path
 from statistics import mean
 
-from compare_cold_warm import ROOT, SCENARIOS, build_system, run_workload
+from compare_cold_warm import ROOT, SCENARIOS, build_system
+from compare_latent_context import latent_signal_specs
 from compare_task_transfer import transfer_metrics
+from experiment_manifest import build_run_manifest, write_run_manifest
 
 DEFAULT_SEEDS = (13, 23, 37, 51, 79)
 
@@ -35,7 +37,42 @@ def _context_stat(summary: dict[str, object], context_key: str, field: str) -> f
     )
 
 
-def sequential_transfer_for_seed(seed: int) -> dict[str, object]:
+def run_scenario(
+    seed: int,
+    scenario_name: str,
+    *,
+    latent_context: bool,
+    source_sequence_context_enabled: bool,
+    carryover_dir: Path | None = None,
+) -> tuple[object, dict[str, object]]:
+    scenario = SCENARIOS[scenario_name]
+    system = build_system(
+        seed,
+        scenario_name,
+        source_sequence_context_enabled=source_sequence_context_enabled,
+    )
+    initial_specs = scenario.initial_signal_specs
+    schedule_specs = scenario.signal_schedule_specs
+    if latent_context:
+        initial_specs, schedule_specs = latent_signal_specs(scenario_name)
+    if carryover_dir is not None:
+        system.load_memory_carryover(carryover_dir)
+    result = system.run_workload(
+        cycles=scenario.cycles,
+        initial_packets=scenario.initial_packets,
+        packet_schedule=scenario.packet_schedule,
+        initial_signal_specs=initial_specs,
+        signal_schedule_specs=schedule_specs,
+    )
+    return system, result["summary"]
+
+
+def sequential_transfer_for_seed(
+    seed: int,
+    *,
+    latent_context: bool = False,
+    source_sequence_context_enabled: bool = True,
+) -> dict[str, object]:
     """Run the full A→B→C evaluation chain for a single seed."""
     base_dir = ROOT / "tests_tmp" / f"seq_transfer_{uuid.uuid4().hex}"
     dir_a = base_dir / "a"
@@ -46,39 +83,67 @@ def sequential_transfer_for_seed(seed: int) -> dict[str, object]:
 
     try:
         # ── Task A (cold) ───────────────────────────────────────────────
-        sys_a = build_system(seed, TASK_A)
-        sum_a = run_workload(sys_a, TASK_A)
+        sys_a, sum_a = run_scenario(
+            seed,
+            TASK_A,
+            latent_context=latent_context,
+            source_sequence_context_enabled=source_sequence_context_enabled,
+        )
         sys_a.save_memory_carryover(dir_a)
 
         # ── Task B cold (control) ────────────────────────────────────────
-        sys_b_cold = build_system(seed, TASK_B)
-        sum_b_cold = run_workload(sys_b_cold, TASK_B)
+        sys_b_cold, sum_b_cold = run_scenario(
+            seed,
+            TASK_B,
+            latent_context=latent_context,
+            source_sequence_context_enabled=source_sequence_context_enabled,
+        )
         sys_b_cold.save_memory_carryover(dir_b_cold)
 
         # ── Task B warm from A (A→B) ─────────────────────────────────────
-        sys_b_warm = build_system(seed, TASK_B)
-        sys_b_warm.load_memory_carryover(dir_a)
-        sum_b_warm = run_workload(sys_b_warm, TASK_B)
+        sys_b_warm, sum_b_warm = run_scenario(
+            seed,
+            TASK_B,
+            latent_context=latent_context,
+            source_sequence_context_enabled=source_sequence_context_enabled,
+            carryover_dir=dir_a,
+        )
         sys_b_warm.save_memory_carryover(dir_b_warm)
 
         # ── Task C cold (control) ────────────────────────────────────────
-        sys_c_cold = build_system(seed, TASK_C)
-        sum_c_cold = run_workload(sys_c_cold, TASK_C)
+        sys_c_cold, sum_c_cold = run_scenario(
+            seed,
+            TASK_C,
+            latent_context=latent_context,
+            source_sequence_context_enabled=source_sequence_context_enabled,
+        )
 
         # ── Task C warm from cold B (B→C, no A context) ──────────────────
-        sys_c_from_cold_b = build_system(seed, TASK_C)
-        sys_c_from_cold_b.load_memory_carryover(dir_b_cold)
-        sum_c_from_cold_b = run_workload(sys_c_from_cold_b, TASK_C)
+        sys_c_from_cold_b, sum_c_from_cold_b = run_scenario(
+            seed,
+            TASK_C,
+            latent_context=latent_context,
+            source_sequence_context_enabled=source_sequence_context_enabled,
+            carryover_dir=dir_b_cold,
+        )
 
         # ── Task C warm from warm B (A→B→C chain) ───────────────────────
-        sys_c_from_warm_b = build_system(seed, TASK_C)
-        sys_c_from_warm_b.load_memory_carryover(dir_b_warm)
-        sum_c_from_warm_b = run_workload(sys_c_from_warm_b, TASK_C)
+        sys_c_from_warm_b, sum_c_from_warm_b = run_scenario(
+            seed,
+            TASK_C,
+            latent_context=latent_context,
+            source_sequence_context_enabled=source_sequence_context_enabled,
+            carryover_dir=dir_b_warm,
+        )
 
         # ── Task C warm directly from A (A→C, skip B) ───────────────────
-        sys_c_from_a = build_system(seed, TASK_C)
-        sys_c_from_a.load_memory_carryover(dir_a)
-        sum_c_from_a = run_workload(sys_c_from_a, TASK_C)
+        sys_c_from_a, sum_c_from_a = run_scenario(
+            seed,
+            TASK_C,
+            latent_context=latent_context,
+            source_sequence_context_enabled=source_sequence_context_enabled,
+            carryover_dir=dir_a,
+        )
 
     finally:
         shutil.rmtree(base_dir, ignore_errors=True)
@@ -103,6 +168,8 @@ def sequential_transfer_for_seed(seed: int) -> dict[str, object]:
 
     return {
         "seed": seed,
+        "latent_context": latent_context,
+        "source_sequence_context_enabled": source_sequence_context_enabled,
         "task_a": {
             "summary": sum_a,
             "transfer_metrics": transfer_metrics(sys_a),
@@ -190,16 +257,45 @@ def aggregate_sequential(results: list[dict[str, object]]) -> dict[str, object]:
 
 def evaluate_sequential_transfer(
     seeds: tuple[int, ...] = DEFAULT_SEEDS,
+    *,
+    latent_context: bool = False,
+    source_sequence_context_enabled: bool = True,
+    output_path: Path | None = None,
 ) -> dict[str, object]:
-    results = [sequential_transfer_for_seed(seed) for seed in seeds]
-    return {
+    results = [
+        sequential_transfer_for_seed(
+            seed,
+            latent_context=latent_context,
+            source_sequence_context_enabled=source_sequence_context_enabled,
+        )
+        for seed in seeds
+    ]
+    result = {
         "seeds": list(seeds),
+        "latent_context": latent_context,
+        "source_sequence_context_enabled": source_sequence_context_enabled,
         "task_a_scenario": TASK_A,
         "task_b_scenario": TASK_B,
         "task_c_scenario": TASK_C,
         "results": results,
         "aggregate": aggregate_sequential(results),
     }
+    if output_path is not None:
+        manifest = build_run_manifest(
+            harness="sequential_transfer",
+            seeds=seeds,
+            scenarios=(TASK_A, TASK_B, TASK_C),
+            latent_context=latent_context,
+            metadata={
+                "source_sequence_context_enabled": source_sequence_context_enabled,
+                "task_a_scenario": TASK_A,
+                "task_b_scenario": TASK_B,
+                "task_c_scenario": TASK_C,
+            },
+            result=result,
+        )
+        write_run_manifest(output_path, manifest)
+    return result
 
 
 def main() -> None:

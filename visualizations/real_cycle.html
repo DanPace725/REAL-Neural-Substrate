@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The REAL Cycle — Node Mechanics</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg:      #080c18;
+    --surface: #0f1629;
+    --card:    #131d35;
+    --border:  #1e2d4d;
+    --text:    #dde6f5;
+    --muted:   #5c7099;
+    --accent1: #60a5fa;
+    --accent2: #34d399;
+    --accent3: #a78bfa;
+    --accent4: #f472b6;
+    --accent5: #fbbf24;
+    --accent6: #fb923c;
+    --red:     #f87171;
+    --mono:    'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(90deg, #080c18 0%, #0a1020 50%, #080c18 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-badge {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #60a5fa22, #a78bfa33);
+    border: 1px solid #3b82f640;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+
+  header h1 {
+    font-size: 20px; font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  header .subtitle {
+    font-size: 12px; color: var(--muted);
+    margin-left: auto;
+    font-family: var(--mono);
+  }
+
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 32px 64px;
+  }
+
+  .intro {
+    max-width: 720px;
+    margin-bottom: 36px;
+  }
+
+  .intro h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .intro p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .intro code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: #1a2540;
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--accent1);
+  }
+
+  /* ── Pipeline strip ────────────────────────────────────────────── */
+  .pipeline-wrap {
+    position: relative;
+    margin-bottom: 40px;
+  }
+
+  .pipeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 24px;
+    overflow: hidden;
+  }
+
+  .stage-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: none;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    transition: all 0.18s ease;
+    position: relative;
+    z-index: 1;
+  }
+
+  .stage-btn:hover {
+    color: var(--text);
+    background: #ffffff06;
+  }
+
+  .stage-btn.active {
+    border-color: var(--stage-color, var(--accent1));
+    background: color-mix(in srgb, var(--stage-color, var(--accent1)) 8%, transparent);
+    color: var(--text);
+  }
+
+  .stage-icon {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    background: #1a2540;
+    border: 2px solid var(--border);
+    transition: all 0.18s ease;
+  }
+
+  .stage-btn.active .stage-icon {
+    background: color-mix(in srgb, var(--stage-color, var(--accent1)) 15%, #1a2540);
+    border-color: var(--stage-color, var(--accent1));
+    box-shadow: 0 0 14px color-mix(in srgb, var(--stage-color, var(--accent1)) 30%, transparent);
+  }
+
+  .stage-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .stage-sublabel {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .stage-btn.active .stage-sublabel {
+    color: color-mix(in srgb, var(--stage-color, var(--accent1)) 70%, var(--text));
+  }
+
+  .arrow {
+    color: var(--border);
+    font-size: 18px;
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+    transition: color 0.18s;
+  }
+
+  .arrow.lit { color: var(--accent1); }
+
+  /* step counter */
+  .step-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    justify-content: center;
+  }
+
+  .step-btn {
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .step-btn:hover { background: #1a2540; border-color: var(--accent1); color: var(--accent1); }
+  .step-btn:disabled { opacity: 0.35; cursor: default; }
+
+  .step-counter {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    min-width: 60px;
+    text-align: center;
+  }
+
+  /* ── Detail panel ───────────────────────────────────────────────── */
+  .detail-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+  }
+
+  .card.accent-top {
+    border-top: 3px solid var(--stage-color, var(--accent1));
+  }
+
+  .card-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 14px;
+  }
+
+  .card h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .card .desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .card .desc strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .fn-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #1a2540;
+    border: 1px solid var(--border);
+    color: var(--accent3);
+    margin-bottom: 6px;
+  }
+
+  /* data flow chips */
+  .data-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: #0f1629;
+    color: var(--muted);
+    transition: all 0.25s;
+  }
+
+  .chip.in  { border-color: #1e3a5f; color: var(--accent1); background: #0d1e35; }
+  .chip.out { border-color: #14382b; color: var(--accent2); background: #0a1e17; }
+  .chip.cost { border-color: #3a2a00; color: var(--accent5); background: #1e1600; }
+  .chip.warn { border-color: #3a1010; color: var(--red); }
+
+  .chip-group-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 12px;
+    margin-bottom: 4px;
+  }
+
+  /* formula box */
+  .formula {
+    background: #0a0f1e;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent3);
+    line-height: 1.8;
+    margin-top: 12px;
+  }
+
+  .formula .comment {
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .formula .val { color: var(--accent2); }
+  .formula .key { color: var(--accent1); }
+  .formula .op  { color: var(--accent5); }
+
+  /* live demo */
+  .demo-section {
+    margin-bottom: 32px;
+  }
+
+  .demo-section .card-title {
+    margin-bottom: 18px;
+  }
+
+  .demo-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .dim-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+
+  .dim-card .dim-name {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .dim-card .dim-val {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .dim-bar-wrap {
+    height: 4px;
+    background: #1a2540;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .dim-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .coherence-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin-bottom: 16px;
+  }
+
+  .coherence-row .label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+
+  .coherence-row .val {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .coherence-row .delta-pill {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 3px 9px;
+    border-radius: 5px;
+  }
+
+  .delta-pos { background: #14382b; color: var(--accent2); }
+  .delta-neg { background: #3a1010; color: var(--red); }
+  .delta-neu { background: #1a2540; color: var(--muted); }
+
+  .gco-badge {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 5px;
+  }
+  .gco-STABLE   { background: #14382b; color: var(--accent2); }
+  .gco-PARTIAL  { background: #3a2a00; color: var(--accent5); }
+  .gco-DEGRADED { background: #2a1a00; color: var(--accent6); }
+  .gco-CRITICAL { background: #3a1010; color: var(--red); }
+
+  /* action list */
+  .action-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .action-item {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: #0f1629;
+    color: var(--muted);
+    cursor: default;
+    transition: all 0.15s;
+  }
+
+  .action-item.selected {
+    background: #1a2f50;
+    border-color: var(--accent1);
+    color: var(--accent1);
+    box-shadow: 0 0 8px #60a5fa22;
+  }
+
+  .action-item.affordable { color: var(--text); background: #0f1629; }
+  .action-item.tooexpensive { opacity: 0.35; text-decoration: line-through; }
+
+  /* substrate viz */
+  .substrate-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #1a2540;
+    font-size: 12px;
+  }
+
+  .substrate-row:last-child { border-bottom: none; }
+
+  .substrate-key {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent1);
+    min-width: 180px;
+  }
+
+  .substrate-bar-wrap {
+    flex: 1;
+    height: 6px;
+    background: #1a2540;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .substrate-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  .substrate-val {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 36px;
+    text-align: right;
+  }
+
+  /* atp gauge */
+  .atp-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #1a2540;
+    font-size: 13px;
+  }
+
+  .atp-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 140px;
+  }
+
+  .atp-bar-wrap {
+    flex: 1;
+    height: 8px;
+    background: #1a2540;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .atp-bar {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--accent2);
+    transition: width 0.5s ease;
+  }
+
+  .atp-val {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent2);
+    min-width: 40px;
+    text-align: right;
+  }
+
+  /* observation panel */
+  .obs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .obs-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background: var(--surface);
+    border-radius: 6px;
+    border: 1px solid #1a2540;
+    font-size: 12px;
+  }
+
+  .obs-key {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .obs-val {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent1);
+  }
+
+  /* cycle ticker */
+  .run-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .run-btn {
+    padding: 9px 22px;
+    border-radius: 8px;
+    border: 1px solid var(--accent2);
+    background: #14382b;
+    color: var(--accent2);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .run-btn:hover { background: #1a4a35; }
+  .run-btn.running { border-color: var(--accent5); background: #3a2a00; color: var(--accent5); }
+
+  .cycle-num {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .reset-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-left: auto;
+  }
+
+  .reset-btn:hover { color: var(--text); border-color: var(--text); }
+
+  .history-strip {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .history-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+
+  .history-dot:hover { transform: scale(1.4); }
+
+  /* section header */
+  .section-hdr {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-hdr::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .span2 { grid-column: span 2; }
+
+  .note-box {
+    background: #0d1525;
+    border: 1px solid #1e3050;
+    border-left: 3px solid var(--accent3);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.65;
+    margin-top: 12px;
+  }
+
+  .note-box strong { color: var(--accent3); }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-badge">⚡</div>
+  <h1>The REAL Cycle — Node Mechanics</h1>
+  <div class="subtitle">real_core/engine.py · RealCoreEngine.run_cycle()</div>
+</header>
+
+<div class="main">
+
+  <div class="intro">
+    <h2>How a node actually runs</h2>
+    <p>Every tick, each node executes the same five-stage loop: <code>perceive → select → execute → score → consolidate</code>. This is <code>RealCoreEngine.run_cycle()</code>. There's no global loss, no backprop — just local observation, local action, and feedback that writes into local substrate. Step through each stage below, then run the live simulation to see it in motion.</p>
+  </div>
+
+  <!-- ── Pipeline strip ───────────────────────────────────────── -->
+  <div class="pipeline-wrap">
+    <div class="pipeline">
+      <button class="stage-btn active" id="btn-0" onclick="setStage(0)" style="--stage-color: #60a5fa">
+        <div class="stage-icon">👁</div>
+        <div class="stage-label">Perceive</div>
+        <div class="stage-sublabel">Observe local<br>state</div>
+      </button>
+      <div class="arrow" id="arr-0">→</div>
+      <button class="stage-btn" id="btn-1" onclick="setStage(1)" style="--stage-color: #a78bfa">
+        <div class="stage-icon">🎯</div>
+        <div class="stage-label">Select</div>
+        <div class="stage-sublabel">Choose an<br>action</div>
+      </button>
+      <div class="arrow" id="arr-1">→</div>
+      <button class="stage-btn" id="btn-2" onclick="setStage(2)" style="--stage-color: #fb923c">
+        <div class="stage-icon">⚡</div>
+        <div class="stage-label">Execute</div>
+        <div class="stage-sublabel">Fire, route,<br>or rest</div>
+      </button>
+      <div class="arrow" id="arr-2">→</div>
+      <button class="stage-btn" id="btn-3" onclick="setStage(3)" style="--stage-color: #34d399">
+        <div class="stage-icon">📊</div>
+        <div class="stage-label">Score</div>
+        <div class="stage-sublabel">Coherence<br>dimensions</div>
+      </button>
+      <div class="arrow" id="arr-3">→</div>
+      <button class="stage-btn" id="btn-4" onclick="setStage(4)" style="--stage-color: #f472b6">
+        <div class="stage-icon">🧬</div>
+        <div class="stage-label">Consolidate</div>
+        <div class="stage-sublabel">Substrate tick,<br>pattern promotion</div>
+      </button>
+    </div>
+
+    <div class="step-controls">
+      <button class="step-btn" id="prev-btn" onclick="prevStage()" disabled>← Prev</button>
+      <span class="step-counter" id="step-counter">1 / 5</span>
+      <button class="step-btn" id="next-btn" onclick="nextStage()">Next →</button>
+    </div>
+  </div>
+
+  <!-- ── Stage detail panels ─────────────────────────────────── -->
+  <div id="stage-panels">
+
+    <!-- STAGE 0: PERCEIVE -->
+    <div class="detail-panel" id="panel-0">
+      <div class="card accent-top" style="--stage-color: #60a5fa">
+        <div class="card-title">What happens</div>
+        <div class="fn-tag">observer.observe(cycle)</div>
+        <div class="fn-tag" style="margin-left:6px">memory_binding.modulate_observation()</div>
+        <h3>Reading local state</h3>
+        <p class="desc">
+          The node calls <strong>observe_local()</strong> on the routing environment. This returns a flat dict of floats describing everything the node can see right now — its ATP level, inbox contents, downstream progress, and recent feedback.
+        </p>
+        <p class="desc">
+          Then <strong>modulate_observation()</strong> runs. It injects substrate support values as additional keys, and adds Gaussian noise to progress/congestion readings — <strong>more noise on edges with low substrate support</strong>. A well-learned connection is perceived more clearly.
+        </p>
+        <div class="note-box">
+          <strong>Why noise?</strong> It models epistemic uncertainty at the edge level. If you haven't routed through a neighbor much, you have a fuzzier read on what's going on over there. High substrate support → high clarity → lower noise scale.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Observation keys (modulated)</div>
+        <div class="obs-grid" id="obs-display">
+          <!-- filled by JS -->
+        </div>
+        <div class="chip-group-label">Injected by substrate binding</div>
+        <div class="data-chips">
+          <span class="chip in">support_N1</span>
+          <span class="chip in">support_velocity_N1</span>
+          <span class="chip in">action_support_N1_identity</span>
+          <span class="chip in">action_support_N1_rotate_left_1</span>
+          <span class="chip in">edge_maintenance_ratio</span>
+          <span class="chip in">substrate_maintenance_ratio</span>
+          <span class="chip in">mean_active_support</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 1: SELECT -->
+    <div class="detail-panel" id="panel-1" style="display:none">
+      <div class="card accent-top" style="--stage-color: #a78bfa">
+        <div class="card-title">What happens</div>
+        <div class="fn-tag">actions.available_actions()</div>
+        <div class="fn-tag" style="margin-left:6px">_affordable_actions()</div>
+        <div class="fn-tag" style="margin-left:6px">selector.select()</div>
+        <h3>Building and filtering the action set</h3>
+        <p class="desc">
+          First, <strong>available_actions()</strong> builds the full menu: <code>rest</code>, one <code>route:N</code> per neighbor, four <code>route_transform:N:T</code> variants per neighbor, plus <code>invest:N</code> and <code>maintain_edges</code> when the inbox is empty and ATP allows.
+        </p>
+        <p class="desc">
+          Each route action has a <strong>use_cost</strong> — base 0.05 ATP, reduced by edge support and action support. If a neighbor has been heavily used and well-maintained, routing there is cheap. The node can only afford actions whose cost fits its current ATP budget.
+        </p>
+        <p class="desc">
+          The Phase8 selector then picks from affordable actions using substrate bias, memory, and a CFAR-style exploration/exploitation balance. If the selector is uncertain, it explores; if a route has strong substrate support, it exploits.
+        </p>
+
+        <div class="formula">
+          <span class="comment">// use_cost() in substrate.py</span><br>
+          cost = <span class="key">fire_base_cost</span> <span class="op">-</span> <span class="key">fire_discount_scale</span> <span class="op">×</span> <span class="val">support</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">-</span> <span class="key">transform_discount_scale</span> <span class="op">×</span> <span class="val">action_support</span><br>
+          <span class="comment">// clamped to fire_floor_cost = 0.01</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Available actions (example node with 2 neighbors)</div>
+        <div class="action-list" id="action-display">
+          <!-- filled by JS -->
+        </div>
+        <div class="chip-group-label" style="margin-top:16px">Legend</div>
+        <div class="data-chips">
+          <span class="chip out">selected</span>
+          <span class="chip affordable">affordable</span>
+          <span class="chip tooexpensive" style="font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:5px;border:1px solid var(--border)">too expensive</span>
+        </div>
+        <div class="note-box" style="margin-top:14px">
+          <strong>inhibit:N</strong> is available when a neighbor's inbox is full and the local node has packets queued. It blocks routing into a congested neighbor without spending ATP on a wasted route.
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 2: EXECUTE -->
+    <div class="detail-panel" id="panel-2" style="display:none">
+      <div class="card accent-top" style="--stage-color: #fb923c">
+        <div class="card-title">What happens</div>
+        <div class="fn-tag">actions.execute(action)</div>
+        <div class="fn-tag" style="margin-left:6px">environment.route_signal()</div>
+        <h3>Firing the action</h3>
+        <p class="desc">
+          The chosen action is dispatched. <strong>route:N</strong> moves a packet from this node's inbox to neighbor N's inbox, charging the use_cost in ATP. <strong>route_transform:N:T</strong> does the same but applies transform T to the packet's bit payload first.
+        </p>
+        <p class="desc">
+          <strong>rest</strong> recovers ATP (partial regen). <strong>invest:N</strong> charges write_cost and boosts the edge's slow support value by +0.20. <strong>maintain_edges</strong> calls <code>maintain_supports()</code>, paying maintain_cost per active edge/action to reset their decay clock.
+        </p>
+        <p class="desc">
+          The environment observes state again after execution — this "after" snapshot is what the coherence model scores.
+        </p>
+        <div class="formula">
+          <span class="comment">// ATP deducted after each action</span><br>
+          <span class="val">atp_after</span> = <span class="val">atp_before</span> <span class="op">-</span> <span class="val">outcome.cost_secs</span><br><br>
+          <span class="comment">// rest recovers ATP</span><br>
+          <span class="val">atp_after</span> = <span class="val">atp_before</span> <span class="op">+</span> <span class="key">rest_recovery_rate</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Action types and ATP costs</div>
+
+        <div class="substrate-row">
+          <div class="substrate-key">rest</div>
+          <div class="substrate-bar-wrap"><div class="substrate-bar" style="width:0%;background:var(--accent2)"></div></div>
+          <div class="substrate-val" style="color:var(--accent2)">+ATP</div>
+        </div>
+        <div class="substrate-row">
+          <div class="substrate-key">route:N (support=0.0)</div>
+          <div class="substrate-bar-wrap"><div class="substrate-bar" style="width:100%;background:var(--accent6)"></div></div>
+          <div class="substrate-val">0.05</div>
+        </div>
+        <div class="substrate-row">
+          <div class="substrate-key">route:N (support=0.5)</div>
+          <div class="substrate-bar-wrap"><div class="substrate-bar" style="width:60%;background:var(--accent5)"></div></div>
+          <div class="substrate-val">0.03</div>
+        </div>
+        <div class="substrate-row">
+          <div class="substrate-key">route:N (support=1.0)</div>
+          <div class="substrate-bar-wrap"><div class="substrate-bar" style="width:20%;background:var(--accent2)"></div></div>
+          <div class="substrate-val">0.01</div>
+        </div>
+        <div class="substrate-row">
+          <div class="substrate-key">invest:N</div>
+          <div class="substrate-bar-wrap"><div class="substrate-bar" style="width:56%;background:var(--accent3)"></div></div>
+          <div class="substrate-val">~0.14</div>
+        </div>
+        <div class="substrate-row">
+          <div class="substrate-key">maintain_edges (3 active)</div>
+          <div class="substrate-bar-wrap"><div class="substrate-bar" style="width:36%;background:var(--accent3)"></div></div>
+          <div class="substrate-val">~0.09</div>
+        </div>
+        <div class="note-box" style="margin-top:14px">
+          <strong>The key insight:</strong> a node that has built up substrate support through repeated routing pays up to 5× less per fire. This makes established routes self-reinforcing — they stay affordable even under ATP pressure.
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 3: SCORE -->
+    <div class="detail-panel" id="panel-3" style="display:none">
+      <div class="card accent-top" style="--stage-color: #34d399">
+        <div class="card-title">What happens</div>
+        <div class="fn-tag">coherence.score(state_after, memory)</div>
+        <div class="fn-tag" style="margin-left:6px">mesh.apply(raw_dimensions)</div>
+        <div class="fn-tag" style="margin-left:6px">coherence.composite(dimensions)</div>
+        <h3>Six dimensions, one composite</h3>
+        <p class="desc">
+          The coherence model reads the post-action observation and recent history to score six dimensions. Each dimension is a hand-crafted formula drawing from different signals. <strong>Substrate health</strong> is then blended in — active connections and maintenance ratios push continuity, contextual_fit, and reflexivity.
+        </p>
+        <p class="desc">
+          The <strong>TiltRegulatoryMesh</strong> applies soft dampening across dimensions before the composite is computed. The composite is just the mean. Delta = composite − prior_composite. GCO status is assigned based on thresholds: STABLE (≥0.6 all dims), DEGRADED (<0.60), CRITICAL (<0.35).
+        </p>
+
+        <div class="formula">
+          <span class="comment">// continuity</span><br>
+          <span class="val">0.4</span> <span class="op">+</span> <span class="val">0.6</span> <span class="op">×</span> <span class="key">atp_ratio</span> <span class="op">-</span> <span class="val">0.12</span> <span class="op">×</span> <span class="key">queue_pressure</span><br>
+          <span class="comment">// differentiation</span><br>
+          max(<span class="key">route_counts</span>) <span class="op">/</span> len(<span class="key">recent_routes</span>)<span class="comment">  ← specialization</span><br>
+          <span class="comment">// reflexivity</span><br>
+          recoveries <span class="op">/</span> revision_attempts<span class="comment">  ← after bad deltas</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Live dimension scores</div>
+        <div class="demo-grid" id="dim-display">
+          <!-- filled by JS -->
+        </div>
+        <div class="coherence-row" id="coherence-display">
+          <span class="label">Coherence</span>
+          <span class="val" id="coherence-val">—</span>
+          <span class="delta-pill delta-neu" id="delta-val">Δ —</span>
+          <span class="gco-badge gco-PARTIAL" id="gco-val">PARTIAL</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 4: CONSOLIDATE -->
+    <div class="detail-panel" id="panel-4" style="display:none">
+      <div class="card accent-top" style="--stage-color: #f472b6">
+        <div class="card-title">What happens</div>
+        <div class="fn-tag">substrate.tick()</div>
+        <div class="fn-tag" style="margin-left:6px">substrate.update_dim_context()</div>
+        <div class="fn-tag" style="margin-left:6px">consolidation.consolidate() [on rest]</div>
+        <h3>Substrate tick and pattern promotion</h3>
+        <p class="desc">
+          Every cycle the substrate <strong>ticks</strong>: all slow values decay by 0.025. If a value drops below the <strong>bistable threshold (0.25)</strong>, decay accelerates by 2.5×. Connections that aren't maintained will fade — fast.
+        </p>
+        <p class="desc">
+          When the node takes a <strong>rest</strong> action and episodic memory has ≥8 entries, <strong>consolidation</strong> runs. It scans recent route history: if a neighbor was routed to ≥2 times with positive mean delta, it seeds edge support (0.32) and builds a ConstraintPattern. Negative-delta routes decay instead.
+        </p>
+        <p class="desc">
+          This is <em>learning writing into structure</em>. Durable behavior shows up as nonzero slow values that survive decay — not as parameter vectors.
+        </p>
+        <div class="note-box">
+          <strong>Bistable cliff:</strong> at support 0.25, a connection is either maintained and stable, or rapidly forgotten. There's no gradual middle ground — this creates discrete "learned vs. unlearned" edge states.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Substrate support over time (simulated)</div>
+        <div id="substrate-display">
+          <!-- filled by JS -->
+        </div>
+        <div class="note-box" style="margin-top:14px">
+          <strong>Context credit accumulation</strong> also happens here. If <code>record_context_feedback()</code> is called with a good bit_match_ratio, a per-edge accumulator fills toward <strong>0.95</strong>. When it crosses that threshold, it seeds contextual action support directly into the substrate — the node now has a context-specific route preference encoded in slow memory.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /stage-panels -->
+
+  <!-- ── Live simulation ─────────────────────────────────────────── -->
+  <div class="section-hdr">Live Simulation</div>
+
+  <div class="card demo-section" style="margin-bottom:24px">
+    <div class="card-title">Run cycles and watch the node evolve</div>
+
+    <div class="run-controls">
+      <button class="run-btn" id="run-btn" onclick="toggleRun()">▶ Run</button>
+      <span class="cycle-num">Cycle <span id="cycle-display">0</span></span>
+      <button class="reset-btn" onclick="resetSim()">Reset</button>
+    </div>
+
+    <div class="history-strip" id="history-strip"></div>
+  </div>
+
+  <div class="detail-panel">
+    <div class="card">
+      <div class="card-title">ATP over cycles</div>
+      <div id="atp-history">
+        <div class="atp-row">
+          <div class="atp-label">Current ATP</div>
+          <div class="atp-bar-wrap"><div class="atp-bar" id="atp-bar" style="width:80%"></div></div>
+          <div class="atp-val" id="atp-val">0.80</div>
+        </div>
+        <div class="atp-row">
+          <div class="atp-label" style="color:var(--accent1)">Edge support N1</div>
+          <div class="atp-bar-wrap"><div class="atp-bar" style="background:var(--accent1)" id="support-bar-n1"></div></div>
+          <div class="atp-val" style="color:var(--accent1)" id="support-val-n1">0.00</div>
+        </div>
+        <div class="atp-row">
+          <div class="atp-label" style="color:var(--accent3)">Edge support N2</div>
+          <div class="atp-bar-wrap"><div class="atp-bar" style="background:var(--accent3)" id="support-bar-n2"></div></div>
+          <div class="atp-val" style="color:var(--accent3)" id="support-val-n2">0.00</div>
+        </div>
+        <div class="atp-row">
+          <div class="atp-label" style="color:var(--accent2)">Coherence</div>
+          <div class="atp-bar-wrap"><div class="atp-bar" style="background:var(--accent2)" id="coherence-bar"></div></div>
+          <div class="atp-val" style="color:var(--accent2)" id="coherence-bar-val">0.00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Cycle log</div>
+      <div id="cycle-log" style="font-family:var(--mono);font-size:11px;color:var(--muted);max-height:220px;overflow-y:auto;line-height:1.9">
+        <div style="color:#3a4a6a">// press Run to start</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ── State ────────────────────────────────────────────────────────────
+let currentStage = 0;
+const STAGES = ['perceive','select','execute','score','consolidate'];
+const STAGE_COLORS = ['#60a5fa','#a78bfa','#fb923c','#34d399','#f472b6'];
+
+// sim state
+let sim = null;
+let runInterval = null;
+
+// ── Stage navigation ─────────────────────────────────────────────────
+function setStage(idx) {
+  // deactivate old
+  document.getElementById(`btn-${currentStage}`).classList.remove('active');
+  document.getElementById(`panel-${currentStage}`).style.display = 'none';
+  // activate new
+  currentStage = idx;
+  document.getElementById(`btn-${idx}`).classList.add('active');
+  document.getElementById(`panel-${idx}`).style.display = 'grid';
+  // update arrows
+  for (let i = 0; i < 4; i++) {
+    const arr = document.getElementById(`arr-${i}`);
+    arr.classList.toggle('lit', i < idx);
+    arr.style.color = i < idx ? STAGE_COLORS[i] : '';
+  }
+  // update controls
+  document.getElementById('prev-btn').disabled = idx === 0;
+  document.getElementById('next-btn').disabled = idx === 4;
+  document.getElementById('step-counter').textContent = `${idx + 1} / 5`;
+  // refresh dynamic content for this stage
+  renderStageContent(idx);
+}
+
+function prevStage() { if (currentStage > 0) setStage(currentStage - 1); }
+function nextStage() { if (currentStage < 4) setStage(currentStage + 1); }
+
+// ── Simulation ───────────────────────────────────────────────────────
+function mkSim() {
+  return {
+    cycle: 0,
+    atp: 0.80,
+    support_n1: 0.0,
+    support_n2: 0.0,
+    coherence: 0.45,
+    prior_coherence: null,
+    inbox: 3,
+    reward_buffer: 0.1,
+    history: [],   // {action, coherence, delta, gco, atp}
+    route_counts: {N1: 0, N2: 0},
+    last_action: null,
+    dim: {continuity:0.55, vitality:0.4, contextual_fit:0.45, differentiation:0.35, accountability:0.3, reflexivity:0.3},
+  };
+}
+
+function rng(min, max) { return min + Math.random() * (max - min); }
+function clamp(v, lo=0, hi=1) { return Math.max(lo, Math.min(hi, v)); }
+
+function simStep(s) {
+  s.cycle++;
+  const use_cost_n1 = Math.max(0.01, 0.05 - 0.04 * s.support_n1);
+  const use_cost_n2 = Math.max(0.01, 0.05 - 0.04 * s.support_n2);
+
+  // pick action
+  let action, cost;
+  if (s.atp < 0.15) {
+    action = 'rest'; cost = 0;
+  } else if (s.inbox > 0) {
+    // bias toward whichever neighbor has more support
+    const prefer_n1 = s.support_n1 + rng(0, 0.3) > s.support_n2 + rng(0, 0.3);
+    if (prefer_n1) {
+      const do_transform = Math.random() < 0.3;
+      action = do_transform ? 'route_transform:N1:identity' : 'route:N1';
+      cost = use_cost_n1;
+      s.support_n1 = clamp(s.support_n1 + rng(0.005, 0.018));
+      s.route_counts.N1++;
+    } else {
+      action = 'route:N2';
+      cost = use_cost_n2;
+      s.support_n2 = clamp(s.support_n2 + rng(0.004, 0.014));
+      s.route_counts.N2++;
+    }
+  } else if (s.atp > 0.5 && Math.random() < 0.4) {
+    const tgt = s.support_n1 <= s.support_n2 ? 'N1' : 'N2';
+    action = `invest:${tgt}`; cost = 0.14;
+    if (tgt === 'N1') s.support_n1 = clamp(s.support_n1 + 0.20);
+    else s.support_n2 = clamp(s.support_n2 + 0.20);
+  } else {
+    action = 'rest'; cost = 0;
+  }
+
+  // ATP
+  if (action === 'rest') {
+    s.atp = clamp(s.atp + rng(0.06, 0.12));
+    s.inbox = Math.min(s.inbox + (Math.random() < 0.4 ? 1 : 0), 8);
+  } else {
+    s.atp = clamp(s.atp - cost);
+    if (action.startsWith('route')) s.inbox = Math.max(0, s.inbox - 1);
+  }
+
+  // slow decay of support
+  s.support_n1 = clamp(s.support_n1 - (s.support_n1 > 0.25 ? 0.025 : 0.025 * 2.5));
+  s.support_n2 = clamp(s.support_n2 - (s.support_n2 > 0.25 ? 0.025 : 0.025 * 2.5));
+
+  // score
+  const atp_ratio = s.atp;
+  const inbox_load = clamp(s.inbox / 8);
+  const specialization = Math.max(s.route_counts.N1, s.route_counts.N2) /
+    Math.max(s.route_counts.N1 + s.route_counts.N2, 1);
+
+  s.dim.continuity   = clamp(0.4 + 0.6 * atp_ratio - 0.12 * inbox_load * 0.3);
+  s.dim.vitality     = clamp(0.25 + 0.45 * inbox_load + 0.35 * s.reward_buffer + rng(-0.03, 0.06));
+  s.dim.contextual_fit = clamp(0.45 + 0.3 * s.reward_buffer + rng(-0.05, 0.08));
+  s.dim.differentiation = clamp(Math.max(0.2, specialization));
+  s.dim.accountability  = clamp(0.2 + 0.07 * Math.min(s.cycle, 20) * 0.1);
+  s.dim.reflexivity     = clamp(0.3 + rng(-0.04, 0.08) + 0.12 * s.reward_buffer);
+
+  const active_ratio = (+(s.support_n1 > 0) + +(s.support_n2 > 0)) / 2;
+  s.dim.continuity   = clamp(0.7 * s.dim.continuity + 0.3 * (0.35 + 0.45 * active_ratio));
+  s.dim.contextual_fit = clamp(0.7 * s.dim.contextual_fit + 0.3 * (0.25 + 0.45 * ((s.support_n1 + s.support_n2) / 2)));
+
+  const new_coh = Object.values(s.dim).reduce((a, b) => a + b, 0) / 6;
+  const delta = s.prior_coherence === null ? 0 : new_coh - s.prior_coherence;
+  s.prior_coherence = s.coherence;
+  s.coherence = new_coh;
+  s.reward_buffer = clamp(s.reward_buffer + (action.startsWith('route') ? rng(0.02, 0.06) : -0.02));
+
+  let gco;
+  if (new_coh < 0.35) gco = 'CRITICAL';
+  else if (new_coh < 0.60) gco = 'DEGRADED';
+  else if (Object.values(s.dim).every(v => v >= 0.60)) gco = 'STABLE';
+  else gco = 'PARTIAL';
+
+  s.last_action = action;
+  s.history.push({ action, coherence: new_coh, delta, gco, atp: s.atp, support_n1: s.support_n1, support_n2: s.support_n2 });
+  return { action, coherence: new_coh, delta, gco };
+}
+
+// ── Render ───────────────────────────────────────────────────────────
+function renderObs(s) {
+  const obs = s || sim;
+  const items = [
+    ['atp_ratio', (obs.atp).toFixed(2)],
+    ['inbox_load', (obs.inbox/8).toFixed(2)],
+    ['reward_buffer', (obs.reward_buffer).toFixed(2)],
+    ['queue_pressure', (obs.inbox > 5 ? 0.6 : 0.1).toFixed(2)],
+    ['support_N1', (obs.support_n1).toFixed(3)],
+    ['support_N2', (obs.support_n2).toFixed(3)],
+    ['edge_maintenance_ratio', '0.67'],
+    ['last_match_ratio', (0.3 + obs.reward_buffer * 0.4).toFixed(2)],
+  ];
+  document.getElementById('obs-display').innerHTML = items.map(([k, v]) =>
+    `<div class="obs-item"><span class="obs-key">${k}</span><span class="obs-val">${v}</span></div>`
+  ).join('');
+}
+
+function renderActions(s) {
+  const obs = s || sim;
+  const uc_n1 = Math.max(0.01, 0.05 - 0.04 * obs.support_n1).toFixed(3);
+  const uc_n2 = Math.max(0.01, 0.05 - 0.04 * obs.support_n2).toFixed(3);
+  const atp = obs.atp;
+  const chosen = obs.last_action || 'route:N1';
+
+  const actions = [
+    { a: 'rest', cost: 0 },
+    { a: 'route:N1', cost: parseFloat(uc_n1) },
+    { a: 'route:N2', cost: parseFloat(uc_n2) },
+    { a: 'route_transform:N1:identity', cost: parseFloat(uc_n1) },
+    { a: 'route_transform:N1:rotate_left_1', cost: parseFloat(uc_n1) - 0.005 },
+    { a: 'route_transform:N1:xor_mask_1010', cost: parseFloat(uc_n1) - 0.005 },
+    { a: 'route_transform:N2:identity', cost: parseFloat(uc_n2) },
+    { a: 'invest:N1', cost: 0.14 },
+    { a: 'maintain_edges', cost: 0.06 },
+  ];
+
+  document.getElementById('action-display').innerHTML = actions.map(({ a, cost }) => {
+    const affordable = cost <= atp;
+    const selected = a === chosen;
+    let cls = selected ? 'action-item selected' : affordable ? 'action-item affordable' : 'action-item tooexpensive';
+    const costStr = cost === 0 ? '+ATP' : `${cost.toFixed(3)}`;
+    return `<div class="${cls}" title="cost: ${costStr}">${a}</div>`;
+  }).join('');
+}
+
+function renderDims(s) {
+  const obs = s || sim;
+  const DIM_COLORS = {
+    continuity: '#60a5fa',
+    vitality: '#34d399',
+    contextual_fit: '#a78bfa',
+    differentiation: '#fb923c',
+    accountability: '#fbbf24',
+    reflexivity: '#f472b6',
+  };
+
+  document.getElementById('dim-display').innerHTML = Object.entries(obs.dim).map(([k, v]) => {
+    const color = DIM_COLORS[k] || '#60a5fa';
+    return `<div class="dim-card">
+      <div class="dim-name">${k.replace('_',' ')}</div>
+      <div class="dim-val" style="color:${color}">${v.toFixed(2)}</div>
+      <div class="dim-bar-wrap"><div class="dim-bar" style="width:${(v*100).toFixed(0)}%;background:${color}"></div></div>
+    </div>`;
+  }).join('');
+
+  const coh = obs.coherence;
+  const delta = obs.prior_coherence === null ? 0 : coh - obs.prior_coherence;
+  let gco;
+  if (coh < 0.35) gco = 'CRITICAL';
+  else if (coh < 0.60) gco = 'DEGRADED';
+  else if (Object.values(obs.dim).every(v => v >= 0.60)) gco = 'STABLE';
+  else gco = 'PARTIAL';
+
+  document.getElementById('coherence-val').textContent = coh.toFixed(3);
+  document.getElementById('coherence-val').style.color = gco === 'STABLE' ? 'var(--accent2)' : gco === 'CRITICAL' ? 'var(--red)' : 'var(--accent5)';
+
+  const dEl = document.getElementById('delta-val');
+  dEl.textContent = `Δ ${delta >= 0 ? '+' : ''}${delta.toFixed(3)}`;
+  dEl.className = 'delta-pill ' + (delta > 0.005 ? 'delta-pos' : delta < -0.005 ? 'delta-neg' : 'delta-neu');
+
+  const gEl = document.getElementById('gco-val');
+  gEl.textContent = gco;
+  gEl.className = `gco-badge gco-${gco}`;
+}
+
+function renderSubstrate(s) {
+  const obs = s || sim;
+  const rows = [
+    { key: 'edge:N1', val: obs.support_n1, color: 'var(--accent1)' },
+    { key: 'edge:N2', val: obs.support_n2, color: 'var(--accent3)' },
+    { key: 'action:N1:identity', val: Math.min(obs.support_n1 * 0.7, 1), color: 'var(--accent2)' },
+    { key: 'action:N1:rotate_left_1', val: Math.min(obs.support_n1 * 0.4, 1), color: 'var(--accent2)' },
+    { key: 'action:N2:identity', val: Math.min(obs.support_n2 * 0.6, 1), color: 'var(--accent5)' },
+  ];
+  const bisthresh = 0.25;
+  document.getElementById('substrate-display').innerHTML = rows.map(({ key, val, color }) => {
+    const pct = (val * 100).toFixed(0);
+    const atCliff = val > 0 && val < bisthresh + 0.05;
+    const cliffWarn = atCliff ? ` <span style="color:var(--red);font-size:10px">⚠ near cliff</span>` : '';
+    return `<div class="substrate-row">
+      <div class="substrate-key">${key}${cliffWarn}</div>
+      <div class="substrate-bar-wrap">
+        <div class="substrate-bar" style="width:${pct}%;background:${atCliff ? 'var(--red)' : color}"></div>
+      </div>
+      <div class="substrate-val">${val.toFixed(3)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderLiveSim() {
+  if (!sim) return;
+  // atp
+  const atp = sim.atp;
+  document.getElementById('atp-bar').style.width = `${(atp * 100).toFixed(0)}%`;
+  document.getElementById('atp-bar').style.background = atp < 0.25 ? 'var(--red)' : atp < 0.5 ? 'var(--accent5)' : 'var(--accent2)';
+  document.getElementById('atp-val').textContent = atp.toFixed(2);
+
+  // supports
+  const sn1 = sim.support_n1;
+  const sn2 = sim.support_n2;
+  document.getElementById('support-bar-n1').style.width = `${(sn1 * 100).toFixed(0)}%`;
+  document.getElementById('support-val-n1').textContent = sn1.toFixed(3);
+  document.getElementById('support-bar-n2').style.width = `${(sn2 * 100).toFixed(0)}%`;
+  document.getElementById('support-val-n2').textContent = sn2.toFixed(3);
+
+  // coherence
+  const coh = sim.coherence;
+  document.getElementById('coherence-bar').style.width = `${(coh * 100).toFixed(0)}%`;
+  document.getElementById('coherence-bar-val').textContent = coh.toFixed(3);
+
+  // cycle display
+  document.getElementById('cycle-display').textContent = sim.cycle;
+
+  // history strip
+  const strip = document.getElementById('history-strip');
+  if (sim.history.length > 0) {
+    const last = sim.history[sim.history.length - 1];
+    const color = last.gco === 'STABLE' ? '#34d399' : last.gco === 'PARTIAL' ? '#fbbf24' : last.gco === 'DEGRADED' ? '#fb923c' : '#f87171';
+    const dot = document.createElement('div');
+    dot.className = 'history-dot';
+    dot.style.background = color;
+    dot.title = `c${sim.cycle}: ${last.action} | coh=${last.coherence.toFixed(2)} | ${last.gco}`;
+    strip.appendChild(dot);
+    if (strip.children.length > 80) strip.removeChild(strip.firstChild);
+  }
+
+  // log
+  const log = document.getElementById('cycle-log');
+  if (sim.history.length > 0) {
+    const last = sim.history[sim.history.length - 1];
+    const gcoColor = last.gco === 'STABLE' ? '#34d399' : last.gco === 'PARTIAL' ? '#fbbf24' : '#f87171';
+    const dSign = last.delta >= 0 ? '+' : '';
+    log.innerHTML = `<div style="color:var(--muted)">// cycle ${sim.cycle}</div>` +
+      `<div>action: <span style="color:var(--accent1)">${last.action}</span></div>` +
+      `<div>atp: <span style="color:var(--accent2)">${sim.atp.toFixed(3)}</span>  support_N1: <span style="color:var(--accent1)">${sim.support_n1.toFixed(3)}</span>  support_N2: <span style="color:var(--accent3)">${sim.support_n2.toFixed(3)}</span></div>` +
+      `<div>coherence: <span style="color:${gcoColor}">${last.coherence.toFixed(3)}</span>  delta: <span style="color:${last.delta>=0?'#34d399':'#f87171'}">${dSign}${last.delta.toFixed(3)}</span>  gco: <span style="color:${gcoColor}">${last.gco}</span></div>` +
+      `<div style="color:var(--muted);margin-top:4px">// ${sim.history.length} cycles recorded</div>` +
+      log.innerHTML;
+    // trim
+    const lines = log.innerHTML.split('</div>');
+    if (lines.length > 40) log.innerHTML = lines.slice(0, 40).join('</div>') + '</div>';
+  }
+
+  // update stage content if visible
+  renderStageContent(currentStage);
+}
+
+function renderStageContent(idx) {
+  if (!sim) return;
+  if (idx === 0) renderObs();
+  if (idx === 1) renderActions();
+  if (idx === 3) renderDims();
+  if (idx === 4) renderSubstrate();
+}
+
+function toggleRun() {
+  if (runInterval) {
+    clearInterval(runInterval);
+    runInterval = null;
+    document.getElementById('run-btn').textContent = '▶ Run';
+    document.getElementById('run-btn').classList.remove('running');
+  } else {
+    document.getElementById('run-btn').textContent = '⏸ Pause';
+    document.getElementById('run-btn').classList.add('running');
+    runInterval = setInterval(() => {
+      simStep(sim);
+      renderLiveSim();
+    }, 200);
+  }
+}
+
+function resetSim() {
+  if (runInterval) { clearInterval(runInterval); runInterval = null; }
+  document.getElementById('run-btn').textContent = '▶ Run';
+  document.getElementById('run-btn').classList.remove('running');
+  sim = mkSim();
+  document.getElementById('history-strip').innerHTML = '';
+  document.getElementById('cycle-log').innerHTML = '<div style="color:#3a4a6a">// press Run to start</div>';
+  renderLiveSim();
+}
+
+// ── Init ─────────────────────────────────────────────────────────────
+sim = mkSim();
+setStage(0);
+renderLiveSim();
+</script>
+
+</body>
+</html>

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import unittest
 import uuid
 import shutil
@@ -19,11 +20,14 @@ from phase8 import (
 from compare_morphogenesis import (
     aggregate_growth_results,
     compare_growth_for_seed,
+    evaluate_morphogenesis,
     growth_counts_as_earned,
     growth_counts_as_win,
 )
+from compare_cyclic_transfer import evaluate_cyclic_transfer
 from compare_large_topology import evaluate_large_topology
 from compare_morphogenesis_large import evaluate_morphogenesis_large
+from compare_morphogenesis_large_paired import evaluate_morphogenesis_large_paired
 from compare_sequential_transfer import evaluate_sequential_transfer
 from analyze_transfer_timecourse import _aggregate_latent_variant, _latent_timeline_summary
 from compare_latent_context import latent_signal_specs
@@ -3002,12 +3006,174 @@ class TestMarch17ExpansionHarnesses(unittest.TestCase):
         self.assertIn("avg_fixed_transfer_exact_matches", result["transfer"]["aggregate"])
         self.assertIn("avg_growth_transfer_exact_matches", result["transfer"]["aggregate"])
 
+    def test_morphogenesis_large_latent_harness_runs_single_seed(self) -> None:
+        result = evaluate_morphogenesis_large(seeds=(13,), latent_context=True)
+
+        self.assertTrue(result["latent_context"])
+        self.assertTrue(result["source_sequence_context_enabled"])
+        self.assertTrue(result["latent_transfer_split_enabled"])
+        self.assertIn("cvt1_task_a_large", result["scenarios"])
+
+    def test_morphogenesis_large_paired_harness_runs_single_seed(self) -> None:
+        result = evaluate_morphogenesis_large_paired(seeds=(13,))
+
+        self.assertIn("visible", result)
+        self.assertIn("latent", result)
+        self.assertIn("comparison", result)
+        self.assertIn("transfer", result["comparison"])
+
     def test_sequential_transfer_harness_runs_single_seed(self) -> None:
         result = evaluate_sequential_transfer(seeds=(13,))
 
         self.assertIn("aggregate", result)
         self.assertIn("avg_delta_c_from_warm_b_exact", result["aggregate"])
         self.assertIn("avg_delta_c_from_a_exact", result["aggregate"])
+
+    def test_sequential_transfer_latent_harness_runs_single_seed(self) -> None:
+        result = evaluate_sequential_transfer(seeds=(13,), latent_context=True)
+
+        self.assertTrue(result["latent_context"])
+        self.assertTrue(result["source_sequence_context_enabled"])
+        self.assertTrue(result["results"][0]["latent_context"])
+        self.assertIn("avg_delta_c_from_warm_b_exact", result["aggregate"])
+
+    def test_cyclic_transfer_harness_runs_single_seed(self) -> None:
+        result = evaluate_cyclic_transfer(seeds=(13,))
+
+        self.assertEqual(result["task_sequence"], [
+            "cvt1_task_a_stage1",
+            "cvt1_task_b_stage1",
+            "cvt1_task_c_stage1",
+            "cvt1_task_a_stage1",
+        ])
+        self.assertIn("avg_delta_exact_matches", result["aggregate"])
+        self.assertIn("avg_final_a_exact_matches", result["aggregate"])
+
+    def test_cyclic_transfer_latent_harness_runs_single_seed(self) -> None:
+        result = evaluate_cyclic_transfer(seeds=(13,), latent_context=True)
+
+        self.assertTrue(result["latent_context"])
+        self.assertTrue(result["source_sequence_context_enabled"])
+        self.assertTrue(result["results"][0]["latent_context"])
+        self.assertIn("avg_delta_mean_bit_accuracy", result["aggregate"])
+
+    def test_morphogenesis_manifest_writes_result_schema(self) -> None:
+        temp_dir = ROOT / "tests_tmp" / f"manifest_{uuid.uuid4().hex}"
+        output_path = temp_dir / "morphogenesis.json"
+        try:
+            result = evaluate_morphogenesis(seeds=(13,), output_path=output_path)
+
+            self.assertTrue(output_path.exists())
+            manifest = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(manifest["harness"], "morphogenesis")
+            self.assertEqual(manifest["seeds"], [13])
+            self.assertIn("title", manifest)
+            self.assertIn("timestamp", manifest)
+            self.assertIn("metadata", manifest)
+            self.assertEqual(manifest["result"]["transfer"]["aggregate"], result["transfer"]["aggregate"])
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_morphogenesis_large_manifest_writes_result_schema(self) -> None:
+        temp_dir = ROOT / "tests_tmp" / f"manifest_{uuid.uuid4().hex}"
+        output_path = temp_dir / "morphogenesis_large.json"
+        try:
+            result = evaluate_morphogenesis_large(seeds=(13,), output_path=output_path)
+
+            self.assertTrue(output_path.exists())
+            manifest = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(manifest["harness"], "morphogenesis_large")
+            self.assertEqual(manifest["seeds"], [13])
+            self.assertIn("title", manifest)
+            self.assertIn("timestamp", manifest)
+            self.assertIn("metadata", manifest)
+            self.assertEqual(manifest["result"]["transfer"]["aggregate"], result["transfer"]["aggregate"])
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_morphogenesis_large_latent_manifest_writes_result_schema(self) -> None:
+        temp_dir = ROOT / "tests_tmp" / f"manifest_{uuid.uuid4().hex}"
+        output_path = temp_dir / "morphogenesis_large_latent.json"
+        try:
+            result = evaluate_morphogenesis_large(
+                seeds=(13,),
+                latent_context=True,
+                output_path=output_path,
+            )
+
+            self.assertTrue(output_path.exists())
+            manifest = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(manifest["harness"], "morphogenesis_large")
+            self.assertTrue(manifest["result"]["latent_context"])
+            self.assertIn("title", manifest)
+            self.assertTrue(manifest["metadata"]["latent_context"])
+            self.assertEqual(manifest["result"]["transfer"]["aggregate"], result["transfer"]["aggregate"])
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_morphogenesis_large_paired_manifest_writes_result_schema(self) -> None:
+        temp_dir = ROOT / "tests_tmp" / f"manifest_{uuid.uuid4().hex}"
+        output_path = temp_dir / "morphogenesis_large_paired.json"
+        try:
+            result = evaluate_morphogenesis_large_paired(
+                seeds=(13,),
+                output_path=output_path,
+            )
+
+            self.assertTrue(output_path.exists())
+            manifest = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(manifest["harness"], "morphogenesis_large_paired")
+            self.assertIn("title", manifest)
+            self.assertIn("visible", manifest["result"])
+            self.assertIn("latent", manifest["result"])
+            self.assertEqual(
+                manifest["result"]["comparison"]["transfer"],
+                result["comparison"]["transfer"],
+            )
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_sequential_transfer_manifest_writes_result_schema(self) -> None:
+        temp_dir = ROOT / "tests_tmp" / f"manifest_{uuid.uuid4().hex}"
+        output_path = temp_dir / "sequential_transfer.json"
+        try:
+            result = evaluate_sequential_transfer(
+                seeds=(13,),
+                latent_context=True,
+                output_path=output_path,
+            )
+
+            self.assertTrue(output_path.exists())
+            manifest = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(manifest["harness"], "sequential_transfer")
+            self.assertEqual(manifest["seeds"], [13])
+            self.assertTrue(manifest["latent_context"])
+            self.assertIn("title", manifest)
+            self.assertIn("timestamp", manifest)
+            self.assertIn("metadata", manifest)
+            self.assertEqual(manifest["result"]["aggregate"], result["aggregate"])
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_cyclic_transfer_manifest_writes_result_schema(self) -> None:
+        temp_dir = ROOT / "tests_tmp" / f"manifest_{uuid.uuid4().hex}"
+        output_path = temp_dir / "cyclic_transfer.json"
+        try:
+            result = evaluate_cyclic_transfer(
+                seeds=(13,),
+                latent_context=True,
+                output_path=output_path,
+            )
+
+            self.assertTrue(output_path.exists())
+            manifest = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(manifest["harness"], "cyclic_transfer")
+            self.assertEqual(manifest["seeds"], [13])
+            self.assertTrue(manifest["latent_context"])
+            self.assertIn("title", manifest)
+            self.assertEqual(manifest["result"]["aggregate"], result["aggregate"])
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
 
 if __name__ == "__main__":

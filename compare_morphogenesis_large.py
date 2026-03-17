@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict
+from pathlib import Path
 from statistics import mean
 
 from compare_morphogenesis import (
@@ -26,6 +27,7 @@ from compare_morphogenesis import (
     _clone_config,
 )
 from compare_cold_warm import SCENARIOS
+from experiment_manifest import build_run_manifest, write_run_manifest
 from phase8 import MorphogenesisConfig
 
 WORKLOAD_SCENARIOS = (
@@ -41,6 +43,10 @@ def evaluate_morphogenesis_large(
     *,
     seeds: tuple[int, ...] = DEFAULT_SEEDS,
     morphogenesis_config: MorphogenesisConfig | None = None,
+    latent_context: bool = False,
+    source_sequence_context_enabled: bool = True,
+    latent_transfer_split_enabled: bool = True,
+    output_path: Path | None = None,
 ) -> dict[str, object]:
     scenario_results = {}
     for scenario_name in WORKLOAD_SCENARIOS:
@@ -49,6 +55,9 @@ def evaluate_morphogenesis_large(
                 seed,
                 scenario_name,
                 morphogenesis_config=morphogenesis_config,
+                latent_context=latent_context,
+                source_sequence_context_enabled=source_sequence_context_enabled,
+                latent_transfer_split_enabled=latent_transfer_split_enabled,
             )
             for seed in seeds
         ]
@@ -64,15 +73,22 @@ def evaluate_morphogenesis_large(
             train_scenario=TRAIN_SCENARIO,
             transfer_scenario=TRANSFER_SCENARIO,
             morphogenesis_config=morphogenesis_config,
+            latent_context=latent_context,
+            source_sequence_context_enabled=source_sequence_context_enabled,
+            latent_transfer_split_enabled=latent_transfer_split_enabled,
         )
         for seed in seeds
     ]
 
-    return {
+    cloned_config = _clone_config(morphogenesis_config)
+    result = {
+        "latent_context": latent_context,
+        "source_sequence_context_enabled": source_sequence_context_enabled,
+        "latent_transfer_split_enabled": latent_transfer_split_enabled,
         "seeds": list(seeds),
         "topology": "cvt1_large (10 nodes, 5-hop paths)",
         "signal_set": "stage2 (36 packets)",
-        "morphogenesis_config": asdict(_clone_config(morphogenesis_config)),
+        "morphogenesis_config": asdict(cloned_config),
         "scenarios": scenario_results,
         "transfer": {
             "train_scenario": TRAIN_SCENARIO,
@@ -81,6 +97,23 @@ def evaluate_morphogenesis_large(
             "aggregate": aggregate_transfer_growth_results(transfer_results),
         },
     }
+    if output_path is not None:
+        manifest = build_run_manifest(
+            harness="morphogenesis_large",
+            seeds=seeds,
+            scenarios=WORKLOAD_SCENARIOS,
+            metadata={
+                "train_scenario": TRAIN_SCENARIO,
+                "transfer_scenario": TRANSFER_SCENARIO,
+                "morphogenesis_config": result["morphogenesis_config"],
+                "latent_context": latent_context,
+                "source_sequence_context_enabled": source_sequence_context_enabled,
+                "latent_transfer_split_enabled": latent_transfer_split_enabled,
+            },
+            result=result,
+        )
+        write_run_manifest(output_path, manifest)
+    return result
 
 
 def main() -> None:
