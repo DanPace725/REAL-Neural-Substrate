@@ -319,7 +319,6 @@ def run_mlp_explicit(
     hidden: int = 8,
     lr: float = 0.30,
     n_epochs: int = 1,
-    train_examples: Optional[List[SignalExample]] = None,
 ) -> BaselineResult:
     """
     MLP with explicit context bit (5 inputs: 4 payload + 1 context).
@@ -327,12 +326,6 @@ def run_mlp_explicit(
     that REAL sees when the context bit is present on the packet.
     """
     net = MLP(n_in=5, hidden=hidden, lr=lr, seed=seed)
-    if train_examples:
-        for _ in range(n_epochs):
-            for ex in train_examples:
-                x = np.array(ex.input_bits + [ex.context_bit], dtype=np.float64)
-                target = np.array(ex.target_bits, dtype=np.float64)
-                net.train_step(x, target)
     exact_results: List[bool] = []
     acc_results: List[float] = []
     losses: List[float] = []
@@ -370,7 +363,6 @@ def run_mlp_latent(
     hidden: int = 8,
     lr: float = 0.30,
     n_epochs: int = 1,
-    train_examples: Optional[List[SignalExample]] = None,
 ) -> BaselineResult:
     """
     MLP without context bit (4 inputs: payload bits only).
@@ -378,12 +370,6 @@ def run_mlp_latent(
     knowing which context it is in â€” the hardest version for a stateless model.
     """
     net = MLP(n_in=4, hidden=hidden, lr=lr, seed=seed)
-    if train_examples:
-        for _ in range(n_epochs):
-            for ex in train_examples:
-                x = np.array(ex.input_bits, dtype=np.float64)
-                target = np.array(ex.target_bits, dtype=np.float64)
-                net.train_step(x, target)
     exact_results: List[bool] = []
     acc_results: List[float] = []
     losses: List[float] = []
@@ -420,7 +406,6 @@ def run_rnn_latent(
     hidden: int = 12,
     lr: float = 0.20,
     n_epochs: int = 1,
-    train_examples: Optional[List[SignalExample]] = None,
 ) -> BaselineResult:
     """
     Elman RNN without explicit context bit (Stage 2 baseline).
@@ -428,13 +413,6 @@ def run_rnn_latent(
     This is the closest neural analogue to REAL's latent context inference.
     """
     net = ElmanRNN(n_in=4, hidden=hidden, lr=lr, seed=seed)
-    if train_examples:
-        for _ in range(n_epochs):
-            net.h = np.zeros(net.hidden)
-            for ex in train_examples:
-                x = np.array(ex.input_bits, dtype=np.float64)
-                target = np.array(ex.target_bits, dtype=np.float64)
-                net.train_step(x, target)
     exact_results: List[bool] = []
     acc_results: List[float] = []
     losses: List[float] = []
@@ -481,7 +459,6 @@ def scan_epochs_to_criterion(
     max_epochs: int = 20,
     mlp_hidden: int = 8,
     rnn_hidden: int = 12,
-    train_examples: Optional[List[SignalExample]] = None,
 ) -> Dict[str, Optional[int]]:
     """
     For each variant, find the minimum number of full passes over the 18-packet
@@ -503,23 +480,6 @@ def scan_epochs_to_criterion(
         net_mlp_e = MLP(n_in=5, hidden=mlp_hidden, lr=0.30, seed=seed) if variant == "mlp-explicit" else None
         net_mlp_l = MLP(n_in=4, hidden=mlp_hidden, lr=0.30, seed=seed) if variant == "mlp-latent" else None
         net_rnn   = ElmanRNN(n_in=4, hidden=rnn_hidden, lr=0.20, seed=seed) if variant == "rnn-latent" else None
-
-        if train_examples:
-            # We train for 1 pass on the training set to match REAL's 1-session carryover
-            for _ in range(1):
-                if net_rnn is not None:
-                    net_rnn.h = np.zeros(net_rnn.hidden)
-                for ex in train_examples:
-                    target = np.array(ex.target_bits, dtype=np.float64)
-                    if net_mlp_e is not None:
-                        x = np.array(ex.input_bits + [ex.context_bit], dtype=np.float64)
-                        net_mlp_e.train_step(x, target)
-                    elif net_mlp_l is not None:
-                        x = np.array(ex.input_bits, dtype=np.float64)
-                        net_mlp_l.train_step(x, target)
-                    else:
-                        x = np.array(ex.input_bits, dtype=np.float64)
-                        net_rnn.train_step(x, target)
 
         epoch_found: Optional[int] = None
         for epoch in range(1, max_epochs + 1):
@@ -566,8 +526,6 @@ def run_real_for_comparison(
     *,
     seed: int,
     scale_mode: bool = False,
-    transfer_mode: bool = False,
-    morphogenesis_enabled: bool = False,
 ) -> Optional[Dict[str, object]]:
     """
     Run the REAL Phase 8 system on the same CVT-1 task and return its metrics.
@@ -575,51 +533,20 @@ def run_real_for_comparison(
     """
     try:
         import sys
-        import uuid
-        import shutil
         from pathlib import Path
         sys.path.insert(0, str(Path(__file__).resolve().parent))
         from scripts.compare_cold_warm import SCENARIOS, build_system, run_workload
         from scripts.compare_task_transfer import transfer_metrics
-        from scripts.compare_morphogenesis import benchmark_morphogenesis_config, build_growth_system
     except ImportError:
         return None
 
-    train_scenario_name = f"cvt1_task_a_scale" if scale_mode else f"cvt1_task_a_stage1"
     scenario_name = f"cvt1_{task_id}_scale" if scale_mode else f"cvt1_{task_id}_stage1"
     if scenario_name not in SCENARIOS:
         return None
 
-    morph_cfg = benchmark_morphogenesis_config() if morphogenesis_enabled else None
-
-    # Helper to build the system depending on morphogenesis setting
-    def _create_system(scen_name):
-        if morphogenesis_enabled:
-            return build_growth_system(seed, scen_name, morphogenesis_config=morph_cfg)
-        return build_system(seed, scen_name)
-
-    if transfer_mode:
-        # Run Task A training to get memory carryover
-        training_system = _create_system(train_scenario_name)
-        run_workload(training_system, train_scenario_name)
-        base_dir = Path(__file__).resolve().parent.parent / "tests_tmp" / f"baseline_transfer_{uuid.uuid4().hex}"
-        full_dir = base_dir / "full"
-        full_dir.mkdir(parents=True, exist_ok=True)
-        try:
-            training_system.save_memory_carryover(full_dir)
-            
-            # Run Task B evaluation with carryover
-            system = _create_system(scenario_name)
-            system.load_memory_carryover(full_dir)
-            summary = run_workload(system, scenario_name)
-            metrics = transfer_metrics(system)
-        finally:
-            shutil.rmtree(base_dir, ignore_errors=True)
-    else:
-        system = _create_system(scenario_name)
-        summary = run_workload(system, scenario_name)
-        metrics = transfer_metrics(system)
-        
+    system = build_system(seed, scenario_name)
+    summary = run_workload(system, scenario_name)
+    metrics = transfer_metrics(system)
     return {
         "exact_matches": summary.get("exact_matches", 0),
         "mean_bit_accuracy": summary.get("mean_bit_accuracy", 0.0),
@@ -676,32 +603,20 @@ def main() -> None:
                              "instead of single-pass")
     parser.add_argument("--scale", action="store_true",
                         help="run with a 30-hidden-unit network on a 108-packet dataset (matches REAL 30-node topology)")
-    # Add custom arguments for Phase 8 comparison extensions
-    parser.add_argument("--transfer", action="store_true",
-                        help="evaluate A->B transfer instead of cold-start (trains on Task A first)")
-    parser.add_argument("--morphogenesis", action="store_true",
-                        help="enable dynamic topology (only applies to REAL comparison)")
-    parser.add_argument("--output", type=str,
-                        help="path to save JSON experiment manifest (e.g., docs/experiment_outputs/baseline.json)")
     args = parser.parse_args()
 
     task_id = args.task
     if args.scale:
-        train_examples = cvt1_stage3_examples("task_a")
         examples = cvt1_stage3_examples(task_id)
         mlp_hidden = 30
         rnn_hidden = 30
     else:
-        train_examples = cvt1_stage1_examples("task_a")
         examples = cvt1_stage1_examples(task_id)
         mlp_hidden = 8
         rnn_hidden = 12
     n = len(examples)
 
-    print(f"\nPhase 8 — Neural Baseline Comparison")
-    mode_str = "A->B Transfer" if args.transfer else "Cold-start"
-    morph_str = " (REAL morphogenesis enabled)" if args.compare_real and args.morphogenesis else ""
-    print(f"Mode: {mode_str}{morph_str}")
+    print(f"\nPhase 8 â€” Neural Baseline Comparison")
     print(f"Task: {task_id}  |  Signal length: {n} examples  |  Seeds: {args.seeds}")
     print(f"Criterion: >={EXACT_THRESHOLD*100:.0f}% exact in rolling {CRITERION_WINDOW}-window")
     print()
@@ -714,18 +629,17 @@ def main() -> None:
     real_results: List[Dict[str, object]] = []
 
     for seed in range(args.seeds):
-        t_ex = train_examples if args.transfer else None
         if not args.epoch_scan:
             all_by_variant["mlp-explicit"].append(
-                run_mlp_explicit(examples, seed=seed, hidden=mlp_hidden, train_examples=t_ex))
+                run_mlp_explicit(examples, seed=seed, hidden=mlp_hidden))
             all_by_variant["mlp-latent"].append(
-                run_mlp_latent(examples, seed=seed, hidden=mlp_hidden, train_examples=t_ex))
+                run_mlp_latent(examples, seed=seed, hidden=mlp_hidden))
             all_by_variant["rnn-latent"].append(
-                run_rnn_latent(examples, seed=seed, hidden=rnn_hidden, train_examples=t_ex))
+                run_rnn_latent(examples, seed=seed, hidden=rnn_hidden))
         else:
             epoch_map = scan_epochs_to_criterion(
                 examples, seed=seed, max_epochs=args.max_epochs,
-                mlp_hidden=mlp_hidden, rnn_hidden=rnn_hidden, train_examples=t_ex)
+                mlp_hidden=mlp_hidden, rnn_hidden=rnn_hidden)
             for variant, epoch_found in epoch_map.items():
                 etc = epoch_found * n if epoch_found is not None else None
                 r = BaselineResult(
@@ -738,10 +652,7 @@ def main() -> None:
                 all_by_variant[variant].append(r)
 
         if args.compare_real:
-            real = run_real_for_comparison(
-                task_id, seed=seed, scale_mode=args.scale, 
-                transfer_mode=args.transfer, morphogenesis_enabled=args.morphogenesis
-            )
+            real = run_real_for_comparison(task_id, seed=seed, scale_mode=args.scale)
             if real is not None:
                 real_results.append(real)
             elif seed == 0:
@@ -822,56 +733,6 @@ def main() -> None:
     print("  - rnn-latent can track context but needs more signal than REAL's substrate memory")
     print("  - REAL warm-full carryover reduces ETC further via substrate transfer")
     print()
-
-    # Write output manifest if requested
-    if args.output:
-        try:
-            import sys
-            from pathlib import Path
-            sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-            from scripts.experiment_manifest import build_run_manifest, write_run_manifest
-            
-            # Serialize the per-seed results into JSON-friendly dicts
-            def _serialize_variant(rs: List[BaselineResult]):
-                return [
-                    {
-                        "seed": r.seed,
-                        "exact_matches": r.exact_matches,
-                        "mean_bit_accuracy": r.mean_bit_accuracy,
-                        "examples_to_criterion": r.examples_to_criterion,
-                        "criterion_reached": r.criterion_reached,
-                    }
-                    for r in rs
-                ]
-
-            result_dict = {
-                "neural_variants": {v: _serialize_variant(rs) for v, rs in all_by_variant.items()},
-                "neural_aggregates": aggs,
-                "real_results": real_results if real_results else None,
-                "real_aggregate": real_agg if real_results else None,
-            }
-
-            scenarios = [f"cvt1_{task_id}_{'scale' if args.scale else 'stage1'}"]
-            if args.transfer:
-                scenarios.insert(0, f"cvt1_task_a_{'scale' if args.scale else 'stage1'}")
-
-            manifest = build_run_manifest(
-                harness="neural_baseline_extended",
-                seeds=list(range(args.seeds)),
-                scenarios=scenarios,
-                result=result_dict,
-                metadata={
-                    "transfer": args.transfer,
-                    "morphogenesis": args.morphogenesis,
-                    "scale": args.scale,
-                    "epoch_scan": args.epoch_scan,
-                    "max_epochs": args.max_epochs,
-                }
-            )
-            write_run_manifest(Path(args.output), manifest)
-            print(f"Saved run manifest to {args.output}")
-        except ImportError:
-            print("Could not import experiment_manifest; JSON output skipped.")
 
 
 if __name__ == "__main__":
