@@ -1,0 +1,1087 @@
+from __future__ import annotations
+
+import math
+import random
+from dataclasses import dataclass, field
+from typing import List, Tuple
+
+from .environment import RoutingEnvironment
+from .substrate import ConnectionSubstrate
+
+ROUTE_TRANSFORMS = ("identity", "rotate_left_1", "xor_mask_1010", "xor_mask_0101")
+
+
+def _route_neighbor(action: str) -> str | None:
+    if action.startswith("route_transform:"):
+        parts = action.split(":")
+        if len(parts) == 3:
+            return parts[1]
+        return None
+    if action.startswith("route:"):
+        return action.split(":", 1)[1]
+    return None
+
+
+def _route_transform(action: str) -> str:
+    if action.startswith("route_transform:"):
+        parts = action.split(":")
+        if len(parts) == 3:
+            return parts[2]
+    return "identity"
+
+
+@dataclass
+class Phase8Selector:
+    """Local selector tuned for routing pressure and substrate bias."""
+
+    environment: RoutingEnvironment
+    node_id: str
+    substrate: ConnectionSubstrate
+    rng: random.Random = field(default_factory=random.Random)
+    exploration_rate: float = 0.10
+    transfer_exploration_boost: float = 0.12
+    recency_half_life: float = 6.0
+    rest_atp_threshold: float = 0.12
+    maintain_velocity_threshold: float = -0.015
+    # Bonus weight applied to task-affinity transforms when the node is in
+    # hidden-context mode (head packet carries a task_id but no explicit or
+    # latent context bit is resolved yet).  Gives an early-cycle push toward
+    # the correct transform family based purely on the task label, without
+    # relaxing the context-promotion gate in the consolidation pipeline.
+    hidden_task_affinity_weight: float = 0.14
+
+    def select(self, available: List[str], history: List[object]) -> Tuple[str, str]:
+        if not available:
+            raise ValueError("No available actions")
+
+        route_actions = [action for action in available if _route_neighbor(action) is not None]
+        invest_actions = [action for action in available if action.startswith("invest:")]
+        maintain_actions = [action for action in available if action == "maintain_edges"]
+        growth_actions = [
+            action
+            for action in available
+            if action.startswith("bud_edge:") or action.startswith("bud_node:")
+        ]
+        prune_actions = [action for action in available if action.startswith("prune_edge:")]
+        apoptosis_actions = [action for action in available if action == "apoptosis_request"]
+        rest_available = "rest" in available
+
+        local_inbox = len(self.environment.inboxes[self.node_id])
+        state = self.environment.state_for(self.node_id)
+        observation = self.environment.observe_local(self.node_id)
+        urgency = max(
+            observation.get("oldest_packet_age", 0.0),
+            observation.get("queue_pressure", 0.0),
+            observation.get("ingress_backlog", 0.0),
+        )
+
+        if growth_actions and self._can_interrupt_routing(growth_actions, local_inbox, urgency, observation, history):
+            return self._best_growth_action(growth_actions), "guided"
+
+        if local_inbox > 0 and route_actions:
+            if self.rng.random() < self._local_exploration_rate(history, local_inbox, urgency, observation):
+                return self._sample_routes(route_actions, history), "fluctuation"
+            return self._best_route(route_actions, history), "guided"
+
+        if state.atp <= self.rest_atp_threshold and rest_available:
+            return "rest", "constraint"
+
+        if growth_actions and self._should_prioritize_growth(growth_actions):
+            return self._best_growth_action(growth_actions), "guided"
+
+        if maintain_actions and self._needs_maintenance():
+            return "maintain_edges", "guided"
+
+        if prune_actions:
+            return self._best_growth_action(prune_actions), "guided"
+
+        if growth_actions:
+            return self._best_growth_action(growth_actions), "guided"
+
+        if apoptosis_actions:
+            return apoptosis_actions[0], "constraint"
+
+        if invest_actions:
+            if self.rng.random() < 0.25:
+                return self._best_invest(invest_actions, history), "guided"
+
+        if rest_available:
+            return "rest", "constraint"
+
+        if invest_actions:
+            return self._best_invest(invest_actions, history), "constraint"
+
+        return available[0], "constraint"
+
+    def _local_exploration_rate(
+        self,
+        history: List[object],
+        local_inbox: int,
+        urgency: float,
+        observation: dict[str, float],
+    ) -> float:
+        maturity = min(1.0, len(history) / 24.0)
+        pressure_discount = min(0.06, local_inbox * 0.02)
+        urgency_discount = min(0.05, urgency * 0.08)
+        transfer_exploration = 0.0
+        if (
+            self.node_id == self.environment.source_id
+            and observation.get("transfer_hidden_unseen_task", 0.0) >= 0.5
+        ):
+            transfer_phase = max(
+                0.0,
+                min(1.0, observation.get("transfer_adaptation_phase", 0.0)),
+            )
+            transfer_exploration = self.transfer_exploration_boost * transfer_phase
+        return max(
+            0.01,
+            min(
+                0.35,
+                self.exploration_rate * (1.0 - 0.7 * maturity)
+                - pressure_discount
+                - urgency_discount
+                + transfer_exploration,
+            ),
+        )
+
+    def _best_route(self, route_actions: List[str], history: List[object]) -> str:
+        route_scores = self._score_routes(route_actions, history)
+        scored = [(route_scores[action], action) for action in route_actions]
+        scored.sort(key=lambda item: item[0], reverse=True)
+        return scored[0][1]
+
+    def _sample_routes(self, route_actions: List[str], history: List[object]) -> str:
+        route_scores = self._score_routes(route_actions, history)
+        scores = [max(0.01, route_scores[action] + 1.0) for action in route_actions]
+        return self.rng.choices(route_actions, weights=scores, k=1)[0]
+
+    def _best_invest(self, invest_actions: List[str], history: List[object]) -> str:
+        scored = [(self._score_invest(action, history), action) for action in invest_actions]
+        scored.sort(key=lambda item: item[0], reverse=True)
+        return scored[0][1]
+
+    def _best_growth_action(self, actions: List[str]) -> str:
+        scored = [(self._score_growth_action(action), action) for action in actions]
+        scored.sort(key=lambda item: item[0], reverse=True)
+        return scored[0][1]
+
+    def _effective_context(self, observation: dict[str, float]) -> tuple[int | None, float]:
+        if observation.get("effective_has_context", 0.0) < 0.5:
+            return None, 0.0
+        return int(observation.get("effective_context_bit", 0.0)), max(
+            0.0,
+            min(1.0, observation.get("effective_context_confidence", 0.0)),
+        )
+
+    def _entry_effective_context(self, entry: object) -> tuple[int | None, float]:
+        state_before = getattr(entry, "state_before", {})
+        if state_before.get("effective_has_context", 0.0) >= 0.5:
+            return int(float(state_before.get("effective_context_bit", 0.0))), max(
+                0.0,
+                min(1.0, float(state_before.get("effective_context_confidence", 0.0))),
+            )
+        if state_before.get("head_has_context", 0.0) >= 0.5:
+            return int(float(state_before.get("head_context_bit", 0.0))), 1.0
+        return None, 0.0
+
+    def _score_route(self, action: str, history: List[object]) -> float:
+        neighbor_id = _route_neighbor(action)
+        if neighbor_id is None:
+            return -1.0
+        observation = self.environment.observe_local(self.node_id)
+
+        recent_delta = self._recency_weighted_mean(history, action, field="delta", default=0.0)
+        recent_coherence = self._recency_weighted_mean(history, action, field="coherence", default=0.5)
+        context_bit, context_weight = self._effective_context(observation)
+        context_delta = self._contextual_route_mean(
+            history,
+            action,
+            context_bit=context_bit,
+            context_weight=context_weight,
+            field="delta",
+            default=recent_delta,
+        )
+        support = self.substrate.support(neighbor_id)
+        support_velocity = self.substrate.velocity(neighbor_id)
+        transform_name = _route_transform(action)
+        generic_action_support = self.substrate.base_action_support(
+            neighbor_id,
+            transform_name,
+        )
+        action_support = self.substrate.action_support(
+            neighbor_id,
+            transform_name,
+            context_bit,
+        )
+        action_velocity = self.substrate.action_velocity(
+            neighbor_id,
+            transform_name,
+            context_bit,
+        )
+        history_transform_evidence = observation.get(
+            f"history_transform_evidence_{transform_name}",
+            0.0,
+        )
+        best_non_identity_history = max(
+            (
+                observation.get(f"history_transform_evidence_{candidate}", 0.0)
+                for candidate in ROUTE_TRANSFORMS
+                if candidate != "identity"
+            ),
+            default=0.0,
+        )
+        task_transform_affinity = observation.get(
+            f"task_transform_affinity_{transform_name}",
+            0.0,
+        )
+        source_sequence_hint = observation.get(
+            f"source_sequence_transform_hint_{transform_name}",
+            0.0,
+        )
+        source_sequence_available = observation.get("source_sequence_available", 0.0)
+        source_sequence_change_ratio = observation.get("source_sequence_change_ratio", 0.0)
+        source_sequence_repeat = observation.get("source_sequence_repeat_input", 0.0)
+        transfer_adaptation_phase = max(
+            0.0,
+            min(1.0, observation.get("transfer_adaptation_phase", 0.0)),
+        )
+        transfer_hidden_unseen_task = (
+            self.node_id == self.environment.source_id
+            and observation.get("transfer_hidden_unseen_task", 0.0) >= 0.5
+        )
+        hidden_task_commitment = (
+            observation.get("head_has_task", 0.0) >= 0.5
+            and observation.get("head_has_context", 0.0) < 0.5
+            and observation.get("effective_has_context", 0.0) < 0.5
+        )
+        feedback_credit = observation.get(f"feedback_credit_{transform_name}", 0.0)
+        feedback_debt = observation.get(f"feedback_debt_{transform_name}", 0.0)
+        context_feedback_credit = observation.get(
+            f"context_feedback_credit_{transform_name}",
+            0.0,
+        )
+        context_feedback_debt = observation.get(
+            f"context_feedback_debt_{transform_name}",
+            0.0,
+        )
+        branch_feedback_debt = observation.get(
+            f"branch_feedback_debt_{neighbor_id}_{transform_name}",
+            0.0,
+        )
+        branch_feedback_credit = observation.get(
+            f"branch_feedback_credit_{neighbor_id}_{transform_name}",
+            0.0,
+        )
+        context_branch_feedback_debt = observation.get(
+            f"context_branch_feedback_debt_{neighbor_id}_{transform_name}",
+            0.0,
+        )
+        context_branch_feedback_credit = observation.get(
+            f"context_branch_feedback_credit_{neighbor_id}_{transform_name}",
+            0.0,
+        )
+        branch_context_feedback_debt = observation.get(
+            f"branch_context_feedback_debt_{neighbor_id}",
+            0.0,
+        )
+        branch_context_feedback_credit = observation.get(
+            f"branch_context_feedback_credit_{neighbor_id}",
+            0.0,
+        )
+        last_match_ratio = observation.get("last_match_ratio", 0.0)
+        last_feedback_amount = observation.get("last_feedback_amount", 0.0)
+        identity_penalty = 0.0
+        task_transform_bonus = 0.0
+        context_support_bonus = 0.0
+        context_support_penalty = 0.0
+        history_alignment = 1.0
+        branch_context_pressure = 0.0
+        branch_context_bonus = 0.0
+        branch_transform_bonus = 0.0
+        competition_penalty = 0.0
+        competition_bonus = 0.0
+        growth_novelty_bonus = 0.0
+        source_pre_effective_route_drive = 0.0
+        hidden_wrong_family_penalty = 0.0
+        if self.environment.topology_state is not None:
+            neighbor_spec = self.environment.topology_state.node_specs.get(neighbor_id)
+            if neighbor_spec is not None and neighbor_spec.dynamic:
+                growth_novelty_bonus += self.environment.morphogenesis_config.growth_route_novelty_bonus
+            if neighbor_spec is not None and neighbor_spec.probationary:
+                growth_novelty_bonus += self.environment.morphogenesis_config.growth_route_probationary_bonus
+        source_pre_effective = (
+            hidden_task_commitment
+            and self.node_id == self.environment.source_id
+            and observation.get("has_packet", 0.0) >= 0.5
+            and source_sequence_available >= 0.5
+        )
+        if hidden_task_commitment:
+            sequence_hint_scale = (
+                1.0 - 0.75 * transfer_adaptation_phase
+                if transfer_hidden_unseen_task
+                else 1.0
+            )
+            source_sequence_hint *= sequence_hint_scale
+            sequence_bonus_scale = (
+                0.18 * sequence_hint_scale
+                if source_sequence_available >= 0.5
+                else 0.0
+            )
+            sequence_repeat_penalty = 0.04 * source_sequence_repeat
+            transfer_candidate_bonus = (
+                0.04 * transfer_adaptation_phase
+                if transfer_hidden_unseen_task and task_transform_affinity > 0.0
+                else 0.0
+            )
+            if transform_name == "identity":
+                identity_penalty += (
+                    0.06
+                    + 0.08 * min(1.0, best_non_identity_history)
+                    + max(0.0, -source_sequence_hint) * sequence_bonus_scale
+                    + sequence_repeat_penalty
+                )
+                if transfer_hidden_unseen_task:
+                    identity_penalty += 0.05 * transfer_adaptation_phase
+                if source_pre_effective:
+                    identity_penalty += (
+                        0.12
+                        + 0.10 * max(0.0, -source_sequence_hint)
+                        + 0.04 * source_sequence_change_ratio
+                    )
+            elif task_transform_affinity > 0.0:
+                task_transform_bonus += (
+                    0.05
+                    + 0.08 * history_transform_evidence
+                    + max(0.0, source_sequence_hint) * sequence_bonus_scale
+                    + 0.03 * source_sequence_change_ratio
+                    + transfer_candidate_bonus
+                )
+                if source_pre_effective:
+                    pre_effective_drive_scale = (
+                        1.0 - 0.55 * transfer_adaptation_phase
+                        if transfer_hidden_unseen_task
+                        else 1.0
+                    )
+                    source_pre_effective_route_drive += (
+                        (
+                            0.10
+                            + 0.12 * max(0.0, source_sequence_hint)
+                            + 0.05 * source_sequence_change_ratio
+                            + 0.04 * observation.get("ingress_backlog", 0.0)
+                            + 0.03 * observation.get("reward_buffer", 0.0)
+                        )
+                        * pre_effective_drive_scale
+                    )
+            elif task_transform_affinity < 0.0:
+                hidden_wrong_family_penalty += 0.04 + max(0.0, source_sequence_hint) * 0.14
+                if source_pre_effective:
+                    hidden_wrong_family_penalty += 0.08 + 0.06 * source_sequence_change_ratio
+        elif transform_name == "identity" and best_non_identity_history > 0.12:
+            identity_penalty += 0.18 * min(1.0, best_non_identity_history)
+        elif transform_name != "identity":
+            task_transform_bonus += 0.12 * history_transform_evidence
+        if context_bit is not None:
+            context_action_support = self.substrate.contextual_action_support(
+                neighbor_id,
+                transform_name,
+                context_bit,
+            )
+            context_action_velocity = self.substrate.contextual_action_velocity(
+                neighbor_id,
+                transform_name,
+                context_bit,
+            )
+            context_support_bonus = max(
+                0.0,
+                context_action_support - generic_action_support,
+            ) * (0.18 * context_weight) + max(0.0, context_action_velocity) * (0.08 * context_weight)
+            context_support_penalty = max(
+                0.0,
+                generic_action_support - context_action_support,
+            ) * (0.12 * context_weight)
+            context_evidence = min(
+                1.0,
+                max(
+                    0.0,
+                    0.55 * history_transform_evidence
+                    + context_action_support
+                    + context_feedback_credit
+                    + 0.35 * branch_feedback_credit
+                    + 0.60 * context_branch_feedback_credit
+                    + 0.55 * branch_context_feedback_credit
+                    - 0.55 * context_feedback_debt
+                    - 0.25 * context_branch_feedback_debt
+                    + 0.35 * max(0.0, last_match_ratio - 0.5),
+                ),
+            )
+            branch_context_pressure = max(
+                0.0,
+                branch_context_feedback_debt
+                - 0.40 * branch_context_feedback_credit
+                - 0.25 * context_feedback_credit
+                - 0.20 * context_action_support,
+            )
+            branch_context_bonus = 0.20 * branch_context_feedback_credit * context_weight
+            branch_transform_bonus = (
+                0.10 * branch_feedback_credit + 0.22 * context_branch_feedback_credit
+            ) * context_weight
+            history_alignment = 0.55 + 0.45 * context_evidence
+            history_alignment *= max(0.30, 1.0 - 0.40 * branch_context_pressure)
+            if (
+                transform_name == "identity"
+                and action_support < 0.35
+                and feedback_credit < 0.35
+                and context_feedback_credit < 0.30
+            ):
+                identity_penalty = 0.14 * context_weight
+            elif transform_name != "identity" and context_feedback_debt < 0.45:
+                task_transform_bonus = 0.08 * max(context_weight, min(1.0, 0.35 + history_transform_evidence))
+            competition_penalty, competition_bonus = self._competition_adjustment(
+                neighbor_id=neighbor_id,
+                transform_name=transform_name,
+                context_bit=context_bit,
+                observation=observation,
+                action_support=action_support,
+                generic_action_support=generic_action_support,
+                feedback_credit=feedback_credit,
+                context_feedback_credit=context_feedback_credit,
+                branch_feedback_credit=branch_feedback_credit,
+                context_branch_feedback_credit=context_branch_feedback_credit,
+                branch_context_feedback_credit=branch_context_feedback_credit,
+                feedback_debt=feedback_debt,
+                context_feedback_debt=context_feedback_debt,
+                branch_feedback_debt=branch_feedback_debt,
+                context_branch_feedback_debt=context_branch_feedback_debt,
+                branch_context_feedback_debt=branch_context_feedback_debt,
+            )
+            competition_penalty *= context_weight
+            competition_bonus *= context_weight
+        branch_escape_bonus = 0.0
+        if context_bit is not None:
+            competing_branch_debt = max(
+                (
+                    observation.get(f"branch_context_feedback_debt_{candidate_neighbor}", 0.0)
+                    for candidate_neighbor in self.environment.neighbors_of(self.node_id)
+                    if candidate_neighbor != neighbor_id
+                ),
+                default=0.0,
+            )
+            branch_escape_bonus = 0.24 * max(
+                0.0,
+                competing_branch_debt - branch_context_pressure,
+            ) * context_weight
+        progress = observation.get(f"progress_{neighbor_id}", 0.0)
+        congestion = observation.get(f"congestion_{neighbor_id}", 0.0)
+        inhibited = observation.get(f"inhibited_{neighbor_id}", 0.0)
+        urgency = observation.get("oldest_packet_age", 0.0)
+        queue_pressure = observation.get("queue_pressure", 0.0)
+        ingress_backlog = observation.get("ingress_backlog", 0.0)
+        transform_cost = self.substrate.use_cost(
+            neighbor_id,
+            transform_name if action.startswith("route_transform:") else None,
+            context_bit,
+        )
+        cost_ratio = transform_cost / max(self.substrate.config.fire_base_cost, 1e-9)
+        stale_penalty = self._stale_bias_penalty(history, action)
+        maintenance = self.substrate.maintenance_metrics()
+        context_route_component = (
+            (1.0 - context_weight) * recent_delta + context_weight * context_delta
+        )
+
+        score = (
+            0.32 * recent_delta * history_alignment
+            + 0.28 * context_route_component * history_alignment
+            + 0.18 * recent_coherence * (0.55 + 0.45 * history_alignment)
+            + 0.30 * support
+            + 0.22 * action_support
+            + 0.24 * progress
+            + 0.08 * support_velocity
+            + 0.06 * action_velocity
+            + 0.18 * feedback_credit
+            + 0.34 * context_feedback_credit * context_weight
+            + 0.16 * history_transform_evidence
+            + 0.12 * last_match_ratio
+            + 0.08 * last_feedback_amount
+            + 0.06 * maintenance["action_maintenance_ratio"]
+            + growth_novelty_bonus
+            + context_support_bonus
+            + task_transform_bonus
+            + source_pre_effective_route_drive
+            + branch_context_bonus
+            + branch_transform_bonus
+            + branch_escape_bonus
+            + 0.20 * urgency
+            + 0.10 * ingress_backlog
+            - 0.22 * congestion
+            - 0.18 * cost_ratio
+            - 0.35 * inhibited
+            - 0.12 * queue_pressure * congestion
+            - context_support_penalty
+            - 0.18 * feedback_debt
+            - 0.42 * context_feedback_debt * context_weight
+            - 0.20 * branch_feedback_debt
+            - 0.48 * context_branch_feedback_debt * context_weight
+            - 0.26 * branch_context_pressure * context_weight
+            - identity_penalty
+            - hidden_wrong_family_penalty
+            - competition_penalty
+            - stale_penalty
+            + competition_bonus
+        )
+        return score
+
+    def _score_invest(self, action: str, history: List[object]) -> float:
+        neighbor_id = action.split(":", 1)[1]
+        observation = self.environment.observe_local(self.node_id)
+        recent_route_delta = self._route_recency_weighted_mean(history, neighbor_id, field="delta", default=0.0)
+        progress = observation.get(f"progress_{neighbor_id}", 0.0)
+        congestion = observation.get(f"congestion_{neighbor_id}", 0.0)
+        support_gap = 1.0 - self.substrate.support(neighbor_id)
+        cost_ratio = self.substrate.write_cost(neighbor_id) / max(self.substrate.config.write_base_cost, 1e-9)
+        return (
+            0.30 * progress
+            + 0.28 * support_gap
+            + 0.22 * max(0.0, recent_route_delta)
+            - 0.10 * congestion
+            - 0.18 * cost_ratio
+        )
+
+    def _score_growth_action(self, action: str) -> float:
+        observation = self.environment.observe_local(self.node_id)
+        contradiction = observation.get("contradiction_pressure", 0.0)
+        surplus = observation.get("growth_surplus_streak", 0.0)
+        energy_surplus = observation.get("energy_surplus", 0.0)
+        energy_balance = observation.get("energy_balance", 0.0)
+        structural_value = observation.get("structural_value", 0.0)
+        maintenance_load = observation.get("maintenance_load", 0.0)
+        overload = max(
+            observation.get("queue_pressure", 0.0),
+            observation.get("oldest_packet_age", 0.0),
+            observation.get("ingress_backlog", 0.0),
+        )
+        if action.startswith("bud_node:"):
+            _, _, target_id = action.split(":", 2)
+            progress = observation.get(f"progress_{target_id}", 0.0)
+            return (
+                0.20
+                + 0.26 * contradiction
+                + 0.18 * surplus
+                + 0.18 * energy_surplus
+                + 0.12 * max(0.0, energy_balance)
+                + 0.08 * max(0.0, structural_value)
+                + 0.10 * overload
+                + 0.08 * progress
+                - 0.10 * maintenance_load
+            )
+        if action.startswith("bud_edge:"):
+            target_id = action.split(":", 1)[1]
+            progress = observation.get(f"progress_{target_id}", 0.0)
+            return (
+                0.18
+                + 0.24 * contradiction
+                + 0.18 * surplus
+                + 0.20 * energy_surplus
+                + 0.14 * max(0.0, energy_balance)
+                + 0.08 * max(0.0, structural_value)
+                + 0.10 * overload
+                + 0.10 * progress
+                - 0.08 * maintenance_load
+            )
+        if action.startswith("prune_edge:"):
+            target_id = action.split(":", 1)[1]
+            congestion = observation.get(f"congestion_{target_id}", 0.0)
+            return 0.22 + 0.28 * max(0.0, -energy_balance) + 0.18 * maintenance_load + 0.14 * congestion + 0.10 * overload
+        if action == "apoptosis_request":
+            return 0.55 + 0.35 * max(0.0, -structural_value) + 0.20 * maintenance_load
+        return 0.0
+
+    def _should_prioritize_growth(self, actions: List[str]) -> bool:
+        if not actions:
+            return False
+        best_score = max(self._score_growth_action(action) for action in actions)
+        return best_score >= 0.45
+
+    def _can_interrupt_routing(
+        self,
+        actions: List[str],
+        local_inbox: int,
+        urgency: float,
+        observation: dict[str, float],
+        history: List[object],
+    ) -> bool:
+        if not self._should_prioritize_growth(actions):
+            return False
+        if local_inbox <= 0:
+            return True
+        if len(history) < 6:
+            return False
+        if local_inbox > self.environment.morphogenesis_config.growth_queue_tolerance:
+            return False
+        if urgency > self.environment.morphogenesis_config.growth_interrupt_urgency_threshold:
+            return False
+        if observation.get("feedback_pending", 0.0) > 0.6:
+            return False
+        if observation.get("atp_ratio", 0.0) < self.environment.morphogenesis_config.atp_surplus_threshold:
+            return False
+        contradiction = observation.get("contradiction_pressure", 0.0)
+        overload = max(
+            observation.get("queue_pressure", 0.0),
+            observation.get("oldest_packet_age", 0.0),
+            observation.get("ingress_backlog", 0.0),
+        )
+        if (
+            observation.get("last_match_ratio", 0.0) >= 0.75
+            and contradiction < self.environment.morphogenesis_config.contradiction_threshold + 0.15
+        ):
+            return False
+        return contradiction >= self.environment.morphogenesis_config.contradiction_threshold or (
+            overload >= self.environment.morphogenesis_config.overload_threshold
+        )
+
+    def _needs_maintenance(self) -> bool:
+        maintenance = self.substrate.maintenance_metrics()
+        if maintenance["active_action_count"] > 0 and maintenance["action_maintenance_ratio"] < 0.6:
+            return True
+        if maintenance["active_edge_count"] > 0 and maintenance["edge_maintenance_ratio"] < 0.6:
+            return True
+        for neighbor_id in self.substrate.active_neighbors():
+            if self.substrate.velocity(neighbor_id) <= self.maintain_velocity_threshold:
+                return True
+        for neighbor_id, transform_name, context_bit in self.substrate.active_action_supports():
+            if (
+                self.substrate.action_velocity(neighbor_id, transform_name, context_bit)
+                <= self.maintain_velocity_threshold
+            ):
+                return True
+        return False
+
+    def _recency_weighted_mean(
+        self,
+        history: List[object],
+        action: str,
+        *,
+        field: str,
+        default: float,
+    ) -> float:
+        entries = [entry for entry in history if entry.action == action]
+        if not entries:
+            return default
+
+        current_cycle = max(entry.cycle for entry in history)
+        weighted_total = 0.0
+        total_weight = 0.0
+        for entry in entries[-24:]:
+            age = max(0, current_cycle - entry.cycle)
+            weight = 0.5 ** (age / max(self.recency_half_life, 1e-9))
+            weighted_total += weight * float(getattr(entry, field))
+            total_weight += weight
+        if total_weight <= 0.0:
+            return default
+        return weighted_total / total_weight
+
+    def _stale_bias_penalty(self, history: List[object], action: str) -> float:
+        entries = [entry for entry in history if entry.action == action]
+        if not entries:
+            return 0.0
+        current_cycle = max(entry.cycle for entry in history)
+        latest = max(entry.cycle for entry in entries)
+        age = max(0, current_cycle - latest)
+        if age <= self.recency_half_life:
+            return 0.0
+        return min(0.18, 0.02 * (age - self.recency_half_life))
+
+    def _route_recency_weighted_mean(
+        self,
+        history: List[object],
+        neighbor_id: str,
+        *,
+        field: str,
+        default: float,
+    ) -> float:
+        entries = [
+            entry for entry in history if _route_neighbor(entry.action) == neighbor_id
+        ]
+        if not entries:
+            return default
+
+        current_cycle = max(entry.cycle for entry in history)
+        weighted_total = 0.0
+        total_weight = 0.0
+        for entry in entries[-24:]:
+            age = max(0, current_cycle - entry.cycle)
+            weight = 0.5 ** (age / max(self.recency_half_life, 1e-9))
+            weighted_total += weight * float(getattr(entry, field))
+            total_weight += weight
+        if total_weight <= 0.0:
+            return default
+        return weighted_total / total_weight
+
+    def _contextual_route_mean(
+        self,
+        history: List[object],
+        action: str,
+        *,
+        context_bit: int | None,
+        context_weight: float,
+        field: str,
+        default: float,
+    ) -> float:
+        if context_bit is None or context_weight <= 0.0:
+            return default
+        entries = [
+            entry
+            for entry in history
+            if entry.action == action and self._entry_effective_context(entry)[0] == context_bit
+        ]
+        if not entries:
+            return default
+
+        current_cycle = max(entry.cycle for entry in history)
+        weighted_total = 0.0
+        total_weight = 0.0
+        for entry in entries[-16:]:
+            age = max(0, current_cycle - entry.cycle)
+            _, entry_weight = self._entry_effective_context(entry)
+            weight = (0.5 ** (age / max(self.recency_half_life, 1e-9))) * max(0.15, entry_weight)
+            weighted_total += weight * float(getattr(entry, field))
+            total_weight += weight
+        if total_weight <= 0.0:
+            return default
+        return weighted_total / total_weight
+
+    def _score_routes(self, route_actions: List[str], history: List[object]) -> dict[str, float]:
+        scores = {
+            action: self._score_route(action, history)
+            for action in route_actions
+        }
+        observation = self.environment.observe_local(self.node_id)
+        context_bit, context_weight = self._effective_context(observation)
+        if context_bit is None or context_weight <= 0.0:
+            return scores
+        evidence = {
+            action: self._candidate_evidence_from_local_state(
+                neighbor_id=_route_neighbor(action) or "",
+                transform_name=_route_transform(action),
+                context_bit=context_bit,
+                observation=observation,
+            )
+            for action in route_actions
+            if _route_neighbor(action) is not None
+        }
+        if not evidence:
+            return scores
+        top_evidence = max(evidence.values())
+        candidate_actions = [
+            action
+            for action in route_actions
+            if _route_neighbor(action) is not None
+            and evidence.get(action, -1.0) >= max(0.12, top_evidence - 0.18)
+        ]
+        candidate_branches = {_route_neighbor(action) for action in candidate_actions}
+        candidate_transforms = {_route_transform(action) for action in candidate_actions}
+        if (
+            len(candidate_actions) < 3
+            or len(candidate_branches) < 2
+            or len(candidate_transforms) < 2
+        ):
+            return scores
+
+        contradictions = {
+            action: self._candidate_contradiction_from_local_state(
+                neighbor_id=_route_neighbor(action) or "",
+                transform_name=_route_transform(action),
+                observation=observation,
+            )
+            for action in candidate_actions
+        }
+        dominant_action = max(
+            candidate_actions,
+            key=lambda action: (evidence[action], scores[action]),
+        )
+        dominant_evidence = evidence[dominant_action]
+        for action in candidate_actions:
+            contradiction = contradictions[action]
+            if contradiction < 0.12:
+                continue
+            neighbor_id = _route_neighbor(action) or ""
+            competitor_count = sum(
+                1
+                for other in candidate_actions
+                if other != action and evidence[other] >= evidence[action] - 0.08
+            )
+            if action == dominant_action:
+                scores[action] += min(
+                    0.18,
+                    contradiction * (0.08 + 0.03 * max(0, competitor_count - 1)),
+                )
+                continue
+            closeness = max(
+                0.0,
+                1.0 - max(0.0, dominant_evidence - evidence[action]) / 0.25,
+            )
+            branch_debt = observation.get(f"branch_context_feedback_debt_{neighbor_id}", 0.0)
+            scores[action] -= min(
+                0.28,
+                contradiction * (0.12 + 0.04 * competitor_count) * closeness
+                + 0.05 * branch_debt,
+            )
+        return scores
+
+    def _competition_adjustment(
+        self,
+        *,
+        neighbor_id: str,
+        transform_name: str,
+        context_bit: int,
+        observation: dict[str, float],
+        action_support: float,
+        generic_action_support: float,
+        feedback_credit: float,
+        context_feedback_credit: float,
+        branch_feedback_credit: float,
+        context_branch_feedback_credit: float,
+        branch_context_feedback_credit: float,
+        feedback_debt: float,
+        context_feedback_debt: float,
+        branch_feedback_debt: float,
+        context_branch_feedback_debt: float,
+        branch_context_feedback_debt: float,
+    ) -> tuple[float, float]:
+        current_evidence = self._candidate_evidence(
+            neighbor_id=neighbor_id,
+            transform_name=transform_name,
+            context_bit=context_bit,
+            observation=observation,
+            action_support=action_support,
+            generic_action_support=generic_action_support,
+            feedback_credit=feedback_credit,
+            context_feedback_credit=context_feedback_credit,
+            branch_feedback_credit=branch_feedback_credit,
+            context_branch_feedback_credit=context_branch_feedback_credit,
+            branch_context_feedback_credit=branch_context_feedback_credit,
+            feedback_debt=feedback_debt,
+            context_feedback_debt=context_feedback_debt,
+            branch_feedback_debt=branch_feedback_debt,
+            context_branch_feedback_debt=context_branch_feedback_debt,
+            branch_context_feedback_debt=branch_context_feedback_debt,
+            transform_history_evidence=observation.get(
+                f"history_transform_evidence_{transform_name}",
+                0.0,
+            ),
+        )
+        contradiction = max(
+            0.0,
+            0.35 * context_feedback_debt
+            + 0.30 * context_branch_feedback_debt
+            + 0.22 * branch_context_feedback_debt
+            + 0.13 * feedback_debt
+            - 0.10 * context_branch_feedback_credit
+            - 0.08 * branch_context_feedback_credit,
+        )
+        if contradiction < 0.12:
+            return 0.0, 0.0
+
+        competing_evidences = []
+        for candidate_neighbor in self.environment.neighbors_of(self.node_id):
+            for candidate_transform in ROUTE_TRANSFORMS:
+                if candidate_neighbor == neighbor_id and candidate_transform == transform_name:
+                    continue
+                candidate_evidence = self._candidate_evidence_from_local_state(
+                    neighbor_id=candidate_neighbor,
+                    transform_name=candidate_transform,
+                    context_bit=context_bit,
+                    observation=observation,
+                )
+                if candidate_evidence >= max(0.12, current_evidence - 0.10):
+                    competing_evidences.append(candidate_evidence)
+
+        if not competing_evidences:
+            return 0.0, min(0.08, contradiction * 0.10)
+
+        strongest_competitor = max(competing_evidences)
+        competitor_count = len(competing_evidences)
+        conflict_spread = min(
+            1.0,
+            0.35 * max(0, competitor_count - 1)
+            + 0.65 * max(0.0, strongest_competitor - current_evidence + 0.05),
+        )
+        if strongest_competitor > current_evidence + 0.04:
+            penalty = min(
+                0.26,
+                contradiction * (0.12 + 0.18 * conflict_spread),
+            )
+            return penalty, 0.0
+
+        dominance = current_evidence - strongest_competitor
+        bonus = min(0.10, contradiction * max(0.0, 0.08 + 0.18 * dominance))
+        penalty = min(0.10, contradiction * max(0.0, 0.04 * competitor_count - 0.02))
+        return penalty, bonus
+
+    def _candidate_evidence_from_local_state(
+        self,
+        *,
+        neighbor_id: str,
+        transform_name: str,
+        context_bit: int,
+        observation: dict[str, float],
+    ) -> float:
+        action_support = self.substrate.action_support(
+            neighbor_id,
+            transform_name,
+            context_bit,
+        )
+        generic_action_support = self.substrate.base_action_support(
+            neighbor_id,
+            transform_name,
+        )
+        feedback_credit = observation.get(f"feedback_credit_{transform_name}", 0.0)
+        context_feedback_credit = observation.get(
+            f"context_feedback_credit_{transform_name}",
+            0.0,
+        )
+        branch_feedback_credit = observation.get(
+            f"branch_feedback_credit_{neighbor_id}_{transform_name}",
+            0.0,
+        )
+        context_branch_feedback_credit = observation.get(
+            f"context_branch_feedback_credit_{neighbor_id}_{transform_name}",
+            0.0,
+        )
+        branch_context_feedback_credit = observation.get(
+            f"branch_context_feedback_credit_{neighbor_id}",
+            0.0,
+        )
+        feedback_debt = observation.get(f"feedback_debt_{transform_name}", 0.0)
+        context_feedback_debt = observation.get(
+            f"context_feedback_debt_{transform_name}",
+            0.0,
+        )
+        branch_feedback_debt = observation.get(
+            f"branch_feedback_debt_{neighbor_id}_{transform_name}",
+            0.0,
+        )
+        context_branch_feedback_debt = observation.get(
+            f"context_branch_feedback_debt_{neighbor_id}_{transform_name}",
+            0.0,
+        )
+        branch_context_feedback_debt = observation.get(
+            f"branch_context_feedback_debt_{neighbor_id}",
+            0.0,
+        )
+        transform_history_evidence = observation.get(
+            f"history_transform_evidence_{transform_name}",
+            0.0,
+        )
+        return self._candidate_evidence(
+            neighbor_id=neighbor_id,
+            transform_name=transform_name,
+            context_bit=context_bit,
+            observation=observation,
+            action_support=action_support,
+            generic_action_support=generic_action_support,
+            feedback_credit=feedback_credit,
+            context_feedback_credit=context_feedback_credit,
+            branch_feedback_credit=branch_feedback_credit,
+            context_branch_feedback_credit=context_branch_feedback_credit,
+            branch_context_feedback_credit=branch_context_feedback_credit,
+            feedback_debt=feedback_debt,
+            context_feedback_debt=context_feedback_debt,
+            branch_feedback_debt=branch_feedback_debt,
+            context_branch_feedback_debt=context_branch_feedback_debt,
+            branch_context_feedback_debt=branch_context_feedback_debt,
+            transform_history_evidence=transform_history_evidence,
+        )
+
+    def _candidate_contradiction_from_local_state(
+        self,
+        *,
+        neighbor_id: str,
+        transform_name: str,
+        observation: dict[str, float],
+    ) -> float:
+        feedback_credit = observation.get(f"feedback_credit_{transform_name}", 0.0)
+        context_feedback_credit = observation.get(
+            f"context_feedback_credit_{transform_name}",
+            0.0,
+        )
+        context_branch_feedback_credit = observation.get(
+            f"context_branch_feedback_credit_{neighbor_id}_{transform_name}",
+            0.0,
+        )
+        branch_context_feedback_credit = observation.get(
+            f"branch_context_feedback_credit_{neighbor_id}",
+            0.0,
+        )
+        feedback_debt = observation.get(f"feedback_debt_{transform_name}", 0.0)
+        context_feedback_debt = observation.get(
+            f"context_feedback_debt_{transform_name}",
+            0.0,
+        )
+        branch_feedback_debt = observation.get(
+            f"branch_feedback_debt_{neighbor_id}_{transform_name}",
+            0.0,
+        )
+        context_branch_feedback_debt = observation.get(
+            f"context_branch_feedback_debt_{neighbor_id}_{transform_name}",
+            0.0,
+        )
+        branch_context_feedback_debt = observation.get(
+            f"branch_context_feedback_debt_{neighbor_id}",
+            0.0,
+        )
+        return max(
+            0.0,
+            0.18 * feedback_debt
+            + 0.28 * context_feedback_debt
+            + 0.14 * branch_feedback_debt
+            + 0.24 * context_branch_feedback_debt
+            + 0.20 * branch_context_feedback_debt
+            - 0.08 * feedback_credit
+            - 0.12 * context_feedback_credit
+            - 0.12 * context_branch_feedback_credit
+            - 0.10 * branch_context_feedback_credit,
+        )
+
+    def _candidate_evidence(
+        self,
+        *,
+        neighbor_id: str,
+        transform_name: str,
+        context_bit: int,
+        observation: dict[str, float],
+        action_support: float,
+        generic_action_support: float,
+        feedback_credit: float,
+        context_feedback_credit: float,
+        branch_feedback_credit: float,
+        context_branch_feedback_credit: float,
+        branch_context_feedback_credit: float,
+        feedback_debt: float,
+        context_feedback_debt: float,
+        branch_feedback_debt: float,
+        context_branch_feedback_debt: float,
+        branch_context_feedback_debt: float,
+        transform_history_evidence: float,
+    ) -> float:
+        context_action_support = self.substrate.contextual_action_support(
+            neighbor_id,
+            transform_name,
+            context_bit,
+        )
+        _, context_weight = self._effective_context(observation)
+        return (
+            0.20 * generic_action_support
+            + 0.30 * action_support
+            + 0.16 * context_action_support * context_weight
+            + 0.16 * transform_history_evidence
+            + 0.10 * feedback_credit
+            + 0.14 * context_feedback_credit * context_weight
+            + 0.10 * branch_feedback_credit
+            + 0.20 * context_branch_feedback_credit * context_weight
+            + 0.16 * branch_context_feedback_credit * context_weight
+            - 0.08 * feedback_debt
+            - 0.16 * context_feedback_debt * context_weight
+            - 0.08 * branch_feedback_debt
+            - 0.22 * context_branch_feedback_debt * context_weight
+            - 0.16 * branch_context_feedback_debt * context_weight
+        )

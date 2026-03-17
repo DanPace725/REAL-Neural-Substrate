@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "real-neural-substrate"
+version = "0.1.0"
+description = "REAL native substrate research prototype built from the generalized allostatic core and Phase 8 neural substrate experiments."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.setuptools]
+packages = ["real_core", "phase8"]
+
+[project.scripts]
+real-phase8-demo = "run_phase8_demo:main"
+real-cold-warm = "compare_cold_warm:main"
+real-task-transfer = "compare_task_transfer:main"
