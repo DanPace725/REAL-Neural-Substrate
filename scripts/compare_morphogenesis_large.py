@@ -3,7 +3,7 @@
 Mirrors compare_morphogenesis.py but targets the *_large scenario set where:
   - 10-node topology gives new nodes more routing paths to specialize into
   - 36-packet sessions provide longer ATP surplus windows and richer feedback
-  - A→B transfer uses the large topology for both training and transfer
+  - Aâ†’B transfer uses the large topology for both training and transfer
 
 Uses the same benchmark_morphogenesis_config() as compare_morphogenesis.py.
 """
@@ -14,7 +14,7 @@ from dataclasses import asdict
 from pathlib import Path
 from statistics import mean
 
-from compare_morphogenesis import (
+from scripts.compare_morphogenesis import (
     DEFAULT_SEEDS,
     aggregate_growth_results,
     aggregate_transfer_growth_results,
@@ -26,8 +26,8 @@ from compare_morphogenesis import (
     transfer_growth_for_seed,
     _clone_config,
 )
-from compare_cold_warm import SCENARIOS
-from experiment_manifest import build_run_manifest, write_run_manifest
+from scripts.compare_cold_warm import SCENARIOS
+from scripts.experiment_manifest import build_run_manifest, write_run_manifest
 from phase8 import MorphogenesisConfig
 
 WORKLOAD_SCENARIOS = (
@@ -122,3 +122,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

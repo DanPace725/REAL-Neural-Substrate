@@ -17,21 +17,21 @@ from phase8 import (
     SignalSpec,
     phase8_scenarios,
 )
-from compare_morphogenesis import (
+from scripts.compare_morphogenesis import (
     aggregate_growth_results,
     compare_growth_for_seed,
     evaluate_morphogenesis,
     growth_counts_as_earned,
     growth_counts_as_win,
 )
-from compare_cyclic_transfer import evaluate_cyclic_transfer
-from compare_large_topology import evaluate_large_topology
-from compare_morphogenesis_large import evaluate_morphogenesis_large
-from compare_morphogenesis_large_paired import evaluate_morphogenesis_large_paired
-from compare_sequential_transfer import evaluate_sequential_transfer
-from analyze_transfer_timecourse import _aggregate_latent_variant, _latent_timeline_summary
-from compare_latent_context import latent_signal_specs
-from compare_task_transfer import aggregate_transfer, transfer_metrics
+from scripts.compare_cyclic_transfer import evaluate_cyclic_transfer
+from scripts.compare_large_topology import evaluate_large_topology
+from scripts.compare_morphogenesis_large import evaluate_morphogenesis_large
+from scripts.compare_morphogenesis_large_paired import evaluate_morphogenesis_large_paired
+from scripts.compare_sequential_transfer import evaluate_sequential_transfer
+from scripts.analyze_transfer_timecourse import _aggregate_latent_variant, _latent_timeline_summary
+from scripts.compare_latent_context import latent_signal_specs
+from scripts.compare_task_transfer import aggregate_transfer, transfer_metrics
 from phase8.consolidation import Phase8ConsolidationPipeline
 from real_core.types import CycleEntry, GCOStatus
 
@@ -3178,3 +3178,4 @@ class TestMarch17ExpansionHarnesses(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+

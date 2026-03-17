@@ -46,3 +46,4 @@ def write_run_manifest(
     with path.open("w", encoding="utf-8") as handle:
         json.dump(manifest, handle, indent=2)
     return path
+

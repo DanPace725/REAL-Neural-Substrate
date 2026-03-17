@@ -6,8 +6,8 @@ import uuid
 from pathlib import Path
 from statistics import mean
 
-from compare_cold_warm import ROOT, SCENARIOS, build_system
-from compare_task_transfer import transfer_metrics
+from scripts.compare_cold_warm import ROOT, SCENARIOS, build_system
+from scripts.compare_task_transfer import transfer_metrics
 
 
 DEFAULT_SEEDS = (5, 13, 17, 23, 29, 37, 43, 51, 61, 79, 87, 97)
@@ -488,3 +488,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

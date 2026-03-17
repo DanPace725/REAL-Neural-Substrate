@@ -3,3 +3,5 @@ __pycache__/
 .pytest_cache/
 .coverage
 tests_tmp/
+phase8_dashboard.html
+visualizations/

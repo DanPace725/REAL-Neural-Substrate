@@ -1,7 +1,7 @@
-"""Cold/warm and A→B transfer evaluation on the 10-node large topology (36-packet sessions).
+"""Cold/warm and Aâ†’B transfer evaluation on the 10-node large topology (36-packet sessions).
 
-Runs each of three tasks cold, then tests A→B transfer on the larger graph.
-Morphogenesis is disabled here — use compare_morphogenesis.py with the *_large
+Runs each of three tasks cold, then tests Aâ†’B transfer on the larger graph.
+Morphogenesis is disabled here â€” use compare_morphogenesis.py with the *_large
 scenario names to run morphogenesis on the expanded topology.
 """
 from __future__ import annotations
@@ -12,8 +12,8 @@ import uuid
 from pathlib import Path
 from statistics import mean
 
-from compare_cold_warm import ROOT, SCENARIOS, build_system, run_workload
-from compare_task_transfer import transfer_metrics
+from scripts.compare_cold_warm import ROOT, SCENARIOS, build_system, run_workload
+from scripts.compare_task_transfer import transfer_metrics
 
 DEFAULT_SEEDS = (13, 23, 37, 51, 79)
 
@@ -37,7 +37,7 @@ def large_topology_for_seed(seed: int) -> dict[str, object]:
     dir_a.mkdir(parents=True, exist_ok=True)
 
     try:
-        # ── Cold runs for all three tasks ─────────────────────────────────
+        # â”€â”€ Cold runs for all three tasks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         sys_a = build_system(seed, TASK_A)
         sum_a = run_workload(sys_a, TASK_A)
         sys_a.save_memory_carryover(dir_a)
@@ -48,7 +48,7 @@ def large_topology_for_seed(seed: int) -> dict[str, object]:
         sys_c_cold = build_system(seed, TASK_C)
         sum_c_cold = run_workload(sys_c_cold, TASK_C)
 
-        # ── A→B transfer ──────────────────────────────────────────────────
+        # â”€â”€ Aâ†’B transfer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         sys_b_warm = build_system(seed, TASK_B)
         sys_b_warm.load_memory_carryover(dir_a)
         sum_b_warm = run_workload(sys_b_warm, TASK_B)
@@ -107,14 +107,14 @@ def aggregate_large(results: list[dict[str, object]]) -> dict[str, object]:
         return round(mean(vals), 4)
 
     return {
-        # ── Cold baselines ─────────────────────────────────────────────
+        # â”€â”€ Cold baselines â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         "avg_task_a_cold_exact": _avg(["task_a_cold", "summary", "exact_matches"]),
         "avg_task_a_cold_bit_accuracy": _avg(["task_a_cold", "summary", "mean_bit_accuracy"]),
         "avg_task_b_cold_exact": _avg(["task_b_cold", "summary", "exact_matches"]),
         "avg_task_b_cold_bit_accuracy": _avg(["task_b_cold", "summary", "mean_bit_accuracy"]),
         "avg_task_c_cold_exact": _avg(["task_c_cold", "summary", "exact_matches"]),
         "avg_task_c_cold_bit_accuracy": _avg(["task_c_cold", "summary", "mean_bit_accuracy"]),
-        # ── A→B transfer ──────────────────────────────────────────────────
+        # â”€â”€ Aâ†’B transfer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         "avg_task_b_warm_exact": _avg(["task_b_warm", "summary", "exact_matches"]),
         "avg_task_b_warm_bit_accuracy": _avg(["task_b_warm", "summary", "mean_bit_accuracy"]),
         "avg_delta_b_exact": _avg(["task_b_warm", "delta_vs_cold", "exact_matches"]),
@@ -146,3 +146,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

@@ -7,9 +7,9 @@ import uuid
 from pathlib import Path
 from statistics import mean
 
-from compare_cold_warm import ROOT
-from compare_sequential_transfer import run_scenario
-from experiment_manifest import build_run_manifest, write_run_manifest
+from scripts.compare_cold_warm import ROOT
+from scripts.compare_sequential_transfer import run_scenario
+from scripts.experiment_manifest import build_run_manifest, write_run_manifest
 
 DEFAULT_SEEDS = (13, 23, 37, 51, 79)
 
@@ -155,3 +155,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

@@ -5,9 +5,9 @@ import shutil
 import uuid
 from statistics import mean
 
-from compare_cold_warm import ROOT, SCENARIOS, build_system
-from compare_latent_context import latent_signal_specs
-from evaluate_transfer_asymmetry import DEFAULT_SEEDS, _runtime_commitment
+from scripts.compare_cold_warm import ROOT, SCENARIOS, build_system
+from scripts.compare_latent_context import latent_signal_specs
+from scripts.evaluate_transfer_asymmetry import DEFAULT_SEEDS, _runtime_commitment
 from phase8.environment import (
     LATENT_CONTEXT_CONFIDENCE_THRESHOLD,
     LATENT_TRANSFER_EFFECTIVE_THRESHOLD_BOOST,
@@ -1704,3 +1704,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

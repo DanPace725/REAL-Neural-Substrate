@@ -5,8 +5,8 @@ import shutil
 import uuid
 from statistics import mean
 
-from compare_cold_warm import ROOT, SCENARIOS, build_system
-from compare_task_transfer import transfer_metrics
+from scripts.compare_cold_warm import ROOT, SCENARIOS, build_system
+from scripts.compare_task_transfer import transfer_metrics
 from phase8 import SignalSpec
 
 
@@ -270,3 +270,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

@@ -22,7 +22,7 @@ The `phase8/` package is organized around local-only substrate mechanics:
 - `substrate.py`/`consolidation.py`/`selector.py` (plus adapters/models): local memory promotion, selection pressure, and substrate carryover mechanics.
 - `admission.py`: source admission control so ingress is metabolically gated.
 
-The top-level runners (`run_phase8_demo.py`, `compare_cold_warm.py`, `compare_task_transfer.py`) provide reproducible scenario comparisons and transfer evaluations.
+The experiment runners under `scripts/` (notably `run_phase8_demo.py`, `compare_cold_warm.py`, and `compare_task_transfer.py`) provide reproducible scenario comparisons and transfer evaluations.
 
 ## 3) How earlier phases support Phase 8
 

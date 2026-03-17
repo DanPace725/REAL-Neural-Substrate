@@ -4,14 +4,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from compare_morphogenesis_large import (
+from scripts.compare_morphogenesis_large import (
     DEFAULT_SEEDS,
     TRAIN_SCENARIO,
     TRANSFER_SCENARIO,
     WORKLOAD_SCENARIOS,
     evaluate_morphogenesis_large,
 )
-from experiment_manifest import build_run_manifest, write_run_manifest
+from scripts.experiment_manifest import build_run_manifest, write_run_manifest
 from phase8 import MorphogenesisConfig
 
 
@@ -134,3 +134,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

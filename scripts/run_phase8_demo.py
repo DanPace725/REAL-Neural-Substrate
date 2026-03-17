@@ -7,11 +7,11 @@ import uuid
 from pathlib import Path
 from pprint import pprint
 
-from compare_cold_warm import SCENARIOS, aggregate, build_system, compare_for_seed, run_workload
-from compare_large_topology import evaluate_large_topology
-from compare_morphogenesis_large import evaluate_morphogenesis_large
-from compare_sequential_transfer import evaluate_sequential_transfer
-from compare_task_transfer import transfer_for_seed
+from scripts.compare_cold_warm import SCENARIOS, aggregate, build_system, compare_for_seed, run_workload
+from scripts.compare_large_topology import evaluate_large_topology
+from scripts.compare_morphogenesis_large import evaluate_morphogenesis_large
+from scripts.compare_sequential_transfer import evaluate_sequential_transfer
+from scripts.compare_task_transfer import transfer_for_seed
 
 
 ROOT = Path(__file__).resolve().parent
@@ -295,3 +295,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

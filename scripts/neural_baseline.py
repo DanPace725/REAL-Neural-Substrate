@@ -1,21 +1,21 @@
 """
-neural_baseline.py — sample-efficiency comparison for Phase 8 CVT-1 tasks.
+neural_baseline.py â€” sample-efficiency comparison for Phase 8 CVT-1 tasks.
 
 Implements two minimal neural baselines trained online (one example at a time,
 matching REAL's learning paradigm) on the CVT-1 Stage 1 signal sequence:
 
-  Stage 1 — MLP:
+  Stage 1 â€” MLP:
     - MLP-explicit  : 5 inputs (4 payload bits + explicit context bit)
     - MLP-latent    : 4 inputs (no context bit given; must learn from pattern)
 
-  Stage 2 — RNN:
+  Stage 2 â€” RNN:
     - RNN-latent    : Elman RNN, 4 inputs, hidden state carries implicit context
 
 All baselines use the same 18-packet CVT-1 signal schedule as the REAL system,
-the same criterion (≥85% exact match in a rolling 8-window), and report
+the same criterion (â‰¥85% exact match in a rolling 8-window), and report
 examples-to-criterion for direct comparison.
 
-No external dependencies — numpy only.
+No external dependencies â€” numpy only.
 
 Usage
 -----
@@ -37,9 +37,9 @@ from typing import Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 #  Signal generation  (mirrors phase8/scenarios.py and environment.py)
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def _bits4(value: int) -> List[int]:
     return [(value >> 3) & 1, (value >> 2) & 1, (value >> 1) & 1, value & 1]
@@ -105,9 +105,9 @@ def cvt1_stage1_examples(task_id: str = "task_a") -> List[SignalExample]:
     return examples
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 #  Criterion helpers
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 CRITERION_WINDOW = 8
 EXACT_THRESHOLD = 0.85
@@ -139,15 +139,15 @@ def examples_to_criterion(results: List[bool]) -> Optional[int]:
     return None
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 #  MLP (Stage 1)
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class MLP:
     """
     Two-layer fully-connected network trained online with SGD.
 
-    Architecture: n_in → hidden → 4 (sigmoid outputs).
+    Architecture: n_in â†’ hidden â†’ 4 (sigmoid outputs).
     Trained one example at a time with MSE loss and gradient clipping.
     """
 
@@ -200,15 +200,15 @@ class MLP:
         return loss
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-#  Elman RNN (Stage 2 — implicit context via hidden state)
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+#  Elman RNN (Stage 2 â€” implicit context via hidden state)
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class ElmanRNN:
     """
     Single-layer Elman RNN trained online with truncated BPTT (1 step).
 
-    Architecture: n_in + hidden → hidden (tanh) → 4 (sigmoid).
+    Architecture: n_in + hidden â†’ hidden (tanh) â†’ 4 (sigmoid).
     Hidden state carries implicit sequence context across examples.
     """
 
@@ -250,7 +250,7 @@ class ElmanRNN:
         dy = err * y * (1 - y)
         dWo = np.outer(dy, h_new)
         dbo = dy
-        # Hidden gradient (through output only — BPTT-1)
+        # Hidden gradient (through output only â€” BPTT-1)
         dh = (self.Wo.T @ dy) * (1 - h_new ** 2)
         dWh = np.outer(dh, combined)
         dbh = dh
@@ -263,9 +263,9 @@ class ElmanRNN:
         return loss
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 #  Per-seed run functions
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @dataclass
 class BaselineResult:
@@ -291,7 +291,7 @@ def run_mlp_explicit(
 ) -> BaselineResult:
     """
     MLP with explicit context bit (5 inputs: 4 payload + 1 context).
-    This is the upper-bound Stage 1 baseline — it sees the same information
+    This is the upper-bound Stage 1 baseline â€” it sees the same information
     that REAL sees when the context bit is present on the packet.
     """
     net = MLP(n_in=5, hidden=hidden, lr=lr, seed=seed)
@@ -335,8 +335,8 @@ def run_mlp_latent(
 ) -> BaselineResult:
     """
     MLP without context bit (4 inputs: payload bits only).
-    This baseline has to learn the bimodal mapping from input→output without
-    knowing which context it is in — the hardest version for a stateless model.
+    This baseline has to learn the bimodal mapping from inputâ†’output without
+    knowing which context it is in â€” the hardest version for a stateless model.
     """
     net = MLP(n_in=4, hidden=hidden, lr=lr, seed=seed)
     exact_results: List[bool] = []
@@ -417,9 +417,9 @@ def run_rnn_latent(
     )
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 #  Multi-epoch scan: find minimum epochs for each variant to reach criterion
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def scan_epochs_to_criterion(
     examples: List[SignalExample],
@@ -433,7 +433,7 @@ def scan_epochs_to_criterion(
     results into an apples-to-apples "training examples to criterion" count where
     1 epoch = 18 examples, matching REAL's per-example learning model.
 
-    Returns: dict mapping variant name → epoch count at criterion (None = not reached).
+    Returns: dict mapping variant name â†’ epoch count at criterion (None = not reached).
     """
     results: Dict[str, Optional[int]] = {}
 
@@ -484,9 +484,9 @@ def scan_epochs_to_criterion(
     return results
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 #  Optional: run REAL system for comparison
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def run_real_for_comparison(
     task_id: str = "task_a",
@@ -501,8 +501,8 @@ def run_real_for_comparison(
         import sys
         from pathlib import Path
         sys.path.insert(0, str(Path(__file__).resolve().parent))
-        from compare_cold_warm import SCENARIOS, build_system, run_workload
-        from compare_task_transfer import transfer_metrics
+        from scripts.compare_cold_warm import SCENARIOS, build_system, run_workload
+        from scripts.compare_task_transfer import transfer_metrics
     except ImportError:
         return None
 
@@ -522,9 +522,9 @@ def run_real_for_comparison(
     }
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 #  Aggregate helpers
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def aggregate_results(results: List[BaselineResult]) -> Dict[str, object]:
     if not results:
@@ -543,9 +543,9 @@ def aggregate_results(results: List[BaselineResult]) -> Dict[str, object]:
     }
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 #  Main entry point
-# ──────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def _fmt_etc(v: Optional[int]) -> str:
     return str(v) if v is not None else "not reached"
@@ -573,7 +573,7 @@ def main() -> None:
     examples = cvt1_stage1_examples(task_id)
     n = len(examples)
 
-    print(f"\nPhase 8 — Neural Baseline Comparison")
+    print(f"\nPhase 8 â€” Neural Baseline Comparison")
     print(f"Task: {task_id}  |  Signal length: {n} examples  |  Seeds: {args.seeds}")
     print(f"Criterion: >={EXACT_THRESHOLD*100:.0f}% exact in rolling {CRITERION_WINDOW}-window")
     print()
@@ -614,7 +614,7 @@ def main() -> None:
             elif seed == 0:
                 print("  [note] phase8 package not found; REAL comparison skipped")
 
-    # ── Print summary table ───────────────────────────────────────────────────
+    # â”€â”€ Print summary table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     col_w = 20
     header_variants = list(all_by_variant.keys())
     if args.compare_real and real_results:
@@ -636,9 +636,9 @@ def main() -> None:
 
     if not args.epoch_scan:
         def _row(label: str, key: str, fmt=str) -> None:
-            vals = [fmt(aggs[v].get(key, "—")) for v in all_by_variant]
+            vals = [fmt(aggs[v].get(key, "â€”")) for v in all_by_variant]
             if args.compare_real and real_results:
-                vals.append(fmt(real_agg.get(key, "—")))
+                vals.append(fmt(real_agg.get(key, "â€”")))
             _print_row(label, col_w, *vals)
 
         _row("Exact matches (mean)", "mean_exact_matches",
@@ -680,9 +680,9 @@ def main() -> None:
     print()
     print("Notes:")
     print("  mlp-explicit : 5 inputs (bits + context), upper-bound Stage 1 baseline")
-    print("  mlp-latent   : 4 inputs (bits only), stateless — cannot track sequence context")
-    print("  rnn-latent   : 4 inputs, Elman RNN — hidden state implicitly tracks parity context")
-    print("  REAL         : Phase 8 native substrate — local metabolic learning, no gradients")
+    print("  mlp-latent   : 4 inputs (bits only), stateless â€” cannot track sequence context")
+    print("  rnn-latent   : 4 inputs, Elman RNN â€” hidden state implicitly tracks parity context")
+    print("  REAL         : Phase 8 native substrate â€” local metabolic learning, no gradients")
     print()
     print("The key comparison is examples-to-criterion (ETC):")
     print("  - mlp-latent cannot reliably reach criterion on 18 examples (bimodal mapping)")
@@ -693,3 +693,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

@@ -7,10 +7,10 @@ from dataclasses import asdict
 from pathlib import Path
 from statistics import mean
 
-from compare_cold_warm import ROOT, SCENARIOS, build_system, run_workload
-from compare_latent_context import latent_signal_specs
-from compare_task_transfer import transfer_metrics
-from experiment_manifest import build_run_manifest, write_run_manifest
+from scripts.compare_cold_warm import ROOT, SCENARIOS, build_system, run_workload
+from scripts.compare_latent_context import latent_signal_specs
+from scripts.compare_task_transfer import transfer_metrics
+from scripts.experiment_manifest import build_run_manifest, write_run_manifest
 from phase8 import MorphogenesisConfig, NativeSubstrateSystem
 
 
@@ -485,3 +485,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

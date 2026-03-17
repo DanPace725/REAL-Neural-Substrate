@@ -7,8 +7,8 @@ import uuid
 from pathlib import Path
 from statistics import mean
 
-from compare_cold_warm import ROOT, build_system, run_workload
-from compare_task_transfer import transfer_metrics
+from scripts.compare_cold_warm import ROOT, build_system, run_workload
+from scripts.compare_task_transfer import transfer_metrics
 
 
 TASK_SCENARIOS = (
@@ -150,3 +150,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

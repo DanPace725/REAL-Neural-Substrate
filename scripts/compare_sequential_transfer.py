@@ -1,10 +1,10 @@
-"""Sequential three-task transfer evaluation: A → B → C.
+"""Sequential three-task transfer evaluation: A â†’ B â†’ C.
 
 Measures:
-  - A→B transfer (baseline, for comparison with compare_task_transfer.py)
-  - B→C transfer: does shared ctx1=xor_0101 help, or does stale ctx0=rotate_left_1 hurt?
-  - A→B→C chain: warm B (trained with A carryover) → C
-  - A→C direct: skip B entirely; how much does the intermediate task matter?
+  - Aâ†’B transfer (baseline, for comparison with compare_task_transfer.py)
+  - Bâ†’C transfer: does shared ctx1=xor_0101 help, or does stale ctx0=rotate_left_1 hurt?
+  - Aâ†’Bâ†’C chain: warm B (trained with A carryover) â†’ C
+  - Aâ†’C direct: skip B entirely; how much does the intermediate task matter?
 
 All conditions use full memory carryover (edge + action supports).
 """
@@ -16,10 +16,10 @@ import uuid
 from pathlib import Path
 from statistics import mean
 
-from compare_cold_warm import ROOT, SCENARIOS, build_system
-from compare_latent_context import latent_signal_specs
-from compare_task_transfer import transfer_metrics
-from experiment_manifest import build_run_manifest, write_run_manifest
+from scripts.compare_cold_warm import ROOT, SCENARIOS, build_system
+from scripts.compare_latent_context import latent_signal_specs
+from scripts.compare_task_transfer import transfer_metrics
+from scripts.experiment_manifest import build_run_manifest, write_run_manifest
 
 DEFAULT_SEEDS = (13, 23, 37, 51, 79)
 
@@ -73,7 +73,7 @@ def sequential_transfer_for_seed(
     latent_context: bool = False,
     source_sequence_context_enabled: bool = True,
 ) -> dict[str, object]:
-    """Run the full A→B→C evaluation chain for a single seed."""
+    """Run the full Aâ†’Bâ†’C evaluation chain for a single seed."""
     base_dir = ROOT / "tests_tmp" / f"seq_transfer_{uuid.uuid4().hex}"
     dir_a = base_dir / "a"
     dir_b_cold = base_dir / "b_cold"
@@ -82,7 +82,7 @@ def sequential_transfer_for_seed(
         d.mkdir(parents=True, exist_ok=True)
 
     try:
-        # ── Task A (cold) ───────────────────────────────────────────────
+        # â”€â”€ Task A (cold) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         sys_a, sum_a = run_scenario(
             seed,
             TASK_A,
@@ -91,7 +91,7 @@ def sequential_transfer_for_seed(
         )
         sys_a.save_memory_carryover(dir_a)
 
-        # ── Task B cold (control) ────────────────────────────────────────
+        # â”€â”€ Task B cold (control) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         sys_b_cold, sum_b_cold = run_scenario(
             seed,
             TASK_B,
@@ -100,7 +100,7 @@ def sequential_transfer_for_seed(
         )
         sys_b_cold.save_memory_carryover(dir_b_cold)
 
-        # ── Task B warm from A (A→B) ─────────────────────────────────────
+        # â”€â”€ Task B warm from A (Aâ†’B) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         sys_b_warm, sum_b_warm = run_scenario(
             seed,
             TASK_B,
@@ -110,7 +110,7 @@ def sequential_transfer_for_seed(
         )
         sys_b_warm.save_memory_carryover(dir_b_warm)
 
-        # ── Task C cold (control) ────────────────────────────────────────
+        # â”€â”€ Task C cold (control) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         sys_c_cold, sum_c_cold = run_scenario(
             seed,
             TASK_C,
@@ -118,7 +118,7 @@ def sequential_transfer_for_seed(
             source_sequence_context_enabled=source_sequence_context_enabled,
         )
 
-        # ── Task C warm from cold B (B→C, no A context) ──────────────────
+        # â”€â”€ Task C warm from cold B (Bâ†’C, no A context) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         sys_c_from_cold_b, sum_c_from_cold_b = run_scenario(
             seed,
             TASK_C,
@@ -127,7 +127,7 @@ def sequential_transfer_for_seed(
             carryover_dir=dir_b_cold,
         )
 
-        # ── Task C warm from warm B (A→B→C chain) ───────────────────────
+        # â”€â”€ Task C warm from warm B (Aâ†’Bâ†’C chain) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         sys_c_from_warm_b, sum_c_from_warm_b = run_scenario(
             seed,
             TASK_C,
@@ -136,7 +136,7 @@ def sequential_transfer_for_seed(
             carryover_dir=dir_b_warm,
         )
 
-        # ── Task C warm directly from A (A→C, skip B) ───────────────────
+        # â”€â”€ Task C warm directly from A (Aâ†’C, skip B) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         sys_c_from_a, sum_c_from_a = run_scenario(
             seed,
             TASK_C,
@@ -216,10 +216,10 @@ def aggregate_sequential(results: list[dict[str, object]]) -> dict[str, object]:
         return round(mean(vals), 4)
 
     return {
-        # ── Task A baseline ──────────────────────────────────────────────
+        # â”€â”€ Task A baseline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         "avg_task_a_exact": _avg(["task_a", "summary", "exact_matches"]),
         "avg_task_a_bit_accuracy": _avg(["task_a", "summary", "mean_bit_accuracy"]),
-        # ── Task B: cold vs warm from A ──────────────────────────────────
+        # â”€â”€ Task B: cold vs warm from A â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         "avg_cold_b_exact": _avg(["cold_b", "summary", "exact_matches"]),
         "avg_warm_b_exact": _avg(["warm_b_from_a", "summary", "exact_matches"]),
         "avg_delta_b_exact": _avg(["warm_b_from_a", "delta_vs_cold", "exact_matches"]),
@@ -228,24 +228,24 @@ def aggregate_sequential(results: list[dict[str, object]]) -> dict[str, object]:
         "avg_delta_b_bit_accuracy": _avg(["warm_b_from_a", "delta_vs_cold", "mean_bit_accuracy"]),
         "avg_warm_b_ctx0_delta": _avg(["warm_b_from_a", "delta_vs_cold", "ctx0_bit_accuracy"]),
         "avg_warm_b_ctx1_delta": _avg(["warm_b_from_a", "delta_vs_cold", "ctx1_bit_accuracy"]),
-        # ── Task C: cold ─────────────────────────────────────────────────
+        # â”€â”€ Task C: cold â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         "avg_cold_c_exact": _avg(["cold_c", "summary", "exact_matches"]),
         "avg_cold_c_bit_accuracy": _avg(["cold_c", "summary", "mean_bit_accuracy"]),
-        # ── Task C: warm from cold B (B→C) ───────────────────────────────
+        # â”€â”€ Task C: warm from cold B (Bâ†’C) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         "avg_warm_c_from_cold_b_exact": _avg(["warm_c_from_cold_b", "summary", "exact_matches"]),
         "avg_warm_c_from_cold_b_bit_accuracy": _avg(["warm_c_from_cold_b", "summary", "mean_bit_accuracy"]),
         "avg_delta_c_from_cold_b_exact": _avg(["warm_c_from_cold_b", "delta_vs_cold", "exact_matches"]),
         "avg_delta_c_from_cold_b_bit_accuracy": _avg(["warm_c_from_cold_b", "delta_vs_cold", "mean_bit_accuracy"]),
         "avg_delta_c_from_cold_b_ctx0": _avg(["warm_c_from_cold_b", "delta_vs_cold", "ctx0_bit_accuracy"]),
         "avg_delta_c_from_cold_b_ctx1": _avg(["warm_c_from_cold_b", "delta_vs_cold", "ctx1_bit_accuracy"]),
-        # ── Task C: warm from warm B (A→B→C chain) ───────────────────────
+        # â”€â”€ Task C: warm from warm B (Aâ†’Bâ†’C chain) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         "avg_warm_c_from_warm_b_exact": _avg(["warm_c_from_warm_b", "summary", "exact_matches"]),
         "avg_warm_c_from_warm_b_bit_accuracy": _avg(["warm_c_from_warm_b", "summary", "mean_bit_accuracy"]),
         "avg_delta_c_from_warm_b_exact": _avg(["warm_c_from_warm_b", "delta_vs_cold", "exact_matches"]),
         "avg_delta_c_from_warm_b_bit_accuracy": _avg(["warm_c_from_warm_b", "delta_vs_cold", "mean_bit_accuracy"]),
         "avg_delta_c_from_warm_b_ctx0": _avg(["warm_c_from_warm_b", "delta_vs_cold", "ctx0_bit_accuracy"]),
         "avg_delta_c_from_warm_b_ctx1": _avg(["warm_c_from_warm_b", "delta_vs_cold", "ctx1_bit_accuracy"]),
-        # ── Task C: warm directly from A (A→C skip) ──────────────────────
+        # â”€â”€ Task C: warm directly from A (Aâ†’C skip) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         "avg_warm_c_from_a_exact": _avg(["warm_c_from_a", "summary", "exact_matches"]),
         "avg_warm_c_from_a_bit_accuracy": _avg(["warm_c_from_a", "summary", "mean_bit_accuracy"]),
         "avg_delta_c_from_a_exact": _avg(["warm_c_from_a", "delta_vs_cold", "exact_matches"]),
@@ -304,3 +304,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from statistics import mean
 
-from compare_latent_context import (
+from scripts.compare_latent_context import (
     DEFAULT_SEEDS,
     TRAIN_SCENARIO,
     TRANSFER_SCENARIO,
@@ -84,3 +84,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
