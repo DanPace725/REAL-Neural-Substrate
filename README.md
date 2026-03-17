@@ -7,6 +7,10 @@ REAL Neural Substrate is a standalone research prototype for native, local-learn
 
 The repo is intentionally focused on non-backprop, non-global-loss experiments around routing, carryover, transfer, and emergent local specialization. It is a clean spin-out from the broader umbrella workspace, not a full archive of every prior phase.
 
+## For AI Coding Agents
+
+Before making changes, read `AGENTS.md`, then cross-reference the docs and trace files using the task's keywords so you understand the repo's scope, vision, current experimental state, and recent decisions. Do not jump straight into edits from surface-level code patterns alone; review the relevant synthesis notes, technical report sections, and March 17 traces first when the change touches transfer, neural baselines, morphogenesis, topology scaling, or latent-context behavior.
+
 ## Package Map
 
 - `real_core/`: reusable allostatic engine, selector, mesh, substrate, carryover, and shared types

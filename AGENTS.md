@@ -68,8 +68,12 @@ Use these heuristics when deciding where code belongs:
 
 If you are modifying this repo as an agent:
 
+0. Orient before editing.
+Read `README.md` and this file first, then search the docs and trace files by relevant keywords before changing code. Use the technical report, session synthesis, architecture notes, and trace documents to cross-reference the current state of transfer, neural baseline, morphogenesis, topology-scaling, and latent-context work so your changes stay aligned with the actual research direction.
+
 1. Preserve decision traces.
 When a change is architectural or experimentally important, capture the reasoning in docs or tests instead of leaving it implicit in code diffs.
+When creating or updating trace documents, put the timestamp in the human-visible title as well as the filename so people and agents can identify the date and time without opening folder metadata. Prefer titles in the form `YYYY-MM-DD HHMM - Short Description` or an equally explicit timestamp-first format.
 
 2. Promote stable constraints into the repo.
 If a pattern becomes important, encode it in tests, docs, or structural interfaces. Do not rely on memory alone.

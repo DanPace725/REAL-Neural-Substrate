@@ -4,11 +4,13 @@ import json
 import shutil
 import uuid
 from dataclasses import asdict
+from pathlib import Path
 from statistics import mean
 
 from compare_cold_warm import ROOT, SCENARIOS, build_system, run_workload
 from compare_latent_context import latent_signal_specs
 from compare_task_transfer import transfer_metrics
+from experiment_manifest import build_run_manifest, write_run_manifest
 from phase8 import MorphogenesisConfig, NativeSubstrateSystem
 
 
@@ -410,6 +412,7 @@ def evaluate_morphogenesis(
     latent_context: bool = False,
     source_sequence_context_enabled: bool = True,
     latent_transfer_split_enabled: bool = True,
+    output_path: Path | None = None,
 ) -> dict[str, object]:
     workload_scenarios = LATENT_WORKLOAD_SCENARIOS if latent_context else WORKLOAD_SCENARIOS
     scenario_results = {}
@@ -442,12 +445,13 @@ def evaluate_morphogenesis(
         for seed in seeds
     ]
 
-    return {
+    cloned_config = _clone_config(morphogenesis_config)
+    result = {
         "seeds": list(seeds),
         "latent_context": latent_context,
         "source_sequence_context_enabled": source_sequence_context_enabled,
         "latent_transfer_split_enabled": latent_transfer_split_enabled,
-        "morphogenesis_config": asdict(_clone_config(morphogenesis_config)),
+        "morphogenesis_config": asdict(cloned_config),
         "scenarios": scenario_results,
         "transfer": {
             "train_scenario": TRAIN_SCENARIO,
@@ -456,6 +460,23 @@ def evaluate_morphogenesis(
             "aggregate": aggregate_transfer_growth_results(transfer_results),
         },
     }
+    if output_path is not None:
+        manifest = build_run_manifest(
+            harness="morphogenesis",
+            seeds=seeds,
+            scenarios=workload_scenarios,
+            latent_context=latent_context,
+            metadata={
+                "source_sequence_context_enabled": source_sequence_context_enabled,
+                "latent_transfer_split_enabled": latent_transfer_split_enabled,
+                "train_scenario": TRAIN_SCENARIO,
+                "transfer_scenario": TRANSFER_SCENARIO,
+                "morphogenesis_config": result["morphogenesis_config"],
+            },
+            result=result,
+        )
+        write_run_manifest(output_path, manifest)
+    return result
 
 
 def main() -> None:
