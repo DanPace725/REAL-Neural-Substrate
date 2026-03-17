@@ -26,8 +26,10 @@ from scripts.compare_morphogenesis import (
 )
 from scripts.compare_cyclic_transfer import evaluate_cyclic_transfer
 from scripts.compare_large_topology import evaluate_large_topology
+from compare_morphogenesis_large_carryover_bridge import evaluate_morphogenesis_large_carryover_bridge
 from scripts.compare_morphogenesis_large import evaluate_morphogenesis_large
 from scripts.compare_morphogenesis_large_paired import evaluate_morphogenesis_large_paired
+from compare_morphogenesis_large_mode_switched import evaluate_morphogenesis_large_mode_switched
 from scripts.compare_sequential_transfer import evaluate_sequential_transfer
 from scripts.analyze_transfer_timecourse import _aggregate_latent_variant, _latent_timeline_summary
 from scripts.compare_latent_context import latent_signal_specs
@@ -3022,6 +3024,23 @@ class TestMarch17ExpansionHarnesses(unittest.TestCase):
         self.assertIn("comparison", result)
         self.assertIn("transfer", result["comparison"])
 
+    def test_morphogenesis_large_mode_switched_harness_runs_single_seed(self) -> None:
+        result = evaluate_morphogenesis_large_mode_switched(seeds=(13,))
+
+        self.assertIn("all_visible", result)
+        self.assertIn("all_latent", result)
+        self.assertIn("visible_train_latent_transfer", result)
+        self.assertIn("comparison", result)
+
+    def test_morphogenesis_large_carryover_bridge_harness_runs_single_seed(self) -> None:
+        result = evaluate_morphogenesis_large_carryover_bridge(seeds=(13,))
+
+        self.assertIn("policies", result)
+        self.assertIn("all_visible", result["policies"])
+        self.assertIn("all_latent", result["policies"])
+        self.assertIn("visible_train_latent_transfer", result["policies"])
+        self.assertIn("comparison", result)
+
     def test_sequential_transfer_harness_runs_single_seed(self) -> None:
         result = evaluate_sequential_transfer(seeds=(13,))
 
@@ -3129,6 +3148,51 @@ class TestMarch17ExpansionHarnesses(unittest.TestCase):
             self.assertEqual(
                 manifest["result"]["comparison"]["transfer"],
                 result["comparison"]["transfer"],
+            )
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_morphogenesis_large_mode_switched_manifest_writes_result_schema(self) -> None:
+        temp_dir = ROOT / "tests_tmp" / f"manifest_{uuid.uuid4().hex}"
+        output_path = temp_dir / "morphogenesis_large_mode_switched.json"
+        try:
+            result = evaluate_morphogenesis_large_mode_switched(
+                seeds=(13,),
+                output_path=output_path,
+            )
+
+            self.assertTrue(output_path.exists())
+            manifest = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(manifest["harness"], "morphogenesis_large_mode_switched")
+            self.assertIn("title", manifest)
+            self.assertIn("all_visible", manifest["result"])
+            self.assertIn("all_latent", manifest["result"])
+            self.assertIn("visible_train_latent_transfer", manifest["result"])
+            self.assertEqual(
+                manifest["result"]["comparison"]["switched_minus_latent"],
+                result["comparison"]["switched_minus_latent"],
+            )
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_morphogenesis_large_carryover_bridge_manifest_writes_result_schema(self) -> None:
+        temp_dir = ROOT / "tests_tmp" / f"manifest_{uuid.uuid4().hex}"
+        output_path = temp_dir / "morphogenesis_large_carryover_bridge.json"
+        try:
+            result = evaluate_morphogenesis_large_carryover_bridge(
+                seeds=(13,),
+                output_path=output_path,
+            )
+
+            self.assertTrue(output_path.exists())
+            manifest = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(manifest["harness"], "morphogenesis_large_carryover_bridge")
+            self.assertIn("title", manifest)
+            self.assertIn("policies", manifest["result"])
+            self.assertIn("all_visible", manifest["result"]["policies"])
+            self.assertEqual(
+                manifest["result"]["comparison"]["switched_full_minus_substrate"],
+                result["comparison"]["switched_full_minus_substrate"],
             )
         finally:
             shutil.rmtree(temp_dir, ignore_errors=True)

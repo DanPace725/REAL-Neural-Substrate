@@ -105,6 +105,66 @@ def cvt1_stage1_examples(task_id: str = "task_a") -> List[SignalExample]:
     return examples
 
 
+def cvt1_stage3_examples(task_id: str = "task_a") -> List[SignalExample]:
+    """Generate the 108-example CVT-1 Stage 3 sequence for scale testing."""
+    base_values = [
+        0b0001, 0b0110, 0b1011, 0b0101, 0b1110, 0b0011,
+        0b1100, 0b1001, 0b0111, 0b1010, 0b0100, 0b1111,
+        0b0000, 0b1101, 0b0010, 0b1000, 0b0110, 0b1011,
+    ]
+    values = []
+    masks = [0b0000, 0b1111, 0b0101, 0b1010, 0b0011, 0b1100]
+    for pass_idx in range(6):
+        for v in base_values:
+            values.append(v ^ masks[pass_idx])
+
+    prev = [0, 0, 0, 0]
+    examples = []
+    for v in values:
+        bits = _bits4(v)
+        ctx = _parity(prev)
+        transform = _target_transform(task_id, ctx)
+        target = _apply_transform(bits, transform)
+        examples.append(SignalExample(
+            input_bits=bits,
+            context_bit=ctx,
+            target_bits=target,
+            task_id=task_id,
+        ))
+        prev = bits
+    return examples
+
+
+def cvt1_stage3_examples(task_id: str = "task_a") -> List[SignalExample]:
+    """Generate the 108-example CVT-1 Stage 3 sequence for scale testing."""
+    base_values = [
+        0b0001, 0b0110, 0b1011, 0b0101, 0b1110, 0b0011,
+        0b1100, 0b1001, 0b0111, 0b1010, 0b0100, 0b1111,
+        0b0000, 0b1101, 0b0010, 0b1000, 0b0110, 0b1011,
+    ]
+    values = []
+    masks = [0b0000, 0b1111, 0b0101, 0b1010, 0b0011, 0b1100]
+    for pass_idx in range(6):
+        for v in base_values:
+            values.append(v ^ masks[pass_idx])
+
+    prev = [0, 0, 0, 0]
+    examples = []
+    for v in values:
+        bits = _bits4(v)
+        ctx = _parity(prev)
+        transform = _target_transform(task_id, ctx)
+        target = _apply_transform(bits, transform)
+        examples.append(SignalExample(
+            input_bits=bits,
+            context_bit=ctx,
+            target_bits=target,
+            task_id=task_id,
+        ))
+        prev = bits
+    return examples
+
+
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 #  Criterion helpers
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -426,6 +486,8 @@ def scan_epochs_to_criterion(
     *,
     seed: int,
     max_epochs: int = 20,
+    mlp_hidden: int = 8,
+    rnn_hidden: int = 12,
 ) -> Dict[str, Optional[int]]:
     """
     For each variant, find the minimum number of full passes over the 18-packet
@@ -438,15 +500,15 @@ def scan_epochs_to_criterion(
     results: Dict[str, Optional[int]] = {}
 
     for variant, runner, kwargs in [
-        ("mlp-explicit", run_mlp_explicit, {"hidden": 8, "lr": 0.30}),
-        ("mlp-latent",   run_mlp_latent,   {"hidden": 8, "lr": 0.30}),
-        ("rnn-latent",   run_rnn_latent,   {"hidden": 12, "lr": 0.20}),
+        ("mlp-explicit", run_mlp_explicit, {"hidden": mlp_hidden, "lr": 0.30}),
+        ("mlp-latent",   run_mlp_latent,   {"hidden": mlp_hidden, "lr": 0.30}),
+        ("rnn-latent",   run_rnn_latent,   {"hidden": rnn_hidden, "lr": 0.20}),
     ]:
         # Re-initialise model and accumulate results across epochs
         all_exact: List[bool] = []
-        net_mlp_e = MLP(n_in=5, hidden=8, lr=0.30, seed=seed) if variant == "mlp-explicit" else None
-        net_mlp_l = MLP(n_in=4, hidden=8, lr=0.30, seed=seed) if variant == "mlp-latent" else None
-        net_rnn   = ElmanRNN(n_in=4, hidden=12, lr=0.20, seed=seed) if variant == "rnn-latent" else None
+        net_mlp_e = MLP(n_in=5, hidden=mlp_hidden, lr=0.30, seed=seed) if variant == "mlp-explicit" else None
+        net_mlp_l = MLP(n_in=4, hidden=mlp_hidden, lr=0.30, seed=seed) if variant == "mlp-latent" else None
+        net_rnn   = ElmanRNN(n_in=4, hidden=rnn_hidden, lr=0.20, seed=seed) if variant == "rnn-latent" else None
 
         epoch_found: Optional[int] = None
         for epoch in range(1, max_epochs + 1):
@@ -492,6 +554,7 @@ def run_real_for_comparison(
     task_id: str = "task_a",
     *,
     seed: int,
+    scale_mode: bool = False,
 ) -> Optional[Dict[str, object]]:
     """
     Run the REAL Phase 8 system on the same CVT-1 task and return its metrics.
@@ -506,7 +569,7 @@ def run_real_for_comparison(
     except ImportError:
         return None
 
-    scenario_name = f"cvt1_{task_id}_stage1"
+    scenario_name = f"cvt1_{task_id}_scale" if scale_mode else f"cvt1_{task_id}_stage1"
     if scenario_name not in SCENARIOS:
         return None
 
@@ -567,10 +630,19 @@ def main() -> None:
     parser.add_argument("--epoch-scan", action="store_true",
                         help="scan across epochs to find examples-to-criterion "
                              "instead of single-pass")
+    parser.add_argument("--scale", action="store_true",
+                        help="run with a 30-hidden-unit network on a 108-packet dataset (matches REAL 30-node topology)")
     args = parser.parse_args()
 
     task_id = args.task
-    examples = cvt1_stage1_examples(task_id)
+    if args.scale:
+        examples = cvt1_stage3_examples(task_id)
+        mlp_hidden = 30
+        rnn_hidden = 30
+    else:
+        examples = cvt1_stage1_examples(task_id)
+        mlp_hidden = 8
+        rnn_hidden = 12
     n = len(examples)
 
     print(f"\nPhase 8 â€” Neural Baseline Comparison")
@@ -588,14 +660,15 @@ def main() -> None:
     for seed in range(args.seeds):
         if not args.epoch_scan:
             all_by_variant["mlp-explicit"].append(
-                run_mlp_explicit(examples, seed=seed))
+                run_mlp_explicit(examples, seed=seed, hidden=mlp_hidden))
             all_by_variant["mlp-latent"].append(
-                run_mlp_latent(examples, seed=seed))
+                run_mlp_latent(examples, seed=seed, hidden=mlp_hidden))
             all_by_variant["rnn-latent"].append(
-                run_rnn_latent(examples, seed=seed))
+                run_rnn_latent(examples, seed=seed, hidden=rnn_hidden))
         else:
             epoch_map = scan_epochs_to_criterion(
-                examples, seed=seed, max_epochs=args.max_epochs)
+                examples, seed=seed, max_epochs=args.max_epochs,
+                mlp_hidden=mlp_hidden, rnn_hidden=rnn_hidden)
             for variant, epoch_found in epoch_map.items():
                 etc = epoch_found * n if epoch_found is not None else None
                 r = BaselineResult(
@@ -608,7 +681,7 @@ def main() -> None:
                 all_by_variant[variant].append(r)
 
         if args.compare_real:
-            real = run_real_for_comparison(task_id, seed=seed)
+            real = run_real_for_comparison(task_id, seed=seed, scale_mode=args.scale)
             if real is not None:
                 real_results.append(real)
             elif seed == 0:
