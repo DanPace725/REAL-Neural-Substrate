@@ -52,7 +52,7 @@ class SignalPacket:
         self.target_bits = _normalize_bits(self.target_bits)
         self.transform_trace = [str(item) for item in self.transform_trace]
         if self.context_bit is not None:
-            self.context_bit = 1 if int(self.context_bit) else 0
+            self.context_bit = int(self.context_bit)
 
 
 @dataclass(frozen=True)

@@ -10,6 +10,19 @@ def _edge_id(source_id: str, target_id: str) -> str:
     return f"{source_id}->{target_id}"
 
 
+def _observed_context_ids(*mappings: Dict[str, float]) -> tuple[int, ...]:
+    context_ids = {int(context_bit) for context_bit in SUPPORTED_CONTEXTS}
+    for mapping in mappings:
+        for key in mapping:
+            if ":context_" not in key:
+                continue
+            try:
+                context_ids.add(int(str(key).rsplit(":context_", 1)[1]))
+            except ValueError:
+                continue
+    return tuple(sorted(context_ids))
+
+
 @dataclass
 class MorphogenesisConfig:
     enabled: bool = False
@@ -822,12 +835,16 @@ class TopologyManager:
 
         generic_scores = []
         context_scores = []
+        context_ids = _observed_context_ids(
+            state.context_transform_credit,
+            state.context_transform_debt,
+        )
         for transform_name in SUPPORTED_TRANSFORMS:
             credit = float(state.transform_credit.get(transform_name, 0.0))
             debt = float(state.transform_debt.get(transform_name, 0.0))
             score = credit - 0.35 * debt
             generic_scores.append((score, transform_name))
-            for context_bit in SUPPORTED_CONTEXTS:
+            for context_bit in context_ids:
                 context_key = f"{transform_name}:context_{int(context_bit)}"
                 context_credit = float(state.context_transform_credit.get(context_key, 0.0))
                 context_debt = float(state.context_transform_debt.get(context_key, 0.0))

@@ -12,6 +12,21 @@ from .models import FeedbackPulse, NodeRuntimeState, SignalPacket, SignalSpec
 from .topology import GrowthProposal, MorphogenesisConfig, TopologyManager, TopologyState
 
 TRANSFORM_NAMES = ("identity", "rotate_left_1", "xor_mask_1010", "xor_mask_0101")
+_CURRENT_TRANSFORM_MAPS: Dict[str, Dict[int, str]] = {
+    "task_a": {0: "rotate_left_1", 1: "xor_mask_1010"},
+    "task_b": {0: "rotate_left_1", 1: "xor_mask_0101"},
+    "task_c": {0: "xor_mask_1010", 1: "xor_mask_0101"},
+}
+_AMBIGUOUS_3_TRANSFORM_MAPS: Dict[str, Dict[int, str]] = {
+    "task_a": {0: "rotate_left_1", 1: "xor_mask_1010", 2: "xor_mask_0101", 3: "xor_mask_1010"},
+    "task_b": {0: "rotate_left_1", 1: "xor_mask_0101", 2: "xor_mask_1010", 3: "xor_mask_0101"},
+    "task_c": {0: "xor_mask_1010", 1: "xor_mask_0101", 2: "rotate_left_1", 3: "xor_mask_0101"},
+}
+_AMBIGUOUS_4_TRANSFORM_MAPS: Dict[str, Dict[int, str]] = {
+    "task_a": {0: "rotate_left_1", 1: "xor_mask_1010", 2: "xor_mask_0101", 3: "identity"},
+    "task_b": {0: "rotate_left_1", 1: "xor_mask_0101", 2: "identity", 3: "xor_mask_1010"},
+    "task_c": {0: "xor_mask_1010", 1: "xor_mask_0101", 2: "rotate_left_1", 3: "identity"},
+}
 TASK_CONTEXT_MATCH_FLOOR = 0.75
 DEBT_ACTIVATION_CREDIT = 0.30
 DEBT_ACTIVATION_CONTEXT_CREDIT = 0.22
@@ -71,16 +86,70 @@ def _parity_bits(bits: Sequence[int] | None) -> int | None:
     return sum(normalized) % 2
 
 
+def _canonical_task_family(task_id: str | None) -> str | None:
+    if task_id is None:
+        return None
+    task_key = str(task_id)
+    for family in ("task_a", "task_b", "task_c"):
+        if task_key == family or task_key.endswith(f"_{family}"):
+            return family
+    return task_key
+
+
+def _task_transform_map(task_id: str | None) -> Dict[int, str] | None:
+    task_family = _canonical_task_family(task_id)
+    if task_family not in _CURRENT_TRANSFORM_MAPS:
+        return None
+    task_key = str(task_id or "")
+    if task_key.startswith("ceiling_c1_"):
+        base = _CURRENT_TRANSFORM_MAPS[task_family]
+        return {0: base[0], 1: base[1], 2: base[0], 3: base[1]}
+    if task_key.startswith("ceiling_c2_"):
+        return _AMBIGUOUS_3_TRANSFORM_MAPS[task_family]
+    if task_key.startswith("ceiling_c3_") or task_key.startswith("ceiling_c4_"):
+        return _AMBIGUOUS_4_TRANSFORM_MAPS[task_family]
+    return _CURRENT_TRANSFORM_MAPS[task_family]
+
+
+def _task_context_candidates(task_id: str | None) -> tuple[int, ...]:
+    transform_map = _task_transform_map(task_id)
+    if not transform_map:
+        return (0, 1)
+    return tuple(sorted(int(context_bit) for context_bit in transform_map))
+
+
+def _sequence_context_estimate_for_task(
+    task_id: str | None,
+    *,
+    prior_parity: int | None,
+    previous_prior_parity: int | None,
+) -> tuple[int | None, float]:
+    task_key = str(task_id or "")
+    if task_key.startswith("ceiling_c"):
+        if prior_parity is None or previous_prior_parity is None:
+            return None, 0.0
+        return int(prior_parity + 2 * previous_prior_parity), 0.95
+    if prior_parity is None:
+        return None, 0.0
+    return int(prior_parity), 0.95
+
+
+def _context_threshold_scale(context_count: int) -> float:
+    if context_count <= 2:
+        return 1.0
+    return max(0.5, (2.0 / max(float(context_count), 2.0)) ** 0.5)
+
+
 @dataclass
 class LatentTaskState:
     task_id: str
-    context_evidence: Dict[int, float] = field(default_factory=lambda: {0: 0.0, 1: 0.0})
+    context_evidence: Dict[int, float] = field(default_factory=dict)
     transform_evidence: Dict[str, float] = field(
         default_factory=lambda: {name: 0.0 for name in TRANSFORM_NAMES}
     )
     context_evidence_by_channel: Dict[str, Dict[int, float]] = field(
         default_factory=lambda: {
-            channel: {0: 0.0, 1: 0.0}
+            channel: {}
             for channel in LATENT_EVIDENCE_CHANNELS
         }
     )
@@ -167,10 +236,6 @@ class LatentTaskState:
             }
             for channel in LATENT_EVIDENCE_CHANNELS
         }
-        for channel in LATENT_EVIDENCE_CHANNELS:
-            state.context_evidence_by_channel.setdefault(channel, {0: 0.0, 1: 0.0})
-            for context_bit in (0, 1):
-                state.context_evidence_by_channel[channel].setdefault(context_bit, 0.0)
         channel_transform_payload = dict(payload.get("transform_evidence_by_channel", {}))
         state.transform_evidence_by_channel = {
             channel: {
@@ -223,10 +288,41 @@ class LatentContextTracker:
         if state is None:
             state = LatentTaskState(task_id=task_key)
             self.task_states[task_key] = state
+        self._ensure_task_contexts(state)
         return state
 
+    def _context_ids(self, state: LatentTaskState) -> tuple[int, ...]:
+        context_ids = set(_task_context_candidates(state.task_id))
+        context_ids.update(int(context_bit) for context_bit in state.context_evidence)
+        for channel_values in state.context_evidence_by_channel.values():
+            context_ids.update(int(context_bit) for context_bit in channel_values)
+        return tuple(sorted(context_ids))
+
+    def _ensure_task_contexts(self, state: LatentTaskState) -> tuple[int, ...]:
+        context_ids = self._context_ids(state)
+        for context_bit in context_ids:
+            state.context_evidence.setdefault(context_bit, 0.0)
+        for channel in LATENT_EVIDENCE_CHANNELS:
+            channel_context = state.context_evidence_by_channel.setdefault(channel, {})
+            for context_bit in context_ids:
+                channel_context.setdefault(context_bit, 0.0)
+        return context_ids
+
+    def _effective_confidence_threshold(self, state: LatentTaskState, *, adaptation_phase: float = 0.0) -> float:
+        threshold_scale = _context_threshold_scale(len(self._context_ids(state)))
+        base_threshold = self.confidence_threshold + adaptation_phase * LATENT_TRANSFER_EFFECTIVE_THRESHOLD_BOOST
+        return max(0.0, min(1.0, base_threshold * threshold_scale))
+
+    def _promotion_confidence_threshold(self, state: LatentTaskState) -> float:
+        threshold_scale = _context_threshold_scale(len(self._context_ids(state)))
+        return max(0.0, min(1.0, self.promotion_threshold * threshold_scale))
+
+    def _growth_confidence_threshold(self, state: LatentTaskState) -> float:
+        return max(self.promotion_threshold, self._promotion_confidence_threshold(state))
+
     def _recompute(self, state: LatentTaskState) -> None:
-        for context_bit in (0, 1):
+        context_ids = self._ensure_task_contexts(state)
+        for context_bit in context_ids:
             state.context_evidence[context_bit] = sum(
                 float(state.context_evidence_by_channel.get(channel, {}).get(context_bit, 0.0))
                 for channel in LATENT_EVIDENCE_CHANNELS
@@ -238,14 +334,22 @@ class LatentContextTracker:
             )
         state.total_evidence = max(
             0.0,
-            float(state.context_evidence.get(0, 0.0)) + float(state.context_evidence.get(1, 0.0)),
+            sum(float(state.context_evidence.get(context_bit, 0.0)) for context_bit in context_ids),
         )
         if state.total_evidence <= 1e-9:
             state.dominant_context = None
             state.confidence = 0.0
             return
-        dominant_context = 0 if state.context_evidence.get(0, 0.0) >= state.context_evidence.get(1, 0.0) else 1
-        diff = abs(state.context_evidence.get(1, 0.0) - state.context_evidence.get(0, 0.0))
+        ranked_contexts = sorted(
+            (
+                (float(state.context_evidence.get(context_bit, 0.0)), int(context_bit))
+                for context_bit in context_ids
+            ),
+            reverse=True,
+        )
+        dominant_score, dominant_context = ranked_contexts[0]
+        runner_up_score = ranked_contexts[1][0] if len(ranked_contexts) > 1 else 0.0
+        diff = max(0.0, dominant_score - runner_up_score)
         state.dominant_context = dominant_context
         purity = max(0.0, min(1.0, diff / max(state.total_evidence, 1e-9)))
         evidence_scale = max(0.0, min(1.0, state.total_evidence / LATENT_CONTEXT_EVIDENCE_SATURATION))
@@ -256,12 +360,22 @@ class LatentContextTracker:
         state: LatentTaskState,
         channel: str,
     ) -> tuple[int | None, float, float]:
-        channel_values = state.context_evidence_by_channel.get(channel, {0: 0.0, 1: 0.0})
-        total = float(channel_values.get(0, 0.0)) + float(channel_values.get(1, 0.0))
+        self._ensure_task_contexts(state)
+        channel_values = state.context_evidence_by_channel.get(channel, {})
+        context_ids = self._context_ids(state)
+        total = sum(float(channel_values.get(context_bit, 0.0)) for context_bit in context_ids)
         if total <= 1e-9:
             return None, 0.0, 0.0
-        estimate = 0 if channel_values.get(0, 0.0) >= channel_values.get(1, 0.0) else 1
-        diff = abs(float(channel_values.get(1, 0.0)) - float(channel_values.get(0, 0.0)))
+        ranked_contexts = sorted(
+            (
+                (float(channel_values.get(context_bit, 0.0)), int(context_bit))
+                for context_bit in context_ids
+            ),
+            reverse=True,
+        )
+        top_score, estimate = ranked_contexts[0]
+        runner_up_score = ranked_contexts[1][0] if len(ranked_contexts) > 1 else 0.0
+        diff = max(0.0, top_score - runner_up_score)
         purity = max(0.0, min(1.0, diff / max(total, 1e-9)))
         evidence_scale = max(0.0, min(1.0, total / LATENT_CONTEXT_EVIDENCE_SATURATION))
         confidence = purity * evidence_scale
@@ -311,7 +425,7 @@ class LatentContextTracker:
             and feedback_confidence >= 0.30
         ):
             boost = commitment_boost * max(0.35, min(route_confidence, feedback_confidence))
-            losing_context = 1 - int(feedback_estimate)
+            context_ids = self._context_ids(state)
             source_route_context[int(feedback_estimate)] = max(
                 0.0,
                 source_route_context.get(int(feedback_estimate), 0.0) + boost,
@@ -320,14 +434,18 @@ class LatentContextTracker:
                 0.0,
                 source_feedback_context.get(int(feedback_estimate), 0.0) + 0.65 * boost,
             )
-            source_route_context[losing_context] = max(
-                0.0,
-                source_route_context.get(losing_context, 0.0) * damp_factor,
-            )
-            source_feedback_context[losing_context] = max(
-                0.0,
-                source_feedback_context.get(losing_context, 0.0) * (0.94 + 0.04 * (1.0 - feedback_confidence)),
-            )
+            for losing_context in context_ids:
+                if losing_context == int(feedback_estimate):
+                    continue
+                source_route_context[losing_context] = max(
+                    0.0,
+                    source_route_context.get(losing_context, 0.0) * damp_factor,
+                )
+                source_feedback_context[losing_context] = max(
+                    0.0,
+                    source_feedback_context.get(losing_context, 0.0)
+                    * (0.94 + 0.04 * (1.0 - feedback_confidence)),
+                )
             if expected_transform is not None:
                 source_route_transforms[expected_transform] = max(
                     0.0,
@@ -362,14 +480,15 @@ class LatentContextTracker:
         self._recompute(state)
 
     def _apply_decay(self, state: LatentTaskState) -> None:
-        for context_bit in (0, 1):
+        context_ids = self._ensure_task_contexts(state)
+        for context_bit in context_ids:
             state.context_evidence[context_bit] = max(
                 0.0,
                 float(state.context_evidence.get(context_bit, 0.0)) * self.evidence_decay,
             )
         for channel in LATENT_EVIDENCE_CHANNELS:
-            channel_context = state.context_evidence_by_channel.setdefault(channel, {0: 0.0, 1: 0.0})
-            for context_bit in (0, 1):
+            channel_context = state.context_evidence_by_channel.setdefault(channel, {})
+            for context_bit in context_ids:
                 channel_context[context_bit] = max(
                     0.0,
                     float(channel_context.get(context_bit, 0.0)) * self.evidence_decay,
@@ -412,7 +531,7 @@ class LatentContextTracker:
             0.0,
             channel_transforms.get(transform, 0.0) + signal,
         )
-        for context_bit in (0, 1):
+        for context_bit in _task_context_candidates(state.task_id):
             expected = _expected_transform_for_task(state.task_id, context_bit)
             if expected == transform:
                 state.context_evidence[context_bit] = max(
@@ -421,7 +540,7 @@ class LatentContextTracker:
                 )
                 channel_context = state.context_evidence_by_channel.setdefault(
                     channel,
-                    {0: 0.0, 1: 0.0},
+                    {},
                 )
                 channel_context[context_bit] = max(
                     0.0,
@@ -486,6 +605,7 @@ class LatentContextTracker:
             return
         current_bits = [1 if int(bit) else 0 for bit in list(input_bits or [])]
         prior_parity = _parity_bits(state.last_input_bits)
+        previous_prior_parity = state.sequence_prev_parity
         width = max(len(current_bits), len(state.last_input_bits), 4)
         padded_current = current_bits + [0] * max(0, width - len(current_bits))
         padded_previous = state.last_input_bits + [0] * max(0, width - len(state.last_input_bits))
@@ -493,8 +613,11 @@ class LatentContextTracker:
             int(current_bit != previous_bit)
             for current_bit, previous_bit in zip(padded_current, padded_previous)
         ]
-        state.sequence_context_estimate = prior_parity
-        state.sequence_context_confidence = 0.95 if prior_parity is not None else 0.0
+        state.sequence_context_estimate, state.sequence_context_confidence = _sequence_context_estimate_for_task(
+            state.task_id,
+            prior_parity=prior_parity,
+            previous_prior_parity=previous_prior_parity,
+        )
         state.sequence_prev_parity = prior_parity
         state.sequence_prev_bits = list(padded_previous[:4])
         state.sequence_delta_bits = list(delta_bits[:4])
@@ -522,11 +645,17 @@ class LatentContextTracker:
     def snapshot(self, task_id: str | None) -> dict[str, object]:
         state = self._state_for(task_id)
         if state is None:
+            context_ids = _task_context_candidates(task_id)
             return {
                 "available": False,
                 "estimate": None,
                 "confidence": 0.0,
+                "context_count": len(context_ids),
+                "context_ids": list(context_ids),
+                "promotion_threshold": LATENT_CONTEXT_PROMOTION_THRESHOLD * _context_threshold_scale(len(context_ids)),
                 "promotion_ready": False,
+                "growth_promotion_threshold": LATENT_CONTEXT_PROMOTION_THRESHOLD,
+                "growth_ready": False,
                 "observation_streak": 0,
                 "sequence_available": False,
                 "sequence_context_estimate": None,
@@ -538,7 +667,7 @@ class LatentContextTracker:
                 "sequence_delta_bits": [],
                 "transform_evidence": {name: 0.0 for name in TRANSFORM_NAMES},
                 "channel_context_evidence": {
-                    channel: {0: 0.0, 1: 0.0}
+                    channel: {context_bit: 0.0 for context_bit in context_ids}
                     for channel in LATENT_EVIDENCE_CHANNELS
                 },
                 "channel_transform_evidence": {
@@ -554,33 +683,54 @@ class LatentContextTracker:
                     for channel in LATENT_EVIDENCE_CHANNELS
                 },
             }
+        context_ids = self._ensure_task_contexts(state)
         sequence_available = state.sequence_context_estimate is not None and state.sequence_context_confidence > 0.0
         available = state.dominant_context is not None and state.total_evidence > 0.0
         estimate = state.dominant_context
         confidence = state.confidence
+        promotion_threshold = self._promotion_confidence_threshold(state)
+        growth_promotion_threshold = self._growth_confidence_threshold(state)
         promotion_ready = bool(
             state.dominant_context is not None
-            and state.confidence >= self.promotion_threshold
+            and state.confidence >= promotion_threshold
+            and state.observation_streak >= self.promotion_streak
+        )
+        growth_ready = bool(
+            state.dominant_context is not None
+            and state.confidence >= growth_promotion_threshold
             and state.observation_streak >= self.promotion_streak
         )
         channel_context_confidence: dict[str, float] = {}
         channel_context_estimate: dict[str, int | None] = {}
         for channel in LATENT_EVIDENCE_CHANNELS:
-            channel_values = state.context_evidence_by_channel.get(channel, {0: 0.0, 1: 0.0})
-            total = float(channel_values.get(0, 0.0)) + float(channel_values.get(1, 0.0))
+            channel_values = state.context_evidence_by_channel.get(channel, {})
+            total = sum(float(channel_values.get(context_bit, 0.0)) for context_bit in context_ids)
             if total <= 1e-9:
                 channel_context_confidence[channel] = 0.0
                 channel_context_estimate[channel] = None
                 continue
-            estimate = 0 if channel_values.get(0, 0.0) >= channel_values.get(1, 0.0) else 1
-            diff = abs(float(channel_values.get(1, 0.0)) - float(channel_values.get(0, 0.0)))
+            ranked_contexts = sorted(
+                (
+                    (float(channel_values.get(context_bit, 0.0)), int(context_bit))
+                    for context_bit in context_ids
+                ),
+                reverse=True,
+            )
+            top_score, estimate = ranked_contexts[0]
+            runner_up_score = ranked_contexts[1][0] if len(ranked_contexts) > 1 else 0.0
+            diff = max(0.0, top_score - runner_up_score)
             channel_context_confidence[channel] = max(0.0, min(1.0, diff / max(total, 1e-9)))
             channel_context_estimate[channel] = estimate
         return {
             "available": available,
             "estimate": estimate,
             "confidence": confidence,
+            "context_count": len(context_ids),
+            "context_ids": list(context_ids),
+            "promotion_threshold": promotion_threshold,
             "promotion_ready": promotion_ready,
+            "growth_promotion_threshold": growth_promotion_threshold,
+            "growth_ready": growth_ready,
             "observation_streak": state.observation_streak,
             "sequence_available": sequence_available,
             "sequence_context_estimate": state.sequence_context_estimate,
@@ -600,7 +750,7 @@ class LatentContextTracker:
                         0.0,
                         min(1.0, float(state.context_evidence_by_channel.get(channel, {}).get(context_bit, 0.0))),
                     )
-                    for context_bit in (0, 1)
+                    for context_bit in context_ids
                 }
                 for channel in LATENT_EVIDENCE_CHANNELS
             },
@@ -664,14 +814,9 @@ def _target_bits_for_task(
 ) -> List[int] | None:
     if not input_bits or task_id is None or context_bit is None:
         return None
-    if task_id == "task_a":
-        transform = "rotate_left_1" if context_bit == 0 else "xor_mask_1010"
-        return _apply_transform(input_bits, transform)
-    if task_id == "task_b":
-        transform = "rotate_left_1" if context_bit == 0 else "xor_mask_0101"
-        return _apply_transform(input_bits, transform)
-    if task_id == "task_c":
-        transform = "xor_mask_1010" if context_bit == 0 else "xor_mask_0101"
+    transform_map = _task_transform_map(task_id)
+    if transform_map is not None and int(context_bit) in transform_map:
+        transform = transform_map[int(context_bit)]
         return _apply_transform(input_bits, transform)
     return None
 
@@ -682,22 +827,16 @@ def _expected_transform_for_task(
 ) -> str | None:
     if task_id is None or context_bit is None:
         return None
-    if task_id == "task_a":
-        return "rotate_left_1" if context_bit == 0 else "xor_mask_1010"
-    if task_id == "task_b":
-        return "rotate_left_1" if context_bit == 0 else "xor_mask_0101"
-    if task_id == "task_c":
-        return "xor_mask_1010" if context_bit == 0 else "xor_mask_0101"
+    transform_map = _task_transform_map(task_id)
+    if transform_map is not None:
+        return transform_map.get(int(context_bit))
     return None
 
 
 def _candidate_transforms_for_task(task_id: str | None) -> tuple[str, ...]:
-    if task_id == "task_a":
-        return ("rotate_left_1", "xor_mask_1010")
-    if task_id == "task_b":
-        return ("rotate_left_1", "xor_mask_0101")
-    if task_id == "task_c":
-        return ("xor_mask_1010", "xor_mask_0101")
+    transform_map = _task_transform_map(task_id)
+    if transform_map is not None:
+        return tuple(dict.fromkeys(transform_map.values()))
     return tuple()
 
 
@@ -1083,19 +1222,29 @@ class RoutingEnvironment:
         latent_available = 1.0 if latent_snapshot.get("available") else 0.0
         latent_estimate = latent_snapshot.get("estimate")
         latent_confidence = float(latent_snapshot.get("confidence", 0.0))
-        effective_context_threshold = (
-            LATENT_CONTEXT_CONFIDENCE_THRESHOLD
-            + transfer_adaptation_phase * LATENT_TRANSFER_EFFECTIVE_THRESHOLD_BOOST
+        latent_context_count = int(latent_snapshot.get("context_count", 2))
+        effective_context_threshold = max(
+            0.0,
+            min(
+                1.0,
+                (
+                    LATENT_CONTEXT_CONFIDENCE_THRESHOLD
+                    + transfer_adaptation_phase * LATENT_TRANSFER_EFFECTIVE_THRESHOLD_BOOST
+                )
+                * _context_threshold_scale(latent_context_count),
+            ),
         )
         effective_context_bit = None
         effective_context_confidence = 0.0
         effective_has_context = 0.0
         context_promotion_ready = 0.0
+        context_growth_ready = 0.0
         if raw_has_context >= 0.5 and head_packet is not None and head_packet.context_bit is not None:
             effective_context_bit = int(head_packet.context_bit)
             effective_context_confidence = 1.0
             effective_has_context = 1.0
             context_promotion_ready = 1.0
+            context_growth_ready = 1.0
         elif (
             latent_available >= 0.5
             and latent_estimate is not None
@@ -1105,6 +1254,7 @@ class RoutingEnvironment:
             effective_context_confidence = latent_confidence
             effective_has_context = 1.0
             context_promotion_ready = 1.0 if latent_snapshot.get("promotion_ready") else 0.0
+            context_growth_ready = 1.0 if latent_snapshot.get("growth_ready") else 0.0
         local = {
             "atp_ratio": state.atp / max(state.max_atp, 1e-9),
             "inbox_load": min(1.0, len(self.inboxes[node_id]) / max(self.inbox_capacity, 1)),
@@ -1167,6 +1317,7 @@ class RoutingEnvironment:
             ),
             "effective_context_confidence": effective_context_confidence,
             "context_promotion_ready": context_promotion_ready,
+            "context_growth_ready": context_growth_ready,
             "last_feedback_amount": min(
                 1.0,
                 state.last_feedback_amount / max(self.feedback_amount, 1e-9),
@@ -1199,10 +1350,10 @@ class RoutingEnvironment:
             )
             if head_task_id is None:
                 affinity = 0.0
-            elif transform_name == "identity":
-                affinity = 0.0
             elif transform_name in candidate_transforms:
                 affinity = 1.0
+            elif transform_name == "identity":
+                affinity = 0.0
             else:
                 affinity = -1.0
             local[f"task_transform_affinity_{transform_name}"] = affinity
@@ -1210,8 +1361,8 @@ class RoutingEnvironment:
             if source_sequence_available >= 0.5 and expected_sequence_transform is not None:
                 if transform_name == expected_sequence_transform:
                     sequence_hint = sequence_confidence
-                elif transform_name in candidate_transforms and transform_name != "identity":
-                    sequence_hint = 0.15 * sequence_confidence
+                elif transform_name in candidate_transforms:
+                    sequence_hint = (0.10 if transform_name == "identity" else 0.15) * sequence_confidence
                 elif transform_name == "identity":
                     sequence_hint = -0.35 * sequence_confidence
                 else:
@@ -1489,10 +1640,18 @@ class RoutingEnvironment:
         # when the node is still inferring which transform context applies.
         # Prune and apoptosis proposals are generated regardless.
         context_gate = self.morphogenesis_config.context_resolution_growth_gate
+        latent_context_unpromoted = (
+            observation.get("head_has_task", 0.0) >= 0.5
+            and observation.get("head_has_context", 0.0) < 0.5
+            and observation.get("context_growth_ready", 0.0) < 0.5
+        )
         context_gate_active = (
             context_gate > 0.0
             and observation.get("head_has_task", 0.0) >= 0.5
-            and observation.get("effective_context_confidence", 0.0) < context_gate
+            and (
+                observation.get("effective_context_confidence", 0.0) < context_gate
+                or latent_context_unpromoted
+            )
         )
         anticipatory_threshold = self.morphogenesis_config.anticipatory_growth_backlog_threshold
         # Anticipatory growth fires under pre-overload pressure even without
@@ -1776,6 +1935,15 @@ class RoutingEnvironment:
             if edge is None:
                 continue
             source_id, neighbor_id = edge.split("->", 1)
+            if source_id not in self.node_states:
+                # Dynamic topology changes can remove a node after a packet has
+                # already committed a forward path through it. In that case the
+                # stale feedback edge should be skipped rather than crashing the
+                # whole workload run.
+                pulse.advance()
+                if not pulse.complete:
+                    remaining.append(pulse)
+                continue
             state = self.state_for(source_id)
             state.atp = min(state.max_atp, state.atp + pulse.amount)
             state.reward_buffer = min(state.max_atp, state.reward_buffer + pulse.amount)
@@ -2720,7 +2888,7 @@ class NativeSubstrateSystem:
                             )
                             for transform_name in ("identity", "rotate_left_1", "xor_mask_1010", "xor_mask_0101")
                         }
-                        for context_bit in (0, 1)
+                        for context_bit in agent.substrate.supported_contexts
                     }
                     for neighbor_id in agent.neighbor_ids
                 }

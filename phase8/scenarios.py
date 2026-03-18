@@ -264,6 +264,82 @@ def cvt1_scale_topology() -> tuple[Dict[str, tuple[str, ...]], Dict[str, int], s
     return adjacency, positions, "n0", "sink"
 
 
+def cvt1_ceiling_topology() -> tuple[Dict[str, tuple[str, ...]], Dict[str, int], str, str]:
+    """50-node deeper topology for ceiling-mapping runs with longer routing horizons."""
+    adjacency = {
+        "n0": ("n1", "n2", "n3", "n4"),
+
+        "n1": ("n5", "n6"),
+        "n2": ("n6", "n7", "n8"),
+        "n3": ("n8", "n9", "n10"),
+        "n4": ("n10", "n11"),
+
+        "n5": ("n12", "n13"),
+        "n6": ("n13", "n14"),
+        "n7": ("n14", "n15"),
+        "n8": ("n15", "n16", "n17"),
+        "n9": ("n17", "n18"),
+        "n10": ("n18", "n19"),
+        "n11": ("n19", "n20"),
+
+        "n12": ("n21",),
+        "n13": ("n21", "n22"),
+        "n14": ("n22", "n23"),
+        "n15": ("n23", "n24"),
+        "n16": ("n24", "n25"),
+        "n17": ("n25", "n26"),
+        "n18": ("n26", "n27"),
+        "n19": ("n27", "n28"),
+        "n20": ("n28",),
+
+        "n21": ("n29", "n30"),
+        "n22": ("n30", "n31"),
+        "n23": ("n31", "n32"),
+        "n24": ("n32", "n33"),
+        "n25": ("n33", "n34"),
+        "n26": ("n34", "n35"),
+        "n27": ("n35", "n36"),
+        "n28": ("n36", "n37"),
+
+        "n29": ("n38",),
+        "n30": ("n38", "n39"),
+        "n31": ("n39", "n40"),
+        "n32": ("n40", "n41"),
+        "n33": ("n41", "n42"),
+        "n34": ("n42", "n43"),
+        "n35": ("n43", "n44"),
+        "n36": ("n44", "n45"),
+        "n37": ("n45",),
+
+        "n38": ("n46", "n47"),
+        "n39": ("n46", "n47"),
+        "n40": ("n47", "n48"),
+        "n41": ("n48",),
+        "n42": ("n48", "n49"),
+        "n43": ("n49", "sink"),
+        "n44": ("n49", "sink"),
+        "n45": ("sink",),
+
+        "n46": ("sink",),
+        "n47": ("sink",),
+        "n48": ("sink",),
+        "n49": ("sink",),
+        "sink": (),
+    }
+    positions = {
+        "n0": 0,
+        "n1": 1, "n2": 1, "n3": 1, "n4": 1,
+        "n5": 2, "n6": 2, "n7": 2, "n8": 2, "n9": 2, "n10": 2, "n11": 2,
+        "n12": 3, "n13": 3, "n14": 3, "n15": 3, "n16": 3, "n17": 3, "n18": 3, "n19": 3, "n20": 3,
+        "n21": 4, "n22": 4, "n23": 4, "n24": 4, "n25": 4, "n26": 4, "n27": 4, "n28": 4,
+        "n29": 5, "n30": 5, "n31": 5, "n32": 5, "n33": 5, "n34": 5, "n35": 5, "n36": 5, "n37": 5,
+        "n38": 6, "n39": 6, "n40": 6, "n41": 6, "n42": 6, "n43": 6, "n44": 6, "n45": 6,
+        "n46": 7, "n47": 7, "n48": 7, "n49": 7,
+        "sink": 8,
+    }
+    return adjacency, positions, "n0", "sink"
+
+
 def cvt1_stage3_signals(task_id: str = "task_a") -> Tuple[SignalSpec, ...]:
     """108-packet signal set: 6 passes of the 18-packet sequence for larger scale learning."""
     base_values = [
@@ -323,6 +399,35 @@ def cvt1_stage2_signals(task_id: str = "task_a") -> Tuple[SignalSpec, ...]:
     return tuple(signals)
 
 
+def cvt1_stage4_signals(task_id: str = "task_a") -> Tuple[SignalSpec, ...]:
+    """216-packet signal set: 12 passes with varied masks for ceiling mapping."""
+    base_values = [
+        0b0001, 0b0110, 0b1011, 0b0101, 0b1110, 0b0011,
+        0b1100, 0b1001, 0b0111, 0b1010, 0b0100, 0b1111,
+        0b0000, 0b1101, 0b0010, 0b1000, 0b0110, 0b1011,
+    ]
+    masks = [
+        0b0000, 0b1111, 0b0101, 0b1010, 0b0011, 0b1100,
+        0b1001, 0b0110, 0b1110, 0b0001, 0b0100, 0b1011,
+    ]
+    values = [value ^ masks[pass_idx] for pass_idx in range(len(masks)) for value in base_values]
+
+    previous_bits = [0, 0, 0, 0]
+    signals = []
+    for value in values:
+        bits = _bits4(value)
+        context_bit = _parity(previous_bits)
+        signals.append(
+            SignalSpec(
+                input_bits=bits,
+                context_bit=context_bit,
+                task_id=task_id,
+            )
+        )
+        previous_bits = bits
+    return tuple(signals)
+
+
 @dataclass(frozen=True)
 class ScenarioSpec:
     name: str
@@ -350,6 +455,7 @@ def phase8_scenarios() -> Dict[str, ScenarioSpec]:
     detour_adjacency, detour_positions, detour_source, detour_sink = detour_resilience_topology()
     large_adjacency, large_positions, large_source, large_sink = cvt1_large_topology()
     scale_adjacency, scale_positions, scale_source, scale_sink = cvt1_scale_topology()
+    ceiling_adjacency, ceiling_positions, ceiling_source, ceiling_sink = cvt1_ceiling_topology()
 
     cvt_a_signals = cvt1_task_a_stage1_signals()
     cvt_a_schedule = {
@@ -397,6 +503,22 @@ def phase8_scenarios() -> Dict[str, ScenarioSpec]:
     cvt_c3_schedule = {
         cycle: (signal_spec,)
         for cycle, signal_spec in enumerate(cvt_c3_signals[1:], start=2)
+    }
+
+    cvt_a4_signals = cvt1_stage4_signals("task_a")
+    cvt_a4_schedule = {
+        cycle: (signal_spec,)
+        for cycle, signal_spec in enumerate(cvt_a4_signals[1:], start=2)
+    }
+    cvt_b4_signals = cvt1_stage4_signals("task_b")
+    cvt_b4_schedule = {
+        cycle: (signal_spec,)
+        for cycle, signal_spec in enumerate(cvt_b4_signals[1:], start=2)
+    }
+    cvt_c4_signals = cvt1_stage4_signals("task_c")
+    cvt_c4_schedule = {
+        cycle: (signal_spec,)
+        for cycle, signal_spec in enumerate(cvt_c4_signals[1:], start=2)
     }
 
     return {
@@ -613,5 +735,56 @@ def phase8_scenarios() -> Dict[str, ScenarioSpec]:
             source_admission_max_rate=2,
             initial_signal_specs=(cvt_c3_signals[0],),
             signal_schedule_specs=cvt_c3_schedule,
+        ),
+        "cvt1_task_a_ceiling": ScenarioSpec(
+            name="cvt1_task_a_ceiling",
+            description="Task A on 50-node topology with 216 packets for ceiling-mapping runs.",
+            adjacency=ceiling_adjacency,
+            positions=ceiling_positions,
+            source_id=ceiling_source,
+            sink_id=ceiling_sink,
+            cycles=len(cvt_a4_signals) + 28,
+            initial_packets=0,
+            packet_schedule={},
+            packet_ttl=26,
+            source_admission_policy="adaptive",
+            source_admission_min_rate=1,
+            source_admission_max_rate=2,
+            initial_signal_specs=(cvt_a4_signals[0],),
+            signal_schedule_specs=cvt_a4_schedule,
+        ),
+        "cvt1_task_b_ceiling": ScenarioSpec(
+            name="cvt1_task_b_ceiling",
+            description="Task B on 50-node topology with 216 packets for ceiling-mapping runs.",
+            adjacency=ceiling_adjacency,
+            positions=ceiling_positions,
+            source_id=ceiling_source,
+            sink_id=ceiling_sink,
+            cycles=len(cvt_b4_signals) + 28,
+            initial_packets=0,
+            packet_schedule={},
+            packet_ttl=26,
+            source_admission_policy="adaptive",
+            source_admission_min_rate=1,
+            source_admission_max_rate=2,
+            initial_signal_specs=(cvt_b4_signals[0],),
+            signal_schedule_specs=cvt_b4_schedule,
+        ),
+        "cvt1_task_c_ceiling": ScenarioSpec(
+            name="cvt1_task_c_ceiling",
+            description="Task C on 50-node topology with 216 packets for ceiling-mapping runs.",
+            adjacency=ceiling_adjacency,
+            positions=ceiling_positions,
+            source_id=ceiling_source,
+            sink_id=ceiling_sink,
+            cycles=len(cvt_c4_signals) + 28,
+            initial_packets=0,
+            packet_schedule={},
+            packet_ttl=26,
+            source_admission_policy="adaptive",
+            source_admission_min_rate=1,
+            source_admission_max_rate=2,
+            initial_signal_specs=(cvt_c4_signals[0],),
+            signal_schedule_specs=cvt_c4_schedule,
         ),
     }

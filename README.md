@@ -46,6 +46,7 @@ After `pip install -e .`, the same runners are also available as console scripts
 - `scripts/compare_morphogenesis_large_carryover_bridge.py`: full-vs-substrate carryover bridge diagnostic
 - `scripts/compare_sequential_transfer.py`: sequential `A -> B -> C` transfer evaluation
 - `scripts/compare_cyclic_transfer.py`: cyclic `A -> B -> C -> A` transfer evaluation
+- `scripts/diagnose_c_family_real.py`: REAL-only full-capability diagnostic for the generated `C` ambiguity ladder
 - `scripts/neural_baseline.py`: online MLP/RNN comparison harness for sample-efficiency checks
 
 ## Reference Artifacts

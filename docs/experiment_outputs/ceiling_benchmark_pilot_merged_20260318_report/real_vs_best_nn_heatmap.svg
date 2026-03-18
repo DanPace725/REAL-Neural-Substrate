@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="570" height="498" viewBox="0 0 570 498">
+<rect width="100%" height="100%" fill="#f7f4eb"/>
+<style>text{font-family:Georgia,serif;fill:#1f1d1a}.small{font-size:12px}.label{font-size:15px;font-weight:bold}</style>
+<text x="20" y="28" class="label">REAL vs Best NN Heatmap (Bit-Accuracy Delta)</text>
+<text x="128" y="58" class="small">fixed-visible</text>
+<text x="278" y="58" class="small">fixed-latent</text>
+<text x="428" y="58" class="small">growth-visible</text>
+<text x="20" y="92" class="small">A1</text>
+<rect x="120" y="70" width="142" height="28" fill="rgb(248,234,217)" stroke="#c9c2b3"/>
+<text x="130" y="92" class="small">+0.014</text>
+<rect x="270" y="70" width="142" height="28" fill="rgb(242,224,206)" stroke="#c9c2b3"/>
+<text x="280" y="92" class="small">+0.032</text>
+<rect x="420" y="70" width="142" height="28" fill="rgb(246,231,213)" stroke="#c9c2b3"/>
+<text x="430" y="92" class="small">+0.020</text>
+<text x="20" y="126" class="small">A2</text>
+<rect x="120" y="104" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="130" y="126" class="small">+-0.014</text>
+<rect x="270" y="104" width="142" height="28" fill="rgb(232,204,183)" stroke="#c9c2b3"/>
+<text x="280" y="126" class="small">+0.066</text>
+<rect x="420" y="104" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="430" y="126" class="small">+-0.043</text>
+<text x="20" y="160" class="small">A3</text>
+<rect x="120" y="138" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="130" y="160" class="small">+-0.037</text>
+<rect x="270" y="138" width="142" height="28" fill="rgb(231,202,181)" stroke="#c9c2b3"/>
+<text x="280" y="160" class="small">+0.070</text>
+<rect x="420" y="138" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="430" y="160" class="small">+-0.017</text>
+<text x="20" y="194" class="small">A4</text>
+<rect x="120" y="172" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="130" y="194" class="small">+-0.028</text>
+<rect x="270" y="172" width="142" height="28" fill="rgb(224,188,167)" stroke="#c9c2b3"/>
+<text x="280" y="194" class="small">+0.093</text>
+<rect x="420" y="172" width="142" height="28" fill="rgb(239,218,199)" stroke="#c9c2b3"/>
+<text x="430" y="194" class="small">+0.042</text>
+<text x="20" y="228" class="small">B1</text>
+<rect x="120" y="206" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="130" y="228" class="small">+-0.037</text>
+<rect x="270" y="206" width="142" height="28" fill="rgb(236,212,193)" stroke="#c9c2b3"/>
+<text x="280" y="228" class="small">+0.052</text>
+<rect x="420" y="206" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="430" y="228" class="small">+-0.017</text>
+<text x="20" y="262" class="small">B2</text>
+<rect x="120" y="240" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="130" y="262" class="small">+-0.000</text>
+<rect x="270" y="240" width="142" height="28" fill="rgb(202,147,121)" stroke="#c9c2b3"/>
+<text x="280" y="262" class="small">+0.163</text>
+<rect x="420" y="240" width="142" height="28" fill="rgb(245,229,212)" stroke="#c9c2b3"/>
+<text x="430" y="262" class="small">+0.023</text>
+<text x="20" y="296" class="small">B3</text>
+<rect x="120" y="274" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="130" y="296" class="small">+-0.065</text>
+<rect x="270" y="274" width="142" height="28" fill="rgb(246,230,213)" stroke="#c9c2b3"/>
+<text x="280" y="296" class="small">+0.021</text>
+<rect x="420" y="274" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="430" y="296" class="small">+-0.064</text>
+<text x="20" y="330" class="small">B4</text>
+<rect x="120" y="308" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="130" y="330" class="small">+-0.035</text>
+<rect x="270" y="308" width="142" height="28" fill="rgb(233,206,186)" stroke="#c9c2b3"/>
+<text x="280" y="330" class="small">+0.062</text>
+<rect x="420" y="308" width="142" height="28" fill="rgb(241,221,203)" stroke="#c9c2b3"/>
+<text x="430" y="330" class="small">+0.036</text>
+<text x="20" y="364" class="small">C1</text>
+<rect x="120" y="342" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="130" y="364" class="small">+-0.037</text>
+<rect x="270" y="342" width="142" height="28" fill="rgb(236,212,193)" stroke="#c9c2b3"/>
+<text x="280" y="364" class="small">+0.052</text>
+<rect x="420" y="342" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="430" y="364" class="small">+-0.017</text>
+<text x="20" y="398" class="small">C2</text>
+<rect x="120" y="376" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="130" y="398" class="small">+-0.086</text>
+<rect x="270" y="376" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="280" y="398" class="small">+-0.007</text>
+<rect x="420" y="376" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="430" y="398" class="small">+-0.029</text>
+<text x="20" y="432" class="small">C3</text>
+<rect x="120" y="410" width="142" height="28" fill="rgb(234,208,189)" stroke="#c9c2b3"/>
+<text x="130" y="432" class="small">+0.058</text>
+<rect x="270" y="410" width="142" height="28" fill="rgb(248,234,217)" stroke="#c9c2b3"/>
+<text x="280" y="432" class="small">+0.015</text>
+<rect x="420" y="410" width="142" height="28" fill="rgb(232,205,185)" stroke="#c9c2b3"/>
+<text x="430" y="432" class="small">+0.065</text>
+<text x="20" y="466" class="small">C4</text>
+<rect x="120" y="444" width="142" height="28" fill="rgb(245,229,211)" stroke="#c9c2b3"/>
+<text x="130" y="466" class="small">+0.023</text>
+<rect x="270" y="444" width="142" height="28" fill="rgb(245,229,212)" stroke="#c9c2b3"/>
+<text x="280" y="466" class="small">+0.023</text>
+<rect x="420" y="444" width="142" height="28" fill="rgb(238,215,196)" stroke="#c9c2b3"/>
+<text x="430" y="466" class="small">+0.048</text>
+</svg>
