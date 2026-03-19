@@ -48,6 +48,7 @@ After `pip install -e .`, the same runners are also available as console scripts
 - `scripts/compare_cyclic_transfer.py`: cyclic `A -> B -> C -> A` transfer evaluation
 - `scripts/diagnose_c_family_real.py`: REAL-only full-capability diagnostic for the generated `C` ambiguity ladder
 - `scripts/neural_baseline.py`: online MLP/RNN comparison harness for sample-efficiency checks
+- `scripts/compare_occupancy_baseline.py`: occupancy bridge comparison between the frozen MLP baseline and a Phase 8 packetized REAL slice
 
 ## Reference Artifacts
 

@@ -51,6 +51,8 @@ class Phase8Selector:
     prediction_delta_bonus: float = 0.12
     prediction_coherence_bonus: float = 0.08
     prediction_stale_family_penalty: float = 0.20
+    partial_context_sequence_bonus: float = 0.14
+    partial_context_sequence_penalty: float = 0.12
     # Bonus weight applied to task-affinity transforms when the node is in
     # hidden-context mode (head packet carries a task_id but no explicit or
     # latent context bit is resolved yet).  Gives an early-cycle push toward
@@ -303,6 +305,8 @@ class Phase8Selector:
         source_sequence_available = observation.get("source_sequence_available", 0.0)
         source_sequence_change_ratio = observation.get("source_sequence_change_ratio", 0.0)
         source_sequence_repeat = observation.get("source_sequence_repeat_input", 0.0)
+        latent_resolution_weight = observation.get("latent_resolution_weight", 1.0)
+        latent_context_count = int(round(observation.get("latent_context_count", 2.0)))
         transfer_adaptation_phase = max(
             0.0,
             min(1.0, observation.get("transfer_adaptation_phase", 0.0)),
@@ -367,6 +371,8 @@ class Phase8Selector:
         hidden_wrong_family_penalty = 0.0
         visible_task_compatibility_bonus = 0.0
         visible_task_incompatibility_penalty = 0.0
+        partial_context_sequence_bonus = 0.0
+        partial_context_sequence_penalty = 0.0
         transform_recognition_confirmation = 0.0
         if self.environment.topology_state is not None:
             neighbor_spec = self.environment.topology_state.node_specs.get(neighbor_id)
@@ -445,6 +451,42 @@ class Phase8Selector:
             identity_penalty += 0.18 * min(1.0, best_non_identity_history)
         elif transform_name != "identity":
             task_transform_bonus += 0.12 * history_transform_evidence
+        partial_multistate_context = (
+            self.node_id == self.environment.source_id
+            and source_sequence_available >= 0.5
+            and latent_context_count > 2
+            and (
+                observation.get("effective_has_context", 0.0) >= 0.5
+                or observation.get("latent_capability_enabled", 0.0) >= 0.5
+            )
+        )
+        if partial_multistate_context and transform_name != "identity":
+            uncertainty = max(0.0, 1.0 - latent_resolution_weight)
+            confidence_softness = max(
+                0.0,
+                0.85 - observation.get("effective_context_confidence", 0.0),
+            )
+            sequence_persistence_weight = max(
+                0.0,
+                min(
+                    1.0,
+                    0.55 * uncertainty + 0.45 * confidence_softness,
+                ),
+            )
+            if source_sequence_hint > 0.0:
+                partial_context_sequence_bonus = (
+                    self.partial_context_sequence_bonus
+                    * sequence_persistence_weight
+                    * source_sequence_hint
+                )
+                task_transform_bonus += partial_context_sequence_bonus
+            elif source_sequence_hint < 0.0:
+                partial_context_sequence_penalty = (
+                    self.partial_context_sequence_penalty
+                    * sequence_persistence_weight
+                    * max(0.0, -source_sequence_hint)
+                )
+                hidden_wrong_family_penalty += partial_context_sequence_penalty
         if context_bit is not None:
             (
                 raw_context_action_support,
@@ -632,6 +674,7 @@ class Phase8Selector:
             "context_support_bonus_term": context_support_bonus,
             "task_transform_bonus_term": task_transform_bonus,
             "source_pre_effective_term": source_pre_effective_route_drive,
+            "partial_context_sequence_bonus_term": partial_context_sequence_bonus,
             "visible_task_compatibility_term": visible_task_compatibility_bonus,
             "branch_context_bonus_term": branch_context_bonus,
             "branch_transform_bonus_term": branch_transform_bonus,
@@ -650,6 +693,7 @@ class Phase8Selector:
             "branch_context_pressure_penalty_term": -0.26 * branch_context_pressure * context_weight,
             "identity_penalty_term": -identity_penalty,
             "hidden_wrong_family_penalty_term": -hidden_wrong_family_penalty,
+            "partial_context_sequence_penalty_term": -partial_context_sequence_penalty,
             "visible_task_incompatibility_penalty_term": -visible_task_incompatibility_penalty,
             "competition_penalty_term": -competition_penalty,
             "stale_penalty_term": -stale_penalty,
@@ -669,6 +713,8 @@ class Phase8Selector:
             "raw_action_support": round(action_support, 6),
             "raw_task_transform_affinity": round(task_transform_affinity, 6),
             "raw_history_transform_evidence": round(history_transform_evidence, 6),
+            "raw_latent_resolution_weight": round(float(latent_resolution_weight), 6),
+            "raw_latent_context_count": int(latent_context_count),
             "raw_feedback_credit": round(feedback_credit, 6),
             "raw_context_feedback_credit": round(context_feedback_credit, 6),
             "raw_feedback_debt": round(feedback_debt, 6),

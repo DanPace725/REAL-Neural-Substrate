@@ -11,9 +11,14 @@ requires-python = ">=3.11"
 dependencies = ["numpy>=1.26", "torch>=2.6"]
 
 [tool.setuptools]
-packages = ["real_core", "phase8", "scripts"]
+packages = ["real_core", "phase8", "scripts", "occupancy_baseline"]
+
+[tool.setuptools.package-data]
+occupancy_baseline = ["data/*.csv", "data/*.md"]
 
 [project.scripts]
+real-occupancy-baseline = "occupancy_baseline.run_baseline:main"
+real-occupancy-compare = "scripts.compare_occupancy_baseline:main"
 real-phase8-demo = "scripts.run_phase8_demo:main"
 real-cold-warm = "scripts.compare_cold_warm:main"
 real-task-transfer = "scripts.compare_task_transfer:main"

@@ -265,6 +265,64 @@ class TestPhase8Recognition(unittest.TestCase):
             0.0,
         )
 
+    def test_phase8_selector_keeps_sequence_hint_alive_under_partial_multistate_context(self) -> None:
+        system = NativeSubstrateSystem(
+            adjacency={
+                "n0": ("n1", "n2"),
+                "n1": ("sink",),
+                "n2": ("sink",),
+            },
+            positions={"n0": 0, "n1": 1, "n2": 1, "sink": 2},
+            source_id="n0",
+            sink_id="sink",
+            selector_seed=19,
+        )
+        selector = system.agents["n0"].engine.selector
+        original_observe = system.environment.observe_local
+        try:
+            base_observation = {
+                "has_packet": 1.0,
+                "head_has_task": 1.0,
+                "head_has_context": 0.0,
+                "effective_has_context": 1.0,
+                "effective_context_bit": 0.0,
+                "effective_context_confidence": 0.58,
+                "latent_capability_enabled": 1.0,
+                "latent_resolution_weight": 0.32,
+                "latent_context_count": 4.0,
+                "source_sequence_available": 1.0,
+                "source_sequence_change_ratio": 0.4,
+                "source_sequence_repeat_input": 0.0,
+                "task_transform_affinity_rotate_left_1": 1.0,
+                "task_transform_affinity_xor_mask_1010": 1.0,
+                "source_sequence_transform_hint_rotate_left_1": -0.2,
+                "source_sequence_transform_hint_xor_mask_1010": 0.95,
+                "history_transform_evidence_rotate_left_1": 0.6,
+                "history_transform_evidence_xor_mask_1010": 0.1,
+                "feedback_credit_rotate_left_1": 0.2,
+                "feedback_credit_xor_mask_1010": 0.0,
+                "context_feedback_credit_rotate_left_1": 0.2,
+                "context_feedback_credit_xor_mask_1010": 0.0,
+                "feedback_debt_rotate_left_1": 0.0,
+                "feedback_debt_xor_mask_1010": 0.0,
+                "context_feedback_debt_rotate_left_1": 0.0,
+                "context_feedback_debt_xor_mask_1010": 0.0,
+            }
+            system.environment.observe_local = lambda node_id: dict(base_observation)
+            rotate = selector.debug_route_score_breakdown(
+                "route_transform:n1:rotate_left_1",
+                history=[],
+            )
+            xor = selector.debug_route_score_breakdown(
+                "route_transform:n2:xor_mask_1010",
+                history=[],
+            )
+        finally:
+            system.environment.observe_local = original_observe
+
+        self.assertLess(rotate["partial_context_sequence_penalty_term"], 0.0)
+        self.assertGreater(xor["partial_context_sequence_bonus_term"], 0.0)
+
     def test_phase8_selector_uses_prediction_context_as_small_route_bias(self) -> None:
         system = NativeSubstrateSystem(
             adjacency={

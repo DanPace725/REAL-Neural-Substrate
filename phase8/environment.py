@@ -1833,6 +1833,7 @@ class RoutingEnvironment:
             ),
             "latent_context_confidence": latent_confidence,
             "latent_resolution_weight": latent_resolution_weight,
+            "latent_context_count": float(latent_context_count),
             "effective_context_threshold": effective_context_threshold,
             "transfer_adaptation_phase": transfer_adaptation_phase,
             "transfer_hidden_unseen_task": transfer_hidden_unseen_task,
