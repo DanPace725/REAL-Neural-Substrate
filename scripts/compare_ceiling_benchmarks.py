@@ -37,7 +37,7 @@ from scripts.neural_baseline_torch import (
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MAIN_SEEDS = (13, 23, 37, 51, 79)
 DEFAULT_PILOT_SEEDS = (13, 23, 37)
-REAL_METHODS = ("fixed-visible", "fixed-latent", "growth-visible")
+REAL_METHODS = ("fixed-visible", "fixed-latent", "growth-visible", "growth-latent", "self-selected")
 NN_METHODS = ("mlp-explicit", "mlp-latent", "elman", "gru", "lstm", "causal-transformer")
 ALL_METHODS = REAL_METHODS + NN_METHODS
 
@@ -63,6 +63,7 @@ def _build_system_from_spec(
     *,
     morphogenesis_enabled: bool = False,
     latent_transfer_split_enabled: bool = True,
+    capability_policy: str | None = None,
 ) -> NativeSubstrateSystem:
     return NativeSubstrateSystem(
         adjacency=spec.adjacency,
@@ -77,6 +78,7 @@ def _build_system_from_spec(
         source_admission_max_rate=spec.source_admission_max_rate,
         morphogenesis_config=benchmark_morphogenesis_config() if morphogenesis_enabled else None,
         latent_transfer_split_enabled=latent_transfer_split_enabled,
+        capability_policy=capability_policy,
     )
 
 
@@ -153,10 +155,17 @@ def _run_real_method(
     seed: int,
 ) -> Dict[str, object]:
     task_spec = point.tasks[task_key]
-    latent = method_id == "fixed-latent"
-    morphogenesis = method_id == "growth-visible"
-    scenario = task_spec.latent_scenario if latent else task_spec.visible_scenario
-    system = _build_system_from_spec(seed, scenario, morphogenesis_enabled=morphogenesis)
+    latent = method_id in ("fixed-latent", "growth-latent")
+    morphogenesis = method_id in ("growth-visible", "growth-latent", "self-selected")
+    scenario = task_spec.visible_scenario if method_id == "self-selected" else (
+        task_spec.latent_scenario if latent else task_spec.visible_scenario
+    )
+    system = _build_system_from_spec(
+        seed,
+        scenario,
+        morphogenesis_enabled=morphogenesis,
+        capability_policy=method_id,
+    )
     _run_spec(system, scenario)
     metrics = _system_metrics(system, expected_examples=point.expected_examples)
     return {
@@ -174,6 +183,7 @@ def _run_real_method(
         "criterion_reached": metrics["criterion_reached"],
         "examples_to_criterion": metrics["examples_to_criterion"],
         "model_family": "real",
+        "capability_policy": method_id,
     }
 
 
@@ -270,10 +280,26 @@ def _aggregate_point_methods(
 
     nn_aggregates = [item for item in method_aggregates if item["method_id"] in NN_METHODS]
     real_aggregates = [item for item in method_aggregates if item["method_id"] in REAL_METHODS]
+    fixed_real_aggregates = [item for item in real_aggregates if item["method_id"] != "self-selected"]
     for aggregate in real_aggregates:
         aggregate["collapse_flag"] = collapse_flag(aggregate, nn_aggregates)
     for aggregate in nn_aggregates:
         aggregate["collapse_flag"] = False
+    best_fixed_real = max(
+        fixed_real_aggregates,
+        key=lambda aggregate: (
+            float(aggregate.get("mean_exact_match_rate", 0.0)),
+            float(aggregate.get("mean_bit_accuracy", 0.0)),
+            float(aggregate.get("criterion_rate", 0.0)),
+        ),
+    ) if fixed_real_aggregates else {}
+    for aggregate in real_aggregates:
+        aggregate["oracle_method_id"] = best_fixed_real.get("method_id")
+        aggregate["oracle_exact_gap"] = round(
+            float(best_fixed_real.get("mean_exact_match_rate", 0.0))
+            - float(aggregate.get("mean_exact_match_rate", 0.0)),
+            4,
+        )
 
     best_nn = best_nn_aggregate(nn_aggregates)
     point_summary = {
@@ -286,6 +312,8 @@ def _aggregate_point_methods(
         "best_nn_method_id": best_nn.get("method_id"),
         "best_nn_mean_bit_accuracy": best_nn.get("mean_bit_accuracy"),
         "best_nn_mean_exact_match_rate": best_nn.get("mean_exact_match_rate"),
+        "oracle_method_id": best_fixed_real.get("method_id"),
+        "oracle_mean_exact_match_rate": best_fixed_real.get("mean_exact_match_rate"),
         "all_real_collapsed": all(bool(item.get("collapse_flag")) for item in real_aggregates) if real_aggregates else False,
     }
     return method_aggregates, point_summary
@@ -325,20 +353,34 @@ def _run_real_transfer(
 ) -> Dict[str, object]:
     train_task = point.tasks["task_a"]
     transfer_task = point.tasks[transfer_task_key]
-    latent = method_id == "fixed-latent"
-    morphogenesis = method_id == "growth-visible"
-    train_scenario = train_task.latent_scenario if latent else train_task.visible_scenario
-    eval_scenario = transfer_task.latent_scenario if latent else transfer_task.visible_scenario
+    latent = method_id in ("fixed-latent", "growth-latent")
+    morphogenesis = method_id in ("growth-visible", "growth-latent", "self-selected")
+    train_scenario = train_task.visible_scenario if method_id == "self-selected" else (
+        train_task.latent_scenario if latent else train_task.visible_scenario
+    )
+    eval_scenario = transfer_task.visible_scenario if method_id == "self-selected" else (
+        transfer_task.latent_scenario if latent else transfer_task.visible_scenario
+    )
 
     base_dir = ROOT / "tests_tmp" / f"ceiling_transfer_{uuid.uuid4().hex}"
     carryover_dir = base_dir / "memory"
     carryover_dir.mkdir(parents=True, exist_ok=True)
     try:
-        train_system = _build_system_from_spec(seed, train_scenario, morphogenesis_enabled=morphogenesis)
+        train_system = _build_system_from_spec(
+            seed,
+            train_scenario,
+            morphogenesis_enabled=morphogenesis,
+            capability_policy=method_id,
+        )
         _run_spec(train_system, train_scenario)
         train_system.save_memory_carryover(carryover_dir)
 
-        transfer_system = _build_system_from_spec(seed, eval_scenario, morphogenesis_enabled=morphogenesis)
+        transfer_system = _build_system_from_spec(
+            seed,
+            eval_scenario,
+            morphogenesis_enabled=morphogenesis,
+            capability_policy=method_id,
+        )
         transfer_system.load_memory_carryover(carryover_dir)
         _run_spec(transfer_system, eval_scenario)
         metrics = _system_metrics(transfer_system, expected_examples=point.expected_examples)
@@ -361,6 +403,7 @@ def _run_real_transfer(
         "examples_to_criterion": metrics["examples_to_criterion"],
         "model_family": "real",
         "in_transfer_slice": True,
+        "capability_policy": method_id,
     }
 
 
@@ -478,6 +521,56 @@ def evaluate_ceiling_benchmarks(
                 }
             )
             transfer_aggregates.append(aggregate)
+        for benchmark_id in transfer_point_ids:
+            for transfer_task_key in ("task_b", "task_c"):
+                same_point = [
+                    aggregate
+                    for aggregate in transfer_aggregates
+                    if aggregate["benchmark_id"] == benchmark_id
+                    and aggregate["transfer_task_key"] == transfer_task_key
+                    and aggregate["method_id"] in REAL_METHODS
+                    and aggregate["method_id"] != "self-selected"
+                ]
+                if not same_point:
+                    continue
+                oracle = max(
+                    same_point,
+                    key=lambda aggregate: (
+                        float(aggregate.get("mean_exact_match_rate", 0.0)),
+                        float(aggregate.get("mean_bit_accuracy", 0.0)),
+                    ),
+                )
+                for aggregate in transfer_aggregates:
+                    if (
+                        aggregate["benchmark_id"] == benchmark_id
+                        and aggregate["transfer_task_key"] == transfer_task_key
+                        and aggregate["method_id"] in REAL_METHODS
+                    ):
+                        aggregate["oracle_method_id"] = oracle["method_id"]
+                        aggregate["oracle_exact_gap"] = round(
+                            float(oracle.get("mean_exact_match_rate", 0.0))
+                            - float(aggregate.get("mean_exact_match_rate", 0.0)),
+                            4,
+                        )
+
+    self_selected_aggregates = [
+        aggregate
+        for aggregate in cold_aggregates
+        if aggregate["method_id"] == "self-selected"
+    ]
+    family_oracle_gap = {
+        family_id: round(
+            sum(float(item.get("oracle_exact_gap", 0.0)) for item in self_selected_aggregates if item["family_id"] == family_id)
+            / max(1, sum(1 for item in self_selected_aggregates if item["family_id"] == family_id)),
+            4,
+        )
+        for family_id in sorted({point.family_id for point in suite})
+    }
+    overall_oracle_gap = round(
+        sum(float(item.get("oracle_exact_gap", 0.0)) for item in self_selected_aggregates)
+        / max(len(self_selected_aggregates), 1),
+        4,
+    )
 
     return {
         "suite": [
@@ -502,6 +595,10 @@ def evaluate_ceiling_benchmarks(
             "points": point_summaries,
             "frontier": frontier,
             "transfer_point_ids": transfer_point_ids,
+            "self_selected_oracle_gap": {
+                "overall": overall_oracle_gap,
+                "by_family": family_oracle_gap,
+            },
         },
         "transfer_slice": {
             "runs": transfer_runs,

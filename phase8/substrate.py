@@ -266,6 +266,20 @@ class ConnectionSubstrate:
     def edge_key(self, neighbor_id: str) -> str:
         return self._edge_keys[neighbor_id]
 
+    def action_key(self, neighbor_id: str, transform_name: str) -> str:
+        return self._action_keys[(neighbor_id, transform_name)]
+
+    def context_action_key(
+        self,
+        neighbor_id: str,
+        transform_name: str,
+        context_bit: int,
+    ) -> str:
+        context_value = self._resolve_context_bit(context_bit)
+        if context_value is None:
+            raise KeyError((neighbor_id, transform_name, context_bit))
+        return self._context_action_keys[(neighbor_id, transform_name, context_value)]
+
     def edge_scores(self) -> Dict[str, float]:
         return {
             neighbor_id: self.support(neighbor_id)

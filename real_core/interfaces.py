@@ -7,7 +7,11 @@ from .types import (
     CycleEntry,
     DimensionScores,
     GCOStatus,
+    LocalPrediction,
     MemoryActionSpec,
+    PredictionError,
+    RecognitionState,
+    SelectionContext,
     SessionCarryover,
     SubstrateSnapshot,
 )
@@ -42,6 +46,54 @@ class CoherenceModel(Protocol):
 class Selector(Protocol):
     def select(self, available: List[str], history: List[CycleEntry]) -> Tuple[str, str]:
         """Return (action_name, mode_name)."""
+
+
+class ContextualSelector(Protocol):
+    def select_with_context(
+        self,
+        available: List[str],
+        history: List[CycleEntry],
+        context: SelectionContext,
+    ) -> Tuple[str, str]:
+        """Return (action_name, mode_name) with current-cycle context."""
+
+
+class RecognitionModel(Protocol):
+    def recognize(
+        self,
+        state_before: Dict[str, float],
+        history: List[CycleEntry],
+        *,
+        prior_coherence: float | None = None,
+        substrate: MemorySubstrateProtocol | None = None,
+    ) -> RecognitionState | None:
+        """Return recognized local problem-shape state, if any."""
+
+
+class ExpectationModel(Protocol):
+    def predict(
+        self,
+        state_before: Dict[str, float],
+        available: List[str],
+        history: List[CycleEntry],
+        *,
+        recognition: RecognitionState | None = None,
+        prior_coherence: float | None = None,
+        substrate: MemorySubstrateProtocol | None = None,
+    ) -> Dict[str, LocalPrediction]:
+        """Return local action expectations keyed by action name."""
+
+    def compare(
+        self,
+        action: str,
+        prediction: LocalPrediction | None,
+        state_after: Dict[str, float],
+        dimensions: DimensionScores,
+        coherence: float,
+        delta: float,
+        history: List[CycleEntry],
+    ) -> PredictionError | None:
+        """Return local prediction error for the executed action."""
 
 
 class Consolidator(Protocol):

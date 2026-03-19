@@ -22,6 +22,64 @@ class ActionOutcome:
 
 
 @dataclass
+class LocalPrediction:
+    """Locally generated expectation for a candidate action."""
+
+    expected_outcome: Dict[str, Any] = field(default_factory=dict)
+    expected_coherence: float | None = None
+    expected_delta: float | None = None
+    confidence: float = 0.0
+    uncertainty: float = 1.0
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class PredictionError:
+    """Difference between an anticipated and observed local outcome."""
+
+    outcome_error: Dict[str, float] = field(default_factory=dict)
+    coherence_error: float | None = None
+    delta_error: float | None = None
+    magnitude: float = 0.0
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class RecognitionMatch:
+    """Recognized resemblance to a prior local problem shape or pattern."""
+
+    label: str
+    score: float
+    source: str = "unknown"
+    valence: float = 0.0
+    strength: float = 0.0
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class RecognitionState:
+    """Current-cycle recognition summary separate from forward prediction."""
+
+    confidence: float = 0.0
+    novelty: float = 1.0
+    matches: List[RecognitionMatch] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class SelectionContext:
+    """Current-cycle anticipatory context exposed to opt-in selectors."""
+
+    cycle: int
+    state_before: Dict[str, Any] = field(default_factory=dict)
+    recognition: RecognitionState | None = None
+    predictions: Dict[str, LocalPrediction] = field(default_factory=dict)
+    prior_coherence: float | None = None
+    budget_remaining: float | None = None
+    action_costs: Dict[str, float] = field(default_factory=dict)
+
+
+@dataclass
 class CycleEntry:
     cycle: int
     action: str
@@ -33,6 +91,9 @@ class CycleEntry:
     delta: float
     gco: GCOStatus
     cost_secs: float
+    recognition: RecognitionState | None = None
+    prediction: LocalPrediction | None = None
+    prediction_error: PredictionError | None = None
 
 
 @dataclass

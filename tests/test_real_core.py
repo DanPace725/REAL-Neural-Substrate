@@ -8,12 +8,20 @@ from pathlib import Path
 
 from real_core import (
     ActionOutcome,
+    AnticipatorySelector,
     BasicConsolidationPipeline,
     CFARSelector,
+    ConstraintPattern,
     CycleEntry,
     GCOStatus,
+    LocalPrediction,
     MemorySubstrate,
+    PatternRecognitionModel,
+    PredictionError,
+    RecognitionMatch,
+    RecognitionState,
     RealCoreEngine,
+    SelectionContext,
     SessionStateStore,
     SubstrateConfig,
 )
@@ -70,6 +78,126 @@ class DummyCoherence:
         if coherence >= 0.55:
             return GCOStatus.PARTIAL
         return GCOStatus.DEGRADED
+
+
+@dataclass
+class DummyExpectationModel:
+    last_recognition: RecognitionState | None = None
+
+    def predict(
+        self,
+        state_before: dict[str, float],
+        available: list[str],
+        history: list[CycleEntry],
+        *,
+        recognition: RecognitionState | None = None,
+        prior_coherence: float | None = None,
+        substrate: object | None = None,
+    ) -> dict[str, LocalPrediction]:
+        self.last_recognition = recognition
+        signal = state_before.get("signal", 0.0)
+        base_delta = signal - 0.5
+        predictions: dict[str, LocalPrediction] = {}
+        for action in available:
+            direction = 1.0 if action == "nudge" else -1.0
+            predictions[action] = LocalPrediction(
+                expected_outcome={"signal": signal + 0.1 * direction},
+                expected_coherence=max(0.0, min(1.0, 0.55 + 0.2 * signal * direction)),
+                expected_delta=base_delta * direction
+                + (0.1 * recognition.confidence if recognition is not None else 0.0),
+                confidence=0.8 if action == "nudge" else 0.4,
+                uncertainty=0.2 if action == "nudge" else 0.6,
+                metadata={"source": "dummy_expectation"},
+            )
+        return predictions
+
+    def compare(
+        self,
+        action: str,
+        prediction: LocalPrediction | None,
+        state_after: dict[str, float],
+        dimensions: dict[str, float],
+        coherence: float,
+        delta: float,
+        history: list[CycleEntry],
+    ) -> PredictionError | None:
+        if prediction is None:
+            return None
+        predicted_signal = float(prediction.expected_outcome.get("signal", 0.0))
+        actual_signal = float(state_after.get("signal", 0.0))
+        outcome_error = actual_signal - predicted_signal
+        coherence_error = (
+            None
+            if prediction.expected_coherence is None
+            else coherence - prediction.expected_coherence
+        )
+        delta_error = (
+            None if prediction.expected_delta is None else delta - prediction.expected_delta
+        )
+        magnitude = abs(outcome_error)
+        if coherence_error is not None:
+            magnitude += abs(coherence_error)
+        if delta_error is not None:
+            magnitude += abs(delta_error)
+        return PredictionError(
+            outcome_error={"signal": outcome_error},
+            coherence_error=coherence_error,
+            delta_error=delta_error,
+            magnitude=magnitude,
+            metadata={"action": action},
+        )
+
+
+@dataclass
+class DummyRecognitionModel:
+    def recognize(
+        self,
+        state_before: dict[str, float],
+        history: list[CycleEntry],
+        *,
+        prior_coherence: float | None = None,
+        substrate: object | None = None,
+    ) -> RecognitionState | None:
+        signal = state_before.get("signal", 0.0)
+        if signal < 0.5:
+            return RecognitionState(
+                confidence=0.85,
+                novelty=0.2,
+                matches=[
+                    RecognitionMatch(
+                        label="low_signal_pattern",
+                        score=0.9,
+                        source="dummy_recognizer",
+                        strength=0.75,
+                        metadata={"signal_band": "low"},
+                    )
+                ],
+                metadata={"recognized_shape": "low_signal"},
+            )
+        return RecognitionState(
+            confidence=0.25,
+            novelty=0.8,
+            matches=[],
+            metadata={"recognized_shape": "unknown"},
+        )
+
+
+@dataclass
+class RecordingContextualSelector:
+    last_context: SelectionContext | None = None
+
+    def select(self, available: list[str], history: list[CycleEntry]) -> tuple[str, str]:
+        return available[0], "fallback"
+
+    def select_with_context(
+        self,
+        available: list[str],
+        history: list[CycleEntry],
+        context: SelectionContext,
+    ) -> tuple[str, str]:
+        self.last_context = context
+        preferred = "nudge" if "nudge" in available else available[0]
+        return preferred, "contextual"
 
 
 class TestRealCoreEngine(unittest.TestCase):
@@ -154,6 +282,183 @@ class TestRealCoreEngine(unittest.TestCase):
         self.assertEqual(len(restored.memory.entries), len(engine.memory.entries))
         self.assertEqual(restored.export_carryover().prior_coherence, carryover.prior_coherence)
 
+    def test_engine_records_optional_predictions_and_errors(self) -> None:
+        expectation_model = DummyExpectationModel()
+        engine = RealCoreEngine(
+            observer=DummyObserver(),
+            actions=DummyActions(),
+            coherence=DummyCoherence(),
+            selector=CFARSelector(exploration_rate=0.0),
+            expectation_model=expectation_model,
+            domain_name="anticipation.domain",
+        )
+
+        entry = engine.run_cycle(1)
+
+        self.assertIsNotNone(entry.prediction)
+        self.assertIsNotNone(entry.prediction_error)
+        self.assertIn("anticipation", entry.state_before)
+        anticipation = entry.state_before["anticipation"]
+        self.assertIn("predictions", anticipation)
+        self.assertIn(entry.action, anticipation["predictions"])
+        self.assertEqual(entry.prediction.metadata.get("source"), "dummy_expectation")
+        self.assertIsNone(expectation_model.last_recognition)
+
+    def test_engine_records_recognition_and_passes_it_to_prediction(self) -> None:
+        expectation_model = DummyExpectationModel()
+        engine = RealCoreEngine(
+            observer=DummyObserver(),
+            actions=DummyActions(),
+            coherence=DummyCoherence(),
+            selector=CFARSelector(exploration_rate=0.0),
+            recognition_model=DummyRecognitionModel(),
+            expectation_model=expectation_model,
+            domain_name="recognition.domain",
+        )
+
+        entry = engine.run_cycle(1)
+
+        self.assertIsNotNone(entry.recognition)
+        assert entry.recognition is not None
+        self.assertEqual(entry.recognition.metadata.get("recognized_shape"), "low_signal")
+        self.assertIn("recognition", entry.state_before)
+        self.assertEqual(
+            entry.state_before["recognition"]["matches"][0]["label"],
+            "low_signal_pattern",
+        )
+        self.assertIsNotNone(expectation_model.last_recognition)
+        assert expectation_model.last_recognition is not None
+        self.assertEqual(
+            expectation_model.last_recognition.metadata.get("recognized_shape"),
+            "low_signal",
+        )
+
+    def test_engine_passes_selection_context_to_contextual_selector(self) -> None:
+        selector = RecordingContextualSelector()
+        engine = RealCoreEngine(
+            observer=DummyObserver(),
+            actions=DummyActions(),
+            coherence=DummyCoherence(),
+            selector=selector,
+            recognition_model=DummyRecognitionModel(),
+            expectation_model=DummyExpectationModel(),
+            domain_name="contextual.selection.domain",
+        )
+
+        entry = engine.run_cycle(1)
+
+        self.assertEqual(entry.action, "nudge")
+        self.assertEqual(entry.mode, "contextual")
+        self.assertIsNotNone(selector.last_context)
+        assert selector.last_context is not None
+        self.assertEqual(selector.last_context.cycle, 1)
+        self.assertIn("nudge", selector.last_context.predictions)
+        self.assertIn("anticipation", selector.last_context.state_before)
+        self.assertIsNotNone(selector.last_context.recognition)
+
+    def test_anticipatory_selector_prefers_high_confidence_prediction(self) -> None:
+        selector = AnticipatorySelector(exploration_rate=0.0)
+        context = SelectionContext(
+            cycle=1,
+            state_before={"signal": 0.2},
+            recognition=RecognitionState(confidence=0.85, novelty=0.2),
+            predictions={
+                "rest": LocalPrediction(
+                    expected_delta=-0.2,
+                    expected_coherence=0.4,
+                    confidence=0.35,
+                    uncertainty=0.7,
+                ),
+                "nudge": LocalPrediction(
+                    expected_delta=0.25,
+                    expected_coherence=0.8,
+                    confidence=0.9,
+                    uncertainty=0.1,
+                ),
+            },
+            prior_coherence=0.5,
+            budget_remaining=1.0,
+            action_costs={"rest": 0.0, "nudge": 0.15},
+        )
+
+        action, mode = selector.select_with_context(["rest", "nudge"], [], context)
+
+        self.assertEqual(action, "nudge")
+        self.assertEqual(mode, "anticipatory")
+
+    def test_pattern_recognition_model_matches_substrate_patterns(self) -> None:
+        substrate = MemorySubstrate(SubstrateConfig(keys=("signal", "energy")))
+        substrate.constraint_patterns.append(
+            ConstraintPattern(
+                dim_scores={"signal": 0.2, "energy": 0.8},
+                dim_trends={"signal": 0.0, "energy": 0.0},
+                valence=0.6,
+                strength=0.9,
+                coherence_level=0.72,
+                match_count=4,
+                source="low_signal_energy_pattern",
+            )
+        )
+        recognizer = PatternRecognitionModel(min_match_score=0.5)
+
+        recognition = recognizer.recognize(
+            {"signal": 0.21, "energy": 0.79},
+            history=[],
+            substrate=substrate,
+        )
+
+        self.assertIsNotNone(recognition)
+        assert recognition is not None
+        self.assertGreater(recognition.confidence, 0.8)
+        self.assertLess(recognition.novelty, 0.25)
+        self.assertEqual(recognition.metadata.get("dims_source"), "state_before")
+        self.assertTrue(recognition.metadata.get("matched"))
+        self.assertEqual(recognition.matches[0].source, "low_signal_energy_pattern")
+
+    def test_engine_records_pattern_based_recognition(self) -> None:
+        substrate = MemorySubstrate(SubstrateConfig(keys=("signal", "energy")))
+        substrate.constraint_patterns.append(
+            ConstraintPattern(
+                dim_scores={"signal": 0.2, "energy": 0.8},
+                dim_trends={"signal": 0.0, "energy": 0.0},
+                strength=0.85,
+                coherence_level=0.7,
+                source="low_signal_energy_pattern",
+            )
+        )
+        expectation_model = DummyExpectationModel()
+        engine = RealCoreEngine(
+            observer=DummyObserver(),
+            actions=DummyActions(),
+            coherence=DummyCoherence(),
+            selector=CFARSelector(exploration_rate=0.0),
+            substrate=substrate,
+            recognition_model=PatternRecognitionModel(min_match_score=0.5),
+            expectation_model=expectation_model,
+            domain_name="pattern.recognition.domain",
+        )
+
+        entry = engine.run_cycle(1)
+
+        self.assertIsNotNone(entry.recognition)
+        assert entry.recognition is not None
+        self.assertTrue(entry.recognition.matches)
+        self.assertEqual(
+            entry.recognition.matches[0].source,
+            "low_signal_energy_pattern",
+        )
+        self.assertIn("recognition", entry.state_before)
+        self.assertEqual(
+            entry.state_before["recognition"]["matches"][0]["source"],
+            "low_signal_energy_pattern",
+        )
+        self.assertIsNotNone(expectation_model.last_recognition)
+        assert expectation_model.last_recognition is not None
+        self.assertEqual(
+            expectation_model.last_recognition.matches[0].source,
+            "low_signal_energy_pattern",
+        )
+
 
 class TestSessionStateStore(unittest.TestCase):
     def test_session_state_store_round_trip(self) -> None:
@@ -178,5 +483,66 @@ class TestSessionStateStore(unittest.TestCase):
 
             self.assertIsNotNone(loaded)
             self.assertEqual(len(saved.episodic_entries), len(loaded.episodic_entries))
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_session_state_store_round_trips_prediction_fields(self) -> None:
+        temp_dir = ROOT / "tests_tmp" / f"real_core_prediction_state_{uuid.uuid4().hex}"
+        temp_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            path = SessionStateStore(Path(temp_dir) / "session_state.json")
+            engine = RealCoreEngine(
+                observer=DummyObserver(),
+                actions=DummyActions(),
+                coherence=DummyCoherence(),
+                selector=CFARSelector(exploration_rate=0.0),
+                expectation_model=DummyExpectationModel(),
+                session_state_store=path,
+                domain_name="prediction.state.domain",
+            )
+            engine.run_session(cycles=2)
+
+            saved = engine.save_session_state()
+            loaded = path.load()
+
+            self.assertIsNotNone(loaded)
+            self.assertIsNotNone(saved.episodic_entries[0].prediction)
+            self.assertIsNotNone(loaded.episodic_entries[0].prediction)
+            self.assertEqual(
+                loaded.episodic_entries[0].prediction.metadata.get("source"),
+                "dummy_expectation",
+            )
+            self.assertIsNotNone(loaded.episodic_entries[0].prediction_error)
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_session_state_store_round_trips_recognition_fields(self) -> None:
+        temp_dir = ROOT / "tests_tmp" / f"real_core_recognition_state_{uuid.uuid4().hex}"
+        temp_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            path = SessionStateStore(Path(temp_dir) / "session_state.json")
+            engine = RealCoreEngine(
+                observer=DummyObserver(),
+                actions=DummyActions(),
+                coherence=DummyCoherence(),
+                selector=CFARSelector(exploration_rate=0.0),
+                recognition_model=DummyRecognitionModel(),
+                expectation_model=DummyExpectationModel(),
+                session_state_store=path,
+                domain_name="recognition.state.domain",
+            )
+            engine.run_session(cycles=2)
+
+            saved = engine.save_session_state()
+            loaded = path.load()
+
+            self.assertIsNotNone(loaded)
+            self.assertIsNotNone(saved.episodic_entries[0].recognition)
+            self.assertIsNotNone(loaded.episodic_entries[0].recognition)
+            assert loaded.episodic_entries[0].recognition is not None
+            self.assertEqual(
+                loaded.episodic_entries[0].recognition.matches[0].label,
+                "low_signal_pattern",
+            )
         finally:
             shutil.rmtree(temp_dir, ignore_errors=True)

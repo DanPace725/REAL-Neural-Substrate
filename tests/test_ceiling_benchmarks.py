@@ -5,6 +5,7 @@ import unittest
 from scripts.ceiling_benchmark_metrics import collapse_flag, frontier_summary
 from scripts.ceiling_benchmark_suite import benchmark_point_ids, benchmark_suite_by_id, build_ceiling_benchmark_suite
 from scripts.compare_ceiling_benchmarks import _run_nn_method, _run_real_method, evaluate_ceiling_benchmarks
+from scripts.compare_self_selected_smoke import evaluate_self_selected_smoke
 from scripts.neural_baseline import cvt1_stage1_examples, run_mlp_explicit
 from scripts.neural_baseline_torch import torch_available
 
@@ -43,6 +44,10 @@ class TestCeilingBenchmarkSuite(unittest.TestCase):
             self.assertIn("method_id", aggregate)
             self.assertIn("collapse_flag", aggregate)
             self.assertIn("in_transfer_slice", aggregate)
+            if aggregate["method_id"] in ("fixed-visible", "fixed-latent", "growth-visible", "growth-latent", "self-selected"):
+                self.assertIn("oracle_exact_gap", aggregate)
+                self.assertIn("oracle_method_id", aggregate)
+        self.assertIn("self_selected_oracle_gap", result["cold_start"])
 
     def test_collapse_detection_and_frontier_summary(self) -> None:
         real = {
@@ -109,6 +114,30 @@ class TestCeilingBenchmarkSuite(unittest.TestCase):
         self.assertEqual(result["benchmark_id"], "A3")
         self.assertEqual(result["method_id"], "growth-visible")
         self.assertGreaterEqual(result["expected_examples"], 108)
+
+    def test_self_selected_smoke_reports_policy(self) -> None:
+        suite = benchmark_suite_by_id()
+
+        result = _run_real_method(point=suite["A1"], task_key="task_a", method_id="self-selected", seed=13)
+
+        self.assertEqual(result["benchmark_id"], "A1")
+        self.assertEqual(result["method_id"], "self-selected")
+        self.assertEqual(result["capability_policy"], "self-selected")
+
+    def test_self_selected_lightweight_harness_returns_oracle_gap(self) -> None:
+        result = evaluate_self_selected_smoke(
+            benchmark_ids=("A1",),
+            task_keys=("task_a",),
+            seeds=(13,),
+        )
+
+        self.assertEqual(result["benchmark_ids"], ["A1"])
+        self.assertEqual(result["task_keys"], ["task_a"])
+        self.assertEqual(result["aggregate"]["point_count"], 1)
+        self.assertIn("mean_self_selected_oracle_gap", result["aggregate"])
+        self.assertEqual(result["results"][0]["benchmark_id"], "A1")
+        method_ids = [item["method_id"] for item in result["results"][0]["methods"]]
+        self.assertIn("self-selected", method_ids)
 
     @unittest.skipUnless(torch_available(), "PyTorch is not installed")
     def test_torch_smoke_easy_and_hard_points(self) -> None:

@@ -4,7 +4,111 @@ import json
 from dataclasses import asdict
 from pathlib import Path
 
-from .types import CycleEntry, GCOStatus, SessionCarryover, SubstrateSnapshot
+from .types import (
+    CycleEntry,
+    GCOStatus,
+    LocalPrediction,
+    PredictionError,
+    RecognitionMatch,
+    RecognitionState,
+    SessionCarryover,
+    SubstrateSnapshot,
+)
+
+
+def _serialize_recognition(recognition: RecognitionState | None) -> dict | None:
+    if recognition is None:
+        return None
+    return {
+        "confidence": recognition.confidence,
+        "novelty": recognition.novelty,
+        "matches": [
+            {
+                "label": match.label,
+                "score": match.score,
+                "source": match.source,
+                "valence": match.valence,
+                "strength": match.strength,
+                "metadata": dict(match.metadata),
+            }
+            for match in recognition.matches
+        ],
+        "metadata": dict(recognition.metadata),
+    }
+
+
+def _deserialize_recognition(data: dict | None) -> RecognitionState | None:
+    if not data:
+        return None
+    return RecognitionState(
+        confidence=float(data.get("confidence", 0.0)),
+        novelty=float(data.get("novelty", 1.0)),
+        matches=[
+            RecognitionMatch(
+                label=str(item.get("label", "unknown")),
+                score=float(item.get("score", 0.0)),
+                source=str(item.get("source", "unknown")),
+                valence=float(item.get("valence", 0.0)),
+                strength=float(item.get("strength", 0.0)),
+                metadata=dict(item.get("metadata", {})),
+            )
+            for item in data.get("matches", [])
+        ],
+        metadata=dict(data.get("metadata", {})),
+    )
+
+
+def _serialize_prediction(prediction: LocalPrediction | None) -> dict | None:
+    if prediction is None:
+        return None
+    return {
+        "expected_outcome": dict(prediction.expected_outcome),
+        "expected_coherence": prediction.expected_coherence,
+        "expected_delta": prediction.expected_delta,
+        "confidence": prediction.confidence,
+        "uncertainty": prediction.uncertainty,
+        "metadata": dict(prediction.metadata),
+    }
+
+
+def _deserialize_prediction(data: dict | None) -> LocalPrediction | None:
+    if not data:
+        return None
+    return LocalPrediction(
+        expected_outcome=dict(data.get("expected_outcome", {})),
+        expected_coherence=data.get("expected_coherence"),
+        expected_delta=data.get("expected_delta"),
+        confidence=float(data.get("confidence", 0.0)),
+        uncertainty=float(data.get("uncertainty", 1.0)),
+        metadata=dict(data.get("metadata", {})),
+    )
+
+
+def _serialize_prediction_error(error: PredictionError | None) -> dict | None:
+    if error is None:
+        return None
+    return {
+        "outcome_error": dict(error.outcome_error),
+        "coherence_error": error.coherence_error,
+        "delta_error": error.delta_error,
+        "magnitude": error.magnitude,
+        "metadata": dict(error.metadata),
+    }
+
+
+def _deserialize_prediction_error(data: dict | None) -> PredictionError | None:
+    if not data:
+        return None
+    return PredictionError(
+        outcome_error={
+            str(key): float(value)
+            for key, value in dict(data.get("outcome_error", {})).items()
+        },
+        coherence_error=data.get("coherence_error"),
+        delta_error=data.get("delta_error"),
+        magnitude=float(data.get("magnitude", 0.0)),
+        metadata=dict(data.get("metadata", {})),
+    )
 
 
 def _serialize_cycle_entry(entry: CycleEntry) -> dict:
@@ -19,6 +123,9 @@ def _serialize_cycle_entry(entry: CycleEntry) -> dict:
         "delta": entry.delta,
         "gco": entry.gco.value if hasattr(entry.gco, "value") else str(entry.gco),
         "cost_secs": entry.cost_secs,
+        "recognition": _serialize_recognition(entry.recognition),
+        "prediction": _serialize_prediction(entry.prediction),
+        "prediction_error": _serialize_prediction_error(entry.prediction_error),
     }
 
 
@@ -37,6 +144,11 @@ def _deserialize_cycle_entry(data: dict) -> CycleEntry:
         delta=float(data.get("delta", 0.0)),
         gco=gco,
         cost_secs=float(data.get("cost_secs", 0.0)),
+        recognition=_deserialize_recognition(data.get("recognition")),
+        prediction=_deserialize_prediction(data.get("prediction")),
+        prediction_error=_deserialize_prediction_error(
+            data.get("prediction_error")
+        ),
     )
 
 

@@ -1,16 +1,21 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import inspect
 from math import isfinite
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from .interfaces import (
     ActionBackend,
     CoherenceModel,
     ConsolidationPipeline,
+    ContextualSelector,
     DomainMemoryBinding,
+    ExpectationModel,
     MemorySubstrateProtocol,
     ObservationAdapter,
+    RecognitionModel,
+    Selector,
 )
 from .consolidation import BasicConsolidationPipeline
 from .memory import EpisodicMemory
@@ -22,7 +27,11 @@ from .types import (
     ActionOutcome,
     CycleEntry,
     DimensionScores,
+    LocalPrediction,
     MemoryActionSpec,
+    PredictionError,
+    RecognitionState,
+    SelectionContext,
     SessionCarryover,
 )
 
@@ -44,12 +53,14 @@ class RealCoreEngine:
         observer: ObservationAdapter,
         actions: ActionBackend,
         coherence: CoherenceModel,
-        selector: Optional[CFARSelector] = None,
+        selector: Optional[Selector] = None,
         mesh: Optional[TiltRegulatoryMesh] = None,
         memory: Optional[EpisodicMemory] = None,
         substrate: Optional[MemorySubstrateProtocol] = None,
         consolidation_pipeline: Optional[ConsolidationPipeline] = None,
         memory_binding: Optional[DomainMemoryBinding] = None,
+        recognition_model: Optional[RecognitionModel] = None,
+        expectation_model: Optional[ExpectationModel] = None,
         domain_name: str = "unknown",
         session_history: Optional[SessionHistory] = None,
         session_state_store: Optional[SessionStateStore] = None,
@@ -64,6 +75,8 @@ class RealCoreEngine:
         self.substrate = substrate
         self.consolidation_pipeline = consolidation_pipeline
         self.memory_binding = memory_binding
+        self.recognition_model = recognition_model
+        self.expectation_model = expectation_model
         self.domain_name = domain_name
         self.session_history = session_history
         self.session_state_store = session_state_store
@@ -71,6 +84,157 @@ class RealCoreEngine:
         self.budget_remaining = session_budget
         self._prior_coherence: Optional[float] = None
         self._memory_action_specs: Dict[str, MemoryActionSpec] = {}
+
+    def _recognize_state(
+        self,
+        state_before: Dict[str, float],
+    ) -> RecognitionState | None:
+        if self.recognition_model is None:
+            return None
+        return self.recognition_model.recognize(
+            state_before,
+            self.memory.entries,
+            prior_coherence=self._prior_coherence,
+            substrate=self.substrate,
+        )
+
+    def _predict_actions(
+        self,
+        state_before: Dict[str, float],
+        available: list[str],
+        recognition: RecognitionState | None,
+    ) -> Dict[str, LocalPrediction]:
+        if self.expectation_model is None or not available:
+            return {}
+        predict = self.expectation_model.predict
+        params = inspect.signature(predict).parameters
+        predict_kwargs: Dict[str, Any] = {
+            "prior_coherence": self._prior_coherence,
+            "substrate": self.substrate,
+        }
+        if "recognition" in params:
+            predict_kwargs["recognition"] = recognition
+        predictions = predict(
+            state_before,
+            available,
+            self.memory.entries,
+            **predict_kwargs,
+        )
+        return {
+            action: prediction
+            for action, prediction in predictions.items()
+            if action in available
+        }
+
+    def _recognition_summary(
+        self,
+        recognition: RecognitionState | None,
+    ) -> Dict[str, Any] | None:
+        if recognition is None:
+            return None
+        return {
+            "confidence": recognition.confidence,
+            "novelty": recognition.novelty,
+            "matches": [
+                {
+                    "label": match.label,
+                    "score": match.score,
+                    "source": match.source,
+                    "valence": match.valence,
+                    "strength": match.strength,
+                }
+                for match in recognition.matches
+            ],
+        }
+
+    def _prediction_summary(
+        self,
+        predictions: Dict[str, LocalPrediction],
+    ) -> Dict[str, Any] | None:
+        if not predictions:
+            return None
+        return {
+            action: {
+                "confidence": prediction.confidence,
+                "uncertainty": prediction.uncertainty,
+                "expected_coherence": prediction.expected_coherence,
+                "expected_delta": prediction.expected_delta,
+            }
+            for action, prediction in predictions.items()
+        }
+
+    def _recordable_before_state(
+        self,
+        before: Dict[str, float],
+        recognition: RecognitionState | None,
+        predictions: Dict[str, LocalPrediction],
+    ) -> Dict[str, Any]:
+        recordable: Dict[str, Any] = dict(before)
+        recognition_summary = self._recognition_summary(recognition)
+        if recognition_summary is not None:
+            recordable["recognition"] = recognition_summary
+        summary = self._prediction_summary(predictions)
+        if summary is not None:
+            recordable["anticipation"] = {"predictions": summary}
+        return recordable
+
+    def _prediction_error(
+        self,
+        action: str,
+        prediction: LocalPrediction | None,
+        state_after: Dict[str, float],
+        dimensions: DimensionScores,
+        coherence: float,
+        delta: float,
+    ) -> PredictionError | None:
+        if self.expectation_model is None:
+            return None
+        return self.expectation_model.compare(
+            action,
+            prediction,
+            state_after,
+            dimensions,
+            coherence,
+            delta,
+            self.memory.entries,
+        )
+
+    def _selection_context(
+        self,
+        cycle: int,
+        state_before: Dict[str, Any],
+        recognition: RecognitionState | None,
+        predictions: Dict[str, LocalPrediction],
+        available: list[str],
+    ) -> SelectionContext:
+        return SelectionContext(
+            cycle=cycle,
+            state_before=state_before,
+            recognition=recognition,
+            predictions=predictions,
+            prior_coherence=self._prior_coherence,
+            budget_remaining=None
+            if not isfinite(self.session_budget)
+            else self.budget_remaining,
+            action_costs={
+                action: self._estimate_action_cost(action) for action in available
+            },
+        )
+
+    def _select_action(
+        self,
+        available: list[str],
+        context: SelectionContext,
+    ) -> tuple[str, str]:
+        selector = self.selector
+        if hasattr(selector, "select_with_context"):
+            contextual_selector = selector
+            return contextual_selector.select_with_context(  # type: ignore[union-attr]
+                available,
+                self.memory.entries,
+                context,
+            )
+        return selector.select(available, self.memory.entries)
 
     def _effective_consolidation_pipeline(self) -> ConsolidationPipeline:
         if self.consolidation_pipeline is not None:
@@ -221,10 +385,24 @@ class RealCoreEngine:
     def run_cycle(self, cycle: int) -> CycleEntry:
         before_raw = self.observer.observe(cycle)
         before = self._modulate_observation(before_raw, cycle)
+        recognition = self._recognize_state(before)
 
         available = self._available_actions()
         available = self._affordable_actions(available)
-        action, mode = self.selector.select(available, self.memory.entries)
+        predictions = self._predict_actions(before, available, recognition)
+        recordable_before = self._recordable_before_state(
+            before,
+            recognition,
+            predictions,
+        )
+        selection_context = self._selection_context(
+            cycle,
+            recordable_before,
+            recognition,
+            predictions,
+            available,
+        )
+        action, mode = self._select_action(available, selection_context)
         outcome = self._execute_action(action)
         self.budget_remaining = max(
             0.0, self.budget_remaining - max(0.0, outcome.cost_secs)
@@ -244,18 +422,30 @@ class RealCoreEngine:
         )
         self._prior_coherence = coherence
         gco = self.coherence.gco_status(dimensions, coherence)
+        prediction = predictions.get(action)
+        prediction_error = self._prediction_error(
+            action,
+            prediction,
+            after,
+            dimensions,
+            coherence,
+            delta,
+        )
 
         entry = CycleEntry(
             cycle=cycle,
             action=action,
             mode=mode,
-            state_before=before,
+            state_before=recordable_before,
             state_after=after,
             dimensions=dimensions,
             coherence=coherence,
             delta=delta,
             gco=gco,
             cost_secs=outcome.cost_secs,
+            recognition=recognition,
+            prediction=prediction,
+            prediction_error=prediction_error,
         )
         self.memory.record(entry)
 

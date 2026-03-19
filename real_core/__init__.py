@@ -5,16 +5,29 @@ from .types import (
     CycleEntry,
     DimensionScores,
     GCOStatus,
+    LocalPrediction,
     MemoryActionSpec,
+    PredictionError,
+    RecognitionMatch,
+    RecognitionState,
+    SelectionContext,
     SessionCarryover,
     SubstrateSnapshot,
 )
 from .engine import RealCoreEngine
 from .episodic import EpisodicMemory
-from .interfaces import ConsolidationPipeline, DomainMemoryBinding, MemorySubstrateProtocol
-from .selector import CFARSelector, SelectionMode
+from .interfaces import (
+    ConsolidationPipeline,
+    ContextualSelector,
+    DomainMemoryBinding,
+    ExpectationModel,
+    MemorySubstrateProtocol,
+    RecognitionModel,
+)
+from .selector import AnticipatorySelector, CFARSelector, SelectionMode
 from .mesh import TiltRegulatoryMesh
 from .patterns import ConstraintPattern
+from .recognition import PatternRecognitionModel
 from .consolidation import BasicConsolidationPipeline
 from .session import SessionHistory, SessionRecord
 from .session_state import SessionStateStore
@@ -25,18 +38,28 @@ __all__ = [
     "CycleEntry",
     "DimensionScores",
     "GCOStatus",
+    "LocalPrediction",
     "MemoryActionSpec",
+    "PredictionError",
+    "RecognitionMatch",
+    "RecognitionState",
+    "SelectionContext",
     "RealCoreEngine",
     "SessionCarryover",
     "SubstrateSnapshot",
     "EpisodicMemory",
     "ConstraintPattern",
+    "PatternRecognitionModel",
     "BasicConsolidationPipeline",
     "MemorySubstrate",
     "SubstrateConfig",
     "MemorySubstrateProtocol",
     "ConsolidationPipeline",
+    "ContextualSelector",
     "DomainMemoryBinding",
+    "ExpectationModel",
+    "AnticipatorySelector",
+    "RecognitionModel",
     "CFARSelector",
     "SelectionMode",
     "TiltRegulatoryMesh",

@@ -20,6 +20,7 @@ from .adapters import (
     LocalNodeObservationAdapter,
 )
 from .environment import NativeSubstrateSystem, RoutingEnvironment
+from .environment import CapabilityControlConfig
 from .models import FeedbackPulse, NodeRuntimeState, SignalPacket, SignalSpec
 from .node_agent import NodeAgent
 from .substrate import ConnectionSubstrate, ConnectionSubstrateConfig
@@ -36,6 +37,7 @@ from .topology import (
 __all__ = [
     "ConnectionSubstrate",
     "ConnectionSubstrateConfig",
+    "CapabilityControlConfig",
     "EdgeSpec",
     "GrowthProposal",
     "AdmissionSubstrate",

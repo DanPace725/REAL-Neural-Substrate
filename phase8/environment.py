@@ -52,6 +52,14 @@ LATENT_TRANSFER_ADAPTATION_DAMP_BLEND = 0.95
 LATENT_TRANSFER_ADAPTATION_REWRITE_SCALE = 0.10
 LATENT_TRANSFER_EFFECTIVE_THRESHOLD_BOOST = 0.18
 LATENT_GROWTH_IDLE_TASK_WINDOW = 1
+CAPABILITY_LATENT_IDLE_TASK_WINDOW = 12
+CAPABILITY_POLICIES = (
+    "fixed-visible",
+    "fixed-latent",
+    "growth-visible",
+    "growth-latent",
+    "self-selected",
+)
 
 
 def _edge_id(source_id: str, target_id: str) -> str:
@@ -119,20 +127,40 @@ def _task_context_candidates(task_id: str | None) -> tuple[int, ...]:
     return tuple(sorted(int(context_bit) for context_bit in transform_map))
 
 
+def _sequence_window_for_task(task_id: str | None) -> int | None:
+    task_key = str(task_id or "")
+    if task_key.startswith("ceiling_b1"):
+        return 1
+    if task_key.startswith("ceiling_b2"):
+        return 2
+    if task_key.startswith("ceiling_b3"):
+        return 4
+    if task_key.startswith("ceiling_b4"):
+        return 8
+    return None
+
+
 def _sequence_context_estimate_for_task(
     task_id: str | None,
     *,
-    prior_parity: int | None,
-    previous_prior_parity: int | None,
+    prior_parities: Sequence[int] | None,
 ) -> tuple[int | None, float]:
     task_key = str(task_id or "")
+    parity_history = [int(bit) & 1 for bit in list(prior_parities or [])]
     if task_key.startswith("ceiling_c"):
-        if prior_parity is None or previous_prior_parity is None:
+        if len(parity_history) < 2:
             return None, 0.0
-        return int(prior_parity + 2 * previous_prior_parity), 0.95
-    if prior_parity is None:
+        low = int(parity_history[-1])
+        high = int(parity_history[-2])
+        return int(low + 2 * high), 0.95
+    sequence_window = _sequence_window_for_task(task_id)
+    if sequence_window is not None:
+        relevant = parity_history[-sequence_window:]
+        padded = [0 for _ in range(max(sequence_window - len(relevant), 0))] + relevant
+        return int(sum(padded) % 2), 0.95
+    if not parity_history:
         return None, 0.0
-    return int(prior_parity), 0.95
+    return int(parity_history[-1]), 0.95
 
 
 def _context_threshold_scale(context_count: int) -> float:
@@ -170,6 +198,7 @@ class LatentTaskState:
     last_input_bits: List[int] = field(default_factory=list)
     sequence_context_estimate: int | None = None
     sequence_context_confidence: float = 0.0
+    sequence_recent_parities: List[int] = field(default_factory=list)
     sequence_prev_parity: int | None = None
     sequence_prev_bits: List[int] = field(default_factory=list)
     sequence_change_ratio: float = 0.0
@@ -211,6 +240,7 @@ class LatentTaskState:
             "last_input_bits": list(self.last_input_bits),
             "sequence_context_estimate": self.sequence_context_estimate,
             "sequence_context_confidence": self.sequence_context_confidence,
+            "sequence_recent_parities": list(self.sequence_recent_parities),
             "sequence_prev_parity": self.sequence_prev_parity,
             "sequence_prev_bits": list(self.sequence_prev_bits),
             "sequence_change_ratio": self.sequence_change_ratio,
@@ -261,6 +291,10 @@ class LatentTaskState:
         if state.sequence_context_estimate is not None:
             state.sequence_context_estimate = int(state.sequence_context_estimate)
         state.sequence_context_confidence = float(payload.get("sequence_context_confidence", 0.0))
+        state.sequence_recent_parities = [
+            int(bit)
+            for bit in payload.get("sequence_recent_parities", [])
+        ]
         state.sequence_prev_parity = payload.get("sequence_prev_parity")
         if state.sequence_prev_parity is not None:
             state.sequence_prev_parity = int(state.sequence_prev_parity)
@@ -605,8 +639,9 @@ class LatentContextTracker:
         if state.last_packet_id == packet_id:
             return
         current_bits = [1 if int(bit) else 0 for bit in list(input_bits or [])]
-        prior_parity = _parity_bits(state.last_input_bits)
-        previous_prior_parity = state.sequence_prev_parity
+        current_parity = _parity_bits(current_bits)
+        prior_parities = list(state.sequence_recent_parities)
+        prior_parity = prior_parities[-1] if prior_parities else None
         width = max(len(current_bits), len(state.last_input_bits), 4)
         padded_current = current_bits + [0] * max(0, width - len(current_bits))
         padded_previous = state.last_input_bits + [0] * max(0, width - len(state.last_input_bits))
@@ -616,8 +651,7 @@ class LatentContextTracker:
         ]
         state.sequence_context_estimate, state.sequence_context_confidence = _sequence_context_estimate_for_task(
             state.task_id,
-            prior_parity=prior_parity,
-            previous_prior_parity=previous_prior_parity,
+            prior_parities=prior_parities,
         )
         state.sequence_prev_parity = prior_parity
         state.sequence_prev_bits = list(padded_previous[:4])
@@ -626,6 +660,8 @@ class LatentContextTracker:
         state.sequence_repeat_input = 1.0 if state.last_input_bits and current_bits == state.last_input_bits else 0.0
         state.last_packet_id = str(packet_id)
         state.last_input_bits = current_bits
+        if current_parity is not None:
+            state.sequence_recent_parities = (prior_parities + [int(current_parity)])[-8:]
 
     def observe_task(self, task_id: str | None, cycle: int) -> dict[str, object]:
         state = self._state_for(task_id)
@@ -789,6 +825,72 @@ class LatentContextTracker:
         return tracker
 
 
+@dataclass
+class CapabilityControlConfig:
+    latent_support_decay: float = 0.88
+    latent_support_gain: float = 0.18
+    latent_activation_threshold: float = 0.44
+    latent_visible_suppression_threshold: float = 0.58
+    latent_maintenance_cost: float = 0.006
+    growth_support_decay: float = 0.90
+    growth_support_gain: float = 0.10
+    growth_activation_threshold: float = 0.62
+    growth_stability_threshold: float = 0.48
+    growth_maintenance_cost: float = 0.005
+
+
+@dataclass
+class CapabilityState:
+    latent_recruitment_pressure: float = 0.0
+    latent_confidence_estimate: float = 0.0
+    latent_support: float = 0.0
+    latent_enabled: bool = False
+    visible_context_trust: float = 1.0
+    growth_recruitment_pressure: float = 0.0
+    growth_stabilization_readiness: float = 0.0
+    growth_support: float = 0.0
+    growth_enabled: bool = False
+    latent_recruitment_cycles: List[int] = field(default_factory=list)
+    growth_recruitment_cycles: List[int] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "latent_recruitment_pressure": float(self.latent_recruitment_pressure),
+            "latent_confidence_estimate": float(self.latent_confidence_estimate),
+            "latent_support": float(self.latent_support),
+            "latent_enabled": bool(self.latent_enabled),
+            "visible_context_trust": float(self.visible_context_trust),
+            "growth_recruitment_pressure": float(self.growth_recruitment_pressure),
+            "growth_stabilization_readiness": float(self.growth_stabilization_readiness),
+            "growth_support": float(self.growth_support),
+            "growth_enabled": bool(self.growth_enabled),
+            "latent_recruitment_cycles": [int(value) for value in self.latent_recruitment_cycles],
+            "growth_recruitment_cycles": [int(value) for value in self.growth_recruitment_cycles],
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, object] | None) -> "CapabilityState":
+        if not payload:
+            return cls()
+        return cls(
+            latent_recruitment_pressure=float(payload.get("latent_recruitment_pressure", 0.0)),
+            latent_confidence_estimate=float(payload.get("latent_confidence_estimate", 0.0)),
+            latent_support=float(payload.get("latent_support", 0.0)),
+            latent_enabled=bool(payload.get("latent_enabled", False)),
+            visible_context_trust=float(payload.get("visible_context_trust", 1.0)),
+            growth_recruitment_pressure=float(payload.get("growth_recruitment_pressure", 0.0)),
+            growth_stabilization_readiness=float(payload.get("growth_stabilization_readiness", 0.0)),
+            growth_support=float(payload.get("growth_support", 0.0)),
+            growth_enabled=bool(payload.get("growth_enabled", False)),
+            latent_recruitment_cycles=[
+                int(value) for value in payload.get("latent_recruitment_cycles", [])
+            ],
+            growth_recruitment_cycles=[
+                int(value) for value in payload.get("growth_recruitment_cycles", [])
+            ],
+        )
+
+
 def _apply_transform(bits: Sequence[int], transform_name: str | None) -> List[int]:
     transform = _normalize_transform_name(transform_name)
     payload = [1 if int(bit) else 0 for bit in bits]
@@ -891,6 +993,8 @@ class RoutingEnvironment:
     source_sequence_context_enabled: bool = True
     latent_transfer_split_enabled: bool = True
     transfer_adaptation_window: int = 10
+    capability_policy: str = "fixed-visible"
+    capability_control_config: CapabilityControlConfig = field(default_factory=CapabilityControlConfig)
 
     def __post_init__(self) -> None:
         if self.topology_state is None:
@@ -940,6 +1044,10 @@ class RoutingEnvironment:
             node_id: LatentContextTracker()
             for node_id in self.node_states
         }
+        self.capability_states: Dict[str, CapabilityState] = {
+            node_id: self._initial_capability_state()
+            for node_id in self.node_states
+        }
         self.carryover_task_ids: set[str] = set()
         self.transfer_adaptation_start_cycle = 0
 
@@ -973,6 +1081,22 @@ class RoutingEnvironment:
             node_id: prior_trackers.get(node_id, LatentContextTracker())
             for node_id in self.node_states
         }
+        prior_capabilities = getattr(self, "capability_states", {})
+        self.capability_states = {
+            node_id: prior_capabilities.get(node_id, self._initial_capability_state())
+            for node_id in self.node_states
+        }
+
+    def _initial_capability_state(self) -> CapabilityState:
+        latent_enabled = self.capability_policy in ("fixed-latent", "growth-latent")
+        growth_enabled = self.capability_policy in ("growth-visible", "growth-latent")
+        return CapabilityState(
+            latent_support=1.0 if latent_enabled else 0.0,
+            latent_enabled=latent_enabled,
+            visible_context_trust=0.0 if latent_enabled else 1.0,
+            growth_support=1.0 if growth_enabled else 0.0,
+            growth_enabled=growth_enabled,
+        )
 
     def agent_ids(self) -> List[str]:
         return sorted(
@@ -1074,6 +1198,12 @@ class RoutingEnvironment:
             for node_id, tracker in self.latent_context_trackers.items()
         }
 
+    def export_capability_state(self) -> dict[str, object]:
+        return {
+            node_id: state.to_dict()
+            for node_id, state in self.capability_states.items()
+        }
+
     def configure_transfer_regime(
         self,
         *,
@@ -1115,6 +1245,237 @@ class RoutingEnvironment:
             for node_id in self.node_states
         }
 
+    def load_capability_state(self, payload: dict[str, object] | None) -> None:
+        payload = payload or {}
+        self.capability_states = {
+            node_id: CapabilityState.from_dict(
+                dict(payload.get(node_id, {})) if node_id in payload else None
+            )
+            for node_id in self.node_states
+        }
+
+    def capability_snapshot(self, node_id: str) -> dict[str, object]:
+        state = self.capability_states.get(node_id, self._initial_capability_state())
+        return {
+            "latent_recruitment_pressure": round(state.latent_recruitment_pressure, 5),
+            "latent_confidence_estimate": round(state.latent_confidence_estimate, 5),
+            "latent_support": round(state.latent_support, 5),
+            "latent_enabled": bool(state.latent_enabled),
+            "visible_context_trust": round(state.visible_context_trust, 5),
+            "growth_recruitment_pressure": round(state.growth_recruitment_pressure, 5),
+            "growth_stabilization_readiness": round(state.growth_stabilization_readiness, 5),
+            "growth_support": round(state.growth_support, 5),
+            "growth_enabled": bool(state.growth_enabled),
+            "latent_recruitment_cycles": list(state.latent_recruitment_cycles),
+            "growth_recruitment_cycles": list(state.growth_recruitment_cycles),
+        }
+
+    def capability_summary(self) -> dict[str, object]:
+        return {
+            node_id: self.capability_snapshot(node_id)
+            for node_id in self.node_states
+        }
+
+    def _visible_context_exposed(
+        self,
+        node_id: str,
+        packet: SignalPacket | None,
+    ) -> bool:
+        if packet is None or packet.context_bit is None:
+            return False
+        if self.capability_policy in ("fixed-visible", "growth-visible"):
+            return True
+        if self.capability_policy in ("fixed-latent", "growth-latent"):
+            return False
+        state = self.capability_states.get(node_id)
+        if state is None:
+            return True
+        return (
+            state.visible_context_trust
+            >= self.capability_control_config.latent_visible_suppression_threshold
+        )
+
+    def _latent_tracker_engaged(
+        self,
+        node_id: str,
+        packet: SignalPacket | None,
+    ) -> bool:
+        if packet is None or packet.task_id is None:
+            return False
+        # In self-selected mode, the source can observe sequence evidence in parallel
+        # with visible context so latent support can accumulate before explicit failure.
+        if (
+            self.capability_policy == "self-selected"
+            and node_id == self.source_id
+            and self.source_sequence_context_enabled
+        ):
+            return True
+        return packet.context_bit is None or not self._visible_context_exposed(node_id, packet)
+
+    def _capability_focus_packet(self, node_id: str) -> SignalPacket | None:
+        packets = self.inboxes.get(node_id, [])
+        if packets:
+            return packets[0]
+        if node_id == self.source_id and self.source_buffer:
+            return self.source_buffer[0]
+        return None
+
+    def _update_capability_states(self) -> None:
+        if self.capability_policy != "self-selected":
+            return
+        config = self.capability_control_config
+        for node_id, runtime in self.node_states.items():
+            capability = self.capability_states.setdefault(node_id, self._initial_capability_state())
+            packets = self.inboxes.get(node_id, [])
+            head_packet = self._capability_focus_packet(node_id)
+            task_active = 1.0 if head_packet is not None and head_packet.task_id is not None else 0.0
+            visible_context_present = (
+                1.0
+                if head_packet is not None and head_packet.context_bit is not None
+                else 0.0
+            )
+            contradiction = self._contradiction_pressure(node_id)
+            local_load = min(1.0, len(packets) / max(self.inbox_capacity, 1))
+            mismatch_signal = 0.0
+            if runtime.received_feedback > 0:
+                mismatch_signal = max(0.0, 1.0 - min(1.0, runtime.last_match_ratio))
+            recent_latent = self._recent_latent_task_summary(node_id)
+            latent_confidence = float(recent_latent.get("confidence", 0.0))
+            latent_recency = float(recent_latent.get("recency_weight", 0.0))
+            effective_latent_confidence = latent_confidence * (0.35 + 0.65 * latent_recency)
+            visible_reliability = (
+                visible_context_present
+                * max(0.0, 1.0 - 0.75 * contradiction)
+                * max(0.0, 1.0 - 0.60 * mismatch_signal)
+            )
+            latent_pressure = max(
+                0.0,
+                min(
+                    1.0,
+                    0.60 * contradiction * task_active
+                    + 0.48 * mismatch_signal * task_active
+                    + 0.06 * local_load * task_active
+                    + 0.08 * float(recent_latent.get("growth_ready", 0.0))
+                    + 0.12 * effective_latent_confidence
+                    + 0.18 * effective_latent_confidence * max(0.0, 1.0 - capability.visible_context_trust)
+                    - 0.18 * visible_reliability
+                    - 0.06 * (1.0 - task_active),
+                ),
+            )
+            prior_latent_enabled = capability.latent_enabled
+            capability.latent_recruitment_pressure = latent_pressure
+            capability.latent_confidence_estimate = effective_latent_confidence
+            capability.latent_support = max(
+                0.0,
+                min(
+                    1.0,
+                    capability.latent_support * config.latent_support_decay
+                    + config.latent_support_gain * latent_pressure
+                    + 0.18 * effective_latent_confidence
+                    - 0.12 * visible_reliability
+                    - 0.08 * (1.0 - task_active),
+                ),
+            )
+            capability.latent_enabled = (
+                capability.latent_support >= config.latent_activation_threshold
+            )
+            capability.visible_context_trust = max(
+                0.0,
+                min(
+                    1.0,
+                    capability.visible_context_trust * (0.98 if task_active < 0.5 else 1.0)
+                    if task_active < 0.5
+                    else visible_context_present
+                    * (
+                        0.65 * visible_reliability
+                        + 0.20 * max(0.0, 1.0 - contradiction)
+                        + 0.15 * max(0.0, 1.0 - effective_latent_confidence)
+                    ),
+                ),
+            )
+            if capability.latent_enabled and not prior_latent_enabled:
+                capability.latent_recruitment_cycles.append(self.current_cycle)
+
+            node_spec = self.topology_state.node_specs.get(node_id) if self.topology_state is not None else None
+            routing_feedback = (
+                max(0.0, min(1.0, float(node_spec.feedback_recent)))
+                if node_spec is not None
+                else 0.0
+            )
+            stabilization = max(
+                0.0,
+                min(
+                    1.0,
+                    0.42 * routing_feedback
+                    + 0.28 * max(float(recent_latent.get("growth_ready", 0.0)), visible_context_present)
+                    + 0.24 * max(0.0, min(1.0, runtime.atp / max(runtime.max_atp, 1e-9)))
+                    - 0.22 * contradiction,
+                ),
+            )
+            growth_pressure = max(
+                0.0,
+                min(
+                    1.0,
+                    0.16 * contradiction * task_active
+                + 0.18 * local_load * task_active
+                + (
+                    0.12 * min(1.0, len(self.source_buffer) / max(self.inbox_capacity, 1))
+                    if node_id == self.source_id
+                    else 0.0
+                )
+                + 0.14 * routing_feedback
+                + (
+                    0.08 * max(0.0, min(1.0, float(node_spec.net_energy_recent)))
+                    if node_spec is not None
+                    else 0.0
+                )
+                + 0.06 * capability.growth_support
+                - 0.28 * max(0.0, 1.0 - stabilization)
+                - 0.18 * capability.latent_enabled * max(0.0, 1.0 - effective_latent_confidence)
+                - 0.10 * visible_reliability,
+                ),
+            )
+            prior_growth_enabled = capability.growth_enabled
+            capability.growth_recruitment_pressure = max(0.0, min(1.0, growth_pressure))
+            capability.growth_stabilization_readiness = stabilization
+            capability.growth_support = max(
+                0.0,
+                min(
+                    1.0,
+                    capability.growth_support * config.growth_support_decay
+                    + config.growth_support_gain * capability.growth_recruitment_pressure
+                    + 0.06 * stabilization
+                    - 0.12 * max(0.0, 1.0 - stabilization),
+                ),
+            )
+            capability.growth_enabled = (
+                capability.growth_support >= config.growth_activation_threshold
+                and stabilization >= config.growth_stability_threshold
+                and (
+                    not capability.latent_enabled
+                    or effective_latent_confidence >= LATENT_CONTEXT_CONFIDENCE_THRESHOLD
+                    or visible_context_present >= 0.5
+                )
+            )
+            if capability.growth_enabled and not prior_growth_enabled:
+                capability.growth_recruitment_cycles.append(self.current_cycle)
+
+    def _apply_capability_costs(self) -> None:
+        if self.capability_policy != "self-selected":
+            return
+        config = self.capability_control_config
+        for node_id, capability in self.capability_states.items():
+            runtime = self.node_states.get(node_id)
+            if runtime is None:
+                continue
+            total_cost = 0.0
+            if capability.latent_enabled:
+                total_cost += config.latent_maintenance_cost * (0.5 + capability.latent_support)
+            if capability.growth_enabled:
+                total_cost += config.growth_maintenance_cost * (0.5 + capability.growth_support)
+            if total_cost > 0.0:
+                runtime.atp = max(0.0, runtime.atp - total_cost)
+
     def _latent_snapshot(
         self,
         node_id: str,
@@ -1138,6 +1499,7 @@ class RoutingEnvironment:
             return {
                 "active": 0.0,
                 "task_age": 0.0,
+                "recency_weight": 0.0,
                 "has_context": 0.0,
                 "confidence": 0.0,
                 "promotion_ready": 0.0,
@@ -1150,7 +1512,7 @@ class RoutingEnvironment:
             if state.last_observed_cycle < 0:
                 continue
             age = max(0, self.current_cycle - state.last_observed_cycle)
-            if age > LATENT_GROWTH_IDLE_TASK_WINDOW:
+            if age > CAPABILITY_LATENT_IDLE_TASK_WINDOW:
                 continue
             confidence = float(state.confidence)
             if (
@@ -1165,15 +1527,24 @@ class RoutingEnvironment:
             return {
                 "active": 0.0,
                 "task_age": 0.0,
+                "recency_weight": 0.0,
                 "has_context": 0.0,
                 "confidence": 0.0,
                 "promotion_ready": 0.0,
                 "growth_ready": 0.0,
             }
         snapshot = tracker.snapshot(best_task_id)
+        recency_weight = max(
+            0.0,
+            min(
+                1.0,
+                1.0 - (float(best_age) / max(float(CAPABILITY_LATENT_IDLE_TASK_WINDOW), 1.0)),
+            ),
+        )
         return {
             "active": 1.0,
             "task_age": float(best_age),
+            "recency_weight": recency_weight,
             "has_context": 1.0 if snapshot.get("available") else 0.0,
             "confidence": float(snapshot.get("confidence", 0.0)),
             "promotion_ready": 1.0 if snapshot.get("promotion_ready") else 0.0,
@@ -1188,7 +1559,19 @@ class RoutingEnvironment:
         context_bit: int | None,
         transform_name: str,
     ) -> None:
-        if context_bit is not None:
+        route_packet = (
+            SignalPacket(
+                packet_id=f"capability-route-{node_id}-{self.current_cycle}",
+                origin=self.source_id,
+                target=self.sink_id,
+                created_cycle=self.current_cycle,
+                context_bit=context_bit,
+                task_id=task_id,
+            )
+            if context_bit is not None
+            else None
+        )
+        if context_bit is not None and self._visible_context_exposed(node_id, route_packet):
             return
         tracker = self.latent_context_trackers.get(node_id)
         if tracker is None:
@@ -1208,7 +1591,19 @@ class RoutingEnvironment:
         *,
         credit_signal: float,
     ) -> tuple[int | None, float, bool]:
-        if pulse.context_bit is not None:
+        feedback_packet = (
+            SignalPacket(
+                packet_id=pulse.packet_id,
+                origin=self.source_id,
+                target=self.sink_id,
+                created_cycle=self.current_cycle,
+                context_bit=pulse.context_bit,
+                task_id=pulse.task_id,
+            )
+            if pulse.context_bit is not None
+            else None
+        )
+        if pulse.context_bit is not None and self._visible_context_exposed(node_id, feedback_packet):
             return int(pulse.context_bit), 1.0, True
         tracker = self.latent_context_trackers.get(node_id)
         if tracker is None:
@@ -1233,16 +1628,18 @@ class RoutingEnvironment:
         state = self.state_for(node_id)
         local_packets = self.inboxes[node_id]
         local_ages = [self._packet_wait_age(packet) for packet in local_packets]
-        oldest_age = max(local_ages, default=0)
         overflow = max(0, len(local_packets) - self.inbox_capacity)
-        head_packet = local_packets[0] if local_packets else None
+        head_packet = self._capability_focus_packet(node_id)
+        head_age = self._packet_wait_age(head_packet) if head_packet is not None else 0
+        oldest_age = max(local_ages, default=head_age)
         head_task_id = head_packet.task_id if head_packet is not None else None
+        visible_context_exposed = self._visible_context_exposed(node_id, head_packet)
         latent_snapshot = self._latent_snapshot(
             node_id,
             head_task_id,
             observe=bool(
                 head_packet is not None
-                and head_packet.context_bit is None
+                and self._latent_tracker_engaged(node_id, head_packet)
                 and head_task_id is not None
                 and node_id == self.source_id
                 and self.source_sequence_context_enabled
@@ -1255,13 +1652,17 @@ class RoutingEnvironment:
             if (
                 node_id == self.source_id
                 and head_packet is not None
-                and head_packet.context_bit is None
+                and self._latent_tracker_engaged(node_id, head_packet)
                 and self.source_sequence_context_enabled
                 and latent_snapshot.get("sequence_available")
             )
             else 0.0
         )
-        raw_has_context = 1.0 if head_packet is not None and head_packet.context_bit is not None else 0.0
+        raw_has_context = (
+            1.0
+            if head_packet is not None and head_packet.context_bit is not None and visible_context_exposed
+            else 0.0
+        )
         transfer_adaptation_phase = (
             self.transfer_adaptation_phase(head_task_id, node_id=node_id)
             if (
@@ -1378,6 +1779,30 @@ class RoutingEnvironment:
             "recent_latent_context_confidence": float(recent_latent.get("confidence", 0.0)),
             "recent_latent_promotion_ready": float(recent_latent.get("promotion_ready", 0.0)),
             "recent_latent_growth_ready": float(recent_latent.get("growth_ready", 0.0)),
+            "visible_context_trust": float(
+                self.capability_states.get(node_id, self._initial_capability_state()).visible_context_trust
+            ),
+            "latent_recruitment_pressure": float(
+                self.capability_states.get(node_id, self._initial_capability_state()).latent_recruitment_pressure
+            ),
+            "latent_capability_support": float(
+                self.capability_states.get(node_id, self._initial_capability_state()).latent_support
+            ),
+            "latent_capability_enabled": 1.0
+            if self.capability_states.get(node_id, self._initial_capability_state()).latent_enabled
+            else 0.0,
+            "growth_recruitment_pressure": float(
+                self.capability_states.get(node_id, self._initial_capability_state()).growth_recruitment_pressure
+            ),
+            "growth_capability_support": float(
+                self.capability_states.get(node_id, self._initial_capability_state()).growth_support
+            ),
+            "growth_capability_enabled": 1.0
+            if self.capability_states.get(node_id, self._initial_capability_state()).growth_enabled
+            else 0.0,
+            "growth_stabilization_readiness": float(
+                self.capability_states.get(node_id, self._initial_capability_state()).growth_stabilization_readiness
+            ),
             "effective_has_context": effective_has_context,
             "effective_context_bit": (
                 float(effective_context_bit) if effective_context_bit is not None else 0.0
@@ -1657,6 +2082,11 @@ class RoutingEnvironment:
         if node_id in (self.sink_id,):
             return []
         if node_id not in self.node_states:
+            return []
+        if (
+            self.capability_policy == "self-selected"
+            and not self.capability_states.get(node_id, self._initial_capability_state()).growth_enabled
+        ):
             return []
         state = self.state_for(node_id)
         observation = self.observe_local(node_id)
@@ -2410,6 +2840,8 @@ class RoutingEnvironment:
                 if state.branch_context_credit[key] < 1e-4:
                     del state.branch_context_credit[key]
         self._update_admission_substrate()
+        self._update_capability_states()
+        self._apply_capability_costs()
         if self.topology_state is not None:
             self.topology_state.update_node_counters(
                 node_states=self.node_states,
@@ -2463,6 +2895,8 @@ class RoutingEnvironment:
             "max_inbox_depth": self.max_inbox_depth,
             "max_source_backlog": self.max_source_backlog,
             "pending_growth_proposals": len(self.pending_growth_proposals),
+            "capability_policy": self.capability_policy,
+            "capability_summary": self.capability_summary(),
         }
 
     def export_runtime_state(self) -> dict:
@@ -2494,6 +2928,8 @@ class RoutingEnvironment:
             "max_source_backlog": self.max_source_backlog,
             "pending_growth_proposals": [asdict(proposal) for proposal in self.pending_growth_proposals],
             "latent_context_trackers": self.export_latent_context_state(),
+            "capability_states": self.export_capability_state(),
+            "capability_policy": self.capability_policy,
         }
 
     def load_runtime_state(self, payload: dict) -> None:
@@ -2550,6 +2986,8 @@ class RoutingEnvironment:
             for proposal in payload.get("pending_growth_proposals", [])
         ]
         self.load_latent_context_state(payload.get("latent_context_trackers"))
+        self.capability_policy = str(payload.get("capability_policy", self.capability_policy))
+        self.load_capability_state(payload.get("capability_states"))
 
     def _feedback_pending_ratio(self, node_id: str) -> float:
         pending = 0
@@ -2712,6 +3150,8 @@ class NativeSubstrateSystem:
         morphogenesis_config: MorphogenesisConfig | None = None,
         source_sequence_context_enabled: bool = True,
         latent_transfer_split_enabled: bool = True,
+        capability_policy: str | None = None,
+        capability_control_config: CapabilityControlConfig | None = None,
     ) -> None:
         from .node_agent import NodeAgent
 
@@ -2721,13 +3161,22 @@ class NativeSubstrateSystem:
         }
         self.selector_seed = selector_seed
         self.max_atp = max_atp
+        resolved_policy = capability_policy
+        if resolved_policy is None:
+            resolved_policy = "growth-visible" if (morphogenesis_config and morphogenesis_config.enabled) else "fixed-visible"
+        if resolved_policy not in CAPABILITY_POLICIES:
+            raise ValueError(f"Unsupported capability policy: {resolved_policy}")
         self.topology_state = TopologyState.from_graph(
             normalized,
             positions,
             source_id=source_id,
             sink_id=sink_id,
         )
+        self.capability_policy = resolved_policy
+        self.capability_control_config = capability_control_config or CapabilityControlConfig()
         self.morphogenesis_config = morphogenesis_config or MorphogenesisConfig()
+        if resolved_policy in ("growth-visible", "growth-latent", "self-selected"):
+            self.morphogenesis_config.enabled = True
         self.topology_manager = TopologyManager(self.morphogenesis_config)
         self.environment = RoutingEnvironment(
             adjacency=normalized,
@@ -2744,9 +3193,12 @@ class NativeSubstrateSystem:
             morphogenesis_config=self.morphogenesis_config,
             source_sequence_context_enabled=source_sequence_context_enabled,
             latent_transfer_split_enabled=latent_transfer_split_enabled,
+            capability_policy=resolved_policy,
+            capability_control_config=self.capability_control_config,
         )
         self.global_cycle = 0
         self.session_start_cycle = 0
+        self.capability_timeline: List[dict[str, object]] = []
         self.agents: Dict[str, NodeAgent] = {}
         for node_id in self.environment.agent_ids():
             self.ensure_agent(node_id)
@@ -2837,6 +3289,23 @@ class NativeSubstrateSystem:
         if self.topology_manager.should_checkpoint(self.global_cycle):
             topology_events = self.topology_manager.apply_checkpoint(self, self.global_cycle)
             self.rebuild_agents_from_topology()
+        source_capability = self.environment.capability_snapshot(self.environment.source_id)
+        self.capability_timeline.append(
+            {
+                "cycle": self.global_cycle,
+                "source": source_capability,
+                "active_latent_nodes": sum(
+                    1
+                    for state in self.environment.capability_states.values()
+                    if state.latent_enabled
+                ),
+                "active_growth_nodes": sum(
+                    1
+                    for state in self.environment.capability_states.values()
+                    if state.growth_enabled
+                ),
+            }
+        )
         return {
             "cycle": self.global_cycle,
             "entries": cycle_entries,
@@ -2938,6 +3407,7 @@ class NativeSubstrateSystem:
             if spec.first_feedback_cycle is not None:
                 first_feedback_samples.append(max(0, spec.first_feedback_cycle - spec.created_cycle))
         return {
+            "capability_policy": self.capability_policy,
             "cycles": self.global_cycle,
             "injected_packets": self.environment.total_injected,
             "delivered_packets": len(delivered),
@@ -3072,6 +3542,16 @@ class NativeSubstrateSystem:
                 }
                 for node_id, agent in self.agents.items()
             },
+            "capability_timeline": list(self.capability_timeline),
+            "latent_recruitment_cycles": {
+                node_id: list(snapshot["latent_recruitment_cycles"])
+                for node_id, snapshot in self.environment.capability_summary().items()
+            },
+            "growth_recruitment_cycles": {
+                node_id: list(snapshot["growth_recruitment_cycles"])
+                for node_id, snapshot in self.environment.capability_summary().items()
+            },
+            "capability_supports": self.environment.capability_summary(),
         }
 
     def _task_diagnostics(self, scored_packets: Sequence[SignalPacket]) -> dict[str, object]:
@@ -3399,6 +3879,8 @@ class NativeSubstrateSystem:
             "agent_ids": list(self.agents.keys()),
             "topology": self.topology_state.to_dict(),
             "task_ids_seen": self._task_ids_seen(),
+            "capability_policy": self.capability_policy,
+            "capability_timeline": list(self.capability_timeline),
         }
         manifest_path = target / "system_state.json"
         manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
@@ -3418,7 +3900,9 @@ class NativeSubstrateSystem:
             "admission_substrate": self.environment.admission_substrate.export_state(),
             "topology": self.topology_state.to_dict(),
             "latent_context_trackers": self.environment.export_latent_context_state(),
+            "capability_states": self.environment.export_capability_state(),
             "task_ids_seen": self._task_ids_seen(),
+            "capability_policy": self.capability_policy,
         }
         manifest_path = target / "memory_state.json"
         manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
@@ -3438,7 +3922,9 @@ class NativeSubstrateSystem:
             "admission_substrate": self.environment.admission_substrate.export_state(),
             "topology": self.topology_state.to_dict(),
             "latent_context_trackers": self.environment.export_latent_context_state(),
+            "capability_states": self.environment.export_capability_state(),
             "task_ids_seen": self._task_ids_seen(),
+            "capability_policy": self.capability_policy,
         }
         manifest_path = target / "substrate_state.json"
         manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
@@ -3452,6 +3938,8 @@ class NativeSubstrateSystem:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         self.global_cycle = int(manifest.get("global_cycle", 0))
         self.session_start_cycle = self.global_cycle
+        self.capability_policy = str(manifest.get("capability_policy", self.capability_policy))
+        self.environment.capability_policy = self.capability_policy
         topology_payload = manifest.get("topology")
         if topology_payload:
             self.topology_state = TopologyState.from_dict(topology_payload)
@@ -3462,6 +3950,7 @@ class NativeSubstrateSystem:
             manifest.get("admission_substrate")
         )
         self.environment.load_latent_context_state(manifest.get("latent_context_trackers"))
+        self.environment.load_capability_state(manifest.get("capability_states"))
         self.environment.configure_transfer_regime(
             task_ids_seen=manifest.get("task_ids_seen", []),
             start_cycle=self.global_cycle,
@@ -3479,6 +3968,8 @@ class NativeSubstrateSystem:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         self.global_cycle = int(manifest.get("global_cycle", 0))
         self.session_start_cycle = self.global_cycle
+        self.capability_policy = str(manifest.get("capability_policy", self.capability_policy))
+        self.environment.capability_policy = self.capability_policy
         topology_payload = manifest.get("topology")
         if topology_payload:
             self.topology_state = TopologyState.from_dict(topology_payload)
@@ -3489,6 +3980,7 @@ class NativeSubstrateSystem:
             manifest.get("admission_substrate")
         )
         self.environment.load_latent_context_state(manifest.get("latent_context_trackers"))
+        self.environment.load_capability_state(manifest.get("capability_states"))
         self.environment.configure_transfer_regime(
             task_ids_seen=manifest.get("task_ids_seen", []),
             start_cycle=self.global_cycle,
@@ -3508,6 +4000,9 @@ class NativeSubstrateSystem:
         self.global_cycle = int(manifest.get("global_cycle", 0))
         self.session_start_cycle = self.global_cycle
         self.environment.load_runtime_state(manifest.get("environment", {}))
+        self.capability_policy = str(manifest.get("capability_policy", self.capability_policy))
+        self.environment.capability_policy = self.capability_policy
+        self.capability_timeline = list(manifest.get("capability_timeline", []))
         self.environment.configure_transfer_regime(
             task_ids_seen=manifest.get("task_ids_seen", []),
             start_cycle=self.global_cycle,

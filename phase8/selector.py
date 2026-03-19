@@ -5,6 +5,8 @@ import random
 from dataclasses import dataclass, field
 from typing import List, Tuple
 
+from real_core.types import SelectionContext
+
 from .environment import RoutingEnvironment
 from .substrate import ConnectionSubstrate
 
@@ -43,12 +45,29 @@ class Phase8Selector:
     recency_half_life: float = 6.0
     rest_atp_threshold: float = 0.12
     maintain_velocity_threshold: float = -0.015
+    recognition_route_bonus: float = 0.12
+    recognition_route_penalty: float = 0.10
+    recognition_transform_bonus: float = 0.10
+    prediction_delta_bonus: float = 0.12
+    prediction_coherence_bonus: float = 0.08
+    prediction_stale_family_penalty: float = 0.20
     # Bonus weight applied to task-affinity transforms when the node is in
     # hidden-context mode (head packet carries a task_id but no explicit or
     # latent context bit is resolved yet).  Gives an early-cycle push toward
     # the correct transform family based purely on the task label, without
     # relaxing the context-promotion gate in the consolidation pipeline.
     hidden_task_affinity_weight: float = 0.14
+    capture_route_breakdowns: bool = False
+    _current_selection_context: SelectionContext | None = field(
+        default=None,
+        init=False,
+        repr=False,
+    )
+    _last_route_score_breakdowns: dict[str, dict[str, float | int | str | None]] | None = field(
+        default=None,
+        init=False,
+        repr=False,
+    )
 
     def select(self, available: List[str], history: List[object]) -> Tuple[str, str]:
         if not available:
@@ -112,6 +131,18 @@ class Phase8Selector:
             return self._best_invest(invest_actions, history), "constraint"
 
         return available[0], "constraint"
+
+    def select_with_context(
+        self,
+        available: List[str],
+        history: List[object],
+        context: SelectionContext,
+    ) -> Tuple[str, str]:
+        self._current_selection_context = context
+        try:
+            return self.select(available, history)
+        finally:
+            self._current_selection_context = None
 
     def _local_exploration_rate(
         self,
@@ -184,10 +215,35 @@ class Phase8Selector:
             return int(float(state_before.get("head_context_bit", 0.0))), 1.0
         return None, 0.0
 
-    def _score_route(self, action: str, history: List[object]) -> float:
+    def debug_route_score_breakdown(
+        self,
+        action: str,
+        history: List[object],
+    ) -> dict[str, float | int | str | None]:
+        breakdown = self._score_route(action, history, return_breakdown=True)
+        assert isinstance(breakdown, dict)
+        return breakdown
+
+    def latest_route_score_breakdowns(
+        self,
+    ) -> dict[str, dict[str, float | int | str | None]] | None:
+        if self._last_route_score_breakdowns is None:
+            return None
+        return {
+            action: dict(details)
+            for action, details in self._last_route_score_breakdowns.items()
+        }
+
+    def _score_route(
+        self,
+        action: str,
+        history: List[object],
+        *,
+        return_breakdown: bool = False,
+    ) -> float | dict[str, float | int | str | None]:
         neighbor_id = _route_neighbor(action)
         if neighbor_id is None:
-            return -1.0
+            return -1.0 if not return_breakdown else {"action": action, "total": -1.0}
         observation = self.environment.observe_local(self.node_id)
 
         recent_delta = self._recency_weighted_mean(history, action, field="delta", default=0.0)
@@ -203,7 +259,13 @@ class Phase8Selector:
         )
         support = self.substrate.support(neighbor_id)
         support_velocity = self.substrate.velocity(neighbor_id)
+        recognition_bias = self._recognized_route_bias(neighbor_id)
         transform_name = _route_transform(action)
+        transform_recognition_bias = self._recognized_transform_bias(
+            neighbor_id,
+            transform_name,
+            context_bit,
+        )
         generic_action_support = self.substrate.base_action_support(
             neighbor_id,
             transform_name,
@@ -303,6 +365,7 @@ class Phase8Selector:
         growth_novelty_bonus = 0.0
         source_pre_effective_route_drive = 0.0
         hidden_wrong_family_penalty = 0.0
+        transform_recognition_confirmation = 0.0
         if self.environment.topology_state is not None:
             neighbor_spec = self.environment.topology_state.node_specs.get(neighbor_id)
             if neighbor_spec is not None and neighbor_spec.dynamic:
@@ -470,6 +533,27 @@ class Phase8Selector:
                 0.0,
                 competing_branch_debt - branch_context_pressure,
             ) * context_weight
+        transform_recognition_confirmation = self._transform_recognition_confirmation(
+            history_transform_evidence=history_transform_evidence,
+            feedback_credit=feedback_credit,
+            context_feedback_credit=context_feedback_credit,
+            branch_feedback_credit=branch_feedback_credit,
+            context_branch_feedback_credit=context_branch_feedback_credit,
+            branch_context_feedback_credit=branch_context_feedback_credit,
+            feedback_debt=feedback_debt,
+            context_feedback_debt=context_feedback_debt,
+            branch_feedback_debt=branch_feedback_debt,
+            context_branch_feedback_debt=context_branch_feedback_debt,
+            branch_context_pressure=branch_context_pressure,
+            context_weight=context_weight,
+        )
+        transform_recognition_bias *= transform_recognition_confirmation
+        (
+            prediction_delta_bias,
+            prediction_coherence_bias,
+            prediction_effective_confidence,
+            prediction_stale_family_penalty,
+        ) = self._prediction_route_bias(action)
         progress = observation.get(f"progress_{neighbor_id}", 0.0)
         congestion = observation.get(f"congestion_{neighbor_id}", 0.0)
         inhibited = observation.get(f"inhibited_{neighbor_id}", 0.0)
@@ -488,47 +572,309 @@ class Phase8Selector:
             (1.0 - context_weight) * recent_delta + context_weight * context_delta
         )
 
-        score = (
-            0.32 * recent_delta * history_alignment
-            + 0.28 * context_route_component * history_alignment
-            + 0.18 * recent_coherence * (0.55 + 0.45 * history_alignment)
-            + 0.30 * support
-            + 0.22 * action_support
-            + 0.24 * progress
-            + 0.08 * support_velocity
-            + 0.06 * action_velocity
-            + 0.18 * feedback_credit
-            + 0.34 * context_feedback_credit * context_weight
-            + 0.16 * history_transform_evidence
-            + 0.12 * last_match_ratio
-            + 0.08 * last_feedback_amount
-            + 0.06 * maintenance["action_maintenance_ratio"]
-            + growth_novelty_bonus
-            + context_support_bonus
-            + task_transform_bonus
-            + source_pre_effective_route_drive
-            + branch_context_bonus
-            + branch_transform_bonus
-            + branch_escape_bonus
-            + 0.20 * urgency
-            + 0.10 * ingress_backlog
-            - 0.22 * congestion
-            - 0.18 * cost_ratio
-            - 0.35 * inhibited
-            - 0.12 * queue_pressure * congestion
-            - context_support_penalty
-            - 0.18 * feedback_debt
-            - 0.42 * context_feedback_debt * context_weight
-            - 0.20 * branch_feedback_debt
-            - 0.48 * context_branch_feedback_debt * context_weight
-            - 0.26 * branch_context_pressure * context_weight
-            - identity_penalty
-            - hidden_wrong_family_penalty
-            - competition_penalty
-            - stale_penalty
-            + competition_bonus
-        )
+        raw_components = {
+            "recent_delta_term": 0.32 * recent_delta * history_alignment,
+            "context_route_term": 0.28 * context_route_component * history_alignment,
+            "recent_coherence_term": 0.18 * recent_coherence * (0.55 + 0.45 * history_alignment),
+            "support_term": 0.30 * support,
+            "recognition_route_term": recognition_bias,
+            "recognition_transform_term": transform_recognition_bias,
+            "recognition_transform_confirmation_term": transform_recognition_confirmation,
+            "prediction_delta_term": prediction_delta_bias,
+            "prediction_coherence_term": prediction_coherence_bias,
+            "prediction_effective_confidence_term": prediction_effective_confidence,
+            "prediction_stale_family_penalty_term": prediction_stale_family_penalty,
+            "action_support_term": 0.22 * action_support,
+            "progress_term": 0.24 * progress,
+            "support_velocity_term": 0.08 * support_velocity,
+            "action_velocity_term": 0.06 * action_velocity,
+            "feedback_credit_term": 0.18 * feedback_credit,
+            "context_feedback_credit_term": 0.34 * context_feedback_credit * context_weight,
+            "history_transform_term": 0.16 * history_transform_evidence,
+            "match_ratio_term": 0.12 * last_match_ratio,
+            "last_feedback_term": 0.08 * last_feedback_amount,
+            "maintenance_term": 0.06 * maintenance["action_maintenance_ratio"],
+            "growth_novelty_term": growth_novelty_bonus,
+            "context_support_bonus_term": context_support_bonus,
+            "task_transform_bonus_term": task_transform_bonus,
+            "source_pre_effective_term": source_pre_effective_route_drive,
+            "branch_context_bonus_term": branch_context_bonus,
+            "branch_transform_bonus_term": branch_transform_bonus,
+            "branch_escape_bonus_term": branch_escape_bonus,
+            "urgency_term": 0.20 * urgency,
+            "ingress_backlog_term": 0.10 * ingress_backlog,
+            "congestion_penalty_term": -0.22 * congestion,
+            "cost_penalty_term": -0.18 * cost_ratio,
+            "inhibited_penalty_term": -0.35 * inhibited,
+            "queue_congestion_penalty_term": -0.12 * queue_pressure * congestion,
+            "context_support_penalty_term": -context_support_penalty,
+            "feedback_debt_penalty_term": -0.18 * feedback_debt,
+            "context_feedback_debt_penalty_term": -0.42 * context_feedback_debt * context_weight,
+            "branch_feedback_debt_penalty_term": -0.20 * branch_feedback_debt,
+            "context_branch_feedback_debt_penalty_term": -0.48 * context_branch_feedback_debt * context_weight,
+            "branch_context_pressure_penalty_term": -0.26 * branch_context_pressure * context_weight,
+            "identity_penalty_term": -identity_penalty,
+            "hidden_wrong_family_penalty_term": -hidden_wrong_family_penalty,
+            "competition_penalty_term": -competition_penalty,
+            "stale_penalty_term": -stale_penalty,
+            "competition_bonus_term": competition_bonus,
+        }
+        components: dict[str, float | int | str | None] = {
+            "action": action,
+            "neighbor_id": neighbor_id,
+            "transform_name": transform_name,
+            "context_bit": context_bit,
+            "context_weight": round(context_weight, 6),
+            "history_alignment": round(history_alignment, 6),
+            "transfer_hidden_unseen_task": 1.0 if transfer_hidden_unseen_task else 0.0,
+            "raw_recent_delta": round(recent_delta, 6),
+            "raw_context_delta": round(context_delta, 6),
+            "raw_support": round(support, 6),
+            "raw_action_support": round(action_support, 6),
+            "raw_task_transform_affinity": round(task_transform_affinity, 6),
+            "raw_history_transform_evidence": round(history_transform_evidence, 6),
+            "raw_feedback_credit": round(feedback_credit, 6),
+            "raw_context_feedback_credit": round(context_feedback_credit, 6),
+            "raw_feedback_debt": round(feedback_debt, 6),
+            "raw_context_feedback_debt": round(context_feedback_debt, 6),
+            "raw_last_match_ratio": round(last_match_ratio, 6),
+            "raw_transfer_adaptation_phase": round(transfer_adaptation_phase, 6),
+        }
+        for key, value in raw_components.items():
+            components[key] = round(value, 6)
+        score = sum(raw_components.values())
+        components["total"] = round(score, 6)
+        if return_breakdown:
+            return components
         return score
+
+    def _recognized_route_bias(self, neighbor_id: str) -> float:
+        context = self._current_selection_context
+        recognition = None if context is None else context.recognition
+        if recognition is None or recognition.confidence <= 0.0 or not recognition.matches:
+            return 0.0
+
+        novelty_scale = max(0.0, min(1.0, 1.0 - recognition.novelty))
+        if novelty_scale <= 0.0:
+            return 0.0
+
+        total_bias = 0.0
+        for match in recognition.matches:
+            pattern = self._recognized_pattern(match.metadata.get("pattern_index"))
+            if pattern is None:
+                continue
+            focus_neighbor = self._pattern_focus_neighbor(pattern, match.source)
+            if focus_neighbor != neighbor_id:
+                continue
+            match_weight = max(
+                0.0,
+                min(
+                    1.0,
+                    recognition.confidence
+                    * match.score
+                    * max(0.25, float(pattern.strength)),
+                ),
+            )
+            if match.source == "route_attractor" and pattern.valence >= 0.0:
+                total_bias += self.recognition_route_bonus * novelty_scale * match_weight
+            elif match.source == "route_trough" or pattern.valence < 0.0:
+                total_bias -= self.recognition_route_penalty * novelty_scale * match_weight
+        return total_bias
+
+    def _prediction_route_bias(
+        self,
+        action: str,
+    ) -> tuple[float, float, float, float]:
+        context = self._current_selection_context
+        if context is None:
+            return 0.0, 0.0, 0.0, 0.0
+        prediction = context.predictions.get(action)
+        if prediction is None or prediction.confidence <= 0.0:
+            return 0.0, 0.0, 0.0, 0.0
+        effective_confidence = max(
+            0.0,
+            min(1.0, prediction.confidence * (1.0 - prediction.uncertainty)),
+        )
+        if effective_confidence <= 0.0:
+            return 0.0, 0.0, 0.0, 0.0
+        delta_term = (
+            self.prediction_delta_bonus
+            * float(prediction.expected_delta or 0.0)
+            * effective_confidence
+        )
+        baseline = 0.5 if context.prior_coherence is None else float(context.prior_coherence)
+        coherence_term = (
+            self.prediction_coherence_bonus
+            * (
+                0.0
+                if prediction.expected_coherence is None
+                else float(prediction.expected_coherence) - baseline
+            )
+            * effective_confidence
+        )
+        stale_family_penalty = (
+            -self.prediction_stale_family_penalty
+            * float(prediction.metadata.get("stale_family_risk", 0.0))
+            * effective_confidence
+        )
+        return (
+            delta_term,
+            coherence_term,
+            effective_confidence,
+            stale_family_penalty,
+        )
+
+    def _recognized_pattern(self, pattern_index: object):
+        if not isinstance(pattern_index, int):
+            return None
+        patterns = self.substrate.constraint_patterns
+        if pattern_index < 0 or pattern_index >= len(patterns):
+            return None
+        return patterns[pattern_index]
+
+    def _pattern_focus_neighbor(self, pattern, source: str) -> str | None:
+        scored_neighbors: list[tuple[float, str]] = []
+        for neighbor_id in self.substrate.neighbor_ids:
+            key = self.substrate.edge_key(neighbor_id)
+            if key not in pattern.dim_scores:
+                continue
+            scored_neighbors.append((float(pattern.dim_scores[key]), neighbor_id))
+        if not scored_neighbors:
+            return None
+        if source == "route_trough" or pattern.valence < 0.0:
+            return min(scored_neighbors, key=lambda item: item[0])[1]
+        return max(scored_neighbors, key=lambda item: item[0])[1]
+
+    def _recognized_transform_bias(
+        self,
+        neighbor_id: str,
+        transform_name: str,
+        context_bit: int | None,
+    ) -> float:
+        if self.node_id != self.environment.source_id:
+            return 0.0
+        if self.recognition_transform_bonus <= 0.0:
+            return 0.0
+        context = self._current_selection_context
+        recognition = None if context is None else context.recognition
+        if recognition is None or recognition.confidence <= 0.0 or not recognition.matches:
+            return 0.0
+
+        target_action_key = self.substrate.action_key(neighbor_id, transform_name)
+        target_signature = (neighbor_id, transform_name)
+        target_context_key = None
+        if context_bit is not None:
+            try:
+                target_context_key = self.substrate.context_action_key(
+                    neighbor_id,
+                    transform_name,
+                    context_bit,
+                )
+            except KeyError:
+                target_context_key = None
+
+        total_bias = 0.0
+        for match in recognition.matches:
+            if match.source not in ("transform_attractor", "context_transform_attractor"):
+                continue
+            pattern = self._recognized_pattern(match.metadata.get("pattern_index"))
+            if pattern is None:
+                continue
+            focused_key = self._pattern_focus_action_key(pattern, match.source)
+            if focused_key is None:
+                continue
+            focused_signature = self._action_signature_from_key(focused_key)
+            weight = max(
+                0.0,
+                min(
+                    1.0,
+                    recognition.confidence
+                    * match.score
+                    * max(0.25, float(pattern.strength)),
+                ),
+            )
+            if focused_key == target_context_key or focused_key == target_action_key:
+                total_bias += self.recognition_transform_bonus * weight
+                continue
+            if focused_signature == target_signature:
+                # Allow context-specific transform attractors to bias the
+                # underlying base transform action before the exact context key
+                # is selectable at the source.
+                total_bias += self.recognition_transform_bonus * 0.75 * weight
+        return total_bias
+
+    def _transform_recognition_confirmation(
+        self,
+        *,
+        history_transform_evidence: float,
+        feedback_credit: float,
+        context_feedback_credit: float,
+        branch_feedback_credit: float,
+        context_branch_feedback_credit: float,
+        branch_context_feedback_credit: float,
+        feedback_debt: float,
+        context_feedback_debt: float,
+        branch_feedback_debt: float,
+        context_branch_feedback_debt: float,
+        branch_context_pressure: float,
+        context_weight: float,
+    ) -> float:
+        positive_support = min(
+            1.0,
+            max(
+                0.0,
+                0.55 * history_transform_evidence
+                + 0.70 * feedback_credit
+                + 0.95 * context_feedback_credit * context_weight
+                + 0.30 * branch_feedback_credit
+                + 0.55 * context_branch_feedback_credit * context_weight
+                + 0.45 * branch_context_feedback_credit * context_weight,
+            ),
+        )
+        if positive_support <= 1e-9:
+            return 0.0
+
+        negative_pressure = min(
+            1.0,
+            max(
+                0.0,
+                0.55 * feedback_debt
+                + 0.90 * context_feedback_debt * context_weight
+                + 0.28 * branch_feedback_debt
+                + 0.60 * context_branch_feedback_debt * context_weight
+                + 0.45 * branch_context_pressure * context_weight,
+            ),
+        )
+        confirmation = positive_support / (positive_support + negative_pressure + 0.20)
+        return max(0.0, min(1.0, confirmation))
+
+    def _pattern_focus_action_key(self, pattern, source: str) -> str | None:
+        action_scores = [
+            (float(value), str(key))
+            for key, value in pattern.dim_scores.items()
+            if str(key).startswith("action:") or str(key).startswith("context_action:")
+        ]
+        if not action_scores:
+            return None
+        if source == "transform_trough" or source == "context_transform_trough" or pattern.valence < 0.0:
+            return min(action_scores, key=lambda item: item[0])[1]
+        return max(action_scores, key=lambda item: item[0])[1]
+
+    def _action_signature_from_key(
+        self,
+        key: str,
+    ) -> tuple[str, str] | None:
+        if key.startswith("action:"):
+            parts = key.split(":")
+            if len(parts) == 3:
+                return parts[1], parts[2]
+            return None
+        if key.startswith("context_action:"):
+            parts = key.split(":")
+            if len(parts) == 4:
+                return parts[1], parts[2]
+            return None
+        return None
 
     def _score_invest(self, action: str, history: List[object]) -> float:
         neighbor_id = action.split(":", 1)[1]
@@ -750,10 +1096,21 @@ class Phase8Selector:
         return weighted_total / total_weight
 
     def _score_routes(self, route_actions: List[str], history: List[object]) -> dict[str, float]:
-        scores = {
-            action: self._score_route(action, history)
-            for action in route_actions
-        }
+        breakdowns: dict[str, dict[str, float | int | str | None]] | None = (
+            {} if self.capture_route_breakdowns else None
+        )
+        scores: dict[str, float] = {}
+        for action in route_actions:
+            if breakdowns is None:
+                score = self._score_route(action, history)
+                assert isinstance(score, float)
+                scores[action] = score
+                continue
+            breakdown = self._score_route(action, history, return_breakdown=True)
+            assert isinstance(breakdown, dict)
+            breakdowns[action] = breakdown
+            scores[action] = float(breakdown["total"])
+        self._last_route_score_breakdowns = breakdowns
         observation = self.environment.observe_local(self.node_id)
         context_bit, context_weight = self._effective_context(observation)
         if context_bit is None or context_weight <= 0.0:

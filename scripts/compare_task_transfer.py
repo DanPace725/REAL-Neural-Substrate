@@ -6,6 +6,7 @@ import uuid
 from pathlib import Path
 from statistics import mean
 
+from phase8.environment import _expected_transform_for_task
 from scripts.compare_cold_warm import ROOT, SCENARIOS, build_system, run_workload
 
 
@@ -14,6 +15,7 @@ TRANSFER_SCENARIO = "cvt1_task_b_stage1"
 CRITERION_WINDOW = 8
 EXACT_THRESHOLD = 0.85
 BIT_ACCURACY_THRESHOLD = 0.95
+ADAPTATION_STREAK = 3
 
 
 def _ordered_scored_packets(system) -> list[object]:
@@ -31,6 +33,99 @@ def _ordered_scored_packets(system) -> list[object]:
     )
 
 
+def _final_transform(packet: object) -> str:
+    trace = getattr(packet, "transform_trace", None) or []
+    if trace:
+        return str(trace[-1])
+    return "identity"
+
+
+def _mean_or_none(values: list[float | int | None]) -> float | None:
+    present = [float(value) for value in values if value is not None]
+    if not present:
+        return None
+    return round(mean(present), 4)
+
+
+def _first_sustained_index(
+    values: list[bool],
+    *,
+    streak: int,
+) -> int | None:
+    if streak <= 1:
+        for index, matched in enumerate(values):
+            if matched:
+                return index
+        return None
+    for start in range(0, len(values) - streak + 1):
+        window = values[start : start + streak]
+        if all(window):
+            return start
+    return None
+
+
+def _anticipation_metrics(system) -> dict[str, object]:
+    source_id = system.environment.source_id
+    route_entry_count = 0
+    recognized_route_entry_count = 0
+    recognized_source_route_entry_count = 0
+    recognized_source_transform_entry_count = 0
+    predicted_route_entry_count = 0
+    predicted_source_route_entry_count = 0
+    first_recognized_route_cycle = None
+    first_recognized_source_route_cycle = None
+    first_recognized_source_transform_cycle = None
+    first_predicted_route_cycle = None
+    first_predicted_source_route_cycle = None
+
+    for agent in system.agents.values():
+        is_source = agent.node_id == source_id
+        for entry in agent.engine.memory.entries:
+            action = str(entry.action)
+            if not action.startswith("route"):
+                continue
+            route_entry_count += 1
+            recognition = getattr(entry, "recognition", None)
+            if recognition is not None and recognition.matches:
+                recognized_route_entry_count += 1
+                if first_recognized_route_cycle is None:
+                    first_recognized_route_cycle = int(entry.cycle)
+                if is_source:
+                    recognized_source_route_entry_count += 1
+                    if first_recognized_source_route_cycle is None:
+                        first_recognized_source_route_cycle = int(entry.cycle)
+                    if any(
+                        match.source in ("transform_attractor", "context_transform_attractor")
+                        for match in recognition.matches
+                    ):
+                        recognized_source_transform_entry_count += 1
+                        if first_recognized_source_transform_cycle is None:
+                            first_recognized_source_transform_cycle = int(entry.cycle)
+            prediction = getattr(entry, "prediction", None)
+            if prediction is not None:
+                predicted_route_entry_count += 1
+                if first_predicted_route_cycle is None:
+                    first_predicted_route_cycle = int(entry.cycle)
+                if is_source:
+                    predicted_source_route_entry_count += 1
+                    if first_predicted_source_route_cycle is None:
+                        first_predicted_source_route_cycle = int(entry.cycle)
+
+    return {
+        "route_entry_count": route_entry_count,
+        "recognized_route_entry_count": recognized_route_entry_count,
+        "recognized_source_route_entry_count": recognized_source_route_entry_count,
+        "recognized_source_transform_entry_count": recognized_source_transform_entry_count,
+        "predicted_route_entry_count": predicted_route_entry_count,
+        "predicted_source_route_entry_count": predicted_source_route_entry_count,
+        "first_recognized_route_cycle": first_recognized_route_cycle,
+        "first_recognized_source_route_cycle": first_recognized_source_route_cycle,
+        "first_recognized_source_transform_cycle": first_recognized_source_transform_cycle,
+        "first_predicted_route_cycle": first_predicted_route_cycle,
+        "first_predicted_source_route_cycle": first_predicted_source_route_cycle,
+    }
+
+
 def transfer_metrics(system) -> dict[str, object]:
     packets = _ordered_scored_packets(system)
     if not packets:
@@ -42,12 +137,59 @@ def transfer_metrics(system) -> dict[str, object]:
             "cycles_to_criterion": None,
             "best_rolling_exact_rate": 0.0,
             "best_rolling_bit_accuracy": 0.0,
+            "first_exact_match_example": None,
+            "first_exact_match_cycle": None,
+            "first_expected_transform_example": None,
+            "first_expected_transform_cycle": None,
+            "first_sustained_expected_transform_example": None,
+            "first_sustained_expected_transform_cycle": None,
+            "early_window_examples": 0,
+            "early_window_exact_rate": 0.0,
+            "early_window_bit_accuracy": 0.0,
+            "early_window_wrong_transform_family": 0,
+            "early_window_wrong_transform_family_rate": 0.0,
+            "anticipation": _anticipation_metrics(system),
         }
 
     best_exact = 0.0
     best_accuracy = 0.0
     examples_to_criterion = None
     cycles_to_criterion = None
+    first_exact_match_example = None
+    first_exact_match_cycle = None
+    first_expected_transform_example = None
+    first_expected_transform_cycle = None
+    expected_transform_matches: list[bool] = []
+    early_window = packets[:CRITERION_WINDOW]
+    early_wrong_transform_family = 0
+    for example_index, packet in enumerate(packets, start=1):
+        expected_transform = _expected_transform_for_task(
+            getattr(packet, "task_id", None),
+            getattr(packet, "context_bit", None),
+        )
+        final_transform = _final_transform(packet)
+        expected_match = (
+            expected_transform is not None and final_transform == expected_transform
+        )
+        expected_transform_matches.append(expected_match)
+        if expected_match and first_expected_transform_example is None:
+            first_expected_transform_example = example_index
+            first_expected_transform_cycle = getattr(packet, "delivered_cycle", None)
+        if bool(getattr(packet, "matched_target", False)) and first_exact_match_example is None:
+            first_exact_match_example = example_index
+            first_exact_match_cycle = getattr(packet, "delivered_cycle", None)
+    sustained_index = _first_sustained_index(
+        expected_transform_matches,
+        streak=ADAPTATION_STREAK,
+    )
+    first_sustained_expected_transform_example = (
+        None if sustained_index is None else sustained_index + 1
+    )
+    first_sustained_expected_transform_cycle = (
+        None
+        if sustained_index is None
+        else getattr(packets[sustained_index], "delivered_cycle", None)
+    )
     for end in range(CRITERION_WINDOW, len(packets) + 1):
         window = packets[end - CRITERION_WINDOW : end]
         exact_rate = sum(1 for packet in window if packet.matched_target) / CRITERION_WINDOW
@@ -61,6 +203,14 @@ def transfer_metrics(system) -> dict[str, object]:
         ):
             examples_to_criterion = end
             cycles_to_criterion = window[-1].delivered_cycle
+    for packet in early_window:
+        expected_transform = _expected_transform_for_task(
+            getattr(packet, "task_id", None),
+            getattr(packet, "context_bit", None),
+        )
+        final_transform = _final_transform(packet)
+        if expected_transform is not None and final_transform != expected_transform:
+            early_wrong_transform_family += 1
 
     return {
         "packets_evaluated": len(packets),
@@ -70,6 +220,33 @@ def transfer_metrics(system) -> dict[str, object]:
         "cycles_to_criterion": cycles_to_criterion,
         "best_rolling_exact_rate": round(best_exact, 4),
         "best_rolling_bit_accuracy": round(best_accuracy, 4),
+        "first_exact_match_example": first_exact_match_example,
+        "first_exact_match_cycle": first_exact_match_cycle,
+        "first_expected_transform_example": first_expected_transform_example,
+        "first_expected_transform_cycle": first_expected_transform_cycle,
+        "first_sustained_expected_transform_example": (
+            first_sustained_expected_transform_example
+        ),
+        "first_sustained_expected_transform_cycle": (
+            first_sustained_expected_transform_cycle
+        ),
+        "early_window_examples": len(early_window),
+        "early_window_exact_rate": round(
+            sum(1 for packet in early_window if packet.matched_target)
+            / max(1, len(early_window)),
+            4,
+        ),
+        "early_window_bit_accuracy": round(
+            sum(float(packet.bit_match_ratio or 0.0) for packet in early_window)
+            / max(1, len(early_window)),
+            4,
+        ),
+        "early_window_wrong_transform_family": early_wrong_transform_family,
+        "early_window_wrong_transform_family_rate": round(
+            early_wrong_transform_family / max(1, len(early_window)),
+            4,
+        ),
+        "anticipation": _anticipation_metrics(system),
     }
 
 
@@ -194,6 +371,16 @@ def aggregate_transfer(results: list[dict[str, object]]) -> dict[str, float]:
         "avg_delta_substrate_task_b_best_exact_rate": round(mean(item["delta_substrate_task_b"]["best_rolling_exact_rate"] for item in results), 4),
         "avg_delta_full_task_b_best_bit_accuracy": round(mean(item["delta_full_task_b"]["best_rolling_bit_accuracy"] for item in results), 4),
         "avg_delta_substrate_task_b_best_bit_accuracy": round(mean(item["delta_substrate_task_b"]["best_rolling_bit_accuracy"] for item in results), 4),
+        "avg_cold_task_b_early_exact_rate": round(mean(item["cold_task_b"]["transfer_metrics"]["early_window_exact_rate"] for item in results), 4),
+        "avg_warm_full_task_b_early_exact_rate": round(mean(item["warm_full_task_b"]["transfer_metrics"]["early_window_exact_rate"] for item in results), 4),
+        "avg_warm_substrate_task_b_early_exact_rate": round(mean(item["warm_substrate_task_b"]["transfer_metrics"]["early_window_exact_rate"] for item in results), 4),
+        "avg_cold_task_b_early_wrong_transform_family_rate": round(mean(item["cold_task_b"]["transfer_metrics"]["early_window_wrong_transform_family_rate"] for item in results), 4),
+        "avg_warm_full_task_b_early_wrong_transform_family_rate": round(mean(item["warm_full_task_b"]["transfer_metrics"]["early_window_wrong_transform_family_rate"] for item in results), 4),
+        "avg_warm_substrate_task_b_early_wrong_transform_family_rate": round(mean(item["warm_substrate_task_b"]["transfer_metrics"]["early_window_wrong_transform_family_rate"] for item in results), 4),
+        "avg_warm_full_task_b_first_expected_transform_example": _mean_or_none([item["warm_full_task_b"]["transfer_metrics"]["first_expected_transform_example"] for item in results]),
+        "avg_cold_task_b_first_expected_transform_example": _mean_or_none([item["cold_task_b"]["transfer_metrics"]["first_expected_transform_example"] for item in results]),
+        "avg_warm_full_task_b_recognized_source_transform_entries": round(mean(float(item["warm_full_task_b"]["transfer_metrics"]["anticipation"]["recognized_source_transform_entry_count"]) for item in results), 4),
+        "avg_warm_full_task_b_predicted_route_entries": round(mean(float(item["warm_full_task_b"]["transfer_metrics"]["anticipation"]["predicted_route_entry_count"]) for item in results), 4),
         "avg_cold_task_b_context_1_bit_accuracy": round(mean(_context_stat(item["cold_task_b"]["summary"], "context_1", "mean_bit_accuracy") for item in results), 4),
         "avg_warm_full_task_b_context_1_bit_accuracy": round(mean(_context_stat(item["warm_full_task_b"]["summary"], "context_1", "mean_bit_accuracy") for item in results), 4),
         "avg_warm_substrate_task_b_context_1_bit_accuracy": round(mean(_context_stat(item["warm_substrate_task_b"]["summary"], "context_1", "mean_bit_accuracy") for item in results), 4),

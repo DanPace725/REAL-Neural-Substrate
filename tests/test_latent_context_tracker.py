@@ -66,6 +66,18 @@ class TestLatentContextTracker(unittest.TestCase):
         self.assertGreater(snapshot["sequence_context_confidence"], 0.0)
         self.assertEqual(_expected_transform_for_task("ceiling_c3_task_a", 2), "xor_mask_0101")
 
+    def test_generated_b2_sequence_context_uses_two_packet_parity_window(self) -> None:
+        tracker = LatentContextTracker()
+        tracker.observe_packet("ceiling_b2_task_a", "p1", [1, 0, 0, 0])
+        tracker.observe_packet("ceiling_b2_task_a", "p2", [1, 1, 0, 0])
+        tracker.observe_packet("ceiling_b2_task_a", "p3", [0, 0, 0, 0])
+
+        snapshot = tracker.snapshot("ceiling_b2_task_a")
+
+        self.assertEqual(snapshot["sequence_context_estimate"], 1)
+        self.assertGreater(snapshot["sequence_context_confidence"], 0.0)
+        self.assertEqual(_expected_transform_for_task("ceiling_b2_task_a", 1), "xor_mask_1010")
+
     def test_multistate_promotion_threshold_is_cardinality_aware(self) -> None:
         tracker = LatentContextTracker()
         state = tracker._state_for("ceiling_c3_task_c")

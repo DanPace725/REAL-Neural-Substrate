@@ -150,6 +150,22 @@ class Phase8ConsolidationPipeline(BasicConsolidationPipeline):
                         value=self.action_support_seed_value,
                         context_bit=context_bit,
                     )
+                pattern = self._build_transform_pattern(
+                    substrate=substrate,
+                    focus_neighbor=neighbor_id,
+                    focus_transform=transform_name,
+                    context_bit=context_bit,
+                    valence=min(1.0, 0.4 + max(0.0, context_delta) * 8.0),
+                    strength=self.pattern_strength,
+                    coherence_level=sum(entry.coherence for entry in context_entries) / len(context_entries),
+                    focus_value=0.85,
+                    source=(
+                        "context_transform_attractor"
+                        if context_bit is not None
+                        else "transform_attractor"
+                    ),
+                )
+                self._merge_or_append_pattern(substrate, pattern)
 
     def _build_pattern(
         self,
@@ -172,6 +188,61 @@ class Phase8ConsolidationPipeline(BasicConsolidationPipeline):
             else:
                 dim_scores[key] = 0.25 if valence > 0 else 0.55
                 dim_trends[key] = dim_trends.get(key, 0.0)
+        return ConstraintPattern(
+            dim_scores=dim_scores,
+            dim_trends=dim_trends,
+            valence=valence,
+            strength=strength,
+            coherence_level=coherence_level,
+            source=source,
+        )
+
+    def _build_transform_pattern(
+        self,
+        substrate: ConnectionSubstrate,
+        *,
+        focus_neighbor: str,
+        focus_transform: str,
+        context_bit: int | None,
+        valence: float,
+        strength: float,
+        coherence_level: float,
+        focus_value: float,
+        source: str,
+    ) -> ConstraintPattern:
+        dim_scores = {}
+        dim_trends = substrate.current_dim_trends()
+        base_value = 0.25 if valence > 0 else 0.55
+        for neighbor_id in substrate.neighbor_ids:
+            for transform_name in substrate.action_scores().get(neighbor_id, {}).keys():
+                key = substrate.action_key(neighbor_id, transform_name)
+                if neighbor_id == focus_neighbor and transform_name == focus_transform:
+                    dim_scores[key] = focus_value
+                    dim_trends[key] = max(
+                        dim_trends.get(key, 0.0),
+                        0.08 if valence > 0 else -0.08,
+                    )
+                else:
+                    dim_scores[key] = base_value
+                    dim_trends[key] = dim_trends.get(key, 0.0)
+                if context_bit is not None:
+                    try:
+                        context_key = substrate.context_action_key(
+                            neighbor_id,
+                            transform_name,
+                            context_bit,
+                        )
+                    except KeyError:
+                        continue
+                    if neighbor_id == focus_neighbor and transform_name == focus_transform:
+                        dim_scores[context_key] = focus_value
+                        dim_trends[context_key] = max(
+                            dim_trends.get(context_key, 0.0),
+                            0.08 if valence > 0 else -0.08,
+                        )
+                    else:
+                        dim_scores[context_key] = base_value
+                        dim_trends[context_key] = dim_trends.get(context_key, 0.0)
         return ConstraintPattern(
             dim_scores=dim_scores,
             dim_trends=dim_trends,

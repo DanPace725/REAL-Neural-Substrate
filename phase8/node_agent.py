@@ -4,6 +4,7 @@ import random
 from pathlib import Path
 
 from real_core.engine import RealCoreEngine
+from real_core.recognition import PatternRecognitionModel
 from real_core.session_state import SessionStateStore
 
 from .adapters import (
@@ -14,6 +15,7 @@ from .adapters import (
 )
 from .consolidation import Phase8ConsolidationPipeline
 from .environment import RoutingEnvironment
+from .expectation import Phase8ExpectationModel
 from .selector import Phase8Selector
 from .substrate import ConnectionSubstrate
 
@@ -75,6 +77,11 @@ class NodeAgent:
             substrate=self.substrate,
             consolidation_pipeline=pipeline,
             memory_binding=binding,
+            recognition_model=PatternRecognitionModel(),
+            expectation_model=Phase8ExpectationModel(
+                environment=environment,
+                node_id=node_id,
+            ),
             domain_name=f"phase8.node.{node_id}",
             session_state_store=state_store,
             session_budget=float("inf"),

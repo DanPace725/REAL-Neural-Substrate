@@ -261,6 +261,7 @@ class LocalNodeMemoryBinding:
         for neighbor_id in self.neighbor_ids:
             support = self.substrate.support(neighbor_id)
             clarity = max(0.15, min(0.95, 0.20 + support * 0.75))
+            modulated[self.substrate.edge_key(neighbor_id)] = support
             for prefix in ("progress", "congestion"):
                 key = f"{prefix}_{neighbor_id}"
                 if key not in modulated:
@@ -270,20 +271,34 @@ class LocalNodeMemoryBinding:
             modulated[f"support_{neighbor_id}"] = support
             modulated[f"support_velocity_{neighbor_id}"] = self.substrate.velocity(neighbor_id)
             for transform_name in TRANSFORM_ACTIONS:
-                modulated[f"action_support_{neighbor_id}_{transform_name}"] = (
-                    self.substrate.action_support(
-                        neighbor_id,
-                        transform_name,
-                    )
+                action_support = self.substrate.action_support(
+                    neighbor_id,
+                    transform_name,
+                )
+                modulated[f"action_support_{neighbor_id}_{transform_name}"] = action_support
+                modulated[self.substrate.action_key(neighbor_id, transform_name)] = (
+                    action_support
                 )
                 if modulated.get("effective_has_context", 0.0) >= 0.5:
+                    context_bit = int(modulated.get("effective_context_bit", 0.0))
+                    context_action_support = self.substrate.action_support(
+                        neighbor_id,
+                        transform_name,
+                        context_bit,
+                    )
                     modulated[f"context_action_support_{neighbor_id}_{transform_name}"] = (
-                        self.substrate.action_support(
+                        context_action_support
+                    )
+                    try:
+                        context_action_key = self.substrate.context_action_key(
                             neighbor_id,
                             transform_name,
-                            int(modulated.get("effective_context_bit", 0.0)),
+                            context_bit,
                         )
-                    )
+                    except KeyError:
+                        context_action_key = None
+                    if context_action_key is not None:
+                        modulated[context_action_key] = context_action_support
         maintenance = self.substrate.maintenance_metrics()
         modulated["edge_maintenance_ratio"] = maintenance["edge_maintenance_ratio"]
         modulated["action_maintenance_ratio"] = maintenance["action_maintenance_ratio"]

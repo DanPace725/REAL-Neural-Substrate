@@ -1895,6 +1895,13 @@ class TestTransferHarness(unittest.TestCase):
         self.assertTrue(metrics["criterion_reached"])
         self.assertEqual(metrics["examples_to_criterion"], 8)
         self.assertGreaterEqual(metrics["best_rolling_exact_rate"], 1.0)
+        self.assertEqual(metrics["first_exact_match_example"], 1)
+        self.assertEqual(metrics["first_expected_transform_example"], 1)
+        self.assertEqual(metrics["first_sustained_expected_transform_example"], 1)
+        self.assertEqual(metrics["early_window_wrong_transform_family"], 0)
+        self.assertEqual(metrics["early_window_exact_rate"], 1.0)
+        self.assertIn("anticipation", metrics)
+        self.assertIn("predicted_route_entry_count", metrics["anticipation"])
 
     def test_transfer_aggregate_reports_context_and_error_diagnostics(self) -> None:
         results = [
@@ -1914,7 +1921,16 @@ class TestTransferHarness(unittest.TestCase):
                                 "context_1": {"mean_bit_accuracy": 0.25},
                             },
                         },
-                    }
+                    },
+                    "transfer_metrics": {
+                        "early_window_exact_rate": 0.25,
+                        "early_window_wrong_transform_family_rate": 0.5,
+                        "first_expected_transform_example": 4,
+                        "anticipation": {
+                            "recognized_source_transform_entry_count": 0,
+                            "predicted_route_entry_count": 0,
+                        },
+                    },
                 },
                 "warm_full_task_b": {
                     "summary": {
@@ -1931,7 +1947,16 @@ class TestTransferHarness(unittest.TestCase):
                                 "context_1": {"mean_bit_accuracy": 0.5},
                             },
                         },
-                    }
+                    },
+                    "transfer_metrics": {
+                        "early_window_exact_rate": 0.5,
+                        "early_window_wrong_transform_family_rate": 0.25,
+                        "first_expected_transform_example": 2,
+                        "anticipation": {
+                            "recognized_source_transform_entry_count": 4,
+                            "predicted_route_entry_count": 0,
+                        },
+                    },
                 },
                 "warm_substrate_task_b": {
                     "summary": {
@@ -1948,7 +1973,16 @@ class TestTransferHarness(unittest.TestCase):
                                 "context_1": {"mean_bit_accuracy": 0.625},
                             },
                         },
-                    }
+                    },
+                    "transfer_metrics": {
+                        "early_window_exact_rate": 0.625,
+                        "early_window_wrong_transform_family_rate": 0.125,
+                        "first_expected_transform_example": 1,
+                        "anticipation": {
+                            "recognized_source_transform_entry_count": 2,
+                            "predicted_route_entry_count": 0,
+                        },
+                    },
                 },
                 "delta_full_task_b": {
                     "exact_matches": 1,
@@ -1973,6 +2007,187 @@ class TestTransferHarness(unittest.TestCase):
         self.assertEqual(aggregate["avg_warm_full_task_b_wrong_transform_family"], 1.0)
         self.assertEqual(aggregate["avg_warm_substrate_task_b_identity_fallbacks"], 0.0)
         self.assertEqual(aggregate["avg_cold_task_b_stale_support_suspicions"], 1.0)
+        self.assertEqual(aggregate["avg_cold_task_b_early_exact_rate"], 0.25)
+        self.assertEqual(aggregate["avg_warm_full_task_b_early_wrong_transform_family_rate"], 0.25)
+        self.assertEqual(aggregate["avg_warm_full_task_b_first_expected_transform_example"], 2.0)
+        self.assertEqual(aggregate["avg_warm_full_task_b_recognized_source_transform_entries"], 4.0)
+
+
+class TestCapabilityControl(unittest.TestCase):
+    def test_self_selected_source_can_track_latent_before_visible_context_is_suppressed(self) -> None:
+        system = NativeSubstrateSystem(
+            adjacency={"n0": ("sink",)},
+            positions={"n0": 0, "sink": 1},
+            source_id="n0",
+            sink_id="sink",
+            selector_seed=67,
+            capability_policy="self-selected",
+        )
+        system.environment.inject_signal(
+            count=1,
+            cycle=0,
+            packet_payloads=[[1, 0, 1, 1]],
+            context_bits=[0],
+            task_id="task_a",
+        )
+
+        packet = system.environment.inboxes["n0"][0]
+
+        self.assertTrue(system.environment._visible_context_exposed("n0", packet))
+        self.assertTrue(system.environment._latent_tracker_engaged("n0", packet))
+
+    def test_self_selected_visible_task_does_not_recruit_latent_immediately(self) -> None:
+        system = NativeSubstrateSystem(
+            adjacency={"n0": ("sink",)},
+            positions={"n0": 0, "sink": 1},
+            source_id="n0",
+            sink_id="sink",
+            selector_seed=69,
+            capability_policy="self-selected",
+        )
+        system.environment.inject_signal(
+            count=5,
+            cycle=0,
+            packet_payloads=[[1, 0, 1, 1]] * 5,
+            context_bits=[0] * 5,
+            task_id="task_a",
+        )
+
+        system.run_global_cycle()
+        capability = system.environment.capability_states["n0"]
+
+        self.assertFalse(capability.latent_enabled)
+        self.assertGreater(capability.visible_context_trust, 0.5)
+        self.assertEqual(capability.latent_recruitment_cycles, [])
+
+    def test_self_selected_summary_reports_capability_fields(self) -> None:
+        system = NativeSubstrateSystem(
+            adjacency={"n0": ("sink",)},
+            positions={"n0": 0, "sink": 1},
+            source_id="n0",
+            sink_id="sink",
+            selector_seed=71,
+            capability_policy="self-selected",
+        )
+        system.environment.inject_signal(
+            count=1,
+            cycle=0,
+            packet_payloads=[[1, 0, 1, 1]],
+            context_bits=[0],
+            task_id="task_a",
+        )
+        system.run_global_cycle()
+
+        summary = system.summarize()
+
+        self.assertEqual(summary["capability_policy"], "self-selected")
+        self.assertIn("capability_timeline", summary)
+        self.assertTrue(summary["capability_timeline"])
+        self.assertIn("capability_supports", summary)
+        self.assertIn("n0", summary["capability_supports"])
+        self.assertIn("latent_recruitment_cycles", summary)
+        self.assertIn("growth_recruitment_cycles", summary)
+
+    def test_self_selected_recent_latent_summary_persists_across_sparse_observations(self) -> None:
+        system = NativeSubstrateSystem(
+            adjacency={"n0": ("sink",)},
+            positions={"n0": 0, "sink": 1},
+            source_id="n0",
+            sink_id="sink",
+            selector_seed=72,
+            capability_policy="self-selected",
+        )
+        tracker = system.environment.latent_context_trackers["n0"]
+        state = tracker._state_for("task_a")
+        assert state is not None
+        state.dominant_context = 1
+        state.confidence = 0.8
+        state.total_evidence = 0.8
+        state.last_observed_cycle = 6
+        system.environment.current_cycle = 10
+
+        recent = system.environment._recent_latent_task_summary("n0")
+
+        self.assertEqual(recent["active"], 1.0)
+        self.assertEqual(recent["task_age"], 4.0)
+        self.assertGreater(recent["recency_weight"], 0.0)
+        self.assertAlmostEqual(recent["confidence"], 0.8, places=6)
+
+    def test_self_selected_carryover_restores_capability_state_without_oracle_fields(self) -> None:
+        system = NativeSubstrateSystem(
+            adjacency={"n0": ("sink",)},
+            positions={"n0": 0, "sink": 1},
+            source_id="n0",
+            sink_id="sink",
+            selector_seed=73,
+            capability_policy="self-selected",
+        )
+        capability = system.environment.capability_states["n0"]
+        capability.latent_support = 0.73
+        capability.latent_enabled = True
+        capability.visible_context_trust = 0.18
+        capability.growth_support = 0.61
+        capability.growth_enabled = True
+        capability.latent_recruitment_cycles = [2, 4]
+        capability.growth_recruitment_cycles = [5]
+
+        temp_dir = ROOT / "tests_tmp" / f"capability_state_{uuid.uuid4().hex}"
+        temp_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            system.save_memory_carryover(temp_dir)
+            manifest_text = (temp_dir / "memory_state.json").read_text(encoding="utf-8")
+            self.assertNotIn("benchmark_id", manifest_text)
+            self.assertNotIn("oracle", manifest_text)
+
+            restored = NativeSubstrateSystem(
+                adjacency={"n0": ("sink",)},
+                positions={"n0": 0, "sink": 1},
+                source_id="n0",
+                sink_id="sink",
+                selector_seed=73,
+                capability_policy="self-selected",
+            )
+            self.assertTrue(restored.load_memory_carryover(temp_dir))
+            restored_capability = restored.environment.capability_states["n0"]
+            self.assertAlmostEqual(restored_capability.latent_support, 0.73, places=6)
+            self.assertTrue(restored_capability.latent_enabled)
+            self.assertAlmostEqual(restored_capability.growth_support, 0.61, places=6)
+            self.assertTrue(restored_capability.growth_enabled)
+            self.assertEqual(restored_capability.latent_recruitment_cycles, [2, 4])
+            self.assertEqual(restored_capability.growth_recruitment_cycles, [5])
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_self_selected_local_contradiction_can_recruit_latent(self) -> None:
+        system = NativeSubstrateSystem(
+            adjacency={"n0": ("sink",)},
+            positions={"n0": 0, "sink": 1},
+            source_id="n0",
+            sink_id="sink",
+            selector_seed=79,
+            capability_policy="self-selected",
+        )
+        system.environment.inject_signal(
+            count=5,
+            cycle=0,
+            packet_payloads=[[1, 0, 1, 1]] * 5,
+            context_bits=[0] * 5,
+            task_id="task_a",
+        )
+        runtime = system.environment.state_for("n0")
+        runtime.received_feedback = 1
+        runtime.last_match_ratio = 0.0
+        runtime.transform_debt["rotate_left_1"] = 0.9
+        capability = system.environment.capability_states["n0"]
+        capability.latent_support = 0.50
+
+        system.environment.tick(1)
+        updated = system.environment.capability_states["n0"]
+
+        self.assertTrue(updated.latent_enabled)
+        self.assertGreater(updated.latent_support, 0.41)
+        self.assertLess(updated.visible_context_trust, 1.0)
+        self.assertEqual(updated.latent_recruitment_cycles, [1])
 
 
 class TestNeuralBaselineHarness(unittest.TestCase):
@@ -2541,6 +2756,45 @@ class TestLatentContextProbe(unittest.TestCase):
         self.assertLess(observed["source_sequence_transform_hint_identity"], 0.0)
         self.assertEqual(observed["source_prev_bit_0"], 1.0)
         self.assertEqual(observed["source_delta_bit_0"], 0.0)
+
+    def test_source_sequence_adapter_uses_source_buffer_focus_packet_for_b2_hidden_memory(self) -> None:
+        system = NativeSubstrateSystem(
+            adjacency={"n0": ("sink",)},
+            positions={"n0": 0, "sink": 1},
+            source_id="n0",
+            sink_id="sink",
+            selector_seed=13,
+            source_sequence_context_enabled=True,
+        )
+        packets = [
+            system.environment.create_packet(
+                cycle=index,
+                input_bits=input_bits,
+                payload_bits=input_bits,
+                context_bit=None,
+                task_id="ceiling_b2_task_a",
+                target_bits=[0, 0, 0, 0],
+            )
+            for index, input_bits in enumerate(
+                ([1, 0, 0, 0], [1, 1, 0, 0], [0, 0, 0, 0]),
+                start=0,
+            )
+        ]
+
+        for cycle, packet in enumerate(packets):
+            system.environment.current_cycle = cycle
+            system.environment.source_buffer = [packet]
+            observed = system.environment.observe_local("n0")
+
+        self.assertEqual(observed["has_packet"], 1.0)
+        self.assertEqual(observed["head_has_task"], 1.0)
+        self.assertEqual(observed["source_sequence_available"], 1.0)
+        self.assertEqual(observed["source_sequence_context_estimate"], 1.0)
+        self.assertGreater(observed["source_sequence_transform_hint_xor_mask_1010"], 0.0)
+        self.assertLess(
+            observed["source_sequence_transform_hint_rotate_left_1"],
+            observed["source_sequence_transform_hint_xor_mask_1010"],
+        )
 
     def test_selector_uses_effective_context_when_explicit_context_is_hidden(self) -> None:
         system = NativeSubstrateSystem(
