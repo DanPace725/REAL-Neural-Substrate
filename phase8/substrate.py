@@ -546,6 +546,7 @@ class ConnectionSubstrate:
         *,
         credit_signal: float,
         bit_match_ratio: float,
+        aligned_transform: bool = False,
     ) -> bool:
         if neighbor_id not in self.neighbor_ids:
             return False
@@ -556,15 +557,34 @@ class ConnectionSubstrate:
         if bit_match_ratio < self.config.context_credit_match_floor:
             mismatch = self.config.context_credit_match_floor - max(0.0, bit_match_ratio)
             mismatch_ratio = mismatch / max(self.config.context_credit_match_floor, 1e-9)
-            demotion = min(
-                0.85,
-                self.config.context_support_demote_scale + 0.45 * mismatch_ratio,
-            )
+            if aligned_transform and bit_match_ratio > 0.0:
+                demotion = min(
+                    0.32,
+                    0.10 + 0.18 * mismatch_ratio,
+                )
+                accumulator_decay = max(0.55, 0.82 - 0.18 * mismatch_ratio)
+                residual_gain = (
+                    self.config.context_credit_gain_scale
+                    * max(0.0, credit_signal)
+                    * max(0.0, bit_match_ratio)
+                    * 0.30
+                )
+            else:
+                demotion = min(
+                    0.85,
+                    self.config.context_support_demote_scale + 0.45 * mismatch_ratio,
+                )
+                accumulator_decay = 0.2
+                residual_gain = 0.0
             context_support_key = self._context_action_keys[(neighbor_id, transform_name, context_value)]
             current_support = self._inner.slow.get(context_support_key, 0.0)
             reduced = max(0.0, current_support * (1.0 - demotion))
             self._inner.slow[context_support_key] = reduced
-            self._context_credit_accumulator[key] = self._context_credit_accumulator.get(key, 0.0) * 0.2
+            self._context_credit_accumulator[key] = min(
+                2.0,
+                self._context_credit_accumulator.get(key, 0.0) * accumulator_decay
+                + residual_gain,
+            )
             if reduced <= 1e-4:
                 self._inner.slow_age[context_support_key] = max(
                     self._inner.slow_age.get(context_support_key, 0),

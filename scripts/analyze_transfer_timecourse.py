@@ -605,6 +605,11 @@ def _latent_timeline_summary(records: list[dict[str, object]]) -> dict[str, floa
             "context_promotion_ready",
             threshold=0.5,
         ),
+        "first_context_growth_ready_cycle": _first_cycle_at_threshold(
+            records,
+            "context_growth_ready",
+            threshold=0.5,
+        ),
         "peak_latent_context_confidence": round(peak_latent_confidence, 5),
         "peak_latent_context_confidence_cycle": peak_latent_confidence_cycle,
         "avg_latent_context_confidence": round(mean(latent_confidences), 5) if latent_confidences else 0.0,

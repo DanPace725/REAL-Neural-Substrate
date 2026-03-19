@@ -117,6 +117,43 @@ class TestConnectionSubstrate(unittest.TestCase):
             0.0,
         )
 
+    def test_aligned_partial_context_feedback_preserves_support_and_accumulator(self) -> None:
+        substrate = ConnectionSubstrate(("n1",))
+
+        for _ in range(2):
+            substrate.record_context_feedback(
+                "n1",
+                "identity",
+                3,
+                credit_signal=1.0,
+                bit_match_ratio=1.0,
+            )
+
+        before_support = substrate.contextual_action_support("n1", "identity", 3)
+        before_accumulator = substrate._context_credit_accumulator[
+            substrate._credit_key("n1", "identity", 3)
+        ]
+
+        promoted = substrate.record_context_feedback(
+            "n1",
+            "identity",
+            3,
+            credit_signal=1.0,
+            bit_match_ratio=0.5,
+            aligned_transform=True,
+        )
+
+        after_support = substrate.contextual_action_support("n1", "identity", 3)
+        after_accumulator = substrate._context_credit_accumulator[
+            substrate._credit_key("n1", "identity", 3)
+        ]
+
+        self.assertFalse(promoted)
+        self.assertGreater(before_support, 0.0)
+        self.assertGreater(after_support, 0.0)
+        self.assertGreater(after_support, before_support * 0.6)
+        self.assertGreater(after_accumulator, before_accumulator * 0.5)
+
     def test_nonbinary_context_labels_can_be_registered_and_maintained(self) -> None:
         substrate = ConnectionSubstrate(("n1",))
         substrate.seed_action_support(
@@ -922,6 +959,48 @@ class TestRoutingEnvironment(unittest.TestCase):
         )
         self.assertGreater(state.branch_context_credit["sink:context_0"], 0.0)
 
+    def test_aligned_partial_resolved_feedback_preserves_transform_credit(self) -> None:
+        env = RoutingEnvironment(
+            adjacency={
+                "n0": ("sink",),
+            },
+            positions={"n0": 0, "sink": 1},
+            source_id="n0",
+            sink_id="sink",
+            max_atp=1.0,
+        )
+        state = env.state_for("n0")
+        state.transform_credit["identity"] = 0.6
+        state.context_transform_credit["identity:context_3"] = 0.7
+        state.branch_transform_credit["sink:identity"] = 0.5
+        state.context_branch_transform_credit["sink:identity:context_3"] = 0.45
+        state.branch_context_credit["sink:context_3"] = 0.5
+        env.inject_signal(
+            count=1,
+            cycle=0,
+            packet_payloads=[[1, 0, 1, 1]],
+            context_bits=[3],
+            task_id="ceiling_c4_task_c",
+        )
+
+        env.route_signal(
+            "n0",
+            "sink",
+            cost=0.05,
+            transform_name="identity",
+        )
+        env.pending_feedback[0].bit_match_ratio = 0.5
+        delivered = env.advance_feedback()
+
+        self.assertTrue(delivered[0]["transform_matches_context"])
+        self.assertGreater(state.transform_credit["identity"], 0.35)
+        self.assertGreater(state.context_transform_credit["identity:context_3"], 0.35)
+        self.assertLessEqual(state.transform_debt.get("identity", 0.0), 1e-6)
+        self.assertLessEqual(state.context_transform_debt.get("identity:context_3", 0.0), 1e-6)
+        self.assertGreater(state.branch_transform_debt["sink:identity"], 0.0)
+        self.assertGreater(state.context_branch_transform_debt["sink:identity:context_3"], 0.0)
+        self.assertGreater(state.branch_context_debt["sink:context_3"], 0.0)
+
 
 class TestNativeSubstrateSystem(unittest.TestCase):
     def test_local_observation_excludes_non_neighbors(self) -> None:
@@ -1379,6 +1458,7 @@ class TestNativeSubstrateSystem(unittest.TestCase):
         action, _ = agent.engine.selector.select(available, history=[])
 
         self.assertEqual(action, "route_transform:n2:xor_mask_0101")
+
 
     def test_consolidation_promotes_route_history_into_substrate(self) -> None:
         system = NativeSubstrateSystem(
@@ -2879,6 +2959,7 @@ class TestLatentTimecourseAnalysis(unittest.TestCase):
                 "effective_has_context": 0.0,
                 "effective_context_confidence": 0.0,
                 "context_promotion_ready": 0.0,
+                "context_growth_ready": 0.0,
                 "source_sequence_context_confidence": 0.80,
                 "source_route_context_confidence": 0.60,
                 "source_feedback_context_confidence": 0.10,
@@ -2900,6 +2981,7 @@ class TestLatentTimecourseAnalysis(unittest.TestCase):
                 "effective_has_context": 1.0,
                 "effective_context_confidence": 0.72,
                 "context_promotion_ready": 0.0,
+                "context_growth_ready": 0.0,
                 "source_sequence_context_confidence": 0.85,
                 "source_route_context_confidence": 0.70,
                 "source_feedback_context_confidence": 0.40,
@@ -2921,6 +3003,7 @@ class TestLatentTimecourseAnalysis(unittest.TestCase):
                 "effective_has_context": 1.0,
                 "effective_context_confidence": 0.82,
                 "context_promotion_ready": 1.0,
+                "context_growth_ready": 1.0,
                 "source_sequence_context_confidence": 0.90,
                 "source_route_context_confidence": 0.80,
                 "source_feedback_context_confidence": 0.20,
@@ -2942,6 +3025,7 @@ class TestLatentTimecourseAnalysis(unittest.TestCase):
         self.assertEqual(summary["first_latent_context_available_cycle"], 1)
         self.assertEqual(summary["first_effective_context_cycle"], 2)
         self.assertEqual(summary["first_context_promotion_ready_cycle"], 3)
+        self.assertEqual(summary["first_context_growth_ready_cycle"], 3)
         self.assertEqual(summary["low_confidence_cycle_count"], 1)
         self.assertEqual(summary["pre_effective_wrong_transform_events"], 1)
         self.assertEqual(summary["pre_effective_instability_events"], 1)

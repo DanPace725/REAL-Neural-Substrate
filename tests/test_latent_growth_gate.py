@@ -66,6 +66,40 @@ class TestLatentGrowthGate(unittest.TestCase):
         self.assertFalse(any(action["action"].startswith("bud_") for action in blocked))
         self.assertTrue(any(action["action"].startswith("bud_") for action in allowed))
 
+    def test_growth_gate_blocks_idle_recent_latent_task_growth(self) -> None:
+        system = self._growth_system()
+
+        blocked_observation = {
+            "atp_ratio": 1.0,
+            "contradiction_pressure": 0.8,
+            "queue_pressure": 0.0,
+            "oldest_packet_age": 0.0,
+            "ingress_backlog": 0.0,
+            "energy_surplus": 0.3,
+            "head_has_task": 0.0,
+            "head_has_context": 0.0,
+            "effective_context_confidence": 0.0,
+            "context_promotion_ready": 0.0,
+            "context_growth_ready": 0.0,
+            "recent_latent_task_active": 1.0,
+            "recent_latent_task_age": 0.0,
+            "recent_latent_has_context": 1.0,
+            "recent_latent_context_confidence": 0.95,
+            "recent_latent_promotion_ready": 1.0,
+            "recent_latent_growth_ready": 1.0,
+        }
+        allowed_observation = dict(blocked_observation)
+        allowed_observation["recent_latent_task_active"] = 0.0
+
+        system.environment.observe_local = lambda node_id: dict(blocked_observation)
+        blocked = system.environment.growth_action_specs("n0")
+
+        system.environment.observe_local = lambda node_id: dict(allowed_observation)
+        allowed = system.environment.growth_action_specs("n0")
+
+        self.assertFalse(any(action["action"].startswith("bud_") for action in blocked))
+        self.assertTrue(any(action["action"].startswith("bud_") for action in allowed))
+
 
 if __name__ == "__main__":
     unittest.main()

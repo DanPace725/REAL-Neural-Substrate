@@ -122,6 +122,7 @@ class NodeAgent:
             promotion_ready = bool(event.get("context_promotion_ready", context_bit is not None))
             amount = float(event.get("amount", 0.0))
             bit_match_ratio = float(event.get("bit_match_ratio", 0.0))
+            transform_matches_context = bool(event.get("transform_matches_context", False))
             feedback_scale = amount / max(self.environment.feedback_amount, 1e-9)
             if promotion_ready:
                 self.substrate.record_context_feedback(
@@ -130,6 +131,7 @@ class NodeAgent:
                     context_bit,
                     credit_signal=feedback_scale,
                     bit_match_ratio=bit_match_ratio,
+                    aligned_transform=transform_matches_context,
                 )
 
     def save_carryover(self, path: str | Path) -> None:

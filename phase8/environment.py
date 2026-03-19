@@ -51,6 +51,7 @@ LATENT_TRANSFER_ADAPTATION_BOOST_SCALE = 0.05
 LATENT_TRANSFER_ADAPTATION_DAMP_BLEND = 0.95
 LATENT_TRANSFER_ADAPTATION_REWRITE_SCALE = 0.10
 LATENT_TRANSFER_EFFECTIVE_THRESHOLD_BOOST = 0.18
+LATENT_GROWTH_IDLE_TASK_WINDOW = 1
 
 
 def _edge_id(source_id: str, target_id: str) -> str:
@@ -856,6 +857,17 @@ def _quality_scaled_credit(bit_match_ratio: float, *, floor: float = TASK_CONTEX
     return min(1.0, (quality - floor) / max(1.0 - floor, 1e-9))
 
 
+def _transform_matches_resolved_context(
+    task_id: str | None,
+    context_bit: int | None,
+    transform_name: str,
+) -> bool:
+    expected_transform = _expected_transform_for_task(task_id, context_bit)
+    if expected_transform is None:
+        return False
+    return expected_transform == _normalize_transform_name(transform_name)
+
+
 @dataclass
 class RoutingEnvironment:
     adjacency: Dict[str, tuple[str, ...]]
@@ -1120,6 +1132,54 @@ class RoutingEnvironment:
             return tracker.observe_task(task_id, self.current_cycle)
         return tracker.snapshot(task_id)
 
+    def _recent_latent_task_summary(self, node_id: str) -> dict[str, float]:
+        tracker = self.latent_context_trackers.get(node_id)
+        if tracker is None:
+            return {
+                "active": 0.0,
+                "task_age": 0.0,
+                "has_context": 0.0,
+                "confidence": 0.0,
+                "promotion_ready": 0.0,
+                "growth_ready": 0.0,
+            }
+        best_task_id: str | None = None
+        best_age: int | None = None
+        best_confidence = -1.0
+        for task_id, state in tracker.task_states.items():
+            if state.last_observed_cycle < 0:
+                continue
+            age = max(0, self.current_cycle - state.last_observed_cycle)
+            if age > LATENT_GROWTH_IDLE_TASK_WINDOW:
+                continue
+            confidence = float(state.confidence)
+            if (
+                best_age is None
+                or age < best_age
+                or (age == best_age and confidence > best_confidence)
+            ):
+                best_task_id = task_id
+                best_age = age
+                best_confidence = confidence
+        if best_task_id is None or best_age is None:
+            return {
+                "active": 0.0,
+                "task_age": 0.0,
+                "has_context": 0.0,
+                "confidence": 0.0,
+                "promotion_ready": 0.0,
+                "growth_ready": 0.0,
+            }
+        snapshot = tracker.snapshot(best_task_id)
+        return {
+            "active": 1.0,
+            "task_age": float(best_age),
+            "has_context": 1.0 if snapshot.get("available") else 0.0,
+            "confidence": float(snapshot.get("confidence", 0.0)),
+            "promotion_ready": 1.0 if snapshot.get("promotion_ready") else 0.0,
+            "growth_ready": 1.0 if snapshot.get("growth_ready") else 0.0,
+        }
+
     def _record_latent_route(
         self,
         node_id: str,
@@ -1222,6 +1282,7 @@ class RoutingEnvironment:
         latent_available = 1.0 if latent_snapshot.get("available") else 0.0
         latent_estimate = latent_snapshot.get("estimate")
         latent_confidence = float(latent_snapshot.get("confidence", 0.0))
+        recent_latent = self._recent_latent_task_summary(node_id)
         latent_context_count = int(latent_snapshot.get("context_count", 2))
         effective_context_threshold = max(
             0.0,
@@ -1311,6 +1372,12 @@ class RoutingEnvironment:
             "source_sequence_repeat_input": float(
                 latent_snapshot.get("sequence_repeat_input", 0.0)
             ),
+            "recent_latent_task_active": float(recent_latent.get("active", 0.0)),
+            "recent_latent_task_age": float(recent_latent.get("task_age", 0.0)),
+            "recent_latent_has_context": float(recent_latent.get("has_context", 0.0)),
+            "recent_latent_context_confidence": float(recent_latent.get("confidence", 0.0)),
+            "recent_latent_promotion_ready": float(recent_latent.get("promotion_ready", 0.0)),
+            "recent_latent_growth_ready": float(recent_latent.get("growth_ready", 0.0)),
             "effective_has_context": effective_has_context,
             "effective_context_bit": (
                 float(effective_context_bit) if effective_context_bit is not None else 0.0
@@ -1645,6 +1712,10 @@ class RoutingEnvironment:
             and observation.get("head_has_context", 0.0) < 0.5
             and observation.get("context_growth_ready", 0.0) < 0.5
         )
+        latent_recent_idle_task = (
+            observation.get("recent_latent_task_active", 0.0) >= 0.5
+            and observation.get("head_has_task", 0.0) < 0.5
+        )
         context_gate_active = (
             context_gate > 0.0
             and observation.get("head_has_task", 0.0) >= 0.5
@@ -1667,7 +1738,15 @@ class RoutingEnvironment:
             and not self.topology_state.max_dynamic_nodes_reached(self.morphogenesis_config)
             and routing_has_feedback
         )
-        if (growth_ready or anticipatory_ready) and low_local_pressure and not context_gate_active:
+        latent_idle_growth_gate_active = (
+            context_gate > 0.0
+            and latent_recent_idle_task
+        )
+        if (
+            ((growth_ready and not latent_idle_growth_gate_active) or anticipatory_ready)
+            and low_local_pressure
+            and not context_gate_active
+        ):
             for target_id in self._candidate_growth_targets(node_id):
                 target_pos = self.positions[target_id]
                 node_pos = self.positions[node_id]
@@ -1955,6 +2034,7 @@ class RoutingEnvironment:
             prior_credit = state.transform_credit.get(transform_name, 0.0)
             prior_debt = state.transform_debt.get(transform_name, 0.0)
             branch_key = _branch_debt_key(neighbor_id, transform_name)
+            transform_matches_context = False
             resolved_context_bit, resolved_context_confidence, context_promotion_ready = self._resolved_feedback_context(
                 source_id,
                 pulse,
@@ -2004,49 +2084,18 @@ class RoutingEnvironment:
                     0.0,
                 )
                 match_ratio = max(0.0, min(1.0, pulse.bit_match_ratio))
+                transform_matches_context = (
+                    match_ratio > 0.0
+                    and _transform_matches_resolved_context(
+                        pulse.task_id,
+                        resolved_context_bit,
+                        transform_name,
+                    )
+                )
                 if match_ratio < TASK_CONTEXT_MATCH_FLOOR:
                     contradiction = (
                         TASK_CONTEXT_MATCH_FLOOR - match_ratio
                     ) / max(TASK_CONTEXT_MATCH_FLOOR, 1e-9)
-                    residual_generic = 0.10 * credit_signal
-                    residual_context = 0.05 * credit_signal
-                    state.transform_credit[transform_name] = min(
-                        1.0,
-                        max(
-                            residual_generic,
-                            prior_credit * max(0.15, 0.58 - 0.24 * contradiction),
-                        ),
-                    )
-                    state.context_transform_credit[context_key] = min(
-                        1.0,
-                        max(
-                            residual_context,
-                            prior_context_credit * max(0.05, 0.32 - 0.18 * contradiction),
-                        ),
-                    )
-                    state.branch_transform_credit[branch_key] = min(
-                        1.0,
-                        max(
-                            residual_context,
-                            prior_branch_credit * max(0.08, 0.40 - 0.20 * contradiction),
-                        ),
-                    )
-                    state.context_branch_transform_credit[context_branch_key] = min(
-                        1.0,
-                        max(
-                            residual_context,
-                            prior_context_branch_credit
-                            * max(0.04, 0.28 - 0.16 * contradiction),
-                        ),
-                    )
-                    state.branch_context_credit[branch_context_key] = min(
-                        1.0,
-                        max(
-                            residual_context,
-                            prior_branch_context_credit
-                            * max(0.06, 0.34 - 0.20 * contradiction),
-                        ),
-                    )
                     debt_signal = max(contradiction, 1.0 - match_ratio)
                     stale_commitment = max(
                         prior_credit,
@@ -2057,7 +2106,7 @@ class RoutingEnvironment:
                         prior_debt,
                         prior_context_debt,
                     )
-                    if (
+                    debt_activation_ready = (
                         prior_credit >= DEBT_ACTIVATION_CREDIT
                         or prior_context_credit >= DEBT_ACTIVATION_CONTEXT_CREDIT
                         or prior_branch_credit >= DEBT_ACTIVATION_CONTEXT_CREDIT
@@ -2068,49 +2117,170 @@ class RoutingEnvironment:
                         or prior_branch_debt >= DEBT_ACTIVATION_EXISTING
                         or prior_context_branch_debt >= DEBT_ACTIVATION_EXISTING
                         or prior_branch_context_debt >= DEBT_ACTIVATION_EXISTING
-                    ):
-                        state.transform_debt[transform_name] = min(
-                            1.0,
-                            0.70 * prior_debt + 0.30 * debt_signal,
+                    )
+                    if transform_matches_context:
+                        quality_credit = max(
+                            0.0,
+                            min(1.0, match_ratio / max(TASK_CONTEXT_MATCH_FLOOR, 1e-9)),
                         )
-                        state.context_transform_debt[context_key] = min(
+                        residual_generic = max(0.16 * credit_signal, 0.14 * quality_credit)
+                        residual_context = max(0.14 * credit_signal, 0.18 * quality_credit)
+                        residual_branch = max(0.10 * credit_signal, 0.10 * quality_credit)
+                        state.transform_credit[transform_name] = min(
                             1.0,
-                            0.55 * prior_context_debt + 0.45 * debt_signal,
+                            max(
+                                residual_generic,
+                                prior_credit * max(0.45, 0.84 - 0.12 * contradiction),
+                            ),
                         )
-                        state.branch_transform_debt[branch_key] = min(
+                        state.context_transform_credit[context_key] = min(
                             1.0,
-                            0.65 * prior_branch_debt + 0.35 * debt_signal,
+                            max(
+                                residual_context,
+                                prior_context_credit * max(0.48, 0.86 - 0.10 * contradiction),
+                            ),
                         )
-                        state.context_branch_transform_debt[context_branch_key] = min(
+                        state.branch_transform_credit[branch_key] = min(
                             1.0,
-                            0.50 * prior_context_branch_debt + 0.50 * debt_signal,
+                            max(
+                                residual_branch,
+                                prior_branch_credit * max(0.35, 0.72 - 0.14 * contradiction),
+                            ),
                         )
-                        state.branch_context_debt[branch_context_key] = min(
+                        state.context_branch_transform_credit[context_branch_key] = min(
                             1.0,
-                            0.45 * prior_branch_context_debt + 0.55 * debt_signal,
+                            max(
+                                residual_branch,
+                                prior_context_branch_credit
+                                * max(0.30, 0.68 - 0.16 * contradiction),
+                            ),
                         )
-                    else:
-                        mild_decay = max(0.0, 0.55 - 0.20 * stale_commitment)
+                        state.branch_context_credit[branch_context_key] = min(
+                            1.0,
+                            max(
+                                residual_branch,
+                                prior_branch_context_credit
+                                * max(0.26, 0.62 - 0.16 * contradiction),
+                            ),
+                        )
                         state.transform_debt[transform_name] = max(
                             0.0,
-                            prior_debt * mild_decay,
+                            prior_debt * max(0.45, 0.82 - 0.18 * contradiction),
                         )
                         state.context_transform_debt[context_key] = max(
                             0.0,
-                            prior_context_debt * max(0.45, mild_decay - 0.05),
+                            prior_context_debt * max(0.45, 0.84 - 0.18 * contradiction),
                         )
-                        state.branch_transform_debt[branch_key] = max(
-                            0.0,
-                            prior_branch_debt * 0.60,
+                        branch_debt_signal = max(0.12, 0.55 * debt_signal)
+                        if debt_activation_ready:
+                            state.branch_transform_debt[branch_key] = min(
+                                1.0,
+                                0.72 * prior_branch_debt + 0.28 * branch_debt_signal,
+                            )
+                            state.context_branch_transform_debt[context_branch_key] = min(
+                                1.0,
+                                0.62 * prior_context_branch_debt + 0.38 * branch_debt_signal,
+                            )
+                            state.branch_context_debt[branch_context_key] = min(
+                                1.0,
+                                0.56 * prior_branch_context_debt + 0.44 * branch_debt_signal,
+                            )
+                        else:
+                            state.branch_transform_debt[branch_key] = max(
+                                0.0,
+                                prior_branch_debt * 0.68,
+                            )
+                            state.context_branch_transform_debt[context_branch_key] = max(
+                                0.0,
+                                prior_context_branch_debt * 0.62,
+                            )
+                            state.branch_context_debt[branch_context_key] = max(
+                                0.0,
+                                prior_branch_context_debt * 0.58,
+                            )
+                    else:
+                        residual_generic = 0.10 * credit_signal
+                        residual_context = 0.05 * credit_signal
+                        state.transform_credit[transform_name] = min(
+                            1.0,
+                            max(
+                                residual_generic,
+                                prior_credit * max(0.15, 0.58 - 0.24 * contradiction),
+                            ),
                         )
-                        state.context_branch_transform_debt[context_branch_key] = max(
-                            0.0,
-                            prior_context_branch_debt * 0.55,
+                        state.context_transform_credit[context_key] = min(
+                            1.0,
+                            max(
+                                residual_context,
+                                prior_context_credit * max(0.05, 0.32 - 0.18 * contradiction),
+                            ),
                         )
-                        state.branch_context_debt[branch_context_key] = max(
-                            0.0,
-                            prior_branch_context_debt * 0.52,
+                        state.branch_transform_credit[branch_key] = min(
+                            1.0,
+                            max(
+                                residual_context,
+                                prior_branch_credit * max(0.08, 0.40 - 0.20 * contradiction),
+                            ),
                         )
+                        state.context_branch_transform_credit[context_branch_key] = min(
+                            1.0,
+                            max(
+                                residual_context,
+                                prior_context_branch_credit
+                                * max(0.04, 0.28 - 0.16 * contradiction),
+                            ),
+                        )
+                        state.branch_context_credit[branch_context_key] = min(
+                            1.0,
+                            max(
+                                residual_context,
+                                prior_branch_context_credit
+                                * max(0.06, 0.34 - 0.20 * contradiction),
+                            ),
+                        )
+                        if debt_activation_ready:
+                            state.transform_debt[transform_name] = min(
+                                1.0,
+                                0.70 * prior_debt + 0.30 * debt_signal,
+                            )
+                            state.context_transform_debt[context_key] = min(
+                                1.0,
+                                0.55 * prior_context_debt + 0.45 * debt_signal,
+                            )
+                            state.branch_transform_debt[branch_key] = min(
+                                1.0,
+                                0.65 * prior_branch_debt + 0.35 * debt_signal,
+                            )
+                            state.context_branch_transform_debt[context_branch_key] = min(
+                                1.0,
+                                0.50 * prior_context_branch_debt + 0.50 * debt_signal,
+                            )
+                            state.branch_context_debt[branch_context_key] = min(
+                                1.0,
+                                0.45 * prior_branch_context_debt + 0.55 * debt_signal,
+                            )
+                        else:
+                            mild_decay = max(0.0, 0.55 - 0.20 * stale_commitment)
+                            state.transform_debt[transform_name] = max(
+                                0.0,
+                                prior_debt * mild_decay,
+                            )
+                            state.context_transform_debt[context_key] = max(
+                                0.0,
+                                prior_context_debt * max(0.45, mild_decay - 0.05),
+                            )
+                            state.branch_transform_debt[branch_key] = max(
+                                0.0,
+                                prior_branch_debt * 0.60,
+                            )
+                            state.context_branch_transform_debt[context_branch_key] = max(
+                                0.0,
+                                prior_context_branch_debt * 0.55,
+                            )
+                            state.branch_context_debt[branch_context_key] = max(
+                                0.0,
+                                prior_branch_context_debt * 0.52,
+                            )
                 else:
                     quality_credit = _quality_scaled_credit(match_ratio)
                     generic_mix = 0.18 + 0.12 * quality_credit
@@ -2174,6 +2344,7 @@ class RoutingEnvironment:
                     "context_promotion_ready": context_promotion_ready,
                     "task_id": pulse.task_id,
                     "bit_match_ratio": pulse.bit_match_ratio,
+                    "transform_matches_context": transform_matches_context,
                 }
             )
             if self.topology_state is not None:

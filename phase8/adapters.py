@@ -52,6 +52,13 @@ class LocalNodeActionBackend:
         local_inbox = len(self.environment.inboxes[self.node_id])
         observation = self.environment.observe_local(self.node_id)
         context_bit = None
+        latent_downstream_transform_gate = (
+            self.node_id != self.environment.source_id
+            and observation.get("head_has_task", 0.0) >= 0.5
+            and observation.get("head_has_context", 0.0) < 0.5
+            and observation.get("latent_context_available", 0.0) >= 0.5
+            and observation.get("context_promotion_ready", 0.0) < 0.5
+        )
         if observation.get("effective_has_context", 0.0) >= 0.5:
             context_bit = int(observation.get("effective_context_bit", 0.0))
         for neighbor_id in self.neighbor_ids:
@@ -59,6 +66,8 @@ class LocalNodeActionBackend:
             if self.environment.route_available(self.node_id, neighbor_id, route_cost):
                 actions.append(f"route:{neighbor_id}")
                 for transform_name in TRANSFORM_ACTIONS:
+                    if latent_downstream_transform_gate and transform_name != "identity":
+                        continue
                     transform_cost = self.substrate.use_cost(neighbor_id, transform_name, context_bit)
                     if self.environment.route_available(self.node_id, neighbor_id, transform_cost):
                         actions.append(f"route_transform:{neighbor_id}:{transform_name}")
