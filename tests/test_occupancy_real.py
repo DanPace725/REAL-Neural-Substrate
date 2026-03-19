@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import json
 import unittest
+from pathlib import Path
 
 from occupancy_baseline import get_preset
-from scripts.compare_occupancy_baseline import compare_occupancy_baseline
+from scripts.compare_occupancy_baseline import (
+    compare_occupancy_baseline,
+    load_or_run_baseline_result,
+)
 from scripts.occupancy_real import (
     DECISION_EMPTY,
     OccupancyRealConfig,
@@ -55,6 +60,26 @@ class TestOccupancyReal(unittest.TestCase):
         self.assertGreaterEqual(result["train_summary"]["mean_feedback_events"], 0.0)
         self.assertIn(DECISION_EMPTY, result["eval_results"][0]["decision_counts"])
 
+    def test_real_summary_only_omits_episode_payloads(self) -> None:
+        preset = get_preset("synth_v1_default")
+        result = run_occupancy_real_experiment(
+            OccupancyRealConfig(
+                csv_path=preset.config.csv_path,
+                window_size=preset.config.window_size,
+                train_fraction=preset.config.train_fraction,
+                normalize=preset.config.normalize,
+                selector_seed=13,
+                max_train_episodes=2,
+                max_eval_episodes=1,
+                summary_only=True,
+            )
+        )
+
+        self.assertNotIn("train_results", result)
+        self.assertNotIn("eval_results", result)
+        self.assertIn("train_summary", result)
+        self.assertIn("eval_summary", result)
+
     def test_comparison_reports_explicit_eval_deltas(self) -> None:
         preset = get_preset("synth_v1_default")
         result = compare_occupancy_baseline(
@@ -62,6 +87,7 @@ class TestOccupancyReal(unittest.TestCase):
             selector_seeds=(13, 23),
             max_train_episodes=3,
             max_eval_episodes=2,
+            summary_only=True,
         )
 
         self.assertEqual(result["selector_seeds"], [13, 23])
@@ -69,6 +95,27 @@ class TestOccupancyReal(unittest.TestCase):
         self.assertIn("accuracy", result["baseline"]["metrics"])
         self.assertIn("accuracy", result["runs"][0]["eval_minus_baseline"])
         self.assertIn("mean_eval_minus_baseline", result["aggregate"])
+        self.assertNotIn("eval_results", result["runs"][0]["real"])
+
+    def test_baseline_cache_is_reused_when_present(self) -> None:
+        preset = get_preset("synth_v1_default")
+        cache_path = Path("tests_tmp") / "test_occupancy_baseline_cache.json"
+        baseline = load_or_run_baseline_result(
+            preset.config,
+            cache_path=cache_path,
+        )
+        mutated = dict(baseline)
+        mutated_metrics = dict(mutated["metrics"])
+        mutated_metrics["accuracy"] = 0.1234
+        mutated["metrics"] = mutated_metrics
+        cache_path.write_text(json.dumps(mutated, indent=2), encoding="utf-8")
+
+        loaded = load_or_run_baseline_result(
+            preset.config,
+            cache_path=cache_path,
+        )
+
+        self.assertEqual(loaded["metrics"]["accuracy"], 0.1234)
 
 
 if __name__ == "__main__":

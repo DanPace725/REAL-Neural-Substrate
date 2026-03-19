@@ -32,10 +32,12 @@ class OccupancyRealConfig:
     selector_seed: int = 0
     feedback_amount: float = 0.18
     packet_ttl: int = 8
+    timestep_drain_cycles: int = 8
     forward_drain_cycles: int = 16
     feedback_drain_cycles: int = 4
     max_train_episodes: int | None = None
     max_eval_episodes: int | None = None
+    summary_only: bool = False
 
 
 @dataclass(frozen=True)
@@ -195,6 +197,16 @@ def _packets_by_id(packets: Iterable[SignalPacket]) -> dict[str, SignalPacket]:
     return {packet.packet_id: packet for packet in packets}
 
 
+def _episode_batches(episode: OccupancyEpisode) -> tuple[tuple[OccupancyPacketSpec, ...], ...]:
+    grouped: dict[int, list[OccupancyPacketSpec]] = {}
+    for packet_spec in episode.packets:
+        grouped.setdefault(int(packet_spec.timestep_offset), []).append(packet_spec)
+    return tuple(
+        tuple(grouped[timestep_offset])
+        for timestep_offset in sorted(grouped.keys(), reverse=True)
+    )
+
+
 def run_episode(
     system: NativeSubstrateSystem,
     episode: OccupancyEpisode,
@@ -206,10 +218,16 @@ def run_episode(
     original_feedback_amount = system.environment.feedback_amount
     system.environment.feedback_amount = 0.0
 
-    for packet_spec in episode.packets:
-        packet = _direct_inject_packet(system, packet_spec)
-        packet_ids.append(packet.packet_id)
-        system.run_global_cycle()
+    for batch in _episode_batches(episode):
+        batch_packet_ids: set[str] = set()
+        for packet_spec in batch:
+            packet = _direct_inject_packet(system, packet_spec)
+            packet_ids.append(packet.packet_id)
+            batch_packet_ids.add(packet.packet_id)
+        for _ in range(max(1, config.timestep_drain_cycles)):
+            if _episode_resolved(system, batch_packet_ids):
+                break
+            system.run_global_cycle()
 
     packet_id_set = set(packet_ids)
     for _ in range(config.forward_drain_cycles):
@@ -379,7 +397,7 @@ def run_occupancy_real_experiment(config: OccupancyRealConfig) -> dict[str, obje
     ]
 
     adjacency, positions, source_id, sink_id = occupancy_topology()
-    return {
+    result = {
         "config": asdict(config),
         "dataset_rows": int(episode_payload["dataset_rows"]),
         "windowed_examples": int(episode_payload["windowed_examples"]),
@@ -394,10 +412,12 @@ def run_occupancy_real_experiment(config: OccupancyRealConfig) -> dict[str, obje
         },
         "train_summary": summarize_episode_results(train_results),
         "eval_summary": summarize_episode_results(eval_results),
-        "train_results": train_results,
-        "eval_results": eval_results,
         "system_summary": _compact_system_summary(system.summarize()),
     }
+    if not config.summary_only:
+        result["train_results"] = train_results
+        result["eval_results"] = eval_results
+    return result
 
 
 __all__ = [
