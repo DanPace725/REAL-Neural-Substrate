@@ -2190,6 +2190,7 @@ class TestCapabilityControl(unittest.TestCase):
         self.assertEqual(updated.latent_recruitment_cycles, [1])
 
 
+
 class TestNeuralBaselineHarness(unittest.TestCase):
     def test_examples_to_criterion_can_optionally_require_bit_accuracy(self) -> None:
         exact_results = [True] * 7 + [False]

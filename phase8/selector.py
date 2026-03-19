@@ -365,6 +365,8 @@ class Phase8Selector:
         growth_novelty_bonus = 0.0
         source_pre_effective_route_drive = 0.0
         hidden_wrong_family_penalty = 0.0
+        visible_task_compatibility_bonus = 0.0
+        visible_task_incompatibility_penalty = 0.0
         transform_recognition_confirmation = 0.0
         if self.environment.topology_state is not None:
             neighbor_spec = self.environment.topology_state.node_specs.get(neighbor_id)
@@ -444,10 +446,27 @@ class Phase8Selector:
         elif transform_name != "identity":
             task_transform_bonus += 0.12 * history_transform_evidence
         if context_bit is not None:
-            context_action_support = self.substrate.contextual_action_support(
-                neighbor_id,
-                transform_name,
-                context_bit,
+            (
+                raw_context_action_support,
+                context_action_support,
+                transfer_context_support_scale,
+            ) = self._effective_context_action_support(
+                neighbor_id=neighbor_id,
+                transform_name=transform_name,
+                context_bit=context_bit,
+                observation=observation,
+                task_transform_affinity=task_transform_affinity,
+                history_transform_evidence=history_transform_evidence,
+                feedback_credit=feedback_credit,
+                context_feedback_credit=context_feedback_credit,
+                branch_feedback_credit=branch_feedback_credit,
+                context_branch_feedback_credit=context_branch_feedback_credit,
+                branch_context_feedback_credit=branch_context_feedback_credit,
+                feedback_debt=feedback_debt,
+                context_feedback_debt=context_feedback_debt,
+                branch_feedback_debt=branch_feedback_debt,
+                context_branch_feedback_debt=context_branch_feedback_debt,
+                branch_context_feedback_debt=branch_context_feedback_debt,
             )
             context_action_velocity = self.substrate.contextual_action_velocity(
                 neighbor_id,
@@ -490,6 +509,21 @@ class Phase8Selector:
             ) * context_weight
             history_alignment = 0.55 + 0.45 * context_evidence
             history_alignment *= max(0.30, 1.0 - 0.40 * branch_context_pressure)
+            if not hidden_task_commitment and transform_name != "identity":
+                compatibility_resolution = max(
+                    transfer_adaptation_phase,
+                    1.0 - transfer_context_support_scale,
+                )
+                if task_transform_affinity > 0.0:
+                    visible_task_compatibility_bonus = (
+                        0.05 + 0.10 * compatibility_resolution
+                    ) * context_weight
+                elif task_transform_affinity < 0.0:
+                    visible_task_incompatibility_penalty = (
+                        0.04
+                        + 0.10 * compatibility_resolution
+                        + 0.18 * raw_context_action_support
+                    ) * context_weight
             if (
                 transform_name == "identity"
                 and action_support < 0.35
@@ -598,6 +632,7 @@ class Phase8Selector:
             "context_support_bonus_term": context_support_bonus,
             "task_transform_bonus_term": task_transform_bonus,
             "source_pre_effective_term": source_pre_effective_route_drive,
+            "visible_task_compatibility_term": visible_task_compatibility_bonus,
             "branch_context_bonus_term": branch_context_bonus,
             "branch_transform_bonus_term": branch_transform_bonus,
             "branch_escape_bonus_term": branch_escape_bonus,
@@ -615,6 +650,7 @@ class Phase8Selector:
             "branch_context_pressure_penalty_term": -0.26 * branch_context_pressure * context_weight,
             "identity_penalty_term": -identity_penalty,
             "hidden_wrong_family_penalty_term": -hidden_wrong_family_penalty,
+            "visible_task_incompatibility_penalty_term": -visible_task_incompatibility_penalty,
             "competition_penalty_term": -competition_penalty,
             "stale_penalty_term": -stale_penalty,
             "competition_bonus_term": competition_bonus,
@@ -637,6 +673,18 @@ class Phase8Selector:
             "raw_context_feedback_credit": round(context_feedback_credit, 6),
             "raw_feedback_debt": round(feedback_debt, 6),
             "raw_context_feedback_debt": round(context_feedback_debt, 6),
+            "raw_context_action_support": round(
+                raw_context_action_support if context_bit is not None else 0.0,
+                6,
+            ),
+            "effective_context_action_support": round(
+                context_action_support if context_bit is not None else 0.0,
+                6,
+            ),
+            "transfer_context_support_scale": round(
+                transfer_context_support_scale if context_bit is not None else 1.0,
+                6,
+            ),
             "raw_last_match_ratio": round(last_match_ratio, 6),
             "raw_transfer_adaptation_phase": round(transfer_adaptation_phase, 6),
         }
@@ -1420,10 +1468,31 @@ class Phase8Selector:
         branch_context_feedback_debt: float,
         transform_history_evidence: float,
     ) -> float:
-        context_action_support = self.substrate.contextual_action_support(
-            neighbor_id,
-            transform_name,
-            context_bit,
+        task_transform_affinity = observation.get(
+            f"task_transform_affinity_{transform_name}",
+            0.0,
+        )
+        (
+            _raw_context_action_support,
+            context_action_support,
+            _transfer_context_support_scale,
+        ) = self._effective_context_action_support(
+            neighbor_id=neighbor_id,
+            transform_name=transform_name,
+            context_bit=context_bit,
+            observation=observation,
+            task_transform_affinity=task_transform_affinity,
+            history_transform_evidence=transform_history_evidence,
+            feedback_credit=feedback_credit,
+            context_feedback_credit=context_feedback_credit,
+            branch_feedback_credit=branch_feedback_credit,
+            context_branch_feedback_credit=context_branch_feedback_credit,
+            branch_context_feedback_credit=branch_context_feedback_credit,
+            feedback_debt=feedback_debt,
+            context_feedback_debt=context_feedback_debt,
+            branch_feedback_debt=branch_feedback_debt,
+            context_branch_feedback_debt=context_branch_feedback_debt,
+            branch_context_feedback_debt=branch_context_feedback_debt,
         )
         _, context_weight = self._effective_context(observation)
         return (
@@ -1441,4 +1510,84 @@ class Phase8Selector:
             - 0.08 * branch_feedback_debt
             - 0.22 * context_branch_feedback_debt * context_weight
             - 0.16 * branch_context_feedback_debt * context_weight
+        )
+
+    def _effective_context_action_support(
+        self,
+        *,
+        neighbor_id: str,
+        transform_name: str,
+        context_bit: int,
+        observation: dict[str, float],
+        task_transform_affinity: float,
+        history_transform_evidence: float,
+        feedback_credit: float,
+        context_feedback_credit: float,
+        branch_feedback_credit: float,
+        context_branch_feedback_credit: float,
+        branch_context_feedback_credit: float,
+        feedback_debt: float,
+        context_feedback_debt: float,
+        branch_feedback_debt: float,
+        context_branch_feedback_debt: float,
+        branch_context_feedback_debt: float,
+    ) -> tuple[float, float, float]:
+        raw_context_action_support = self.substrate.contextual_action_support(
+            neighbor_id,
+            transform_name,
+            context_bit,
+        )
+        if raw_context_action_support <= 0.0:
+            return raw_context_action_support, raw_context_action_support, 1.0
+        transfer_adaptation_phase = max(
+            0.0,
+            min(1.0, observation.get("transfer_adaptation_phase", 0.0)),
+        )
+        local_confirmation = min(
+            1.0,
+            max(
+                0.0,
+                0.42 * history_transform_evidence
+                + 0.24 * max(0.0, task_transform_affinity)
+                + 0.44 * feedback_credit
+                + 0.68 * context_feedback_credit
+                + 0.26 * branch_feedback_credit
+                + 0.40 * context_branch_feedback_credit
+                + 0.34 * branch_context_feedback_credit
+                - 0.18 * feedback_debt
+                - 0.26 * branch_feedback_debt
+                - 0.32 * context_feedback_debt
+                - 0.26 * context_branch_feedback_debt
+                - 0.22 * branch_context_feedback_debt,
+            ),
+        )
+        task_mismatch = max(0.0, -task_transform_affinity)
+        adaptation_pressure = max(
+            transfer_adaptation_phase,
+            0.55 * task_mismatch,
+        )
+        if adaptation_pressure <= 0.0:
+            return raw_context_action_support, raw_context_action_support, 1.0
+        stale_pressure = min(
+            1.0,
+            max(
+                0.0,
+                0.58 * task_mismatch
+                + 0.32 * context_feedback_debt
+                + 0.18 * feedback_debt
+                + 0.18 * context_branch_feedback_debt
+                + 0.16 * branch_context_feedback_debt
+                - 0.24 * local_confirmation,
+            ),
+        )
+        if stale_pressure <= 0.0:
+            return raw_context_action_support, raw_context_action_support, 1.0
+        suppression = adaptation_pressure * stale_pressure * (
+            1.0 - 0.75 * local_confirmation
+        )
+        support_scale = max(0.15, 1.0 - 0.85 * suppression)
+        return (
+            raw_context_action_support,
+            raw_context_action_support * support_scale,
+            support_scale,
         )

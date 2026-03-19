@@ -27,6 +27,9 @@ class TestBenchmarkNodeProbe(unittest.TestCase):
         self.assertIn("first_latent_capability_cycle", task_run["nodes"][first_node]["summary"])
         self.assertIn("mean_source_sequence_context_confidence", task_run["nodes"][first_node]["summary"])
         self.assertIn("pre_sequence_guidance_match_rate", task_run["nodes"][first_node]["summary"])
+        self.assertIn("first_prediction_cycle", task_run["nodes"][first_node]["summary"])
+        self.assertIn("predicted_route_entry_count", task_run["nodes"][first_node]["summary"])
+        self.assertIn("mean_prediction_confidence", task_run["nodes"][first_node]["summary"])
 
 
 if __name__ == "__main__":

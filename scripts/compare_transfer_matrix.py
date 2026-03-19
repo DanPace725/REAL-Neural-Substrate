@@ -32,6 +32,24 @@ def _overall_stat(summary: dict[str, object], field: str) -> float:
     return float(summary.get("task_diagnostics", {}).get("overall", {}).get(field, 0.0))
 
 
+def _anticipation_stat(metrics: dict[str, object], field: str) -> float:
+    return float(metrics.get("anticipation", {}).get(field, 0.0))
+
+
+def _anticipation_mean_or_none(
+    metrics_list: list[dict[str, object]],
+    field: str,
+) -> float | None:
+    values = [
+        metrics.get("anticipation", {}).get(field)
+        for metrics in metrics_list
+    ]
+    present = [float(value) for value in values if value is not None]
+    if not present:
+        return None
+    return round(mean(present), 4)
+
+
 def transfer_pair_for_seed(train_scenario: str, transfer_scenario: str, seed: int) -> dict[str, object]:
     training = build_system(seed, train_scenario)
     training_summary = run_workload(training, train_scenario)
@@ -75,7 +93,7 @@ def transfer_pair_for_seed(train_scenario: str, transfer_scenario: str, seed: in
     }
 
 
-def aggregate_pair(results: list[dict[str, object]]) -> dict[str, float]:
+def aggregate_pair(results: list[dict[str, object]]) -> dict[str, object]:
     cold_summaries = [item["cold_summary"] for item in results]
     warm_full_summaries = [item["warm_full_summary"] for item in results]
     warm_substrate_summaries = [item["warm_substrate_summary"] for item in results]
@@ -103,6 +121,15 @@ def aggregate_pair(results: list[dict[str, object]]) -> dict[str, float]:
         "avg_warm_full_best_bit_accuracy": round(mean(metric["best_rolling_bit_accuracy"] for metric in warm_full_metrics), 4),
         "avg_warm_substrate_best_exact_rate": round(mean(metric["best_rolling_exact_rate"] for metric in warm_substrate_metrics), 4),
         "avg_warm_substrate_best_bit_accuracy": round(mean(metric["best_rolling_bit_accuracy"] for metric in warm_substrate_metrics), 4),
+        "avg_cold_predicted_route_entries": round(mean(_anticipation_stat(metric, "predicted_route_entry_count") for metric in cold_metrics), 4),
+        "avg_warm_full_predicted_route_entries": round(mean(_anticipation_stat(metric, "predicted_route_entry_count") for metric in warm_full_metrics), 4),
+        "avg_warm_substrate_predicted_route_entries": round(mean(_anticipation_stat(metric, "predicted_route_entry_count") for metric in warm_substrate_metrics), 4),
+        "avg_cold_predicted_source_route_entries": round(mean(_anticipation_stat(metric, "predicted_source_route_entry_count") for metric in cold_metrics), 4),
+        "avg_warm_full_predicted_source_route_entries": round(mean(_anticipation_stat(metric, "predicted_source_route_entry_count") for metric in warm_full_metrics), 4),
+        "avg_warm_substrate_predicted_source_route_entries": round(mean(_anticipation_stat(metric, "predicted_source_route_entry_count") for metric in warm_substrate_metrics), 4),
+        "avg_cold_first_predicted_source_route_cycle": _anticipation_mean_or_none(cold_metrics, "first_predicted_source_route_cycle"),
+        "avg_warm_full_first_predicted_source_route_cycle": _anticipation_mean_or_none(warm_full_metrics, "first_predicted_source_route_cycle"),
+        "avg_warm_substrate_first_predicted_source_route_cycle": _anticipation_mean_or_none(warm_substrate_metrics, "first_predicted_source_route_cycle"),
         "avg_delta_full_exact": round(mean(warm["exact_matches"] - cold["exact_matches"] for cold, warm in zip(cold_summaries, warm_full_summaries)), 4),
         "avg_delta_full_bit_accuracy": round(mean(warm["mean_bit_accuracy"] - cold["mean_bit_accuracy"] for cold, warm in zip(cold_summaries, warm_full_summaries)), 4),
         "avg_delta_substrate_exact": round(mean(warm["exact_matches"] - cold["exact_matches"] for cold, warm in zip(cold_summaries, warm_substrate_summaries)), 4),

@@ -109,6 +109,10 @@ class NodeRuntimeState:
     rest_count: int = 0
     last_feedback_amount: float = 0.0
     last_match_ratio: float = 0.0
+    last_prediction_confidence: float = 0.0
+    last_prediction_expected_delta: float = 0.0
+    last_prediction_expected_match_ratio: float = 0.0
+    last_prediction_error_magnitude: float = 0.0
     transform_credit: Dict[str, float] = field(default_factory=dict)
     context_transform_credit: Dict[str, float] = field(default_factory=dict)
     branch_transform_credit: Dict[str, float] = field(default_factory=dict)

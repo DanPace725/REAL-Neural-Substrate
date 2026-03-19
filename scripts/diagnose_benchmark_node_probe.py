@@ -130,6 +130,8 @@ def _node_cycle_record(
     entry = dict(report.get("entries", {})).get(node_id)
     action = str(entry.action) if entry is not None else ""
     state_before = dict(entry.state_before) if entry is not None else {}
+    prediction = entry.prediction if entry is not None else None
+    prediction_error = entry.prediction_error if entry is not None else None
     chosen_transform = _route_transform(action)
     chosen_neighbor = _route_neighbor(action)
     effective_context_bit = (
@@ -147,6 +149,11 @@ def _node_cycle_record(
     route_transform_match = None
     if chosen_transform is not None and expected_transform is not None:
         route_transform_match = 1.0 if chosen_transform == expected_transform else 0.0
+    prediction_expected_outcome = (
+        dict(prediction.expected_outcome)
+        if prediction is not None
+        else {}
+    )
     if node_id == env.source_id:
         has_packet = 1.0 if focus_packet is not None else 0.0
         head_has_task = 1.0 if focus_packet is not None and focus_packet.task_id is not None else 0.0
@@ -270,6 +277,24 @@ def _node_cycle_record(
         "mode": str(entry.mode) if entry is not None else "",
         "coherence": round(float(entry.coherence), 5) if entry is not None else 0.0,
         "delta": round(float(entry.delta), 5) if entry is not None else 0.0,
+        "prediction_available": 1.0 if prediction is not None else 0.0,
+        "prediction_confidence": round(float(prediction.confidence), 5) if prediction is not None else 0.0,
+        "prediction_uncertainty": round(float(prediction.uncertainty), 5) if prediction is not None else 0.0,
+        "prediction_expected_delta": round(float(prediction.expected_delta), 5)
+        if prediction is not None and prediction.expected_delta is not None
+        else None,
+        "prediction_expected_coherence": round(float(prediction.expected_coherence), 5)
+        if prediction is not None and prediction.expected_coherence is not None
+        else None,
+        "prediction_expected_progress": round(float(prediction_expected_outcome.get("progress", 0.0)), 5)
+        if prediction is not None and "progress" in prediction_expected_outcome
+        else None,
+        "prediction_expected_match_ratio": round(float(prediction_expected_outcome.get("match_ratio", 0.0)), 5)
+        if prediction is not None and "match_ratio" in prediction_expected_outcome
+        else None,
+        "prediction_error_magnitude": round(float(prediction_error.magnitude), 5)
+        if prediction_error is not None
+        else None,
         "route_neighbor": chosen_neighbor,
         "route_transform": chosen_transform,
         "expected_context": expected_context,
@@ -299,6 +324,10 @@ def _best_positive_transform(transform_scores: dict[str, object] | None) -> str 
 def _node_summary(records: Sequence[dict[str, object]]) -> dict[str, object]:
     action_counts = Counter(str(record.get("action", "")) for record in records if record.get("action"))
     route_records = [record for record in records if record.get("route_neighbor") is not None]
+    predicted_records = [record for record in records if float(record.get("prediction_available", 0.0)) >= 0.5]
+    predicted_route_records = [
+        record for record in route_records if float(record.get("prediction_available", 0.0)) >= 0.5
+    ]
     route_branch_counts = Counter(str(record.get("route_neighbor")) for record in route_records)
     route_transform_counts = Counter(str(record.get("route_transform")) for record in route_records)
     route_mode_counts = Counter(str(record.get("mode", "")) for record in route_records if record.get("mode"))
@@ -328,16 +357,51 @@ def _node_summary(records: Sequence[dict[str, object]]) -> dict[str, object]:
         for record in pre_latent_guidance_records
         if record.get("route_transform") == record.get("expected_transform")
     )
+    prediction_confidences = [
+        float(record["prediction_confidence"])
+        for record in predicted_records
+        if record.get("prediction_confidence") is not None
+    ]
+    prediction_expected_deltas = [
+        float(record["prediction_expected_delta"])
+        for record in predicted_records
+        if record.get("prediction_expected_delta") is not None
+    ]
+    prediction_expected_match_ratios = [
+        float(record["prediction_expected_match_ratio"])
+        for record in predicted_records
+        if record.get("prediction_expected_match_ratio") is not None
+    ]
+    prediction_error_magnitudes = [
+        float(record["prediction_error_magnitude"])
+        for record in predicted_records
+        if record.get("prediction_error_magnitude") is not None
+    ]
+    first_latent_capability_cycle = _first_cycle(records, "latent_capability_enabled")
+    predicted_before_latent_records = [
+        record
+        for record in predicted_route_records
+        if first_latent_capability_cycle is None or int(record["cycle"]) < first_latent_capability_cycle
+    ]
     return {
         "first_packet_cycle": _first_cycle(records, "has_packet"),
         "first_task_cycle": _first_cycle(records, "head_has_task"),
         "first_latent_context_cycle": _first_cycle(records, "latent_context_available"),
         "first_effective_context_cycle": _first_cycle(records, "effective_has_context"),
         "first_context_promotion_ready_cycle": _first_cycle(records, "context_promotion_ready"),
-        "first_latent_capability_cycle": _first_cycle(records, "latent_capability_enabled"),
+        "first_latent_capability_cycle": first_latent_capability_cycle,
         "first_growth_capability_cycle": _first_cycle(records, "growth_capability_enabled"),
         "first_source_sequence_cycle": _first_cycle(records, "source_sequence_available"),
+        "first_prediction_cycle": _first_cycle(records, "prediction_available"),
+        "first_route_prediction_cycle": _first_cycle(route_records, "prediction_available"),
         "route_count": len(route_records),
+        "predicted_entry_count": len(predicted_records),
+        "predicted_route_entry_count": len(predicted_route_records),
+        "predicted_route_before_latent_count": len(predicted_before_latent_records),
+        "predicted_route_before_latent_rate": round(
+            len(predicted_before_latent_records) / max(len(predicted_route_records), 1),
+            5,
+        ) if predicted_route_records else None,
         "route_branch_counts": dict(sorted(route_branch_counts.items())),
         "route_transform_counts": dict(sorted(route_transform_counts.items())),
         "route_mode_counts": dict(sorted(route_mode_counts.items())),
@@ -368,6 +432,17 @@ def _node_summary(records: Sequence[dict[str, object]]) -> dict[str, object]:
             mean(float(record.get("source_sequence_context_confidence", 0.0)) for record in records),
             5,
         ),
+        "mean_prediction_confidence": round(mean(prediction_confidences), 5) if prediction_confidences else None,
+        "max_prediction_confidence": round(max(prediction_confidences), 5) if prediction_confidences else None,
+        "mean_prediction_expected_delta": round(mean(prediction_expected_deltas), 5)
+        if prediction_expected_deltas
+        else None,
+        "mean_prediction_expected_match_ratio": round(mean(prediction_expected_match_ratios), 5)
+        if prediction_expected_match_ratios
+        else None,
+        "mean_prediction_error_magnitude": round(mean(prediction_error_magnitudes), 5)
+        if prediction_error_magnitudes
+        else None,
         "mean_latent_recruitment_pressure": round(
             mean(float(record.get("latent_recruitment_pressure", 0.0)) for record in records),
             5,

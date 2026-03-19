@@ -1348,6 +1348,37 @@ class RoutingEnvironment:
                 * max(0.0, 1.0 - 0.75 * contradiction)
                 * max(0.0, 1.0 - 0.60 * mismatch_signal)
             )
+            prediction_confidence = max(0.0, min(1.0, runtime.last_prediction_confidence))
+            prediction_expected_delta = max(-0.45, min(0.45, runtime.last_prediction_expected_delta))
+            prediction_expected_match_ratio = max(
+                0.0,
+                min(1.0, runtime.last_prediction_expected_match_ratio),
+            )
+            prediction_error_magnitude = max(
+                0.0,
+                min(1.0, runtime.last_prediction_error_magnitude),
+            )
+            prediction_task_active = max(
+                task_active,
+                1.0 if prediction_confidence > 0.0 else 0.0,
+            )
+            prediction_shortfall = prediction_confidence * max(
+                0.0,
+                0.60 * (0.78 - prediction_expected_match_ratio) / 0.78
+                + 0.40 * (0.16 - prediction_expected_delta) / 0.16,
+            )
+            prediction_confirmation = prediction_confidence * max(
+                0.0,
+                0.60 * (prediction_expected_match_ratio - 0.82) / 0.18
+                + 0.40 * (prediction_expected_delta - 0.18) / 0.18,
+            )
+            predictive_latent_drive = max(
+                0.0,
+                prediction_shortfall
+                + 0.30 * prediction_error_magnitude * prediction_confidence
+                - 0.45 * prediction_confirmation * visible_reliability,
+            )
+            predictive_visible_guard = prediction_confirmation * visible_reliability
             latent_pressure = max(
                 0.0,
                 min(
@@ -1358,7 +1389,9 @@ class RoutingEnvironment:
                     + 0.08 * float(recent_latent.get("growth_ready", 0.0))
                     + 0.12 * effective_latent_confidence
                     + 0.18 * effective_latent_confidence * max(0.0, 1.0 - capability.visible_context_trust)
+                    + 0.30 * predictive_latent_drive * prediction_task_active
                     - 0.18 * visible_reliability
+                    - 0.12 * predictive_visible_guard * prediction_task_active
                     - 0.06 * (1.0 - task_active),
                 ),
             )
@@ -1372,7 +1405,9 @@ class RoutingEnvironment:
                     capability.latent_support * config.latent_support_decay
                     + config.latent_support_gain * latent_pressure
                     + 0.18 * effective_latent_confidence
+                    + 0.18 * predictive_latent_drive * prediction_task_active
                     - 0.12 * visible_reliability
+                    - 0.08 * predictive_visible_guard * prediction_task_active
                     - 0.08 * (1.0 - task_active),
                 ),
             )
@@ -1551,6 +1586,47 @@ class RoutingEnvironment:
             "growth_ready": 1.0 if snapshot.get("growth_ready") else 0.0,
         }
 
+    def _latent_resolution_weight(
+        self,
+        latent_snapshot: dict[str, object],
+    ) -> float:
+        context_count = int(latent_snapshot.get("context_count", 2))
+        estimate = latent_snapshot.get("estimate")
+        if context_count <= 2 or estimate is None:
+            return 1.0
+
+        weight = 1.0
+        sequence_estimate = latent_snapshot.get("sequence_context_estimate")
+        sequence_confidence = max(
+            0.0,
+            min(1.0, float(latent_snapshot.get("sequence_context_confidence", 0.0))),
+        )
+        if sequence_estimate is not None and sequence_confidence > 0.0:
+            if int(sequence_estimate) != int(estimate):
+                weight *= max(0.25, 1.0 - 0.75 * sequence_confidence)
+            else:
+                weight *= min(1.0, 0.85 + 0.15 * sequence_confidence)
+
+        channel_estimates = dict(latent_snapshot.get("channel_context_estimate", {}))
+        channel_confidences = dict(latent_snapshot.get("channel_context_confidence", {}))
+        weighted_total = 0.0
+        weighted_match = 0.0
+        for channel, channel_estimate in channel_estimates.items():
+            confidence = max(
+                0.0,
+                min(1.0, float(channel_confidences.get(channel, 0.0))),
+            )
+            if channel_estimate is None or confidence <= 0.0:
+                continue
+            weighted_total += confidence
+            if int(channel_estimate) == int(estimate):
+                weighted_match += confidence
+        if weighted_total > 0.0:
+            consensus = weighted_match / weighted_total
+            weight *= max(0.35, 0.55 + 0.45 * consensus)
+
+        return max(0.15, min(1.0, weight))
+
     def _record_latent_route(
         self,
         node_id: str,
@@ -1683,6 +1759,12 @@ class RoutingEnvironment:
         latent_available = 1.0 if latent_snapshot.get("available") else 0.0
         latent_estimate = latent_snapshot.get("estimate")
         latent_confidence = float(latent_snapshot.get("confidence", 0.0))
+        latent_resolution_weight = (
+            self._latent_resolution_weight(latent_snapshot)
+            if latent_available >= 0.5 and latent_estimate is not None
+            else 1.0
+        )
+        effective_latent_confidence = latent_confidence * latent_resolution_weight
         recent_latent = self._recent_latent_task_summary(node_id)
         latent_context_count = int(latent_snapshot.get("context_count", 2))
         effective_context_threshold = max(
@@ -1710,10 +1792,10 @@ class RoutingEnvironment:
         elif (
             latent_available >= 0.5
             and latent_estimate is not None
-            and latent_confidence >= effective_context_threshold
+            and effective_latent_confidence >= effective_context_threshold
         ):
             effective_context_bit = int(latent_estimate)
-            effective_context_confidence = latent_confidence
+            effective_context_confidence = effective_latent_confidence
             effective_has_context = 1.0
             context_promotion_ready = 1.0 if latent_snapshot.get("promotion_ready") else 0.0
             context_growth_ready = 1.0 if latent_snapshot.get("growth_ready") else 0.0
@@ -1750,6 +1832,7 @@ class RoutingEnvironment:
                 float(latent_estimate) if latent_estimate is not None else 0.0
             ),
             "latent_context_confidence": latent_confidence,
+            "latent_resolution_weight": latent_resolution_weight,
             "effective_context_threshold": effective_context_threshold,
             "transfer_adaptation_phase": transfer_adaptation_phase,
             "transfer_hidden_unseen_task": transfer_hidden_unseen_task,
@@ -1815,6 +1898,16 @@ class RoutingEnvironment:
                 state.last_feedback_amount / max(self.feedback_amount, 1e-9),
             ),
             "last_match_ratio": min(1.0, max(0.0, state.last_match_ratio)),
+            "last_prediction_confidence": min(1.0, max(0.0, state.last_prediction_confidence)),
+            "last_prediction_expected_delta": max(-0.45, min(0.45, state.last_prediction_expected_delta)),
+            "last_prediction_expected_match_ratio": min(
+                1.0,
+                max(0.0, state.last_prediction_expected_match_ratio),
+            ),
+            "last_prediction_error_magnitude": min(
+                1.0,
+                max(0.0, state.last_prediction_error_magnitude),
+            ),
             "dormant": 1.0 if state.dormant else 0.0,
         }
         transform_evidence = dict(latent_snapshot.get("transform_evidence", {}))
@@ -2799,6 +2892,10 @@ class RoutingEnvironment:
                 state.inhibited_for -= 1
             state.last_feedback_amount *= 0.85
             state.last_match_ratio *= 0.90
+            state.last_prediction_confidence *= 0.92
+            state.last_prediction_expected_delta *= 0.92
+            state.last_prediction_expected_match_ratio *= 0.92
+            state.last_prediction_error_magnitude *= 0.90
             for transform_name in list(state.transform_credit.keys()):
                 state.transform_credit[transform_name] *= 0.92
                 if state.transform_credit[transform_name] < 1e-4:
@@ -3274,6 +3371,25 @@ class NativeSubstrateSystem:
         cycle_entries = {}
         for node_id in self.environment.agent_ids():
             cycle_entries[node_id] = self.agents[node_id].step()
+        for node_id, entry in cycle_entries.items():
+            runtime = self.environment.node_states.get(node_id)
+            if runtime is None:
+                continue
+            prediction = entry.prediction
+            prediction_error = entry.prediction_error
+            if prediction is None:
+                runtime.last_prediction_confidence = 0.0
+                runtime.last_prediction_expected_delta = 0.0
+                runtime.last_prediction_expected_match_ratio = 0.0
+            else:
+                runtime.last_prediction_confidence = float(prediction.confidence)
+                runtime.last_prediction_expected_delta = float(prediction.expected_delta or 0.0)
+                runtime.last_prediction_expected_match_ratio = float(
+                    prediction.expected_outcome.get("match_ratio", 0.0)
+                )
+            runtime.last_prediction_error_magnitude = float(
+                prediction_error.magnitude if prediction_error is not None else 0.0
+            )
         for packet in self.environment.delivered_packets:
             if packet.delivered_cycle is None:
                 packet.delivered_cycle = self.global_cycle
