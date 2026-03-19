@@ -6,7 +6,18 @@ from pathlib import Path
 from statistics import mean
 from typing import Sequence
 
-from occupancy_baseline import ExperimentConfig, get_preset, list_presets, run_experiment
+from occupancy_baseline import (
+    BinaryMLP,
+    ExperimentConfig,
+    TrainingConfig,
+    build_windowed_dataset,
+    evaluate_binary_predictions,
+    get_preset,
+    list_presets,
+    load_csv_dataset,
+    run_experiment,
+)
+from occupancy_baseline.experiment import _split_index
 from scripts.experiment_manifest import build_run_manifest, write_run_manifest
 from scripts.occupancy_real import (
     DEFAULT_SELECTOR_SEEDS,
@@ -48,12 +59,61 @@ def _selector_seeds_from_args(args: argparse.Namespace) -> tuple[int, ...]:
     return (int(args.selector_seed),)
 
 
+def _baseline_metrics_for_eval_indices(
+    config: ExperimentConfig,
+    *,
+    eval_episode_indices: Sequence[int] | None,
+) -> dict[str, float]:
+    if not eval_episode_indices:
+        return dict(run_experiment(config).metrics)
+    dataset = load_csv_dataset(config.csv_path, normalize=config.normalize)
+    windowed = build_windowed_dataset(dataset, window_size=config.window_size, flatten=True)
+    split_index = _split_index(windowed.size, config.train_fraction)
+
+    train_x = windowed.features[:split_index]
+    train_y = windowed.labels[:split_index]
+    test_x = windowed.features[split_index:]
+    test_y = windowed.labels[split_index:]
+
+    model = BinaryMLP(
+        input_dim=windowed.input_dim,
+        config=TrainingConfig(
+            hidden_size=config.hidden_size,
+            learning_rate=config.learning_rate,
+            epochs=config.epochs,
+            seed=config.seed,
+        ),
+    )
+    model.train(train_x, train_y)
+    predictions = model.predict(test_x)
+    relative_positions = [
+        int(index) - split_index
+        for index in eval_episode_indices
+        if split_index <= int(index) < windowed.size
+    ]
+    selected_labels = [test_y[position] for position in relative_positions]
+    selected_predictions = [predictions[position] for position in relative_positions]
+    if not selected_labels:
+        return {
+            "accuracy": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0.0,
+            "tn": 0.0,
+            "fp": 0.0,
+            "fn": 0.0,
+        }
+    return evaluate_binary_predictions(selected_labels, selected_predictions)
+
+
 def compare_occupancy_baseline(
     *,
     baseline_config: ExperimentConfig,
     selector_seeds: Sequence[int],
     max_train_episodes: int | None = None,
     max_eval_episodes: int | None = None,
+    eval_preview_per_label: int | None = None,
 ) -> dict[str, object]:
     baseline_result = run_experiment(baseline_config)
     comparison_runs: list[dict[str, object]] = []
@@ -68,10 +128,14 @@ def compare_occupancy_baseline(
                 selector_seed=int(selector_seed),
                 max_train_episodes=max_train_episodes,
                 max_eval_episodes=max_eval_episodes,
+                eval_preview_per_label=eval_preview_per_label,
             )
         )
         eval_metrics = dict(real_result["eval_summary"]["metrics"])
-        baseline_metrics = dict(baseline_result.metrics)
+        baseline_metrics = _baseline_metrics_for_eval_indices(
+            baseline_config,
+            eval_episode_indices=real_result.get("eval_episode_indices"),
+        )
         comparison_runs.append(
             {
                 "selector_seed": int(selector_seed),
@@ -136,6 +200,9 @@ def compare_occupancy_baseline(
 
     return {
         "baseline": baseline_result.to_dict(),
+        "baseline_eval_selection": (
+            "per_label_preview" if eval_preview_per_label is not None else "full_tail"
+        ),
         "selector_seeds": [int(seed) for seed in selector_seeds],
         "runs": comparison_runs,
         "aggregate": aggregate,
@@ -158,6 +225,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--default-series-seeds", action="store_true")
     parser.add_argument("--max-train-episodes", type=int)
     parser.add_argument("--max-eval-episodes", type=int)
+    parser.add_argument(
+        "--eval-preview-per-label",
+        type=int,
+        help="Select the first N held-out eval episodes for each occupancy label before optional max-eval trimming.",
+    )
     parser.add_argument("--output", help="Optional path to write the manifest JSON")
     parser.add_argument("--list-presets", action="store_true", help="List available presets and exit")
     return parser.parse_args()
@@ -185,6 +257,7 @@ def main() -> None:
         selector_seeds=selector_seeds,
         max_train_episodes=args.max_train_episodes,
         max_eval_episodes=args.max_eval_episodes,
+        eval_preview_per_label=args.eval_preview_per_label,
     )
     print(json.dumps(result, indent=2, sort_keys=True))
 
@@ -201,6 +274,7 @@ def main() -> None:
                 "normalize": baseline_config.normalize,
                 "max_train_episodes": args.max_train_episodes,
                 "max_eval_episodes": args.max_eval_episodes,
+                "eval_preview_per_label": args.eval_preview_per_label,
             },
         )
         write_run_manifest(Path(output_path), manifest)
