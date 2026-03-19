@@ -55,6 +55,24 @@ class TestOccupancyReal(unittest.TestCase):
         self.assertGreaterEqual(result["train_summary"]["mean_feedback_events"], 0.0)
         self.assertIn(DECISION_EMPTY, result["eval_results"][0]["decision_counts"])
 
+    def test_eval_preview_per_label_selects_both_classes(self) -> None:
+        preset = get_preset("synth_v1_default")
+        payload = load_occupancy_episodes(
+            OccupancyRealConfig(
+                csv_path=preset.config.csv_path,
+                window_size=preset.config.window_size,
+                train_fraction=preset.config.train_fraction,
+                normalize=preset.config.normalize,
+                eval_preview_per_label=1,
+            )
+        )
+
+        self.assertEqual(payload["eval_selection"], "per_label_preview")
+        self.assertEqual(payload["selected_eval_label_counts"][0], 1)
+        self.assertEqual(payload["selected_eval_label_counts"][1], 1)
+        self.assertGreater(payload["full_eval_label_counts"][0], 1)
+        self.assertGreater(payload["full_eval_label_counts"][1], 1)
+
     def test_comparison_reports_explicit_eval_deltas(self) -> None:
         preset = get_preset("synth_v1_default")
         result = compare_occupancy_baseline(
@@ -69,6 +87,20 @@ class TestOccupancyReal(unittest.TestCase):
         self.assertIn("accuracy", result["baseline"]["metrics"])
         self.assertIn("accuracy", result["runs"][0]["eval_minus_baseline"])
         self.assertIn("mean_eval_minus_baseline", result["aggregate"])
+
+    def test_comparison_preview_uses_preview_baseline_metrics(self) -> None:
+        preset = get_preset("synth_v1_default")
+        result = compare_occupancy_baseline(
+            baseline_config=preset.config,
+            selector_seeds=(13,),
+            max_train_episodes=3,
+            eval_preview_per_label=1,
+        )
+
+        self.assertEqual(result["baseline_eval_selection"], "per_label_preview")
+        self.assertEqual(result["runs"][0]["real"]["selected_eval_label_counts"][0], 1)
+        self.assertEqual(result["runs"][0]["real"]["selected_eval_label_counts"][1], 1)
+        self.assertGreater(result["runs"][0]["baseline_metrics"]["recall"], 0.0)
 
 
 if __name__ == "__main__":
