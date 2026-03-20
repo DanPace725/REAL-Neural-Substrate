@@ -17,6 +17,11 @@ Produces:
     - Packet delivery / drop statistics
     - Feedback dynamics over training
     - Confidence distribution histogram
+
+V3 occupancy (run_occupancy_real_v3 JSON):
+    python analyze_experiment_output.py docs/experiment_outputs/v3_train50_seed13.json
+    python analyze_experiment_output.py path/to/v3.json --no-plots
+    python analyze_experiment_output.py path/to/v3.json --summary
 """
 
 import argparse
@@ -606,6 +611,387 @@ def _md_metrics_table(metrics, ref=None):
 
 
 # ---------------------------------------------------------------------------
+# V3 format support (session carryover output from run_occupancy_real_v3.py)
+# ---------------------------------------------------------------------------
+
+def is_v3_format(data: dict) -> bool:
+    """Return True if this JSON was produced by the v3 occupancy runner."""
+    return (
+        isinstance(data.get("v3_config"), dict)
+        and "carryover_efficiency" in data
+    )
+
+
+def _print_v3_manifest(manifest: dict | None) -> None:
+    if not manifest:
+        return
+    sep = "-" * 60
+    print(f"\n{sep}")
+    print(f"  run_id:   {manifest.get('run_id', '?')}")
+    print(f"  run_at:   {manifest.get('run_at', '?')}")
+    if manifest.get("git_sha"):
+        print(f"  git_sha:  {manifest['git_sha']}")
+    print(f"  csv:      {manifest.get('csv', '?')}")
+    print(
+        f"  seed:     {manifest.get('selector_seed', '?')}  "
+        f"window: {manifest.get('window_size', '?')}  "
+        f"train_frac: {manifest.get('train_session_fraction', '?')}"
+    )
+    caps = []
+    if manifest.get("max_train_sessions") is not None:
+        caps.append(f"train<={manifest['max_train_sessions']}")
+    if manifest.get("max_eval_sessions") is not None:
+        caps.append(f"eval<={manifest['max_eval_sessions']}")
+    if caps:
+        print(f"  caps:     {', '.join(caps)}")
+    print(f"  workers:  {manifest.get('workers', '?')}")
+    es = manifest.get("elapsed_seconds")
+    if es is not None:
+        print(f"  elapsed:  {float(es):.1f}s")
+    print(sep)
+
+
+def _print_v3_inventory(label: str, inv: dict) -> None:
+    print(f"\n{label}")
+    print(f"  sessions:       {inv.get('session_count', '?')}")
+    print(f"  by label:       {inv.get('by_label', {})}")
+    print(f"  by context:     {inv.get('by_context_code', {})}")
+    ep = inv.get("episode_lengths") or {}
+    if ep:
+        print(
+            f"  episode length: min={ep.get('min')}  mean={ep.get('mean')}  "
+            f"max={ep.get('max')}"
+        )
+
+
+def _print_v3_phase_summary(title: str, summary: dict) -> None:
+    print(f"\n{title}")
+    m = summary.get("metrics") or {}
+    ec = summary.get("episode_count", "?")
+    print(f"  episodes:     {ec}")
+    for key in ("accuracy", "f1", "precision", "recall"):
+        v = m.get(key)
+        if v is not None:
+            print(f"  {key:<12} : {float(v):.4f}")
+    for key in (
+        "mean_delivered_packets",
+        "mean_dropped_packets",
+        "mean_feedback_events",
+        "occupied_prediction_rate",
+    ):
+        if key in summary:
+            print(f"  {key:<22} : {summary[key]}")
+
+
+def _print_v3_efficiency(eff: dict) -> None:
+    print("\nCarryover efficiency")
+    print(f"  mean efficiency ratio:       {eff.get('mean_efficiency_ratio')}")
+    print(f"  warm sessions to 80% deliv:  {eff.get('warm_sessions_to_80pct')}")
+    print(f"  cold sessions to 80% deliv:  {eff.get('cold_sessions_to_80pct')}")
+    print("\n  Delivery ratio at session N:")
+    print(f"  {'Session':>10}  {'Warm':>8}  {'Cold':>8}  {'Ratio':>8}")
+    warm_at = eff.get("warm_delivery_at") or {}
+    cold_at = eff.get("cold_delivery_at") or {}
+    for key in ("session_1", "session_5", "session_10", "session_20"):
+        w, c = warm_at.get(key), cold_at.get(key)
+        ratio = (
+            f"{w / c:.4f}"
+            if (w is not None and c is not None and c > 0)
+            else "—"
+        )
+        w_str = f"{float(w):.4f}" if w is not None else "—"
+        c_str = f"{float(c):.4f}" if c is not None else "—"
+        lab = key.replace("session_", "session ")
+        print(f"  {lab:>10}  {w_str:>8}  {c_str:>8}  {ratio:>8}")
+
+
+def _print_v3_transfer(probe: dict) -> None:
+    print("\nContext transfer probe")
+    print(f"  training context codes:    {probe.get('training_context_codes')}")
+    print(
+        f"  seen contexts (warm):        {probe.get('warm_seen_mean_delivery')}  "
+        f"({probe.get('warm_seen_session_count')} sessions)"
+    )
+    print(
+        f"  unseen contexts (warm):      {probe.get('warm_unseen_mean_delivery')}  "
+        f"({probe.get('warm_unseen_session_count')} sessions)"
+    )
+    print(f"  seen contexts (cold):        {probe.get('cold_seen_mean_delivery')}")
+    print(
+        f"  unseen contexts (cold):      {probe.get('cold_unseen_mean_delivery')}"
+    )
+
+
+def _print_v3_system(label: str, sys_s: dict) -> None:
+    if not sys_s:
+        return
+    print(f"\n  --- {label} ---")
+    for key in (
+        "cycles",
+        "injected_packets",
+        "delivered_packets",
+        "delivery_ratio",
+        "drop_ratio",
+        "mean_latency",
+        "mean_route_cost",
+        "mean_feedback_award",
+        "node_atp_total",
+        "exact_matches",
+        "mean_bit_accuracy",
+    ):
+        val = sys_s.get(key)
+        if val is None:
+            continue
+        try:
+            print(f"  {key:<22} : {float(val):.4f}")
+        except (TypeError, ValueError):
+            print(f"  {key:<22} : {val}")
+
+
+def analyze_v3(data: dict, args) -> None:
+    cfg = data.get("v3_config") or {}
+    seed = cfg.get("selector_seed")
+    if args.seed is not None and seed != args.seed:
+        print(
+            f"[info] Skipping: file selector_seed={seed} "
+            f"does not match --seed {args.seed}"
+        )
+        return
+
+    print_header("REAL Occupancy v3 — session carryover experiment")
+    _print_v3_manifest(data.get("manifest"))
+
+    print(f"\n  dataset_rows:      {data.get('dataset_rows')}")
+    print(f"  total_episodes:   {data.get('total_episodes')}")
+    print(f"  total_sessions:   {data.get('total_sessions')}")
+    print(f"  train sessions:   {data.get('train_session_count')}")
+    print(f"  eval sessions:    {data.get('eval_session_count')}")
+    print(f"  CO2 train median:  {data.get('co2_training_median')}")
+    print(f"  Light train median: {data.get('light_training_median')}")
+
+    print_header("Session inventory")
+    _print_v3_inventory("Training", data.get("train_inventory") or {})
+    _print_v3_inventory("Eval", data.get("eval_inventory") or {})
+    print(f"\n  Training context codes seen: {data.get('training_context_codes')}")
+
+    print_header("Phase 2 — Training")
+    _print_v3_phase_summary("Training (sequential sessions)", data.get("train_summary") or {})
+
+    print_header("Phase 3 — Carryover efficiency")
+    _print_v3_phase_summary("Warm eval (with carryover)", data.get("warm_eval_summary") or {})
+    _print_v3_phase_summary("Cold eval (fresh substrate)", data.get("cold_eval_summary") or {})
+    _print_v3_efficiency(data.get("carryover_efficiency") or {})
+
+    print_header("Phase 4 — Context transfer")
+    _print_v3_transfer(data.get("context_transfer_probe") or {})
+
+    print_header("Substrate system summaries")
+    _print_v3_system("Train", data.get("train_system_summary") or {})
+    _print_v3_system("Warm eval", data.get("warm_system_summary") or {})
+    _print_v3_system("Cold eval", data.get("cold_system_summary") or {})
+
+    if HAS_PLT and not args.no_plots:
+        _plot_v3(data, args.rolling)
+        print("\n[info] Showing plots — close windows to exit.")
+        plt.show()
+
+
+def _plot_v3(data: dict, window: int) -> None:
+    """Session-indexed curves for train delivery and warm/cold eval."""
+    fig = plt.figure(figsize=(14, 9))
+    fig.suptitle(
+        "Occupancy v3 — session delivery & carryover\n"
+        f"seed={data.get('v3_config', {}).get('selector_seed', '?')}",
+        fontsize=11,
+    )
+    gs = gridspec.GridSpec(2, 2, figure=fig, hspace=0.35, wspace=0.3)
+
+    train_sess = data.get("train_session_results") or []
+    if train_sess:
+        ax0 = fig.add_subplot(gs[0, 0])
+        ratios = [float(s.get("delivery_ratio") or 0) for s in train_sess]
+        xs = list(range(len(ratios)))
+        if window > 1 and len(ratios) >= window:
+            smooth = rolling_mean(ratios, window)
+            ax0.plot(xs, smooth, color="steelblue", label=f"delivery (roll={window})")
+        else:
+            ax0.plot(xs, ratios, color="steelblue", label="delivery ratio")
+        ax0.set_title("Train — delivery ratio by session")
+        ax0.set_xlabel("Train session index")
+        ax0.set_ylabel("Delivery ratio")
+        ax0.set_ylim(-0.05, 1.05)
+        ax0.legend(fontsize=8)
+        ax0.grid(True, alpha=0.3)
+
+    eff = data.get("carryover_efficiency") or {}
+    warm_c = eff.get("warm_delivery_curve") or []
+    cold_c = eff.get("cold_delivery_curve") or []
+    if warm_c or cold_c:
+        ax1 = fig.add_subplot(gs[0, 1])
+        if warm_c:
+            ax1.plot(
+                range(len(warm_c)),
+                warm_c,
+                color="darkgreen",
+                label="warm eval",
+                alpha=0.9,
+            )
+        if cold_c:
+            ax1.plot(
+                range(len(cold_c)),
+                cold_c,
+                color="coral",
+                label="cold eval",
+                alpha=0.9,
+            )
+        ax1.set_title("Eval sessions — delivery ratio (warm vs cold)")
+        ax1.set_xlabel("Eval session index")
+        ax1.set_ylabel("Delivery ratio")
+        ax1.set_ylim(-0.05, 1.05)
+        ax1.legend(fontsize=8)
+        ax1.grid(True, alpha=0.3)
+
+    ratio_curve = eff.get("efficiency_ratio_curve") or []
+    if ratio_curve:
+        ax2 = fig.add_subplot(gs[1, :])
+        rc = ratio_curve
+        ys = rolling_mean([float(x) for x in rc], min(window, len(rc))) if window > 1 else [float(x) for x in rc]
+        ax2.plot(
+            range(len(ys)),
+            ys,
+            color="mediumpurple",
+            label=(
+                f"efficiency ratio (warm/cold delivery, roll={min(window, len(rc))})"
+                if window > 1
+                else "efficiency ratio"
+            ),
+        )
+        ax2.axhline(1.0, color="gray", linestyle="--", linewidth=1, label="1.0 (parity)")
+        ax2.set_title("Carryover efficiency ratio across eval sessions")
+        ax2.set_xlabel("Eval session index")
+        ax2.set_ylabel("Ratio")
+        ax2.legend(fontsize=8)
+        ax2.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+
+
+def write_summary_v3(data: dict, out_path) -> None:
+    cfg = data.get("v3_config") or {}
+    manifest = data.get("manifest") or {}
+    lines = [
+        "# REAL Occupancy v3 — session carryover experiment",
+        "",
+        f"**run_id:** `{manifest.get('run_id', '?')}`  ",
+        f"**run_at:** `{manifest.get('run_at', '?')}`  ",
+        f"**git_sha:** `{manifest.get('git_sha', '')}`  ",
+        "",
+        "## Config",
+        "",
+        "| Key | Value |",
+        "|---|---|",
+    ]
+    for k in sorted(cfg.keys()):
+        lines.append(f"| {k} | {cfg[k]} |")
+    lines.extend(
+        [
+            "",
+            "## Dataset",
+            "",
+            f"- dataset_rows: **{data.get('dataset_rows')}**",
+            f"- total_episodes: **{data.get('total_episodes')}**",
+            f"- total_sessions: **{data.get('total_sessions')}**",
+            f"- train_session_count: **{data.get('train_session_count')}**",
+            f"- eval_session_count: **{data.get('eval_session_count')}**",
+            f"- co2_training_median: **{data.get('co2_training_median')}**",
+            f"- light_training_median: **{data.get('light_training_median')}**",
+            f"- training_context_codes: {data.get('training_context_codes')}",
+            "",
+            "### Train inventory",
+            "",
+            f"```\n{json.dumps(data.get('train_inventory'), indent=2)}\n```",
+            "",
+            "### Eval inventory",
+            "",
+            f"```\n{json.dumps(data.get('eval_inventory'), indent=2)}\n```",
+            "",
+            "## Phase 2 — Training summary",
+            "",
+        ]
+    )
+    ts = data.get("train_summary") or {}
+    lines.append(_md_metrics_table(ts.get("metrics") or {}))
+    lines.extend(
+        [
+            "",
+            "| Stat | Value |",
+            "|---|---|",
+            f"| episode_count | {ts.get('episode_count')} |",
+            f"| mean_delivered_packets | {ts.get('mean_delivered_packets')} |",
+            f"| mean_dropped_packets | {ts.get('mean_dropped_packets')} |",
+            f"| mean_feedback_events | {ts.get('mean_feedback_events')} |",
+            "",
+            "## Phase 3 — Warm / cold eval & carryover",
+            "",
+        ]
+    )
+    for label, key in (
+        ("Warm eval", "warm_eval_summary"),
+        ("Cold eval", "cold_eval_summary"),
+    ):
+        s = data.get(key) or {}
+        lines.append(f"### {label}")
+        lines.append("")
+        lines.append(_md_metrics_table(s.get("metrics") or {}))
+        lines.append("")
+    eff = data.get("carryover_efficiency") or {}
+    lines.extend(
+        [
+            "### Carryover efficiency metrics",
+            "",
+            "| Metric | Value |",
+            "|---|---|",
+            f"| mean_efficiency_ratio | {eff.get('mean_efficiency_ratio')} |",
+            f"| warm_sessions_to_80pct | {eff.get('warm_sessions_to_80pct')} |",
+            f"| cold_sessions_to_80pct | {eff.get('cold_sessions_to_80pct')} |",
+            "",
+            "**Delivery checkpoints:**",
+            "",
+        ]
+    )
+    warm_at = eff.get("warm_delivery_at") or {}
+    cold_at = eff.get("cold_delivery_at") or {}
+    lines.append("| checkpoint | warm | cold | ratio |")
+    lines.append("|---|---:|---:|---:|")
+    for key in ("session_1", "session_5", "session_10", "session_20"):
+        w, c = warm_at.get(key), cold_at.get(key)
+        ratio = (
+            f"{w / c:.4f}"
+            if (w is not None and c is not None and c > 0)
+            else "—"
+        )
+        lines.append(f"| {key} | {w} | {c} | {ratio} |")
+    lines.extend(["", "## Phase 4 — Context transfer probe", ""])
+    probe = data.get("context_transfer_probe") or {}
+    for k, v in probe.items():
+        lines.append(f"- **{k}**: {v}")
+    lines.extend(["", "## System summaries", ""])
+    for label, key in (
+        ("Train", "train_system_summary"),
+        ("Warm eval", "warm_system_summary"),
+        ("Cold eval", "cold_system_summary"),
+    ):
+        lines.append(f"### {label}")
+        lines.append("")
+        lines.append(f"```\n{json.dumps(data.get(key), indent=2)}\n```")
+        lines.append("")
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text("\n".join(lines), encoding="utf-8")
+    print(f"[summary] Written to: {out_path}")
+
+
+# ---------------------------------------------------------------------------
 # V2 format support (conditions-based output from run_occupancy_real_v2.py)
 # ---------------------------------------------------------------------------
 
@@ -815,7 +1201,10 @@ def write_summary_v2(data: dict, out_path) -> None:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Analyze occupancy bridge experiment JSON outputs."
+        description=(
+            "Analyze experiment JSON outputs: occupancy v1 comparison harness, "
+            "v2 multi-condition runs, and v3 session carryover JSON."
+        )
     )
     parser.add_argument("json_path", help="Path to the experiment JSON file")
     parser.add_argument(
@@ -844,7 +1233,9 @@ def main():
     with path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
-    if is_v2_format(data):
+    if is_v3_format(data):
+        analyze_v3(data, args)
+    elif is_v2_format(data):
         analyze_v2(data, args)
     else:
         analyze(data, args)
@@ -854,7 +1245,9 @@ def main():
             out_path = path.with_name(path.stem + "_summary.md")
         else:
             out_path = Path(args.summary)
-        if is_v2_format(data):
+        if is_v3_format(data):
+            write_summary_v3(data, out_path)
+        elif is_v2_format(data):
             write_summary_v2(data, out_path)
         else:
             write_summary(data, out_path)
