@@ -1,13 +1,14 @@
 # Project REAL Overview (Phase 8 Anchored)
 
-_Last updated: 2026-03-16 by GPT-5.2-Codex_
+_Last updated: 2026-03-20 by GPT-5.2-Codex_
 
 ## 1) Start Point: What Phase 8 is trying to prove
 
 Phase 8 reframes the project from "one agent using REAL" into a **multi-agent substrate** where each node is itself a local REAL agent. The key claim is that useful computation can emerge from local allostatic adaptation (ATP budgets, local memory, sequential feedback), without global loss functions or backprop updates.
 
 In practical terms, the Phase 8 codebase currently focuses on:
-- node-local decision loops (`perceive -> select -> execute -> score -> consolidate`)
+- node-local decision loops (`observe -> recognize -> predict -> select -> execute -> score -> compare -> consolidate`)
+- explicit recognition, local expectation, and prediction-error handling in `real_core` and Phase 8
 - edge/transform memory substrate that lowers local action costs over time
 - task-oriented packet routing with graded sink feedback
 - carryover comparisons (cold vs warm starts, including transfer from Task A to Task B)
@@ -17,9 +18,9 @@ This is the immediate execution layer of the architecture and currently the most
 ## 2) Phase 8 implementation map (current runnable system)
 
 The `phase8/` package is organized around local-only substrate mechanics:
-- `node_agent.py`: wraps `RealCoreEngine` for each node.
+- `node_agent.py`: wraps `RealCoreEngine` for each node and wires in recognition plus routing expectation binding.
 - `environment.py`: small routing environment with sequential, localizable feedback flow.
-- `substrate.py`/`consolidation.py`/`selector.py` (plus adapters/models): local memory promotion, selection pressure, and substrate carryover mechanics.
+- `substrate.py`/`consolidation.py`/`selector.py` (plus adapters/models): local memory promotion, selection pressure, anticipation use, and substrate carryover mechanics.
 - `admission.py`: source admission control so ingress is metabolically gated.
 
 The experiment runners under `scripts/` (notably `run_phase8_demo.py`, `compare_cold_warm.py`, and `compare_task_transfer.py`) provide reproducible scenario comparisons and transfer evaluations.

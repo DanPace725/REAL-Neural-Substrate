@@ -100,17 +100,17 @@ signal that must be broadcast simultaneously across the entire model.
 These costs are especially limiting in settings where data arrives incrementally,
 tasks shift over time, or hardware constraints preclude centralised computation.
 
-A complementary tradition ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â drawing on Hebbian associativity
+A complementary tradition --- drawing on Hebbian associativity
 \citep{hebb1949organization}, allostatic regulation
 \citep{sterling2012allostasis}, and local structural plasticity
-\citep{bhatt2009dendritic} ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â suggests that useful computation can arise from
+\citep{bhatt2009dendritic} --- suggests that useful computation can arise from
 networks of locally-acting agents responding only to their immediate metabolic
 state, without any global teacher.
 Project REAL operationalises this intuition.
 
 \paragraph{Our approach.}
 We construct a graph of node-agents.
-Each node executes an independent perceptionÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“actionÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“consolidation loop, spends
+Each node executes an independent perception--action--consolidation loop, spends
 a finite ATP budget on routing actions, and earns replenishment when its actions
 contribute to correctly delivering a packet to the network sink.
 Long-run regularities are encoded in a \emph{maintained substrate} ($\Ms$): a
@@ -173,8 +173,8 @@ outer optimisation loop or explicit memory replay.
 \paragraph{Multi-agent emergent communication.}
 Work on emergent communication in multi-agent systems~\citep{lazaridou2020emergent}
 explores how agents can develop shared protocols through local interaction.
-REAL nodes develop routing specialisation through the same mechanism ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â
-differential survival ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â rather than through a designed communication protocol.
+REAL nodes develop routing specialisation through the same mechanism ---
+differential survival --- rather than through a designed communication protocol.
 
 \paragraph{Neuromorphic and biologically-inspired computing.}
 Spiking neural networks~\citep{maass1997networks} and neuromorphic
@@ -234,17 +234,17 @@ Coherence scoring $\Phi$ decomposes into six dimensions derived from the
 E$^2$ relational framework:
 
 \begin{enumerate}[leftmargin=*, itemsep=1pt]
-  \item \textbf{Continuity} ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â does the action preserve the node's historical
+  \item \textbf{Continuity} --- does the action preserve the node's historical
         routing function?
-  \item \textbf{Vitality} ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â is the node actively participating in useful
+  \item \textbf{Vitality} --- is the node actively participating in useful
         routing (receiving ATP)?
-  \item \textbf{Contextual fit} ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â does the selected action match the
+  \item \textbf{Contextual fit} --- does the selected action match the
         context-indexed support in $\Ms$?
-  \item \textbf{Differentiation} ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â does the node offer routing value distinct
+  \item \textbf{Differentiation} --- does the node offer routing value distinct
         from its neighbours?
-  \item \textbf{Accountability} ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â is the causal flow of the action traceable
+  \item \textbf{Accountability} --- is the causal flow of the action traceable
         through the substrate?
-  \item \textbf{Reflexivity} ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â does the node's self-model in $\Ms$ reflect its
+  \item \textbf{Reflexivity} --- does the node's self-model in $\Ms$ reflect its
         actual performance history?
 \end{enumerate}
 
@@ -276,7 +276,7 @@ Each packet carries a payload (a 4-bit string), an optional context bit,
 and a path history.
 The correct transformation of the payload (e.g., \textsc{rotate\_left\_1} or
 \textsc{xor\_mask\_1010}) is context-dependent and unknown to individual nodes
-ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â it must be inferred from the statistics of which actions earn ATP.
+--- it must be inferred from the statistics of which actions earn ATP.
 
 Node actions include: \textsc{route}$(v)$, \textsc{rest},
 \textsc{inhibit}$(v)$, \textsc{invest}$(e)$, and
@@ -364,7 +364,7 @@ The REAL harness evolved through three versions:
 
 \begin{description}[leftmargin=1.2em, topsep=2pt]
   \item[V1] Continuous train/eval; feedback suppressed during eval;
-            no carryover test; no context bit. \emph{(Invalid ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â see \S\ref{sec:v1_failure})}
+            no carryover test; no context bit. \emph{(Invalid --- see \S\ref{sec:v1_failure})}
   \item[V2] Feedback at full fraction during eval; \texttt{fresh\_eval}
             carryover protocol; CO$_2$-derived binary context bit.
   \item[V3] Online running context (4-code, multi-sensor);
@@ -382,7 +382,7 @@ The REAL harness evolved through three versions:
 
 Table~\ref{tab:transfer_small} shows the core small-topology carryover results.
 Warm full carryover ($A \to B$) achieves $10.6$ exact matches out of 18,
-compared to $3.9$ for cold-start Task B ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â a $2.7\times$ improvement.
+compared to $3.9$ for cold-start Task B --- a $2.7\times$ improvement.
 Substrate-only carryover ($7.3$ exact) confirms that the structural substrate,
 independent of episodic replay, is the primary carrier of transfer benefit.
 
@@ -422,7 +422,7 @@ The mechanism is architectural.
 Visible training writes context-specific action supports
 $\Ms^a(a, k\!=\!1)$ keyed to task A's context-1 transform.
 When task B redefines context~1, these supports become \emph{context poison}
-ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â an inhibitory prior that costs approximately $3$ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“$4$ exact matches.
+--- an inhibitory prior that costs approximately $3$--$4$ exact matches.
 Latent training writes context-agnostic supports
 $\Ms^a(a, k\!=\!\varnothing)$, which carry no binding to any specific label.
 They cannot poison and tend to benefit by providing routing scaffold.
@@ -436,7 +436,7 @@ matches on Task C, but through complementary mechanisms:
 
 \begin{description}[leftmargin=1.2em, topsep=2pt]
   \item[$A\to B\to C$] B training deeply reinforces $\Ms^a(\textsc{xor\_0101},
-    k\!=\!1)$ ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â the correct context-1 action for C. Massive context-1 lift
+    k\!=\!1)$ --- the correct context-1 action for C. Massive context-1 lift
     ($+0.463$ bit accuracy) partially offset by A$+$B context-0 poison
     ($-0.14$). Net: highest bit accuracy ($0.561$).
   \item[$A\to C$ direct] A's $\Ms^a(\textsc{xor\_1010}, k\!=\!1)$ coincidentally
@@ -444,7 +444,7 @@ matches on Task C, but through complementary mechanisms:
     lift. Net: lower bit accuracy ($0.528$).
 \end{description}
 
-Critically, B training does not erase A's value ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â it compounds it for the
+Critically, B training does not erase A's value --- it compounds it for the
 contexts where A and C align while adding new context-1 value.
 This is graceful specialisation, not catastrophic overwrite.
 
@@ -470,10 +470,10 @@ $A\to B\to C$ & \textbf{7.6} & \textbf{0.561} \\
 
 Table~\ref{tab:neural} compares REAL against online-trained neural baselines
 under the rolling-window criterion.
-The RNN-latent baseline ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â the fairest analogue to REAL's hidden-context setting
-ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â requires approximately $144$ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“$162$ examples to reach criterion.
+The RNN-latent baseline --- the fairest analogue to REAL's hidden-context setting
+--- requires approximately $144$--$162$ examples to reach criterion.
 REAL reaches comparable milestone behavior in a single $18$-packet session:
-approximately $8$ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“$9\times$ more sample-efficient.
+approximately $8$--$9\times$ more sample-efficient.
 The MLP-latent baseline cannot solve the bimodal mapping at all within 20 epochs.
 
 \begin{table}[t]
@@ -487,7 +487,7 @@ The MLP-latent baseline cannot solve the bimodal mapping at all within 20 epochs
 Model & Examples to criterion & Ratio vs REAL \\
 \midrule
 MLP-explicit       & $\sim$54 & $3.0\times$ \\
-MLP-latent         & $>$360 (fails) & ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â \\
+MLP-latent         & $>$360 (fails) & --- \\
 RNN-latent         & $\sim$144--162 & $8$--$9\times$ \\
 \midrule
 \textbf{REAL}      & \textbf{18} & $1\times$ \\
@@ -508,7 +508,7 @@ performance and the topology maximum.
 On the small ($N\!=\!6$) topology, cold-start earned growth is only $20\%$;
 on the large ($N\!=\!10$) topology, it reaches $100\%$ for all task-carrying
 scenarios.
-This is not a configuration artifact ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â it reflects the ATP surplus gate
+This is not a configuration artifact --- it reflects the ATP surplus gate
 operating correctly.
 High-performing tasks exhaust ATP efficiently, leaving no surplus to trigger
 budding.
@@ -567,7 +567,7 @@ V2 addressed each flaw with a targeted change:
 (2) \texttt{fresh\_eval} carryover protocol,
 (3) CO$_2$-derived binary context bit.
 Table~\ref{tab:v2_results} reports the outcome.
-Enabling feedback alone raised eval F1 from $0.032$ to $0.748$ ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â a $23\times$
+Enabling feedback alone raised eval F1 from $0.032$ to $0.748$ --- a $23\times$
 improvement attributable entirely to removing a structural defect, not to
 any model change.
 The best V2 configuration achieved $\mathrm{F1} = 0.766$ with a delivery
@@ -612,7 +612,7 @@ this setup (mean efficiency ratio $0.9915$; mean first-three-episode delivery
 delta $-0.0112$), so occupancy should currently be read as evidence of strong
 task viability more than as a strong carryover showcase.
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
 \caption{V3 run progression (2026-03-20, seed 13 unless noted).
   All use \texttt{fresh\_session\_eval}. ER: efficiency ratio (warm/cold delivery).}
@@ -628,7 +628,7 @@ Full (62)           & 62 & \textbf{0.981} & \textbf{0.952} & 0.919 & \textbf{0.9
 Sweep avg (3 seeds) & 62 & \textbf{0.973} & n/a & n/a & 0.992 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 \subsection{Comparison with MLP Baseline}
 \label{sec:mlp_comparison}
@@ -724,7 +724,7 @@ The consistent finding that morphogenesis helps where performance is low
 and disrupts where performance is already high is not a limitation --- it is
 the ATP surplus gate functioning as a \emph{headroom detector}.
 This is a useful emergent property: the growth system is effectively asking
-``do I have routing capacity to spare?''\ and answering ``no'' in cases where
+``do I have routing capacity to spare?'' and answering ``no'' in cases where
 the fixed topology is already efficient.
 The practical implication is that morphogenesis configurations should be
 calibrated per scenario or per performance tier, rather than set globally.
@@ -787,9 +787,8 @@ non-backprop, locally adapting substrate can compete on a real-world
 classification task.
 
 Together, these results position REAL Neural Substrate as a credible
-Together, these results position REAL Neural Substrate as a credible
 experimental platform for low-data, continually adapting, substrate-based
-paradigm deserves serious attention alongside the dominant top-down,
+computation. This paradigm deserves serious attention alongside the dominant top-down,
 gradient-based paradigm.
 
 % ============================================================
@@ -797,9 +796,6 @@ gradient-based paradigm.
 \textit{[To be completed by authors.]}
 
 % ============================================================
-\bibliographystyle{plainnat}
-\bibliography{references}
-
 % Inline bibliography for draft convenience
 % (remove when bibtex file is ready)
 \begin{thebibliography}{99}
@@ -875,7 +871,7 @@ MIT Press.
 % ============================================================
 \appendix
 
-\section{CVT-1 Configuration ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Task Family Performance Map}
+\section{CVT-1 Configuration --- Task Family Performance Map}
 \label{app:config_map}
 
 Table~\ref{tab:config_map} summarises the prescription emerging from the
@@ -891,13 +887,13 @@ March 18 configuration sweep across task families A, B, and C.
 \toprule
 Task characteristics & Best cold config & Best transfer config \\
 \midrule
-Short horizon, unambiguous context (A1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“A2)
+Short horizon, unambiguous context (A1--A2)
   & fixed-visible & growth-visible + substrate-only \\
-Large scale, unambiguous context (A3ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“A4)
+Large scale, unambiguous context (A3--A4)
   & fixed-visible & growth-latent + full episodic \\
-Hidden memory (B2ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“B4)
+Hidden memory (B2--B4)
   & fixed-visible & growth-latent + full episodic \\
-Partial ambiguity (C1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“C2)
+Partial ambiguity (C1--C2)
   & fixed-visible & fixed-visible ($\to$ task b) \\
 Deep ambiguity, short topo.\ (C3)
   & fixed-latent & fixed-latent \\

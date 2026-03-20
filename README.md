@@ -2,19 +2,25 @@
 
 REAL Neural Substrate is a standalone research prototype for native, local-learning neural-substrate experiments built on two layers:
 
-- `real_core`: the generalized REAL engine and memory substrate contracts
-- `phase8`: the multi-agent substrate where each node is a local REAL agent
+- `real_core`: the generalized REAL engine, anticipation contracts, and memory substrate contracts
+- `phase8`: the multi-agent substrate where each node is a local REAL agent wired to a routing environment
 
-The repo is intentionally focused on non-backprop, non-global-loss experiments around routing, carryover, transfer, and emergent local specialization. It is a clean spin-out from the broader umbrella workspace, not a full archive of every prior phase.
+The repo is intentionally focused on non-backprop, non-global-loss experiments around routing, carryover, transfer, emergent local specialization, and anticipatory local behavior. It is a clean spin-out from the broader umbrella workspace, not a full archive of every prior phase.
+
+At the current architecture, the generalized REAL loop is no longer just retrospective memory plus action selection. The core loop now includes local recognition and local prediction:
+
+`observe -> recognize -> predict -> select -> execute -> score -> compare -> consolidate`
+
+`real_core` owns the reusable loop, anticipation types, recognition/prediction interfaces, and carryover plumbing. `phase8` binds those concepts to routing-specific substrate state, selector pressure, capability recruitment, and prediction-aware environment dynamics.
 
 ## For AI Coding Agents
 
-Before making changes, read `AGENTS.md`, then cross-reference the docs and trace files using the task's keywords so you understand the repo's scope, vision, current experimental state, and recent decisions. Do not jump straight into edits from surface-level code patterns alone; review the relevant synthesis notes, technical report sections, and March 17 traces first when the change touches transfer, neural baselines, morphogenesis, topology scaling, or latent-context behavior.
+Before making changes, read `AGENTS.md`, then cross-reference the docs and trace files using the task's keywords so you understand the repo's scope, vision, current experimental state, and recent decisions. Do not jump straight into edits from surface-level code patterns alone; review the relevant synthesis notes, technical report sections, March 17 traces, and the March 19 anticipation/recognition/prediction synthesis when the change touches transfer, neural baselines, morphogenesis, topology scaling, latent-context behavior, or the REAL loop itself.
 
 ## Package Map
 
-- `real_core/`: reusable allostatic engine, selector, mesh, substrate, carryover, and shared types
-- `phase8/`: node agents, local routing environment, substrate mechanics, selectors, scenarios, and topology growth logic
+- `real_core/`: reusable allostatic engine, recognition and expectation interfaces, selectors, mesh, substrate, carryover, and shared types
+- `phase8/`: node agents, local routing environment, substrate mechanics, routing-specific expectation binding, selectors, scenarios, and topology growth logic
 - `scripts/`: experiment runners, comparison harnesses, and manifest-writing utilities
 - `tests/`: standalone `real_core` tests plus Phase 8 unit and integration coverage
 - `docs/`: architecture notes, the cross-phase overview, the updated technical report, session synthesis, and selected trace documents
@@ -55,9 +61,10 @@ After `pip install -e .`, the same runners are also available as console scripts
 
 - `docs/technical_report.md`: current merged technical report
 - `docs/20260317_phase8_session_synthesis.md`: March 17 consolidated progress summary
+- `docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md`: March 19 synthesis covering anticipation, recognition, prediction, self-selection, and carryover hygiene
 - `docs/experiment_outputs/`: timestamped JSON experiment manifests
 - `docs/traces/`: selected March 17 episodic traces for neural baselines and large-topology morphogenesis
-- `docs/phase8_dashboard.html`: static Phase 8 dashboard snapshot carried over from the source workspace
+- `docs/visualizations/phase8_dashboard.html`: static Phase 8 dashboard snapshot carried over from the source workspace
 - `docs/visualizations/real_cycle.html`: saved cyclic-transfer visualization artifact
 
 ## What Stayed In The Umbrella Repo

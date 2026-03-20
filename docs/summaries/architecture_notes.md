@@ -43,7 +43,7 @@ When placed in an environment with high density, these agents must specialize, s
 ## 2. The Agent as a Node (The 6 Primitives)
 
 In a generic neural network, a neuron computes $y = f(Wx + b)$. It has no agency. 
-In the Phase 8 Substrate, a node (or cortical column) is a full REAL agent executing the `perceive -> select -> execute -> score -> consolidate` loop, governed by the E² Relational Primitives.
+In the Phase 8 Substrate, a node (or cortical column) is a full REAL agent executing the `observe -> recognize -> predict -> select -> execute -> score -> compare -> consolidate` loop, governed by the E^2 Relational Primitives.
 
 ### Primitive 1: Ontological (Identity & Boundary)
 The agent defines its identity not by what it inherently *is*, but by its active connections. If an agent loses all its input/output connections because it cannot afford to maintain them, it drops out of the network (artificial apoptosis). 
@@ -56,7 +56,7 @@ The agent possesses a local Action Vocabulary. Instead of just "firing," an agen
 *   Rest (to conserve metabolic energy)
 
 ### Primitive 3: Geometric/Causal (Spacetime & Constraints)
-The network topology is not fully dense. Agents exist in specific spatial relationships (e.g., a 2D or 3D graph). Causal influence takes time to propagate. Agents must deal with the *Temporal Constraint Lamination (TCL)*—waiting for feedback from downstream agents before investing memory in a connection.
+The network topology is not fully dense. Agents exist in specific spatial relationships (e.g., a 2D or 3D graph). Causal influence takes time to propagate. Agents must deal with the *Temporal Constraint Lamination (TCL)*Ã¢â‚¬â€waiting for feedback from downstream agents before investing memory in a connection.
 
 ### Primitive 4: Symmetric/Constraint (Differentiation & Invariants)
 As density increases, agents must differentiate. If Agent A and Agent B compute the exact same feature, they split the available upstream ATP, starving both. To survive, the system enforces **Differentiation**. Agents naturally fall into specialized roles, acting like structural constraints on the global network flow. 
@@ -65,13 +65,13 @@ As density increases, agents must differentiate. If Agent A and Agent B compute 
 Agents do not possess global knowledge. They only observe their immediate neighbors. Their perception is actively shaped by their Phase 4.5 Memory Substrate. A historically reliable connection is "seen" more clearly than a novel, noisy one.
 
 ### Primitive 6: Meta-Relational (Substrate Consolidation)
-The agent maintains a two-layer memory (Fast and Slow). When it finds an attractor pattern (a behavior that consistently yields high vitality/ATP), it promotes this into its **Memory Substrate**. This physically alters the cost function—making that specific behavior mathematically cheaper to execute in the future. The network literally re-scaffolds its own physics based on experience.
+The agent maintains a two-layer memory (Fast and Slow). When it finds an attractor pattern (a behavior that consistently yields high vitality/ATP), it promotes this into its **Memory Substrate**. This physically alters the cost functionÃ¢â‚¬â€making that specific behavior mathematically cheaper to execute in the future. The network literally re-scaffolds its own physics based on experience.
 
 ---
 
 ## 3. The Micro-Allostatic Learning Loop
 
-Learning in Phase 8 is entirely local and driven by the Phase 4.5 Memory Substrate.
+Learning in Phase 8 is entirely local and driven by the Phase 4.5 Memory Substrate. Recognition and prediction are now explicit parts of that local loop rather than only implicit side effects of stored bias.
 
 1.  **Stimulus:** An environmental signal enters the edge of the agent graph.
 2.  **Fluctuation:** Agents fire semi-randomly (Fluctuation mode), spending their limited ATP.
@@ -87,8 +87,7 @@ This is Hebbian learning merged with epigenetic constraint maintenance.
 
 As we begin writing code for the Native Substrate, adhere to the following directives:
 
-1.  **Domain Agnosticism First:** Build the `NodeAgent` class in a way that it doesn't know what it is computing. It should only know about its neighbors, its ATP, and its 6-dimensional coherence scores.
-2.  **Rely on the Core:** Use the `real_core` engine from Phase 4.5. Each node is literally instantiating a `RealCoreEngine`. 
+2.  **Rely on the Core:** Use the `real_core` engine from Phase 4.5. Each node is literally instantiating a `RealCoreEngine`, including its reusable recognition, expectation, and prediction-error path. 
 3.  **Strict Metabolic Walls:** Enforce the ATP budget ruthlessly. If a node runs out of ATP, it is dead or dormant. Infrastructure costs must scale with density.
 4.  **No Global Gradients:** Do not implement any global loss function that simultaneously updates all agents. Feedback must propagate purely sequentially through local node-to-node ATP handshakes. 
 5.  **Start Small:** The first environment should be a trivial spatial graph where an input signal at (x=0) must navigate to an output at (x=10) by agents learning which paths to maintain. 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The REAL Cycle — Node Mechanics</title>
+<title>The REAL Cycle â€” Node Mechanics</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -97,7 +97,7 @@
     color: var(--accent1);
   }
 
-  /* ── Pipeline strip ────────────────────────────────────────────── */
+  /* â”€â”€ Pipeline strip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .pipeline-wrap {
     position: relative;
     margin-bottom: 40px;
@@ -222,7 +222,7 @@
     text-align: center;
   }
 
-  /* ── Detail panel ───────────────────────────────────────────────── */
+  /* â”€â”€ Detail panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .detail-panel {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -682,60 +682,60 @@
 <body>
 
 <header>
-  <div class="logo-badge">⚡</div>
-  <h1>The REAL Cycle — Node Mechanics</h1>
-  <div class="subtitle">real_core/engine.py · RealCoreEngine.run_cycle()</div>
+  <div class="logo-badge">âš¡</div>
+  <h1>The REAL Cycle â€” Node Mechanics</h1>
+  <div class="subtitle">real_core/engine.py Â· RealCoreEngine.run_cycle()</div>
 </header>
 
 <div class="main">
 
   <div class="intro">
     <h2>How a node actually runs</h2>
-    <p>Every tick, each node executes the same five-stage loop: <code>perceive → select → execute → score → consolidate</code>. This is <code>RealCoreEngine.run_cycle()</code>. There's no global loss, no backprop — just local observation, local action, and feedback that writes into local substrate. Step through each stage below, then run the live simulation to see it in motion.</p>
+    <p>Every tick, each node executes the same anticipation-aware loop: <code>observe -&gt; recognize -&gt; predict -&gt; select -&gt; execute -&gt; score -&gt; compare -&gt; consolidate</code>. This is <code>RealCoreEngine.run_cycle()</code>. There's no global loss, no backprop -- just local observation, local anticipation, local action, and feedback that writes into local substrate. Step through each stage below, then run the live simulation to see it in motion.</p>
   </div>
 
-  <!-- ── Pipeline strip ───────────────────────────────────────── -->
+  <!-- â”€â”€ Pipeline strip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <div class="pipeline-wrap">
     <div class="pipeline">
       <button class="stage-btn active" id="btn-0" onclick="setStage(0)" style="--stage-color: #60a5fa">
-        <div class="stage-icon">👁</div>
+        <div class="stage-icon">ðŸ‘</div>
         <div class="stage-label">Perceive</div>
         <div class="stage-sublabel">Observe local<br>state</div>
       </button>
-      <div class="arrow" id="arr-0">→</div>
+      <div class="arrow" id="arr-0">â†’</div>
       <button class="stage-btn" id="btn-1" onclick="setStage(1)" style="--stage-color: #a78bfa">
-        <div class="stage-icon">🎯</div>
+        <div class="stage-icon">ðŸŽ¯</div>
         <div class="stage-label">Select</div>
         <div class="stage-sublabel">Choose an<br>action</div>
       </button>
-      <div class="arrow" id="arr-1">→</div>
+      <div class="arrow" id="arr-1">â†’</div>
       <button class="stage-btn" id="btn-2" onclick="setStage(2)" style="--stage-color: #fb923c">
-        <div class="stage-icon">⚡</div>
+        <div class="stage-icon">âš¡</div>
         <div class="stage-label">Execute</div>
         <div class="stage-sublabel">Fire, route,<br>or rest</div>
       </button>
-      <div class="arrow" id="arr-2">→</div>
+      <div class="arrow" id="arr-2">â†’</div>
       <button class="stage-btn" id="btn-3" onclick="setStage(3)" style="--stage-color: #34d399">
-        <div class="stage-icon">📊</div>
+        <div class="stage-icon">ðŸ“Š</div>
         <div class="stage-label">Score</div>
         <div class="stage-sublabel">Coherence<br>dimensions</div>
       </button>
-      <div class="arrow" id="arr-3">→</div>
+      <div class="arrow" id="arr-3">â†’</div>
       <button class="stage-btn" id="btn-4" onclick="setStage(4)" style="--stage-color: #f472b6">
-        <div class="stage-icon">🧬</div>
+        <div class="stage-icon">ðŸ§¬</div>
         <div class="stage-label">Consolidate</div>
         <div class="stage-sublabel">Substrate tick,<br>pattern promotion</div>
       </button>
     </div>
 
     <div class="step-controls">
-      <button class="step-btn" id="prev-btn" onclick="prevStage()" disabled>← Prev</button>
+      <button class="step-btn" id="prev-btn" onclick="prevStage()" disabled>â† Prev</button>
       <span class="step-counter" id="step-counter">1 / 5</span>
-      <button class="step-btn" id="next-btn" onclick="nextStage()">Next →</button>
+      <button class="step-btn" id="next-btn" onclick="nextStage()">Next â†’</button>
     </div>
   </div>
 
-  <!-- ── Stage detail panels ─────────────────────────────────── -->
+  <!-- â”€â”€ Stage detail panels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <div id="stage-panels">
 
     <!-- STAGE 0: PERCEIVE -->
@@ -746,13 +746,13 @@
         <div class="fn-tag" style="margin-left:6px">memory_binding.modulate_observation()</div>
         <h3>Reading local state</h3>
         <p class="desc">
-          The node calls <strong>observe_local()</strong> on the routing environment. This returns a flat dict of floats describing everything the node can see right now — its ATP level, inbox contents, downstream progress, and recent feedback.
+          The node calls <strong>observe_local()</strong> on the routing environment. This returns a flat dict of floats describing everything the node can see right now â€” its ATP level, inbox contents, downstream progress, and recent feedback.
         </p>
         <p class="desc">
-          Then <strong>modulate_observation()</strong> runs. It injects substrate support values as additional keys, and adds Gaussian noise to progress/congestion readings — <strong>more noise on edges with low substrate support</strong>. A well-learned connection is perceived more clearly.
+          Then <strong>modulate_observation()</strong> runs. It injects substrate support values as additional keys, and adds Gaussian noise to progress/congestion readings â€” <strong>more noise on edges with low substrate support</strong>. A well-learned connection is perceived more clearly.
         </p>
         <div class="note-box">
-          <strong>Why noise?</strong> It models epistemic uncertainty at the edge level. If you haven't routed through a neighbor much, you have a fuzzier read on what's going on over there. High substrate support → high clarity → lower noise scale.
+          <strong>Why noise?</strong> It models epistemic uncertainty at the edge level. If you haven't routed through a neighbor much, you have a fuzzier read on what's going on over there. High substrate support â†’ high clarity â†’ lower noise scale.
         </div>
       </div>
 
@@ -786,7 +786,7 @@
           First, <strong>available_actions()</strong> builds the full menu: <code>rest</code>, one <code>route:N</code> per neighbor, four <code>route_transform:N:T</code> variants per neighbor, plus <code>invest:N</code> and <code>maintain_edges</code> when the inbox is empty and ATP allows.
         </p>
         <p class="desc">
-          Each route action has a <strong>use_cost</strong> — base 0.05 ATP, reduced by edge support and action support. If a neighbor has been heavily used and well-maintained, routing there is cheap. The node can only afford actions whose cost fits its current ATP budget.
+          Each route action has a <strong>use_cost</strong> â€” base 0.05 ATP, reduced by edge support and action support. If a neighbor has been heavily used and well-maintained, routing there is cheap. The node can only afford actions whose cost fits its current ATP budget.
         </p>
         <p class="desc">
           The Phase8 selector then picks from affordable actions using substrate bias, memory, and a CFAR-style exploration/exploitation balance. If the selector is uncertain, it explores; if a route has strong substrate support, it exploits.
@@ -794,8 +794,8 @@
 
         <div class="formula">
           <span class="comment">// use_cost() in substrate.py</span><br>
-          cost = <span class="key">fire_base_cost</span> <span class="op">-</span> <span class="key">fire_discount_scale</span> <span class="op">×</span> <span class="val">support</span><br>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">-</span> <span class="key">transform_discount_scale</span> <span class="op">×</span> <span class="val">action_support</span><br>
+          cost = <span class="key">fire_base_cost</span> <span class="op">-</span> <span class="key">fire_discount_scale</span> <span class="op">Ã—</span> <span class="val">support</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">-</span> <span class="key">transform_discount_scale</span> <span class="op">Ã—</span> <span class="val">action_support</span><br>
           <span class="comment">// clamped to fire_floor_cost = 0.01</span>
         </div>
       </div>
@@ -831,7 +831,7 @@
           <strong>rest</strong> recovers ATP (partial regen). <strong>invest:N</strong> charges write_cost and boosts the edge's slow support value by +0.20. <strong>maintain_edges</strong> calls <code>maintain_supports()</code>, paying maintain_cost per active edge/action to reset their decay clock.
         </p>
         <p class="desc">
-          The environment observes state again after execution — this "after" snapshot is what the coherence model scores.
+          The environment observes state again after execution â€” this "after" snapshot is what the coherence model scores.
         </p>
         <div class="formula">
           <span class="comment">// ATP deducted after each action</span><br>
@@ -875,7 +875,7 @@
           <div class="substrate-val">~0.09</div>
         </div>
         <div class="note-box" style="margin-top:14px">
-          <strong>The key insight:</strong> a node that has built up substrate support through repeated routing pays up to 5× less per fire. This makes established routes self-reinforcing — they stay affordable even under ATP pressure.
+          <strong>The key insight:</strong> a node that has built up substrate support through repeated routing pays up to 5Ã— less per fire. This makes established routes self-reinforcing â€” they stay affordable even under ATP pressure.
         </div>
       </div>
     </div>
@@ -889,19 +889,19 @@
         <div class="fn-tag" style="margin-left:6px">coherence.composite(dimensions)</div>
         <h3>Six dimensions, one composite</h3>
         <p class="desc">
-          The coherence model reads the post-action observation and recent history to score six dimensions. Each dimension is a hand-crafted formula drawing from different signals. <strong>Substrate health</strong> is then blended in — active connections and maintenance ratios push continuity, contextual_fit, and reflexivity.
+          The coherence model reads the post-action observation and recent history to score six dimensions. Each dimension is a hand-crafted formula drawing from different signals. <strong>Substrate health</strong> is then blended in â€” active connections and maintenance ratios push continuity, contextual_fit, and reflexivity.
         </p>
         <p class="desc">
-          The <strong>TiltRegulatoryMesh</strong> applies soft dampening across dimensions before the composite is computed. The composite is just the mean. Delta = composite − prior_composite. GCO status is assigned based on thresholds: STABLE (≥0.6 all dims), DEGRADED (<0.60), CRITICAL (<0.35).
+          The <strong>TiltRegulatoryMesh</strong> applies soft dampening across dimensions before the composite is computed. The composite is just the mean. Delta = composite âˆ’ prior_composite. GCO status is assigned based on thresholds: STABLE (â‰¥0.6 all dims), DEGRADED (<0.60), CRITICAL (<0.35).
         </p>
 
         <div class="formula">
           <span class="comment">// continuity</span><br>
-          <span class="val">0.4</span> <span class="op">+</span> <span class="val">0.6</span> <span class="op">×</span> <span class="key">atp_ratio</span> <span class="op">-</span> <span class="val">0.12</span> <span class="op">×</span> <span class="key">queue_pressure</span><br>
+          <span class="val">0.4</span> <span class="op">+</span> <span class="val">0.6</span> <span class="op">Ã—</span> <span class="key">atp_ratio</span> <span class="op">-</span> <span class="val">0.12</span> <span class="op">Ã—</span> <span class="key">queue_pressure</span><br>
           <span class="comment">// differentiation</span><br>
-          max(<span class="key">route_counts</span>) <span class="op">/</span> len(<span class="key">recent_routes</span>)<span class="comment">  ← specialization</span><br>
+          max(<span class="key">route_counts</span>) <span class="op">/</span> len(<span class="key">recent_routes</span>)<span class="comment">  â† specialization</span><br>
           <span class="comment">// reflexivity</span><br>
-          recoveries <span class="op">/</span> revision_attempts<span class="comment">  ← after bad deltas</span>
+          recoveries <span class="op">/</span> revision_attempts<span class="comment">  â† after bad deltas</span>
         </div>
       </div>
 
@@ -912,8 +912,8 @@
         </div>
         <div class="coherence-row" id="coherence-display">
           <span class="label">Coherence</span>
-          <span class="val" id="coherence-val">—</span>
-          <span class="delta-pill delta-neu" id="delta-val">Δ —</span>
+          <span class="val" id="coherence-val">â€”</span>
+          <span class="delta-pill delta-neu" id="delta-val">Î” â€”</span>
           <span class="gco-badge gco-PARTIAL" id="gco-val">PARTIAL</span>
         </div>
       </div>
@@ -928,16 +928,16 @@
         <div class="fn-tag" style="margin-left:6px">consolidation.consolidate() [on rest]</div>
         <h3>Substrate tick and pattern promotion</h3>
         <p class="desc">
-          Every cycle the substrate <strong>ticks</strong>: all slow values decay by 0.025. If a value drops below the <strong>bistable threshold (0.25)</strong>, decay accelerates by 2.5×. Connections that aren't maintained will fade — fast.
+          Every cycle the substrate <strong>ticks</strong>: all slow values decay by 0.025. If a value drops below the <strong>bistable threshold (0.25)</strong>, decay accelerates by 2.5Ã—. Connections that aren't maintained will fade â€” fast.
         </p>
         <p class="desc">
-          When the node takes a <strong>rest</strong> action and episodic memory has ≥8 entries, <strong>consolidation</strong> runs. It scans recent route history: if a neighbor was routed to ≥2 times with positive mean delta, it seeds edge support (0.32) and builds a ConstraintPattern. Negative-delta routes decay instead.
+          When the node takes a <strong>rest</strong> action and episodic memory has â‰¥8 entries, <strong>consolidation</strong> runs. It scans recent route history: if a neighbor was routed to â‰¥2 times with positive mean delta, it seeds edge support (0.32) and builds a ConstraintPattern. Negative-delta routes decay instead.
         </p>
         <p class="desc">
-          This is <em>learning writing into structure</em>. Durable behavior shows up as nonzero slow values that survive decay — not as parameter vectors.
+          This is <em>learning writing into structure</em>. Durable behavior shows up as nonzero slow values that survive decay â€” not as parameter vectors.
         </p>
         <div class="note-box">
-          <strong>Bistable cliff:</strong> at support 0.25, a connection is either maintained and stable, or rapidly forgotten. There's no gradual middle ground — this creates discrete "learned vs. unlearned" edge states.
+          <strong>Bistable cliff:</strong> at support 0.25, a connection is either maintained and stable, or rapidly forgotten. There's no gradual middle ground â€” this creates discrete "learned vs. unlearned" edge states.
         </div>
       </div>
 
@@ -947,21 +947,21 @@
           <!-- filled by JS -->
         </div>
         <div class="note-box" style="margin-top:14px">
-          <strong>Context credit accumulation</strong> also happens here. If <code>record_context_feedback()</code> is called with a good bit_match_ratio, a per-edge accumulator fills toward <strong>0.95</strong>. When it crosses that threshold, it seeds contextual action support directly into the substrate — the node now has a context-specific route preference encoded in slow memory.
+          <strong>Context credit accumulation</strong> also happens here. If <code>record_context_feedback()</code> is called with a good bit_match_ratio, a per-edge accumulator fills toward <strong>0.95</strong>. When it crosses that threshold, it seeds contextual action support directly into the substrate â€” the node now has a context-specific route preference encoded in slow memory.
         </div>
       </div>
     </div>
 
   </div><!-- /stage-panels -->
 
-  <!-- ── Live simulation ─────────────────────────────────────────── -->
+  <!-- â”€â”€ Live simulation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <div class="section-hdr">Live Simulation</div>
 
   <div class="card demo-section" style="margin-bottom:24px">
     <div class="card-title">Run cycles and watch the node evolve</div>
 
     <div class="run-controls">
-      <button class="run-btn" id="run-btn" onclick="toggleRun()">▶ Run</button>
+      <button class="run-btn" id="run-btn" onclick="toggleRun()">â–¶ Run</button>
       <span class="cycle-num">Cycle <span id="cycle-display">0</span></span>
       <button class="reset-btn" onclick="resetSim()">Reset</button>
     </div>
@@ -1007,16 +1007,16 @@
 </div><!-- /main -->
 
 <script>
-// ── State ────────────────────────────────────────────────────────────
+// â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let currentStage = 0;
-const STAGES = ['perceive','select','execute','score','consolidate'];
-const STAGE_COLORS = ['#60a5fa','#a78bfa','#fb923c','#34d399','#f472b6'];
+const STAGES = ['observe','recognize','predict','select','execute','score','compare','consolidate'];
+const STAGE_COLORS = ['#60a5fa','#38bdf8','#22c55e','#a78bfa','#fb923c','#34d399','#f472b6','#facc15'];
 
 // sim state
 let sim = null;
 let runInterval = null;
 
-// ── Stage navigation ─────────────────────────────────────────────────
+// â”€â”€ Stage navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setStage(idx) {
   // deactivate old
   document.getElementById(`btn-${currentStage}`).classList.remove('active');
@@ -1042,7 +1042,7 @@ function setStage(idx) {
 function prevStage() { if (currentStage > 0) setStage(currentStage - 1); }
 function nextStage() { if (currentStage < 4) setStage(currentStage + 1); }
 
-// ── Simulation ───────────────────────────────────────────────────────
+// â”€â”€ Simulation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function mkSim() {
   return {
     cycle: 0,
@@ -1143,7 +1143,7 @@ function simStep(s) {
   return { action, coherence: new_coh, delta, gco };
 }
 
-// ── Render ───────────────────────────────────────────────────────────
+// â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderObs(s) {
   const obs = s || sim;
   const items = [
@@ -1221,7 +1221,7 @@ function renderDims(s) {
   document.getElementById('coherence-val').style.color = gco === 'STABLE' ? 'var(--accent2)' : gco === 'CRITICAL' ? 'var(--red)' : 'var(--accent5)';
 
   const dEl = document.getElementById('delta-val');
-  dEl.textContent = `Δ ${delta >= 0 ? '+' : ''}${delta.toFixed(3)}`;
+  dEl.textContent = `Î” ${delta >= 0 ? '+' : ''}${delta.toFixed(3)}`;
   dEl.className = 'delta-pill ' + (delta > 0.005 ? 'delta-pos' : delta < -0.005 ? 'delta-neg' : 'delta-neu');
 
   const gEl = document.getElementById('gco-val');
@@ -1242,7 +1242,7 @@ function renderSubstrate(s) {
   document.getElementById('substrate-display').innerHTML = rows.map(({ key, val, color }) => {
     const pct = (val * 100).toFixed(0);
     const atCliff = val > 0 && val < bisthresh + 0.05;
-    const cliffWarn = atCliff ? ` <span style="color:var(--red);font-size:10px">⚠ near cliff</span>` : '';
+    const cliffWarn = atCliff ? ` <span style="color:var(--red);font-size:10px">âš  near cliff</span>` : '';
     return `<div class="substrate-row">
       <div class="substrate-key">${key}${cliffWarn}</div>
       <div class="substrate-bar-wrap">
@@ -1323,10 +1323,10 @@ function toggleRun() {
   if (runInterval) {
     clearInterval(runInterval);
     runInterval = null;
-    document.getElementById('run-btn').textContent = '▶ Run';
+    document.getElementById('run-btn').textContent = 'â–¶ Run';
     document.getElementById('run-btn').classList.remove('running');
   } else {
-    document.getElementById('run-btn').textContent = '⏸ Pause';
+    document.getElementById('run-btn').textContent = 'â¸ Pause';
     document.getElementById('run-btn').classList.add('running');
     runInterval = setInterval(() => {
       simStep(sim);
@@ -1337,7 +1337,7 @@ function toggleRun() {
 
 function resetSim() {
   if (runInterval) { clearInterval(runInterval); runInterval = null; }
-  document.getElementById('run-btn').textContent = '▶ Run';
+  document.getElementById('run-btn').textContent = 'â–¶ Run';
   document.getElementById('run-btn').classList.remove('running');
   sim = mkSim();
   document.getElementById('history-strip').innerHTML = '';
@@ -1345,7 +1345,7 @@ function resetSim() {
   renderLiveSim();
 }
 
-// ── Init ─────────────────────────────────────────────────────────────
+// â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 sim = mkSim();
 setStage(0);
 renderLiveSim();

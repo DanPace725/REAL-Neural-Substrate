@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Phase 8 — REAL Native Substrate Dashboard</title>
+<title>Phase 8 â€” REAL Native Substrate Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -36,7 +36,7 @@
     flex-direction: column;
   }
 
-  /* ─── Header ─────────────────────────────────────── */
+  /* â”€â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   header {
     background: linear-gradient(90deg, #080c18 0%, #0a1020 50%, #080c18 100%);
     border-bottom: 1px solid var(--border);
@@ -68,13 +68,13 @@
     text-align: right;
   }
 
-  /* ─── Layout ──────────────────────────────────────── */
+  /* â”€â”€â”€ Layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .layout {
     display: flex;
     flex: 1;
   }
 
-  /* ─── Sidebar ─────────────────────────────────────── */
+  /* â”€â”€â”€ Sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   nav {
     width: 220px;
     background: var(--surface);
@@ -119,7 +119,7 @@
 
   nav button .nav-icon { font-size: 15px; opacity: 0.85; }
 
-  /* ─── Main Content ────────────────────────────────── */
+  /* â”€â”€â”€ Main Content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   main {
     flex: 1;
     padding: 28px 32px;
@@ -143,7 +143,7 @@
     max-width: 720px;
   }
 
-  /* ─── Grid ────────────────────────────────────────── */
+  /* â”€â”€â”€ Grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .grid { display: grid; gap: 20px; }
   .g2 { grid-template-columns: 1fr 1fr; }
   .g3 { grid-template-columns: 1fr 1fr 1fr; }
@@ -152,7 +152,7 @@
   .span3 { grid-column: span 3; }
   .span4 { grid-column: 1 / -1; }
 
-  /* ─── Cards ───────────────────────────────────────── */
+  /* â”€â”€â”€ Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -169,7 +169,7 @@
     margin-bottom: 14px;
   }
 
-  /* ─── Stat Pills ──────────────────────────────────── */
+  /* â”€â”€â”€ Stat Pills â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .stat-row {
     display: flex;
     justify-content: space-between;
@@ -187,7 +187,7 @@
   .blue { color: var(--accent1); }
   .purple { color: var(--accent3); }
 
-  /* ─── Pillar Cards ────────────────────────────────── */
+  /* â”€â”€â”€ Pillar Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .pillar {
     background: var(--card);
     border: 1px solid var(--border);
@@ -204,7 +204,7 @@
   .p5 { border-top-color: var(--accent4); }
   .p6 { border-top-color: var(--accent6); }
 
-  /* ─── Big Metric ──────────────────────────────────── */
+  /* â”€â”€â”€ Big Metric â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .big-metric {
     background: var(--card);
     border: 1px solid var(--border);
@@ -222,7 +222,7 @@
   }
   .big-metric .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
-  /* ─── Badge ───────────────────────────────────────── */
+  /* â”€â”€â”€ Badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .badge {
     display: inline-block;
     padding: 2px 8px; border-radius: 4px;
@@ -235,11 +235,11 @@
   .badge-amber  { background: #3a2a00; color: var(--accent5); }
   .badge-red    { background: #3a1010; color: var(--red); }
 
-  /* ─── Canvas ──────────────────────────────────────── */
+  /* â”€â”€â”€ Canvas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   canvas { max-height: 280px; }
   .canvas-tall canvas { max-height: 360px; }
 
-  /* ─── Topology SVG ────────────────────────────────── */
+  /* â”€â”€â”€ Topology SVG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .topology-wrap {
     background: var(--card);
     border: 1px solid var(--border);
@@ -298,7 +298,7 @@
     opacity: 0.9;
   }
 
-  /* ─── Transfer Heatmap ────────────────────────────── */
+  /* â”€â”€â”€ Transfer Heatmap â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .heatmap-wrap {
     overflow-x: auto;
   }
@@ -334,7 +334,7 @@
     font-weight: 400; margin-top: 3px;
   }
 
-  /* ─── Phase Pipeline ──────────────────────────────── */
+  /* â”€â”€â”€ Phase Pipeline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .phase-pipeline {
     display: flex;
     align-items: stretch;
@@ -355,7 +355,7 @@
   .phase-box:last-child { border-radius: 0 10px 10px 0; }
 
   .phase-box::after {
-    content: '→';
+    content: 'â†’';
     position: absolute;
     right: -14px;
     top: 50%;
@@ -380,7 +380,7 @@
     font-size: 11px; color: var(--muted); line-height: 1.5;
   }
 
-  /* ─── Module Grid ─────────────────────────────────── */
+  /* â”€â”€â”€ Module Grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .module-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -399,7 +399,7 @@
     font-size: 11.5px; color: var(--muted); line-height: 1.55;
   }
 
-  /* ─── Timeline ────────────────────────────────────── */
+  /* â”€â”€â”€ Timeline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .timeline {
     position: relative;
     padding-left: 28px;
@@ -430,7 +430,7 @@
   .tl-title { font-size: 13.5px; font-weight: 600; margin-bottom: 4px; }
   .tl-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
 
-  /* ─── Transform Table ─────────────────────────────── */
+  /* â”€â”€â”€ Transform Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .transform-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -457,7 +457,7 @@
 
   .transform-card .tx-example span { color: var(--accent2); }
 
-  /* ─── Progress Bar ────────────────────────────────── */
+  /* â”€â”€â”€ Progress Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .prog-bar {
     display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
   }
@@ -475,20 +475,20 @@
     font-weight: 600; text-align: right;
   }
 
-  /* ─── Admission Gauge ─────────────────────────────── */
+  /* â”€â”€â”€ Admission Gauge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .gauge-wrap {
     display: flex; align-items: center; justify-content: center;
     flex-direction: column; gap: 8px;
   }
 
-  /* ─── Responsive ──────────────────────────────────── */
+  /* â”€â”€â”€ Responsive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   @media (max-width: 900px) {
     .g2, .g3, .g4 { grid-template-columns: 1fr; }
     .span2, .span3, .span4 { grid-column: span 1; }
     nav { width: 180px; }
   }
 
-  /* ─── Scrollbar ───────────────────────────────────── */
+  /* â”€â”€â”€ Scrollbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -496,68 +496,68 @@
 </head>
 <body>
 
-<!-- ═══ HEADER ══════════════════════════════════════════════════ -->
+<!-- â•â•â• HEADER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <header>
-  <div class="logo-badge">🧠</div>
+  <div class="logo-badge">ðŸ§ </div>
   <div>
-    <h1>REAL — Phase 8: Native Multi-Agent Substrate</h1>
+    <h1>REAL â€” Phase 8: Native Multi-Agent Substrate</h1>
   </div>
   <div class="subtitle">
     Relationally Embedded Allostatic Learning<br>
-    Local metabolic computation · Transfer learning · Morphogenesis
+    Local metabolic computation Â· Transfer learning Â· Morphogenesis
   </div>
 </header>
 
 <div class="layout">
 
-<!-- ═══ SIDEBAR ═════════════════════════════════════════════════ -->
+<!-- â•â•â• SIDEBAR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <nav>
   <div class="nav-section">Core</div>
   <button class="active" onclick="showTab('overview')" id="btn-overview">
-    <span class="nav-icon">⬡</span> Overview
+    <span class="nav-icon">â¬¡</span> Overview
   </button>
   <button onclick="showTab('topology')" id="btn-topology">
-    <span class="nav-icon">🔗</span> Topology
+    <span class="nav-icon">ðŸ”—</span> Topology
   </button>
 
   <div class="nav-section">Learning</div>
   <button onclick="showTab('carryover')" id="btn-carryover">
-    <span class="nav-icon">♻</span> Carryover
+    <span class="nav-icon">â™»</span> Carryover
   </button>
   <button onclick="showTab('transfer')" id="btn-transfer">
-    <span class="nav-icon">⇄</span> Transfer Matrix
+    <span class="nav-icon">â‡„</span> Transfer Matrix
   </button>
   <button onclick="showTab('cvt1')" id="btn-cvt1">
-    <span class="nav-icon">⚙</span> CVT-1 Tasks
+    <span class="nav-icon">âš™</span> CVT-1 Tasks
   </button>
 
   <div class="nav-section">Substrate</div>
   <button onclick="showTab('substrate')" id="btn-substrate">
-    <span class="nav-icon">🧬</span> Memory Substrate
+    <span class="nav-icon">ðŸ§¬</span> Memory Substrate
   </button>
   <button onclick="showTab('morphogenesis')" id="btn-morphogenesis">
-    <span class="nav-icon">🌱</span> Morphogenesis
+    <span class="nav-icon">ðŸŒ±</span> Morphogenesis
   </button>
 
   <div class="nav-section">Meta</div>
   <button onclick="showTab('architecture')" id="btn-architecture">
-    <span class="nav-icon">📐</span> Architecture
+    <span class="nav-icon">ðŸ“</span> Architecture
   </button>
   <button onclick="showTab('trail')" id="btn-trail">
-    <span class="nav-icon">📋</span> Dev Trail
+    <span class="nav-icon">ðŸ“‹</span> Dev Trail
   </button>
 </nav>
 
-<!-- ═══ MAIN ════════════════════════════════════════════════════ -->
+<!-- â•â•â• MAIN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <main>
 
-<!-- ──────────────────────────────────────── TAB: OVERVIEW ──── -->
+<!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TAB: OVERVIEW â”€â”€â”€â”€ -->
 <div class="tab-panel active" id="tab-overview">
   <div class="panel-title">Phase 8 Overview</div>
   <div class="panel-desc">
     Phase 8 reframes REAL from a single agent into a <strong>native multi-agent substrate</strong>:
     each node is a local REAL agent with its own ATP budget, slow memory, and selection pressure.
-    Useful computation emerges from local allostatic adaptation — no global loss, no backprop.
+    Useful computation emerges from local allostatic adaptation â€” no global loss, no backprop.
   </div>
 
   <!-- Big metric row -->
@@ -565,7 +565,7 @@
     <div class="big-metric">
       <div class="num blue">8.8</div>
       <div class="label">Warm-Full Exact Matches</div>
-      <div class="sub">vs 3.0 cold (Task A→B)</div>
+      <div class="sub">vs 3.0 cold (Task Aâ†’B)</div>
     </div>
     <div class="big-metric">
       <div class="num good">63.3%</div>
@@ -575,12 +575,12 @@
     <div class="big-metric">
       <div class="num purple">6</div>
       <div class="label">Scenario Types</div>
-      <div class="sub">branch · sustained · detour · CVT-1 A/B/C</div>
+      <div class="sub">branch Â· sustained Â· detour Â· CVT-1 A/B/C</div>
     </div>
     <div class="big-metric">
       <div class="num" style="color:var(--accent5)">4</div>
       <div class="label">Transform Actions</div>
-      <div class="sub">identity · rotate · xor_1010 · xor_0101</div>
+      <div class="sub">identity Â· rotate Â· xor_1010 Â· xor_0101</div>
     </div>
   </div>
 
@@ -593,11 +593,11 @@
     </div>
     <div class="pillar p2">
       <h3 style="color:var(--accent2)">Metabolic Constraint</h3>
-      <p>Edge investment lowers future route cost. Feedback returns upstream sequentially, not as a global broadcast. Action costs are metabolic and local — scarcity is the teacher.</p>
+      <p>Edge investment lowers future route cost. Feedback returns upstream sequentially, not as a global broadcast. Action costs are metabolic and local â€” scarcity is the teacher.</p>
     </div>
     <div class="pillar p3">
       <h3 style="color:var(--accent3)">Carryover & Transfer</h3>
-      <p>Cross-session warm starts rehydrate node substrate and episodic survivors. Transfer between tasks is directional: Task A→B is robustly positive; B→A remains mixed.</p>
+      <p>Cross-session warm starts rehydrate node substrate and episodic survivors. Transfer between tasks is directional: Task Aâ†’B is robustly positive; Bâ†’A remains mixed.</p>
     </div>
     <div class="pillar p4">
       <h3 style="color:var(--accent5)">Adaptive Admission</h3>
@@ -619,36 +619,36 @@
     <div class="phase-box">
       <div class="phase-num">Phase 4</div>
       <div class="phase-name" style="color:var(--accent1)">REAL Core</div>
-      <div class="phase-desc">Domain-agnostic engine · S,A,c,O,Φ,H,Ψ,Γ,Ω tuple · reusable adapters</div>
+      <div class="phase-desc">Domain-agnostic engine Â· S,A,c,O,Î¦,H,Î¨,Î“,Î© tuple Â· reusable adapters</div>
     </div>
     <div class="phase-box">
       <div class="phase-num">Phase 5</div>
       <div class="phase-name" style="color:var(--accent2)">Infrastructure</div>
-      <div class="phase-desc">Generalized tooling · cross-domain operation · test harnesses</div>
+      <div class="phase-desc">Generalized tooling Â· cross-domain operation Â· test harnesses</div>
     </div>
     <div class="phase-box">
       <div class="phase-num">Phase 6</div>
       <div class="phase-name" style="color:var(--accent3)">Integration</div>
-      <div class="phase-desc">Emergence Engine · operational telemetry · A/B workflows</div>
+      <div class="phase-desc">Emergence Engine Â· operational telemetry Â· A/B workflows</div>
     </div>
     <div class="phase-box">
       <div class="phase-num">Phase 7</div>
       <div class="phase-name" style="color:var(--accent5)">Substrate</div>
-      <div class="phase-desc">Persistent memory · budget sweeps · retention analyses</div>
+      <div class="phase-desc">Persistent memory Â· budget sweeps Â· retention analyses</div>
     </div>
     <div class="phase-box" style="border-top:3px solid var(--accent4); border-radius:0 10px 10px 0;">
       <div class="phase-num">Phase 8</div>
       <div class="phase-name" style="color:var(--accent4)">Native Substrate</div>
-      <div class="phase-desc">Multi-agent network · emergent computation · transfer learning</div>
+      <div class="phase-desc">Multi-agent network Â· emergent computation Â· transfer learning</div>
     </div>
   </div>
 </div>
 
-<!-- ──────────────────────────────────────── TAB: TOPOLOGY ──── -->
+<!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TAB: TOPOLOGY â”€â”€â”€â”€ -->
 <div class="tab-panel" id="tab-topology">
   <div class="panel-title">Network Topology</div>
   <div class="panel-desc">
-    The routing graph connects source→intermediate nodes→sink. Packets flow forward while feedback pulses return upstream hop-by-hop. Node positions define the metabolic depth of the path.
+    The routing graph connects sourceâ†’intermediate nodesâ†’sink. Packets flow forward while feedback pulses return upstream hop-by-hop. Node positions define the metabolic depth of the path.
   </div>
 
   <div class="topology-wrap span4" style="margin-bottom: 20px;">
@@ -681,7 +681,7 @@
     </svg>
 
     <div id="topo-desc" style="font-size:12px; color:var(--muted); margin-top:12px; padding: 0 4px;">
-      Branch pressure topology: n0→(n1,n2)→(n3,n4,n5)→sink.
+      Branch pressure topology: n0â†’(n1,n2)â†’(n3,n4,n5)â†’sink.
       Two parallel branches, three exit nodes. Tests branch selection and load balancing under pressure.
     </div>
   </div>
@@ -690,10 +690,10 @@
   <div class="grid g2">
     <div class="card">
       <div class="card-title">Node Legend</div>
-      <div class="stat-row"><span class="stat-label">⬤ Source (n0)</span><span class="stat-val blue">Admission gating, ingress queue, ATP spending</span></div>
-      <div class="stat-row"><span class="stat-label">⬤ Intermediate (n1–n5)</span><span class="stat-val">Local selector, transform, substrate, carryover</span></div>
-      <div class="stat-row"><span class="stat-label">⬤ Sink</span><span class="stat-val good">Scores packet vs target bits, returns graded feedback</span></div>
-      <div class="stat-row"><span class="stat-label">○ Dynamic (g0–g3)</span><span class="stat-val purple">Morphogenesis-budded, probationary, may be pruned</span></div>
+      <div class="stat-row"><span class="stat-label">â¬¤ Source (n0)</span><span class="stat-val blue">Admission gating, ingress queue, ATP spending</span></div>
+      <div class="stat-row"><span class="stat-label">â¬¤ Intermediate (n1â€“n5)</span><span class="stat-val">Local selector, transform, substrate, carryover</span></div>
+      <div class="stat-row"><span class="stat-label">â¬¤ Sink</span><span class="stat-val good">Scores packet vs target bits, returns graded feedback</span></div>
+      <div class="stat-row"><span class="stat-label">â—‹ Dynamic (g0â€“g3)</span><span class="stat-val purple">Morphogenesis-budded, probationary, may be pruned</span></div>
     </div>
     <div class="card">
       <div class="card-title">Edge Properties</div>
@@ -706,7 +706,7 @@
   </div>
 </div>
 
-<!-- ──────────────────────────────────────── TAB: CARRYOVER ─── -->
+<!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TAB: CARRYOVER â”€â”€â”€ -->
 <div class="tab-panel" id="tab-carryover">
   <div class="panel-title">Carryover Comparison</div>
   <div class="panel-desc">
@@ -754,23 +754,23 @@
   </div>
 </div>
 
-<!-- ──────────────────────────────────────── TAB: TRANSFER ──── -->
+<!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TAB: TRANSFER â”€â”€â”€â”€ -->
 <div class="tab-panel" id="tab-transfer">
   <div class="panel-title">Transfer Matrix</div>
   <div class="panel-desc">
     Pairwise transfer benefit across Task A, B, and C. Warm-full carryover from source task improves
-    target task performance over cold start. Transfer is <em>directional</em> — A→B is robustly positive
-    while B→A remains mixed due to contradictory context-transform credit.
+    target task performance over cold start. Transfer is <em>directional</em> â€” Aâ†’B is robustly positive
+    while Bâ†’A remains mixed due to contradictory context-transform credit.
   </div>
 
   <div class="grid g2" style="margin-bottom: 20px;">
     <div class="card">
-      <div class="card-title">Transfer Benefit (Warm Full vs Cold — Exact Matches)</div>
+      <div class="card-title">Transfer Benefit (Warm Full vs Cold â€” Exact Matches)</div>
       <div class="heatmap-wrap">
         <table class="heatmap" id="heatmap-table">
           <thead>
             <tr>
-              <th style="text-align:left">Train → Test</th>
+              <th style="text-align:left">Train â†’ Test</th>
               <th>Task A</th>
               <th>Task B</th>
               <th>Task C</th>
@@ -793,7 +793,7 @@
 
   <div class="grid g3">
     <div class="card">
-      <div class="card-title">Task A → Task B</div>
+      <div class="card-title">Task A â†’ Task B</div>
       <div class="stat-row"><span class="stat-label">Warm-full exact</span><span class="stat-val good">8.8</span></div>
       <div class="stat-row"><span class="stat-label">Cold exact</span><span class="stat-val warn">3.0</span></div>
       <div class="stat-row"><span class="stat-label">Bit accuracy (warm)</span><span class="stat-val good">63.3%</span></div>
@@ -801,7 +801,7 @@
       <div class="stat-row"><span class="stat-label">Assessment</span><span class="stat-val"><span class="badge badge-green">Robustly positive</span></span></div>
     </div>
     <div class="card">
-      <div class="card-title">Task A → Task C</div>
+      <div class="card-title">Task A â†’ Task C</div>
       <div class="stat-row"><span class="stat-label">Warm-full exact</span><span class="stat-val good">6.2</span></div>
       <div class="stat-row"><span class="stat-label">Cold exact</span><span class="stat-val warn">3.4</span></div>
       <div class="stat-row"><span class="stat-label">Bit accuracy (warm)</span><span class="stat-val blue">56.8%</span></div>
@@ -809,7 +809,7 @@
       <div class="stat-row"><span class="stat-label">Assessment</span><span class="stat-val"><span class="badge badge-blue">Positive</span></span></div>
     </div>
     <div class="card">
-      <div class="card-title">Task B → Task A</div>
+      <div class="card-title">Task B â†’ Task A</div>
       <div class="stat-row"><span class="stat-label">Warm-full exact</span><span class="stat-val bad">2.8</span></div>
       <div class="stat-row"><span class="stat-label">Cold exact</span><span class="stat-val warn">3.2</span></div>
       <div class="stat-row"><span class="stat-label">Bit accuracy (warm)</span><span class="stat-val bad">40.2%</span></div>
@@ -822,12 +822,12 @@
     <div class="card-title">Why Asymmetry?</div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; font-size:13px; color:var(--muted); line-height:1.7;">
       <div>
-        <strong style="color:var(--text)">A → B succeeds</strong> because Task B uses a similar parity context signal.
+        <strong style="color:var(--text)">A â†’ B succeeds</strong> because Task B uses a similar parity context signal.
         The branch-plus-transform credit path ties the preferred branch to the correct transform family.
         Context-bound credit from A's training seeds the right bias for B's patterns without needing retraining.
       </div>
       <div>
-        <strong style="color:var(--text)">B → A fails</strong> because Task B's context_1 transform habit conflicts with
+        <strong style="color:var(--text)">B â†’ A fails</strong> because Task B's context_1 transform habit conflicts with
         Task A's expected transform. Contradiction debt is now gated by prior local commitment, which prevents
         over-damping, but the odd-context branch remains behind substrate-only carryover.
       </div>
@@ -835,7 +835,7 @@
   </div>
 </div>
 
-<!-- ──────────────────────────────────────── TAB: CVT-1 ─────── -->
+<!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TAB: CVT-1 â”€â”€â”€â”€â”€â”€â”€ -->
 <div class="tab-panel" id="tab-cvt1">
   <div class="panel-title">CVT-1 Computational Verification Tasks</div>
   <div class="panel-desc">
@@ -846,7 +846,7 @@
 
   <div class="grid g2" style="margin-bottom:20px;">
     <div class="card canvas-tall">
-      <div class="card-title">Learning Curve — Task A (Exact Match Rate, rolling 8)</div>
+      <div class="card-title">Learning Curve â€” Task A (Exact Match Rate, rolling 8)</div>
       <canvas id="cvt1Chart"></canvas>
     </div>
     <div class="card">
@@ -854,17 +854,17 @@
       <div style="font-size:12.5px; color:var(--muted); line-height:1.75;">
         <div style="margin-bottom:12px;">
           <strong style="color:var(--text)">Signal format:</strong><br>
-          Input: 4-bit vector · Context: parity(prev bits) · Task ID: task_a/b/c
+          Input: 4-bit vector Â· Context: parity(prev bits) Â· Task ID: task_a/b/c
         </div>
         <div style="margin-bottom:12px;">
           <strong style="color:var(--text)">18-packet schedule:</strong><br>
-          Values 0b0001 → 0b0110 → 0b1011 → … scheduled across cycles.
+          Values 0b0001 â†’ 0b0110 â†’ 0b1011 â†’ â€¦ scheduled across cycles.
           Context bit tracks sequential state from packet to packet.
         </div>
         <div>
           <strong style="color:var(--text)">Feedback:</strong><br>
-          Routing packets → legacy full pulse.<br>
-          Task packets → feedback scaled by bit match quality.<br>
+          Routing packets â†’ legacy full pulse.<br>
+          Task packets â†’ feedback scaled by bit match quality.<br>
           Exact match = full reward, partial match = graded reward.
         </div>
       </div>
@@ -911,7 +911,7 @@
   <!-- Context breakdown chart -->
   <div class="grid g2">
     <div class="card canvas-tall">
-      <div class="card-title">Context 0 vs Context 1 — Bit Accuracy by Condition</div>
+      <div class="card-title">Context 0 vs Context 1 â€” Bit Accuracy by Condition</div>
       <canvas id="contextChart"></canvas>
     </div>
     <div class="card">
@@ -966,7 +966,7 @@
   </div>
 </div>
 
-<!-- ──────────────────────────────────────── TAB: SUBSTRATE ─── -->
+<!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TAB: SUBSTRATE â”€â”€â”€ -->
 <div class="tab-panel" id="tab-substrate">
   <div class="panel-title">Memory Substrate</div>
   <div class="panel-desc">
@@ -1005,7 +1005,7 @@
       <div class="card-title">Substrate Maintenance</div>
       <div style="font-size:12.5px; color:var(--muted); line-height:1.75;">
         <div style="margin-bottom: 10px;"><strong style="color:var(--text)">Explicit maintenance</strong> lets nodes actively spend ATP to preserve high-value substrate entries rather than relying on slow natural decay.</div>
-        <div style="margin-bottom: 10px;"><strong style="color:var(--text)">Recently maintained</strong> entries are distinguished from support that is merely lingering — summaries expose this ratio.</div>
+        <div style="margin-bottom: 10px;"><strong style="color:var(--text)">Recently maintained</strong> entries are distinguished from support that is merely lingering â€” summaries expose this ratio.</div>
         <div><strong style="color:var(--text)">Promoted context-action</strong> support can survive substrate-only carryover, inheriting part of the learned task structure even without episodic memory.</div>
       </div>
     </div>
@@ -1013,7 +1013,7 @@
 
   <div class="grid g2">
     <div class="card canvas-tall">
-      <div class="card-title">Substrate Support Levels (Simulated — End of Task A)</div>
+      <div class="card-title">Substrate Support Levels (Simulated â€” End of Task A)</div>
       <canvas id="substrateChart"></canvas>
     </div>
     <div class="card">
@@ -1036,7 +1036,7 @@
   </div>
 </div>
 
-<!-- ──────────────────────────────────────── TAB: MORPHOGENESIS -->
+<!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TAB: MORPHOGENESIS -->
 <div class="tab-panel" id="tab-morphogenesis">
   <div class="panel-title">Morphogenesis</div>
   <div class="panel-desc">
@@ -1089,25 +1089,25 @@
         </marker>
       </defs>
 
-      <!-- Static → Probation (bud_node) -->
+      <!-- Static â†’ Probation (bud_node) -->
       <path d="M98,80 Q150,40 186,68" stroke="#34d399" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
       <text x="135" y="44" font-size="10" fill="#34d399" font-family="Inter" text-anchor="middle">bud_node</text>
 
-      <!-- Probation → Active -->
+      <!-- Probation â†’ Active -->
       <path d="M254,70 Q310,60 342,80" stroke="#a78bfa" stroke-width="1.5" fill="none" marker-end="url(#arr3)"/>
-      <text x="295" y="55" font-size="10" fill="#a78bfa" font-family="Inter" text-anchor="middle">feedback ≥ threshold</text>
+      <text x="295" y="55" font-size="10" fill="#a78bfa" font-family="Inter" text-anchor="middle">feedback â‰¥ threshold</text>
 
-      <!-- Active → Pruned edge -->
+      <!-- Active â†’ Pruned edge -->
       <path d="M414,72 Q490,50 526,67" stroke="#f87171" stroke-width="1.5" fill="none" marker-end="url(#arr4)"/>
       <text x="472" y="44" font-size="10" fill="#f87171" font-family="Inter" text-anchor="middle">neg_value_streak</text>
 
-      <!-- Active → Apoptosis -->
+      <!-- Active â†’ Apoptosis -->
       <path d="M418,100 Q560,115 666,106" stroke="#f87171" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr4)"/>
       <text x="540" y="132" font-size="10" fill="#f87171" font-family="Inter" text-anchor="middle">dormant / isolated ticks</text>
 
-      <!-- Static → bud_edge annotation -->
+      <!-- Static â†’ bud_edge annotation -->
       <text x="60" y="155" font-size="10" fill="#5c7099" font-family="Inter" text-anchor="middle">Static nodes can also</text>
-      <text x="60" y="168" font-size="10" fill="#60a5fa" font-family="Inter" text-anchor="middle">bud new edges →</text>
+      <text x="60" y="168" font-size="10" fill="#60a5fa" font-family="Inter" text-anchor="middle">bud new edges â†’</text>
     </svg>
   </div>
 
@@ -1145,13 +1145,13 @@
     <div class="card-title">Transform Seeding on Growth</div>
     <div style="font-size:12.5px; color:var(--muted); line-height:1.75;">
       When a new node or edge is budded, the growth path is seeded with transform support from the parent node's existing credit/debt state.
-      The top-2 generic transforms and top-2 context-specific transforms with positive net score (credit − 0.35×debt) are inherited.
+      The top-2 generic transforms and top-2 context-specific transforms with positive net score (credit âˆ’ 0.35Ã—debt) are inherited.
       This lets learned task structure propagate into newly grown topology without requiring a fresh bootstrap period.
     </div>
   </div>
 </div>
 
-<!-- ──────────────────────────────────────── TAB: ARCHITECTURE ─ -->
+<!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TAB: ARCHITECTURE â”€ -->
 <div class="tab-panel" id="tab-architecture">
   <div class="panel-title">Architecture</div>
   <div class="panel-desc">
@@ -1162,7 +1162,7 @@
   <div class="grid g3" style="margin-bottom:20px;">
     <div class="module-card" style="border-left-color:var(--accent1)">
       <div class="mod-name" style="color:var(--accent1)">node_agent.py</div>
-      <div class="mod-desc">Wraps <code>RealCoreEngine</code> for each network node. Manages per-cycle perceive→select→execute→score→consolidate loop. Handles transform selection and local credit/debt updates.</div>
+      <div class="mod-desc">Wraps <code>RealCoreEngine</code> for each network node. Manages the per-cycle <code>observe-&gt;recognize-&gt;predict-&gt;select-&gt;execute-&gt;score-&gt;compare-&gt;consolidate</code> loop and binds recognition plus routing expectation into local control. Handles transform selection and local credit/debt updates.</div>
     </div>
     <div class="module-card" style="border-left-color:var(--accent2)">
       <div class="mod-name" style="color:var(--accent2)">substrate.py</div>
@@ -1206,7 +1206,7 @@
     </div>
     <div class="module-card" style="border-left-color:var(--muted)">
       <div class="mod-name">compare_task_transfer.py</div>
-      <div class="mod-desc">Task A→B transfer harness. Trains on Task A, saves carryover, then tests each condition on Task B. Reports criterion window, examples-to-criterion, context-level diagnostics.</div>
+      <div class="mod-desc">Task Aâ†’B transfer harness. Trains on Task A, saves carryover, then tests each condition on Task B. Reports criterion window, examples-to-criterion, context-level diagnostics.</div>
     </div>
   </div>
 
@@ -1215,18 +1215,18 @@
     <div class="grid g2" style="gap:16px; font-size:12.5px; color:var(--muted); line-height:1.7;">
       <div>
         <strong style="color:var(--text)">SignalPacket fields:</strong><br>
-        packet_id · origin · target · created_cycle<br>
-        <span style="color:var(--accent1)">input_bits</span> · <span style="color:var(--accent2)">payload_bits</span>
-        · <span style="color:var(--accent3)">context_bit</span> · <span style="color:var(--accent5)">task_id</span><br>
-        <span style="color:var(--accent4)">transform_trace</span> · hops · edge_path<br>
-        matched_target · bit_match_ratio · feedback_award<br>
-        delivered · delivered_cycle · drop_reason
+        packet_id Â· origin Â· target Â· created_cycle<br>
+        <span style="color:var(--accent1)">input_bits</span> Â· <span style="color:var(--accent2)">payload_bits</span>
+        Â· <span style="color:var(--accent3)">context_bit</span> Â· <span style="color:var(--accent5)">task_id</span><br>
+        <span style="color:var(--accent4)">transform_trace</span> Â· hops Â· edge_path<br>
+        matched_target Â· bit_match_ratio Â· feedback_award<br>
+        delivered Â· delivered_cycle Â· drop_reason
       </div>
       <div>
         <strong style="color:var(--text)">FeedbackPulse fields:</strong><br>
-        packet_id · edge_path · amount<br>
-        <span style="color:var(--accent4)">transform_path</span> · context_bit · task_id<br>
-        bit_match_ratio · matched_target · cursor<br><br>
+        packet_id Â· edge_path Â· amount<br>
+        <span style="color:var(--accent4)">transform_path</span> Â· context_bit Â· task_id<br>
+        bit_match_ratio Â· matched_target Â· cursor<br><br>
         Pulse travels <em>in reverse</em> through edge_path, delivering
         ATP to each hop. Transform path aligns credit with the node
         that applied each transform.
@@ -1235,7 +1235,7 @@
   </div>
 </div>
 
-<!-- ──────────────────────────────────────── TAB: TRAIL ─────── -->
+<!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TAB: TRAIL â”€â”€â”€â”€â”€â”€â”€ -->
 <div class="tab-panel" id="tab-trail">
   <div class="panel-title">Development Trail</div>
   <div class="panel-desc">
@@ -1246,7 +1246,7 @@
   <div class="timeline">
     <div class="tl-item">
       <div class="tl-dot" style="background:var(--accent1); border-color:var(--accent1)"></div>
-      <div class="tl-date">2026-03-15 · Slice 1</div>
+      <div class="tl-date">2026-03-15 Â· Slice 1</div>
       <div class="tl-title">Bootstrap: Local REAL nodes + metabolic routing</div>
       <div class="tl-body">Each node wraps RealCoreEngine. ATP tracked per-node. Successful routes send ATP back upstream one hop at a time. Route attractors promoted into durable edge support.</div>
     </div>
@@ -1258,7 +1258,7 @@
     </div>
     <div class="tl-item">
       <div class="tl-dot" style="background:var(--accent3); border-color:var(--accent3)"></div>
-      <div class="tl-date">2026-03-16 · Morning</div>
+      <div class="tl-date">2026-03-16 Â· Morning</div>
       <div class="tl-title">Adaptive admission + queue management</div>
       <div class="tl-body">Source admission learns boundary openness from local success/friction. Ingress queue meters packets instead of flooding inbox. Admission substrate tracks metabolic efficiency.</div>
     </div>
@@ -1277,14 +1277,14 @@
     <div class="tl-item">
       <div class="tl-dot" style="background:var(--accent6); border-color:var(--accent6)"></div>
       <div class="tl-date">2026-03-16</div>
-      <div class="tl-title">Task A → Task B transfer harness</div>
+      <div class="tl-title">Task A â†’ Task B transfer harness</div>
       <div class="tl-body">First explicit pairwise transfer runner. Warm full carryover improves exact-match counts over cold. Mean bit accuracy stabilization still needed.</div>
     </div>
     <div class="tl-item">
       <div class="tl-dot" style="background:var(--accent2); border-color:var(--accent2)"></div>
       <div class="tl-date">2026-03-16</div>
       <div class="tl-title">Transfer matrix: Tasks A, B, C + asymmetry analysis</div>
-      <div class="tl-body">Task C variant added. compare_transfer_matrix.py runner for pairwise checks. A→B and A→C positive. B→A mixed/negative. Transfer is directional, not symmetric.</div>
+      <div class="tl-body">Task C variant added. compare_transfer_matrix.py runner for pairwise checks. Aâ†’B and Aâ†’C positive. Bâ†’A mixed/negative. Transfer is directional, not symmetric.</div>
     </div>
     <div class="tl-item">
       <div class="tl-dot" style="background:var(--accent3); border-color:var(--accent3)"></div>
@@ -1302,7 +1302,7 @@
       <div class="tl-dot" style="background:var(--muted); border-color:var(--muted)"></div>
       <div class="tl-date">Next Steps</div>
       <div class="tl-title">Upcoming work</div>
-      <div class="tl-body">Deeper Phase 7-style pattern merging inside connection substrate · Stabilize Task B transfer on mean bit accuracy · Use matrix runner to study directionality · Add neighbor inhibition effects · Measure specialization over longer runs · Neural network baseline comparison for CVT-1</div>
+      <div class="tl-body">Deeper Phase 7-style pattern merging inside connection substrate Â· Stabilize Task B transfer on mean bit accuracy Â· Use matrix runner to study directionality Â· Add neighbor inhibition effects Â· Measure specialization over longer runs Â· Neural network baseline comparison for CVT-1</div>
     </div>
   </div>
 </div>
@@ -1311,9 +1311,9 @@
 </div>
 
 <script>
-// ══════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  TAB NAVIGATION
-// ══════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function showTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -1328,9 +1328,9 @@ function showTab(name) {
 const _chartsInited = { overview: true };
 const _initFns = {};
 
-// ══════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  CHART DEFAULTS
-// ══════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 Chart.defaults.color = '#5c7099';
 Chart.defaults.borderColor = '#1e2d4d';
 Chart.defaults.font.family = "'Inter', sans-serif";
@@ -1341,12 +1341,12 @@ function mkChart(id, config) {
   return new Chart(ctx, config);
 }
 
-// ══════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  TOPOLOGY SVG
-// ══════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const TOPOLOGIES = {
   branch: {
-    desc: 'Branch pressure topology: n0→(n1,n2)→(n3,n4,n5)→sink. Two parallel mid-branches, three exit nodes. Tests branch selection and load balancing under sustained pressure.',
+    desc: 'Branch pressure topology: n0â†’(n1,n2)â†’(n3,n4,n5)â†’sink. Two parallel mid-branches, three exit nodes. Tests branch selection and load balancing under sustained pressure.',
     nodes: {
       n0:   { x: 80,  y: 160, label: 'n0', sub: 'source', color: '#60a5fa' },
       n1:   { x: 260, y: 80,  label: 'n1', sub: 'pos:1',   color: '#a78bfa' },
@@ -1382,7 +1382,7 @@ const TOPOLOGIES = {
     ],
   },
   detour: {
-    desc: 'Detour resilience topology: n0→(n1,n2)→(n3,n4)→n5→sink. Tests ability to find alternate routes and maintain delivery under disruption.',
+    desc: 'Detour resilience topology: n0â†’(n1,n2)â†’(n3,n4)â†’n5â†’sink. Tests ability to find alternate routes and maintain delivery under disruption.',
     nodes: {
       n0:   { x: 80,  y: 160, label: 'n0', sub: 'source', color: '#60a5fa' },
       n1:   { x: 240, y: 80,  label: 'n1', sub: 'pos:1',   color: '#a78bfa' },
@@ -1401,7 +1401,7 @@ const TOPOLOGIES = {
     ],
   },
   basic: {
-    desc: 'Basic demo topology: n0→(n1,n2)→n3→sink. Simplest possible branching graph. Used for smoke tests and first operational verification.',
+    desc: 'Basic demo topology: n0â†’(n1,n2)â†’n3â†’sink. Simplest possible branching graph. Used for smoke tests and first operational verification.',
     nodes: {
       n0:   { x: 120, y: 160, label: 'n0', sub: 'source', color: '#60a5fa' },
       n1:   { x: 320, y: 90,  label: 'n1', sub: 'pos:1',   color: '#a78bfa' },
@@ -1623,9 +1623,9 @@ function spawnPackets(name) {
   tick();
 }
 
-// ══════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  HEATMAP
-// ══════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const HM_DATA = {
   rows: ['Task A', 'Task B', 'Task C'],
   cols: ['Task A', 'Task B', 'Task C'],
@@ -1650,7 +1650,7 @@ function buildHeatmap() {
   HM_DATA.rows.forEach((row, ri) => {
     const tr = document.createElement('tr');
     const th = document.createElement('th');
-    th.textContent = row + ' →';
+    th.textContent = row + ' â†’';
     th.style.textAlign = 'left';
     tr.appendChild(th);
 
@@ -1681,9 +1681,9 @@ function buildHeatmap() {
   });
 }
 
-// ══════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  INIT CHARTS BY TAB
-// ══════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 _initFns['topology'] = function() {
   drawTopo('branch');
@@ -1698,31 +1698,31 @@ _initFns['carryover'] = function() {
       labels,
       datasets: [
         {
-          label: 'Cold — Delivery %',
+          label: 'Cold â€” Delivery %',
           data: [72, 65, 68],
           backgroundColor: 'rgba(248,113,113,0.6)',
           borderColor: '#f87171', borderWidth: 1, borderRadius: 3,
         },
         {
-          label: 'Warm Full — Delivery %',
+          label: 'Warm Full â€” Delivery %',
           data: [86, 80, 79],
           backgroundColor: 'rgba(52,211,153,0.6)',
           borderColor: '#34d399', borderWidth: 1, borderRadius: 3,
         },
         {
-          label: 'Warm Sub — Delivery %',
+          label: 'Warm Sub â€” Delivery %',
           data: [79, 72, 74],
           backgroundColor: 'rgba(96,165,250,0.6)',
           borderColor: '#60a5fa', borderWidth: 1, borderRadius: 3,
         },
         {
-          label: 'Cold — Exact Match %',
+          label: 'Cold â€” Exact Match %',
           data: [16.7, 14, 18],
           backgroundColor: 'rgba(248,113,113,0.25)',
           borderColor: '#f87171', borderWidth: 1, borderRadius: 3, borderDash: [3,3],
         },
         {
-          label: 'Warm Full — Exact Match %',
+          label: 'Warm Full â€” Exact Match %',
           data: [48.9, 44, 42],
           backgroundColor: 'rgba(52,211,153,0.25)',
           borderColor: '#34d399', borderWidth: 1, borderRadius: 3,
@@ -1745,19 +1745,19 @@ _initFns['carryover'] = function() {
       labels,
       datasets: [
         {
-          label: 'Cold — Latency (cyc)',
+          label: 'Cold â€” Latency (cyc)',
           data: [3.4, 3.8, 3.6],
           backgroundColor: 'rgba(248,113,113,0.6)',
           borderColor: '#f87171', borderWidth: 1, borderRadius: 3,
         },
         {
-          label: 'Warm Full — Latency (cyc)',
+          label: 'Warm Full â€” Latency (cyc)',
           data: [2.7, 3.0, 2.9],
           backgroundColor: 'rgba(52,211,153,0.6)',
           borderColor: '#34d399', borderWidth: 1, borderRadius: 3,
         },
         {
-          label: 'Warm Sub — Latency (cyc)',
+          label: 'Warm Sub â€” Latency (cyc)',
           data: [3.0, 3.3, 3.2],
           backgroundColor: 'rgba(96,165,250,0.6)',
           borderColor: '#60a5fa', borderWidth: 1, borderRadius: 3,
@@ -1781,9 +1781,9 @@ _initFns['transfer'] = function() {
   mkChart('transferChart', {
     type: 'bar',
     data: {
-      labels: ['A→A', 'A→B', 'A→C', 'B→A', 'B→B', 'B→C', 'C→A', 'C→B', 'C→C'],
+      labels: ['Aâ†’A', 'Aâ†’B', 'Aâ†’C', 'Bâ†’A', 'Bâ†’B', 'Bâ†’C', 'Câ†’A', 'Câ†’B', 'Câ†’C'],
       datasets: [{
-        label: 'Bit Accuracy Delta (warm full − cold)',
+        label: 'Bit Accuracy Delta (warm full âˆ’ cold)',
         data: [0, 0.188, 0.123, -0.044, 0, 0.082, 0.034, 0.062, 0],
         backgroundColor: (ctx) => {
           const v = ctx.raw;

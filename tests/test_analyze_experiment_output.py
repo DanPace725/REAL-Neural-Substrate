@@ -6,7 +6,7 @@ from argparse import Namespace
 from contextlib import redirect_stdout
 from pathlib import Path
 
-from analyze_experiment_output import analyze_v3, is_v3_format, write_summary_v3
+from scripts.analyze_experiment_output import analyze_v3, is_v3_format, write_summary_v3
 
 
 def _single_v3_payload(seed: int = 13) -> dict[str, object]:

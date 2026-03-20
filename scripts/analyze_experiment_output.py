@@ -4,12 +4,12 @@ analyze_experiment_output.py
 Quick analysis of occupancy bridge (and similar) experiment JSON outputs.
 
 Usage:
-    python analyze_experiment_output.py <path_to_json>
-    python analyze_experiment_output.py <path_to_json> --rolling 50
-    python analyze_experiment_output.py <path_to_json> --no-plots
-    python analyze_experiment_output.py <path_to_json> --seed 13
-    python analyze_experiment_output.py <path_to_json> --summary
-    python analyze_experiment_output.py <path_to_json> --summary path/to/output.md
+    python -m scripts.analyze_experiment_output <path_to_json>
+    python -m scripts.analyze_experiment_output <path_to_json> --rolling 50
+    python -m scripts.analyze_experiment_output <path_to_json> --no-plots
+    python -m scripts.analyze_experiment_output <path_to_json> --seed 13
+    python -m scripts.analyze_experiment_output <path_to_json> --summary
+    python -m scripts.analyze_experiment_output <path_to_json> --summary path/to/output.md
 
 Produces:
     - A printed summary of baseline vs REAL metrics per seed
@@ -19,9 +19,9 @@ Produces:
     - Confidence distribution histogram
 
 V3 occupancy (run_occupancy_real_v3 JSON):
-    python analyze_experiment_output.py docs/experiment_outputs/v3_train50_seed13.json
-    python analyze_experiment_output.py path/to/v3.json --no-plots
-    python analyze_experiment_output.py path/to/v3.json --summary
+    python -m scripts.analyze_experiment_output docs/experiment_outputs/v3_train50_seed13.json
+    python -m scripts.analyze_experiment_output path/to/v3.json --no-plots
+    python -m scripts.analyze_experiment_output path/to/v3.json --summary
 """
 
 import argparse

@@ -1,0 +1,4054 @@
+{
+  "generated_at": "2026-03-20T16:32:09-07:00",
+  "trace_root": "docs/traces",
+  "entry_count": 74,
+  "entries": [
+    {
+      "path": "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "filename": "2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "title": "2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through",
+      "timestamp": "2026-03-20T10:18",
+      "date": "2026-03-20",
+      "trace_type": "H_e (Episodic Trace)",
+      "author": null,
+      "model": "GPT-5 Codex",
+      "keywords": [
+        "occupancy",
+        "harness",
+        "agents",
+        "architecture_notes",
+        "codex",
+        "design",
+        "episodic",
+        "experiment",
+        "follow",
+        "gpt-5",
+        "h_e",
+        "independent"
+      ],
+      "referenced_files": [
+        "AGENTS.md",
+        "README.md",
+        "docs/20260319_phase8_occupancy_v2_synthesis.md",
+        "docs/architecture_notes.md",
+        "docs/running_occupancy_v3.md",
+        "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
+        "scripts/occupancy_real_v3.py",
+        "scripts/run_occupancy_real_v3.py",
+        "scripts/run_occupancy_tests_parallel.py",
+        "tests/test_occupancy_real_v3.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
+      "filename": "2026-03-19 1700 - V3 Occupancy Experiment Design.md",
+      "title": "2026-03-19 1700 - V3 Occupancy Experiment Design",
+      "timestamp": "2026-03-19T17:00",
+      "date": "2026-03-19",
+      "trace_type": "H_e (Episodic Trace)",
+      "author": null,
+      "model": "Claude Sonnet 4.6 (claude-sonnet-4-6)",
+      "keywords": [
+        "design",
+        "accuracy",
+        "episodic",
+        "occupancy",
+        "sessions",
+        "around",
+        "carryover",
+        "classification",
+        "claude",
+        "claude-sonnet-4-6",
+        "experiment",
+        "fixed"
+      ],
+      "referenced_files": [
+        "occupancy_baseline/session_splitter.py",
+        "scripts/occupancy_real_v3.py",
+        "scripts/run_occupancy_real_v3.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md",
+      "filename": "2026-03-19 1430 - Occupancy Eval Preview Path.md",
+      "title": "2026-03-19 1430 - Occupancy Eval Preview Path",
+      "timestamp": "2026-03-19T14:30",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "eval",
+        "held-out",
+        "occupancy",
+        "preview",
+        "tail",
+        "behavior",
+        "episodes",
+        "actually",
+        "bash",
+        "both",
+        "empty",
+        "experiment_outputs"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/occupancy_comparison_preview_20260319.json"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md",
+      "filename": "2026-03-19 1405 - Occupancy Bridge Port.md",
+      "title": "2026-03-19 1405 - Occupancy Bridge Port",
+      "timestamp": "2026-03-19T14:05",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": "GPT-5.4",
+      "keywords": [
+        "occupancy",
+        "bridge",
+        "environment",
+        "packet",
+        "baseline",
+        "port",
+        "result",
+        "accepted",
+        "can",
+        "comparison",
+        "current",
+        "injection"
+      ],
+      "referenced_files": [
+        "phase8/environment.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
+      "filename": "2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
+      "title": "2026-03-19 1303 - Visible Task Compatibility Carryover Pass",
+      "timestamp": "2026-03-19T13:03",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "but",
+        "compatibility",
+        "context",
+        "was",
+        "carried",
+        "carryover",
+        "phase8",
+        "selector",
+        "too",
+        "visible",
+        "already",
+        "change"
+      ],
+      "referenced_files": [
+        "phase8/selector.py",
+        "tests/test_phase8_recognition.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
+      "filename": "2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
+      "title": "2026-03-19 1238 - B to C Carryover Hygiene Pass",
+      "timestamp": "2026-03-19T12:38",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "carried",
+        "carryover",
+        "support",
+        "context",
+        "credit",
+        "feedback",
+        "phase8",
+        "selector",
+        "down-weights",
+        "evidence",
+        "hygiene",
+        "local"
+      ],
+      "referenced_files": [
+        "phase8/selector.py",
+        "tests/test_phase8_recognition.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md",
+      "filename": "2026-03-19 1213 - B to C Carryover Diagnosis.md",
+      "title": "2026-03-19 1213 - B to C Carryover Diagnosis",
+      "timestamp": "2026-03-19T12:13",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "carryover",
+        "full",
+        "substrate",
+        "diagnose_b_to_c_carryover",
+        "test_b_to_c_carryover_diagnosis",
+        "added",
+        "both",
+        "diagnosis",
+        "first",
+        "prediction",
+        "started",
+        "structural"
+      ],
+      "referenced_files": [
+        "scripts/diagnose_b_to_c_carryover.py",
+        "tests/test_b_to_c_carryover_diagnosis.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md",
+      "filename": "2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md",
+      "title": "2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover",
+      "timestamp": "2026-03-19T11:51",
+      "date": "2026-03-19",
+      "trace_type": "Session synthesis",
+      "author": null,
+      "model": null,
+      "keywords": [
+        "anticipation",
+        "synthesis",
+        "carryover",
+        "latent",
+        "path",
+        "prediction",
+        "recognition",
+        "selection",
+        "are",
+        "but",
+        "can",
+        "gap"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md",
+      "filename": "2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md",
+      "title": "2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes",
+      "timestamp": "2026-03-19T11:50",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "carryover",
+        "warm",
+        "carryover-mode",
+        "cvt1_task_c_stage1",
+        "exact",
+        "exposure",
+        "full",
+        "modes",
+        "probe_transfer_exposure_prediction",
+        "python",
+        "repeat",
+        "repeat-counts"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
+      "filename": "2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
+      "title": "2026-03-19 1142 - C Transfer Exposure Prediction Probe",
+      "timestamp": "2026-03-19T11:42",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "transfer",
+        "probe",
+        "warm",
+        "exposure",
+        "prediction",
+        "full",
+        "repeated",
+        "result",
+        "seed",
+        "slice",
+        "ambiguity-rich",
+        "anticipatory"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md",
+      "filename": "2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md",
+      "title": "2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison",
+      "timestamp": "2026-03-19T11:41",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "fixed-latent",
+        "self-selected",
+        "benchmark",
+        "cycles",
+        "latent",
+        "method",
+        "seed",
+        "task_a",
+        "accuracy",
+        "bit",
+        "comparison",
+        "diagnose_benchmark_node_probe"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md",
+      "filename": "2026-03-19 1134 - Transfer Exposure Prediction Probe.md",
+      "title": "2026-03-19 1134 - Transfer Exposure Prediction Probe",
+      "timestamp": "2026-03-19T11:34",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "exposure",
+        "transfer",
+        "compare_transfer_matrix",
+        "evaluate_experience_extension",
+        "prediction",
+        "probe",
+        "repeated",
+        "repeated_signal_scenarios",
+        "changes",
+        "context",
+        "helper",
+        "probe_transfer_exposure_prediction"
+      ],
+      "referenced_files": [
+        "scripts/compare_transfer_matrix.py",
+        "scripts/evaluate_experience_extension.py",
+        "scripts/probe_transfer_exposure_prediction.py",
+        "scripts/repeated_signal_scenarios.py",
+        "tests/test_compare_transfer_matrix.py",
+        "tests/test_transfer_exposure_prediction.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
+      "filename": "2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
+      "title": "2026-03-19 1131 - Partial Context Sequence Persistence Pass",
+      "timestamp": "2026-03-19T11:31",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "context",
+        "selector",
+        "phase8",
+        "sequence",
+        "evidence",
+        "added",
+        "effective",
+        "environment",
+        "multistate",
+        "partial",
+        "persistence",
+        "test_phase8_recognition"
+      ],
+      "referenced_files": [
+        "phase8/environment.py",
+        "phase8/selector.py",
+        "tests/test_phase8_recognition.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
+      "filename": "2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
+      "title": "2026-03-19 1113 - Uncertainty Weighted Effective Context Pass",
+      "timestamp": "2026-03-19T11:13",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "context",
+        "latent",
+        "environment",
+        "phase8",
+        "effective",
+        "estimate",
+        "multistate",
+        "change",
+        "confidence",
+        "current",
+        "effective_has_context",
+        "latent_resolution_weight"
+      ],
+      "referenced_files": [
+        "phase8/environment.py",
+        "tests/test_phase8_context_uncertainty.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md",
+      "filename": "2026-03-19 1106 - Family Time Exposure Prediction Probe.md",
+      "title": "2026-03-19 1106 - Family Time Exposure Prediction Probe",
+      "timestamp": "2026-03-19T11:06",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "allostatic",
+        "benchmark_anticipation_metrics",
+        "coding",
+        "embedded",
+        "evaluate_experience_extension",
+        "evaluate_runtime_slack",
+        "learning",
+        "nscha",
+        "probe_time_exposure_prediction",
+        "real-neural-substrate",
+        "relationally",
+        "users"
+      ],
+      "referenced_files": [
+        "scripts/benchmark_anticipation_metrics.py",
+        "scripts/evaluate_experience_extension.py",
+        "scripts/evaluate_runtime_slack.py",
+        "scripts/probe_time_exposure_prediction.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md",
+      "filename": "2026-03-19 1103 - C3 Selector Interaction Reading.md",
+      "title": "2026-03-19 1103 - C3 Selector Interaction Reading",
+      "timestamp": "2026-03-19T11:03",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "selector",
+        "phase8",
+        "activation",
+        "interaction",
+        "latent",
+        "bit",
+        "change",
+        "path",
+        "reading",
+        "source",
+        "transform",
+        "activates"
+      ],
+      "referenced_files": [
+        "phase8/selector.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
+      "filename": "2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
+      "title": "2026-03-19 1058 - C3 Latent Activation Window Diagnosis",
+      "timestamp": "2026-03-19T10:58",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "latent",
+        "activation",
+        "capability",
+        "cycle",
+        "cycles",
+        "diagnosis",
+        "earlier",
+        "first",
+        "self-selected",
+        "source",
+        "window",
+        "actually"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
+      "filename": "2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
+      "title": "2026-03-19 1054 - Prediction Coupled Capability Pressure Pass",
+      "timestamp": "2026-03-19T10:54",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "phase8",
+        "prediction",
+        "environment",
+        "models",
+        "capability",
+        "latent",
+        "pressure",
+        "allostatic",
+        "coding",
+        "controller",
+        "coupled",
+        "embedded"
+      ],
+      "referenced_files": [
+        "phase8/environment.py",
+        "phase8/models.py",
+        "tests/test_phase8_capability_prediction.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
+      "filename": "2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
+      "title": "2026-03-19 1036 - Distinct Prediction Stale Family Pass",
+      "timestamp": "2026-03-19T10:36",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "phase8",
+        "prediction",
+        "added",
+        "allostatic",
+        "coding",
+        "embedded",
+        "learning",
+        "nscha",
+        "real-neural-substrate",
+        "relationally",
+        "selector",
+        "transform"
+      ],
+      "referenced_files": [
+        "phase8/expectation.py",
+        "phase8/selector.py",
+        "scripts/diagnose_phase8_transfer_prediction_interaction.py",
+        "tests/test_phase8_expectation.py",
+        "tests/test_phase8_transfer_prediction_interaction.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
+      "filename": "2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
+      "title": "2026-03-19 1034 - Prediction Aware Benchmark Node Probe",
+      "timestamp": "2026-03-19T10:34",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "probe",
+        "diagnose_benchmark_node_probe",
+        "latent",
+        "node",
+        "prediction",
+        "aware",
+        "benchmark",
+        "capability",
+        "directly",
+        "local",
+        "path",
+        "recruitment"
+      ],
+      "referenced_files": [
+        "scripts/diagnose_benchmark_node_probe.py",
+        "tests/test_benchmark_node_probe.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md",
+      "filename": "2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md",
+      "title": "2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover",
+      "timestamp": "2026-03-19T10:28",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "point",
+        "item",
+        "self-selected",
+        "carryover",
+        "self_selected",
+        "anticipation",
+        "nscha",
+        "original",
+        "users",
+        "was",
+        "allostatic",
+        "capability"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md",
+      "filename": "2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md",
+      "title": "2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis",
+      "timestamp": "2026-03-19T10:20",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "phase8",
+        "prediction",
+        "selector",
+        "diagnose_phase8_transfer_prediction_interaction",
+        "test_phase8_transfer_prediction_interaction",
+        "added",
+        "allostatic",
+        "coding",
+        "decisions",
+        "embedded",
+        "learning",
+        "nscha"
+      ],
+      "referenced_files": [
+        "phase8/selector.py",
+        "scripts/diagnose_phase8_transfer_prediction_interaction.py",
+        "tests/test_phase8_transfer_prediction_interaction.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "filename": "2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "title": "2026-03-19 1008 - Phase8 Expectation Binding Probe",
+      "timestamp": "2026-03-19T10:08",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "phase8",
+        "expectation",
+        "allostatic",
+        "coding",
+        "embedded",
+        "learning",
+        "nscha",
+        "real-neural-substrate",
+        "relationally",
+        "users",
+        "selector",
+        "test_phase8_expectation"
+      ],
+      "referenced_files": [
+        "phase8/expectation.py",
+        "phase8/node_agent.py",
+        "phase8/selector.py",
+        "tests/test_phase8_expectation.py",
+        "tests/test_phase8_recognition.py",
+        "tests/test_phase8_transfer_recognition_probe.py",
+        "tests/test_transfer_adaptation_recognition.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md",
+      "filename": "2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md",
+      "title": "2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe",
+      "timestamp": "2026-03-19T09:42",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "transfer",
+        "adaptation",
+        "probe",
+        "recognition",
+        "anticipation",
+        "early",
+        "extended",
+        "metrics",
+        "probe_transfer_adaptation_recognition",
+        "test_compare_task_transfer_metrics",
+        "test_transfer_adaptation_recognition",
+        "actually"
+      ],
+      "referenced_files": [
+        "scripts/probe_transfer_adaptation_recognition.py",
+        "tests/test_compare_task_transfer_metrics.py",
+        "tests/test_transfer_adaptation_recognition.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md",
+      "filename": "2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md",
+      "title": "2026-03-19 0920 - C to A Seed 51 Exception Diagnosis",
+      "timestamp": "2026-03-19T09:20",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "enabled",
+        "seed",
+        "source",
+        "decision",
+        "diagnosis",
+        "exception",
+        "regression",
+        "route",
+        "source-side",
+        "summary",
+        "accuracy",
+        "actions"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md",
+      "filename": "2026-03-19 0914 - Widened Recognition Generalization Sweep.md",
+      "title": "2026-03-19 0914 - Widened Recognition Generalization Sweep",
+      "timestamp": "2026-03-19T09:14",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "cvt1_task_a_stage1",
+        "cvt1_task_b_stage1",
+        "cvt1_task_c_stage1",
+        "recognition",
+        "transfer",
+        "widened",
+        "generalization",
+        "matrix",
+        "stage-1",
+        "sweep",
+        "across",
+        "beyond"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
+      "filename": "2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
+      "title": "2026-03-19 0905 - Evidence Confirmation Generalization Sweep",
+      "timestamp": "2026-03-19T09:05",
+      "date": "2026-03-19",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "generalization",
+        "sweep",
+        "bias",
+        "confirmation",
+        "cvt1_task_a_stage1",
+        "cvt1_task_b_stage1",
+        "cvt1_task_c_stage1",
+        "evidence",
+        "pair",
+        "recognition",
+        "seed",
+        "across"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md",
+      "filename": "2026-03-18 2359 - Split Latent Growth Gate.md",
+      "title": "2026-03-18 2359 - Split Latent Growth Gate",
+      "timestamp": "2026-03-18T23:59",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "latent",
+        "gate",
+        "growth",
+        "threshold",
+        "environment",
+        "phase8",
+        "c_family_real_diagnostic_c3_seed13_postgrowthgate_cold_20260318",
+        "cardinality-aware",
+        "change",
+        "commitment",
+        "context_growth_ready",
+        "context_promotion_ready"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/c_family_real_diagnostic_c3_seed13_postgrowthgate_cold_20260318.json",
+        "phase8/environment.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md",
+      "filename": "2026-03-18 2355 - Cardinality Aware Thresholds.md",
+      "title": "2026-03-18 2355 - Cardinality Aware Thresholds",
+      "timestamp": "2026-03-18T23:55",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "thresholds",
+        "cardinality",
+        "environment",
+        "latent",
+        "phase8",
+        "aware",
+        "c_family_real_diagnostic_c3_seed13_postthresholdscale_cold_20260318",
+        "context",
+        "context_count",
+        "effective",
+        "experiment_outputs",
+        "multi-state"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/c_family_real_diagnostic_c3_seed13_postthresholdscale_cold_20260318.json",
+        "phase8/environment.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
+      "filename": "2026-03-18 2330 - Post Multicontext C Family Rerun.md",
+      "title": "2026-03-18 2330 - Post Multicontext C Family Rerun",
+      "timestamp": "2026-03-18T23:30",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "experiment_outputs",
+        "warm",
+        "c_family_real_diagnostic_c3_c4_seed13_postmulticontext_cold_20260318",
+        "c_family_real_diagnostic_c3_seed13_postmulticontext_20260318",
+        "full",
+        "original",
+        "rerun",
+        "cold",
+        "cold-start",
+        "exact",
+        "family",
+        "generalization"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/c_family_real_diagnostic_c3_c4_seed13_postmulticontext_cold_20260318.json",
+        "docs/experiment_outputs/c_family_real_diagnostic_c3_seed13_postmulticontext_20260318.json"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
+      "filename": "2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
+      "title": "2026-03-18 2254 - Evidence Confirmed Transform Recognition",
+      "timestamp": "2026-03-18T22:54",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "evidence",
+        "recognition",
+        "selector",
+        "local",
+        "transform",
+        "phase8",
+        "branch",
+        "confirmation",
+        "confirmed",
+        "context",
+        "source",
+        "test_phase8_recognition"
+      ],
+      "referenced_files": [
+        "phase8/selector.py",
+        "tests/test_phase8_recognition.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md",
+      "filename": "2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md",
+      "title": "2026-03-18 2243 - Transfer Selector Interaction Diagnosis",
+      "timestamp": "2026-03-18T22:43",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "selector",
+        "added",
+        "transfer",
+        "breakdown",
+        "phase8",
+        "recognition",
+        "terms",
+        "changes",
+        "diagnose_phase8_transfer_selector_interaction",
+        "diagnosis",
+        "interaction",
+        "path"
+      ],
+      "referenced_files": [
+        "phase8/selector.py",
+        "scripts/diagnose_phase8_transfer_selector_interaction.py",
+        "tests/test_phase8_transfer_selector_interaction.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
+      "filename": "2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
+      "title": "2026-03-18 2231 - Source Transform Recognition Transfer Probe",
+      "timestamp": "2026-03-18T22:31",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "selector",
+        "recognition",
+        "transfer",
+        "transform",
+        "change",
+        "phase8",
+        "probe",
+        "source",
+        "added",
+        "bias",
+        "but",
+        "explicit"
+      ],
+      "referenced_files": [
+        "phase8/selector.py",
+        "scripts/probe_phase8_transfer_recognition.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md",
+      "filename": "2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md",
+      "title": "2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape",
+      "timestamp": "2026-03-18T22:22",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": "GPT-5 Codex",
+      "model": null,
+      "keywords": [
+        "recognition",
+        "transfer",
+        "early",
+        "real_core",
+        "relative",
+        "route",
+        "shape",
+        "absolute",
+        "already",
+        "are",
+        "but",
+        "candidate"
+      ],
+      "referenced_files": [
+        "real_core/recognition.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md",
+      "filename": "2026-03-18 2216 - Transfer Recognition Timing Probe.md",
+      "title": "2026-03-18 2216 - Transfer Recognition Timing Probe",
+      "timestamp": "2026-03-18T22:16",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": "GPT-5 Codex",
+      "model": null,
+      "keywords": [
+        "recognized",
+        "route",
+        "are",
+        "test_phase8_transfer_recognition_probe",
+        "timing",
+        "cycles",
+        "entries",
+        "first",
+        "probe_phase8_transfer_recognition",
+        "recognition",
+        "transfer",
+        "codex"
+      ],
+      "referenced_files": [
+        "scripts/probe_phase8_transfer_recognition.py",
+        "tests/test_phase8_transfer_recognition_probe.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
+      "filename": "2026-03-18 2212 - Transfer Recognition Diagnosis.md",
+      "title": "2026-03-18 2212 - Transfer Recognition Diagnosis",
+      "timestamp": "2026-03-18T22:12",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": "GPT-5 Codex",
+      "model": null,
+      "keywords": [
+        "recognition",
+        "route",
+        "transfer",
+        "diagnosis",
+        "was",
+        "adapters",
+        "codex",
+        "edge",
+        "gpt-5",
+        "had",
+        "patterns",
+        "phase8"
+      ],
+      "referenced_files": [
+        "phase8/adapters.py",
+        "real_core/recognition.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "filename": "2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "title": "2026-03-18 2207 - Phase8 Transfer Recognition Probe",
+      "timestamp": "2026-03-18T22:07",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": "GPT-5 Codex",
+      "model": null,
+      "keywords": [
+        "transfer",
+        "probe",
+        "recognition",
+        "probe_phase8_transfer_recognition",
+        "test_phase8_transfer_recognition_probe",
+        "bias",
+        "carryover",
+        "codex",
+        "gpt-5",
+        "phase8",
+        "route",
+        "warm"
+      ],
+      "referenced_files": [
+        "scripts/probe_phase8_transfer_recognition.py",
+        "tests/test_phase8_transfer_recognition_probe.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md",
+      "filename": "2026-03-18 2204 - Phase8 Recognition Bias Probe.md",
+      "title": "2026-03-18 2204 - Phase8 Recognition Bias Probe",
+      "timestamp": "2026-03-18T22:04",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": "GPT-5 Codex",
+      "model": null,
+      "keywords": [
+        "recognition",
+        "bias",
+        "probe",
+        "probe_phase8_recognition_bias",
+        "test_phase8_recognition_probe",
+        "was",
+        "case",
+        "codex",
+        "gpt-5",
+        "one",
+        "pattern",
+        "phase8"
+      ],
+      "referenced_files": [
+        "scripts/probe_phase8_recognition_bias.py",
+        "tests/test_phase8_recognition_probe.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2200 - Phase8 Recognition Route Bias.md",
+      "filename": "2026-03-18 2200 - Phase8 Recognition Route Bias.md",
+      "title": "2026-03-18 2200 - Phase8 Recognition Route Bias",
+      "timestamp": "2026-03-18T22:00",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": "GPT-5 Codex",
+      "model": null,
+      "keywords": [
+        "recognition",
+        "route",
+        "bias",
+        "selector",
+        "but",
+        "codex",
+        "context",
+        "control",
+        "existing",
+        "gpt-5",
+        "narrow",
+        "phase8"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
+      "filename": "2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
+      "title": "2026-03-18 2153 - Phase8 Pattern Recognition Hookup",
+      "timestamp": "2026-03-18T21:53",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": "GPT-5 Codex",
+      "model": null,
+      "keywords": [
+        "recognition",
+        "phase8",
+        "hookup",
+        "node_agent",
+        "pattern",
+        "test_phase8",
+        "test_phase8_recognition",
+        "without",
+        "can",
+        "capability",
+        "codex",
+        "gpt-5"
+      ],
+      "referenced_files": [
+        "phase8/node_agent.py",
+        "tests/test_phase8.py",
+        "tests/test_phase8_recognition.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
+      "filename": "2026-03-18 2145 - Real Core Pattern Recognition.md",
+      "title": "2026-03-18 2145 - Real Core Pattern Recognition",
+      "timestamp": "2026-03-18T21:45",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": "GPT-5 Codex",
+      "model": null,
+      "keywords": [
+        "recognition",
+        "real_core",
+        "core",
+        "current",
+        "patterns",
+        "recognizer",
+        "reusable",
+        "already",
+        "codex",
+        "constraintpattern",
+        "gpt-5",
+        "has"
+      ],
+      "referenced_files": [
+        "real_core/__init__.py",
+        "real_core/recognition.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2145 - Latent Context Generalization.md",
+      "filename": "2026-03-18 2145 - Latent Context Generalization.md",
+      "title": "2026-03-18 2145 - Latent Context Generalization",
+      "timestamp": "2026-03-18T21:45",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "environment",
+        "generated",
+        "latent",
+        "mappings",
+        "transform",
+        "context",
+        "phase8",
+        "generalization",
+        "maps",
+        "original",
+        "accumulate",
+        "actual"
+      ],
+      "referenced_files": [
+        "phase8/environment.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
+      "filename": "2026-03-18 2138 - Real Core Recognition Phase 3.md",
+      "title": "2026-03-18 2138 - Real Core Recognition Phase 3",
+      "timestamp": "2026-03-18T21:38",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": "GPT-5 Codex",
+      "model": null,
+      "keywords": [
+        "recognition",
+        "real_core",
+        "types",
+        "core",
+        "carries",
+        "codex",
+        "gpt-5",
+        "interfaces",
+        "optional",
+        "prediction",
+        "about",
+        "action"
+      ],
+      "referenced_files": [
+        "real_core/interfaces.py",
+        "real_core/types.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
+      "filename": "2026-03-18 2133 - Real Core Anticipation Phase 2.md",
+      "title": "2026-03-18 2133 - Real Core Anticipation Phase 2",
+      "timestamp": "2026-03-18T21:33",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": "GPT-5 Codex",
+      "model": null,
+      "keywords": [
+        "real_core",
+        "selector",
+        "anticipation",
+        "current-cycle",
+        "interfaces",
+        "state",
+        "types",
+        "added",
+        "codex",
+        "context",
+        "control",
+        "core"
+      ],
+      "referenced_files": [
+        "real_core/interfaces.py",
+        "real_core/selector.py",
+        "real_core/types.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
+      "filename": "2026-03-18 2128 - Real Core Anticipation Phase 1.md",
+      "title": "2026-03-18 2128 - Real Core Anticipation Phase 1",
+      "timestamp": "2026-03-18T21:28",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": "GPT-5 Codex",
+      "model": null,
+      "keywords": [
+        "real_core",
+        "anticipation",
+        "core",
+        "types",
+        "interfaces",
+        "new",
+        "optional",
+        "added",
+        "codex",
+        "generalized",
+        "gpt-5",
+        "inspectable"
+      ],
+      "referenced_files": [
+        "real_core/interfaces.py",
+        "real_core/types.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "filename": "2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "title": "2026-03-18 2122 - Real Core Anticipation Proposal",
+      "timestamp": "2026-03-18T21:22",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": "GPT-5 Codex",
+      "model": null,
+      "keywords": [
+        "real_core",
+        "engine",
+        "phase8",
+        "selector",
+        "memory",
+        "proposal",
+        "anticipation",
+        "codex",
+        "consolidation",
+        "core",
+        "current",
+        "environment"
+      ],
+      "referenced_files": [
+        "phase8/environment.py",
+        "phase8/selector.py",
+        "real_core/consolidation.py",
+        "real_core/engine.py",
+        "real_core/interfaces.py",
+        "real_core/selector.py",
+        "real_core/types.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md",
+      "filename": "2026-03-18 2059 - Repeated Experience Probe.md",
+      "title": "2026-03-18 2059 - Repeated Experience Probe",
+      "timestamp": "2026-03-18T20:59",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "exact",
+        "evaluate_experience_extension",
+        "rate",
+        "test_experience_extension",
+        "criterion",
+        "probe",
+        "stream",
+        "added",
+        "allostatic",
+        "benchmark",
+        "best",
+        "coding"
+      ],
+      "referenced_files": [
+        "scripts/evaluate_experience_extension.py",
+        "tests/test_experience_extension.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
+      "filename": "2026-03-18 2054 - Runtime Slack Probe.md",
+      "title": "2026-03-18 2054 - Runtime Slack Probe",
+      "timestamp": "2026-03-18T20:54",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "evaluate_runtime_slack",
+        "runtime",
+        "stream",
+        "benchmark",
+        "changes",
+        "cycles",
+        "probe",
+        "slack",
+        "test_runtime_slack",
+        "added",
+        "agents",
+        "allostatic"
+      ],
+      "referenced_files": [
+        "scripts/evaluate_runtime_slack.py",
+        "tests/test_runtime_slack.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
+      "filename": "2026-03-18 2045 - Context Cardinality Groundwork.md",
+      "title": "2026-03-18 2045 - Context Cardinality Groundwork",
+      "timestamp": "2026-03-18T20:45",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "phase8",
+        "context",
+        "substrate",
+        "binary",
+        "support",
+        "groundwork",
+        "models",
+        "topology",
+        "was",
+        "applied",
+        "assumption",
+        "benchmark"
+      ],
+      "referenced_files": [
+        "phase8/environment.py",
+        "phase8/models.py",
+        "phase8/substrate.py",
+        "phase8/topology.py",
+        "tests/test_multicontext_substrate.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
+      "filename": "2026-03-18 2041 - B2 Use Path Analysis.md",
+      "title": "2026-03-18 2041 - B2 Use Path Analysis",
+      "timestamp": "2026-03-18T20:41",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "latent",
+        "use",
+        "added",
+        "diagnose_benchmark_node_probe",
+        "environment",
+        "path",
+        "phase8",
+        "analysis",
+        "sequence",
+        "source-sequence",
+        "allostatic",
+        "behavior"
+      ],
+      "referenced_files": [
+        "phase8/environment.py",
+        "scripts/diagnose_benchmark_node_probe.py",
+        "tests/test_benchmark_node_probe.py",
+        "tests/test_latent_context_tracker.py",
+        "tests/test_phase8.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
+      "filename": "2026-03-18 2027 - B2 Benchmark Node Probe.md",
+      "title": "2026-03-18 2027 - B2 Benchmark Node Probe",
+      "timestamp": "2026-03-18T20:27",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "node",
+        "nscha",
+        "probe",
+        "test_benchmark_node_probe",
+        "users",
+        "allostatic",
+        "coding",
+        "diagnose_benchmark_node_probe",
+        "embedded",
+        "learning",
+        "real-neural-substrate",
+        "relationally"
+      ],
+      "referenced_files": [
+        "docs/traces/2026-03-18%202145%20-%20Latent%20Context%20Generalization.md",
+        "scripts/diagnose_benchmark_node_probe.py",
+        "tests/test_benchmark_node_probe.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
+      "filename": "2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
+      "title": "2026-03-18 2015 - Self Selected Capability Tuning Pass",
+      "timestamp": "2026-03-18T20:15",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "latent",
+        "capability",
+        "environment",
+        "phase8",
+        "test_phase8",
+        "tuning",
+        "added",
+        "recent",
+        "recruitment",
+        "across",
+        "allostatic",
+        "changed"
+      ],
+      "referenced_files": [
+        "phase8/environment.py",
+        "tests/test_phase8.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md",
+      "filename": "2026-03-18 1941 - Self Selected Smoke Harness.md",
+      "title": "2026-03-18 1941 - Self Selected Smoke Harness",
+      "timestamp": "2026-03-18T19:41",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": "GPT-5 Codex",
+      "model": null,
+      "keywords": [
+        "compare_self_selected_smoke",
+        "harness",
+        "selected",
+        "self-selected",
+        "capability",
+        "ceiling",
+        "codex",
+        "first",
+        "gpt-5",
+        "points",
+        "pyproject",
+        "quiet"
+      ],
+      "referenced_files": [
+        "pyproject.toml",
+        "scripts/compare_self_selected_smoke.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md",
+      "filename": "2026-03-18 1915 - C Family Architecture Diagnosis.md",
+      "title": "2026-03-18 1915 - C Family Architecture Diagnosis",
+      "timestamp": "2026-03-18T19:15",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "family",
+        "phase8",
+        "diagnosis",
+        "generated",
+        "architecture",
+        "environment",
+        "ids",
+        "substrate",
+        "benchmark",
+        "code-level",
+        "test_c_family_real_diagnostic",
+        "ambiguity"
+      ],
+      "referenced_files": [
+        "phase8/environment.py",
+        "phase8/substrate.py",
+        "tests/test_c_family_real_diagnostic.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
+      "filename": "2026-03-18 1815 - C Family Credit Debt Evaluation.md",
+      "title": "2026-03-18 1815 - C Family Credit Debt Evaluation",
+      "timestamp": "2026-03-18T18:15",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "phase8",
+        "context",
+        "transform",
+        "credit",
+        "partial",
+        "resolved",
+        "were",
+        "debt",
+        "family",
+        "latent",
+        "matches",
+        "can"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/c_family_credit_debt_spotcheck_20260318.json",
+        "phase8/environment.py",
+        "phase8/node_agent.py",
+        "phase8/substrate.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
+      "filename": "2026-03-18 1725 - C Family Full Capability Run.md",
+      "title": "2026-03-18 1725 - C Family Full Capability Run",
+      "timestamp": "2026-03-18T17:25",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "experiment_outputs",
+        "full",
+        "capability",
+        "coverage",
+        "diagnose_c_family_real",
+        "family",
+        "new",
+        "test_c_family_real_diagnostic",
+        "are",
+        "c_family_real_diagnostic_20260318_seed13",
+        "c_family_real_diagnostic_c3_3seed_20260318",
+        "fixed-latent"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/c_family_real_diagnostic_20260318_seed13.json",
+        "docs/experiment_outputs/c_family_real_diagnostic_c3_3seed_20260318.json",
+        "scripts/diagnose_c_family_real.py",
+        "tests/test_c_family_real_diagnostic.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 1702 - Identity Selector Revert.md",
+      "filename": "2026-03-18 1702 - Identity Selector Revert.md",
+      "title": "2026-03-18 1702 - Identity Selector Revert",
+      "timestamp": "2026-03-18T17:02",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "identity",
+        "aggregate",
+        "bit",
+        "exact",
+        "growth-latent",
+        "selector",
+        "tweak",
+        "was",
+        "adapters",
+        "diagnose_c_node_probe",
+        "improved",
+        "phase8"
+      ],
+      "referenced_files": [
+        "phase8/adapters.py",
+        "scripts/diagnose_c_node_probe.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md",
+      "filename": "2026-03-18 1650 - C4 Post Route Gate Spot Check.md",
+      "title": "2026-03-18 1650 - C4 Post Route Gate Spot Check",
+      "timestamp": "2026-03-18T16:50",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "bit",
+        "c_node_probe_c4_taskb_taskc_growth_latent_seed13_postroutegate_20260318",
+        "check",
+        "exact",
+        "route",
+        "spot",
+        "experiment_outputs",
+        "gate",
+        "growth-latent",
+        "task_c",
+        "commits",
+        "latent"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/c_node_probe_c4_taskb_taskc_growth_latent_seed13_postroutegate_20260318.json"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
+      "filename": "2026-03-18 1646 - Downstream Latent Route Gate.md",
+      "title": "2026-03-18 1646 - Downstream Latent Route Gate",
+      "timestamp": "2026-03-18T16:46",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "latent",
+        "context",
+        "downstream",
+        "test_latent_route_transform_gate",
+        "adapters",
+        "available",
+        "but",
+        "gate",
+        "phase8",
+        "route",
+        "route_transform",
+        "added"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/c_node_probe_c3_taskb_taskc_growth_latent_seed13_postroutegate_20260318.json",
+        "phase8/adapters.py",
+        "tests/test_latent_route_transform_gate.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 1640 - C Node Probe.md",
+      "filename": "2026-03-18 1640 - C Node Probe.md",
+      "title": "2026-03-18 1640 - C Node Probe",
+      "timestamp": "2026-03-18T16:40",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "c_node_probe_c3_taskb_taskc_growth_latent_seed13_20260318",
+        "diagnose_c_node_probe",
+        "first",
+        "probe",
+        "experiment_outputs",
+        "node",
+        "task_b",
+        "task_c",
+        "allostatic",
+        "bit",
+        "both",
+        "coding"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/c_node_probe_c3_taskb_taskc_growth_latent_seed13_20260318.json",
+        "scripts/diagnose_c_node_probe.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
+      "filename": "2026-03-18 1632 - Idle Latent Growth Gate.md",
+      "title": "2026-03-18 1632 - Idle Latent Growth Gate",
+      "timestamp": "2026-03-18T16:32",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "growth",
+        "latent",
+        "latent-task",
+        "bud",
+        "environment",
+        "gate",
+        "recent",
+        "contradiction",
+        "cycle",
+        "had",
+        "head",
+        "idle"
+      ],
+      "referenced_files": [
+        "phase8/environment.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
+      "filename": "2026-03-18 1535 - C Family Diagnostic.md",
+      "title": "2026-03-18 1535 - C Family Diagnostic",
+      "timestamp": "2026-03-18T15:35",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "benchmark",
+        "ceiling",
+        "pilot",
+        "traces",
+        "family",
+        "visible",
+        "harness",
+        "node",
+        "packet",
+        "seed",
+        "ambiguity",
+        "are"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/ceiling_benchmark_pilot_family_c_20260318.json",
+        "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
+        "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
+        "scripts/ceiling_benchmark_suite.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
+      "filename": "2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
+      "title": "2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot",
+      "timestamp": "2026-03-18T12:48",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "family",
+        "ceiling",
+        "band",
+        "none",
+        "pilot",
+        "seed",
+        "was",
+        "benchmark",
+        "best",
+        "current",
+        "ladder",
+        "causal-transformer"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
+      "filename": "2026-03-18 1200 - Ceiling Benchmark Harness.md",
+      "title": "2026-03-18 1200 - Ceiling Benchmark Harness",
+      "timestamp": "2026-03-18T12:00",
+      "date": "2026-03-18",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "benchmark",
+        "point",
+        "families",
+        "harness",
+        "ambiguity",
+        "ceiling",
+        "collapse",
+        "deterministic",
+        "each",
+        "first",
+        "frontier",
+        "hidden-memory"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md",
+      "filename": "20260317_1117_morphogenesis_large_carryover_bridge_trace.md",
+      "title": "2026-03-17 1117 - Large-Topology Carryover Bridge Diagnostic",
+      "timestamp": "2026-03-17T11:17",
+      "date": "2026-03-17",
+      "trace_type": "H_e (Experiment trace)",
+      "author": null,
+      "model": null,
+      "keywords": [
+        "acc",
+        "bit",
+        "exact",
+        "carryover",
+        "experiment_outputs",
+        "morphogenesis_large_carryover_bridge",
+        "transfer",
+        "visible",
+        "all",
+        "bridge",
+        "diagnostic",
+        "experiment"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/20260317_1113_morphogenesis_large_carryover_bridge.json"
+      ]
+    },
+    {
+      "path": "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
+      "filename": "20260317_1046_morphogenesis_large_mode_switched_trace.md",
+      "title": "2026-03-17 1046 - Large-Topology Mode-Switched Morphogenesis",
+      "timestamp": "2026-03-17T10:46",
+      "date": "2026-03-17",
+      "trace_type": "H_e (Experiment trace)",
+      "author": null,
+      "model": null,
+      "keywords": [
+        "delta",
+        "transfer",
+        "bit-acc",
+        "exact",
+        "experiment_outputs",
+        "latent",
+        "morphogenesis_large_mode_switched",
+        "visible",
+        "all",
+        "experiment",
+        "h_e",
+        "large"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/20260317_1044_morphogenesis_large_mode_switched.json"
+      ]
+    },
+    {
+      "path": "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
+      "filename": "20260317_1021_morphogenesis_large_paired_trace.md",
+      "title": "2026-03-17 1021 - Paired Visible vs Latent Large-Topology Morphogenesis",
+      "timestamp": "2026-03-17T10:21",
+      "date": "2026-03-17",
+      "trace_type": "H_e (Experiment trace)",
+      "author": null,
+      "model": null,
+      "keywords": [
+        "latent",
+        "visible",
+        "delta",
+        "large-topology",
+        "morphogenesis",
+        "transfer",
+        "exact",
+        "experiment_outputs",
+        "growth",
+        "morphogenesis_large_paired",
+        "paired",
+        "win"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/20260317_1019_morphogenesis_large_paired.json"
+      ]
+    },
+    {
+      "path": "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
+      "filename": "20260317_1005_latent_morphogenesis_large_trace.md",
+      "title": "2026-03-17 1005 - Latent Large-Topology Morphogenesis",
+      "timestamp": "2026-03-17T10:05",
+      "date": "2026-03-17",
+      "trace_type": "H_e (Experiment trace)",
+      "author": null,
+      "model": null,
+      "keywords": [
+        "latent",
+        "avg",
+        "growth",
+        "experiment_outputs",
+        "latent_morphogenesis_large",
+        "morphogenesis",
+        "transfer",
+        "enabled",
+        "experiment",
+        "h_e",
+        "large-topology",
+        "node"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/20260317_1002_latent_morphogenesis_large.json"
+      ]
+    },
+    {
+      "path": "docs/traces/20260317_1005_cyclic_transfer_trace.md",
+      "filename": "20260317_1005_cyclic_transfer_trace.md",
+      "title": "2026-03-17 1005 - Cyclic Transfer Exploration",
+      "timestamp": "2026-03-17T10:05",
+      "date": "2026-03-17",
+      "trace_type": "H_e (Experiment trace)",
+      "author": null,
+      "model": null,
+      "keywords": [
+        "experiment_outputs",
+        "cyclic_transfer",
+        "cyclic",
+        "cyclic_transfer_latent",
+        "transfer",
+        "cold",
+        "delta",
+        "exact",
+        "experiment",
+        "exploration",
+        "final",
+        "h_e"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/20260317_1002_cyclic_transfer.json",
+        "docs/experiment_outputs/20260317_1004_cyclic_transfer_latent.json"
+      ]
+    },
+    {
+      "path": "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md",
+      "filename": "20260317_0935_parallel_subagent_coordination_trace.md",
+      "title": "2026-03-17 0935 - Parallel Subagent Coordination Trace",
+      "timestamp": "2026-03-17T09:35",
+      "date": "2026-03-17",
+      "trace_type": "H_c (Parallel coordination)",
+      "author": null,
+      "model": null,
+      "keywords": [
+        "agents",
+        "parallel",
+        "readme",
+        "coordination",
+        "current",
+        "master",
+        "phase8_session_synthesis",
+        "subagent",
+        "test_phase8",
+        "transfer",
+        "visible",
+        "already"
+      ],
+      "referenced_files": [
+        "AGENTS.md",
+        "README.md",
+        "docs/20260317_phase8_session_synthesis.md",
+        "tests/test_phase8.py"
+      ]
+    },
+    {
+      "path": "docs/traces/20260317_phase8_neural_baseline_trace.md",
+      "filename": "20260317_phase8_neural_baseline_trace.md",
+      "title": "Phase 8 \u2014 Neural Baseline Comparison Trace",
+      "timestamp": "2026-03-17",
+      "date": "2026-03-17",
+      "trace_type": "H_e (Episodic Trace)",
+      "author": null,
+      "model": "Claude Sonnet 4.6",
+      "keywords": [
+        "baseline",
+        "neural",
+        "claim",
+        "criterion",
+        "time",
+        "baselines",
+        "claude",
+        "comparison",
+        "cvt-1",
+        "episodic",
+        "h_e",
+        "matches"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/20260317_phase8_morphogenesis_large_trace.md",
+      "filename": "20260317_phase8_morphogenesis_large_trace.md",
+      "title": "Phase 8 \u2014 Morphogenesis on Large Topology Trace",
+      "timestamp": "2026-03-17",
+      "date": "2026-03-17",
+      "trace_type": "H_e (Episodic Trace)",
+      "author": null,
+      "model": "Claude Sonnet 4.6",
+      "keywords": [
+        "morphogenesis",
+        "topology",
+        "large",
+        "claude",
+        "earned",
+        "episodic",
+        "h_e",
+        "node",
+        "sonnet",
+        "transfer",
+        "win",
+        "anticipatory_growth_backlog_threshold"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md",
+      "filename": "20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md",
+      "title": "Phase 8 \u2014 Latent Transfer Robustness & Morphogenesis Evaluation Trace",
+      "timestamp": "2026-03-17",
+      "date": "2026-03-17",
+      "trace_type": "H_e (Episodic Trace)",
+      "author": null,
+      "model": "Claude Sonnet 4.6",
+      "keywords": [
+        "transfer",
+        "latent",
+        "robustness",
+        "evaluation",
+        "morphogenesis",
+        "across",
+        "avg",
+        "claude",
+        "condition",
+        "episodic",
+        "experiments",
+        "float"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/baseline_scale_comparisons.md",
+      "filename": "baseline_scale_comparisons.md",
+      "title": "Phase 8 Baseline Experiments",
+      "timestamp": null,
+      "date": null,
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "hidden",
+        "exact",
+        "scale",
+        "criterion",
+        "matches",
+        "rolling",
+        "sequence",
+        "signal",
+        "signals",
+        "topology",
+        "window",
+        "across"
+      ],
+      "referenced_files": [
+        "phase8/scenarios.py"
+      ]
+    }
+  ],
+  "by_keyword": {
+    "about": [
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
+    ],
+    "absolute": [
+      "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md"
+    ],
+    "acc": [
+      "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
+    ],
+    "accepted": [
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
+    ],
+    "accumulate": [
+      "docs/traces/2026-03-18 2145 - Latent Context Generalization.md"
+    ],
+    "accuracy": [
+      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md",
+      "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md",
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
+    ],
+    "across": [
+      "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
+      "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
+      "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md",
+      "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md",
+      "docs/traces/baseline_scale_comparisons.md"
+    ],
+    "action": [
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
+    ],
+    "actions": [
+      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
+    ],
+    "activates": [
+      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md"
+    ],
+    "activation": [
+      "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
+      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md"
+    ],
+    "actual": [
+      "docs/traces/2026-03-18 2145 - Latent Context Generalization.md"
+    ],
+    "actually": [
+      "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md",
+      "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
+      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
+    ],
+    "adaptation": [
+      "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
+    ],
+    "adapters": [
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
+      "docs/traces/2026-03-18 1702 - Identity Selector Revert.md",
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md"
+    ],
+    "added": [
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
+      "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
+      "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
+      "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md",
+      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
+      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
+      "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "agents": [
+      "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
+    ],
+    "aggregate": [
+      "docs/traces/2026-03-18 1702 - Identity Selector Revert.md"
+    ],
+    "all": [
+      "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
+      "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
+    ],
+    "allostatic": [
+      "docs/traces/2026-03-18 1640 - C Node Probe.md",
+      "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
+      "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
+      "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
+      "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md",
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+    ],
+    "already": [
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
+      "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md",
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
+    ],
+    "ambiguity": [
+      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md"
+    ],
+    "ambiguity-rich": [
+      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md"
+    ],
+    "analysis": [
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md"
+    ],
+    "anticipation": [
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
+      "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md",
+      "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md",
+      "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md"
+    ],
+    "anticipatory": [
+      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md"
+    ],
+    "anticipatory_growth_backlog_threshold": [
+      "docs/traces/20260317_phase8_morphogenesis_large_trace.md"
+    ],
+    "applied": [
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
+    ],
+    "architecture": [
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md"
+    ],
+    "architecture_notes": [
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "are": [
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
+      "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md",
+      "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md",
+      "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md"
+    ],
+    "around": [
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
+    ],
+    "assumption": [
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
+    ],
+    "available": [
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md"
+    ],
+    "avg": [
+      "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
+      "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md"
+    ],
+    "aware": [
+      "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md",
+      "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md"
+    ],
+    "band": [
+      "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md"
+    ],
+    "baseline": [
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md",
+      "docs/traces/20260317_phase8_neural_baseline_trace.md"
+    ],
+    "baselines": [
+      "docs/traces/20260317_phase8_neural_baseline_trace.md"
+    ],
+    "bash": [
+      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
+    ],
+    "behavior": [
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
+      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
+    ],
+    "benchmark": [
+      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
+      "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md",
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
+      "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
+      "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md",
+      "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
+      "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md"
+    ],
+    "benchmark_anticipation_metrics": [
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+    ],
+    "best": [
+      "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
+      "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md"
+    ],
+    "beyond": [
+      "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md"
+    ],
+    "bias": [
+      "docs/traces/2026-03-18 2200 - Phase8 Recognition Route Bias.md",
+      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md",
+      "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
+      "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md"
+    ],
+    "binary": [
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
+    ],
+    "bit": [
+      "docs/traces/2026-03-18 1640 - C Node Probe.md",
+      "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md",
+      "docs/traces/2026-03-18 1702 - Identity Selector Revert.md",
+      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md",
+      "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md",
+      "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
+    ],
+    "bit-acc": [
+      "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md"
+    ],
+    "both": [
+      "docs/traces/2026-03-18 1640 - C Node Probe.md",
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md",
+      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
+    ],
+    "branch": [
+      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md"
+    ],
+    "breakdown": [
+      "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md"
+    ],
+    "bridge": [
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md",
+      "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
+    ],
+    "bud": [
+      "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md"
+    ],
+    "but": [
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
+      "docs/traces/2026-03-18 2200 - Phase8 Recognition Route Bias.md",
+      "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md",
+      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
+      "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md",
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+    ],
+    "c_family_real_diagnostic_20260318_seed13": [
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md"
+    ],
+    "c_family_real_diagnostic_c3_3seed_20260318": [
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md"
+    ],
+    "c_family_real_diagnostic_c3_c4_seed13_postmulticontext_cold_20260318": [
+      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md"
+    ],
+    "c_family_real_diagnostic_c3_seed13_postgrowthgate_cold_20260318": [
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md"
+    ],
+    "c_family_real_diagnostic_c3_seed13_postmulticontext_20260318": [
+      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md"
+    ],
+    "c_family_real_diagnostic_c3_seed13_postthresholdscale_cold_20260318": [
+      "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md"
+    ],
+    "c_node_probe_c3_taskb_taskc_growth_latent_seed13_20260318": [
+      "docs/traces/2026-03-18 1640 - C Node Probe.md"
+    ],
+    "c_node_probe_c4_taskb_taskc_growth_latent_seed13_postroutegate_20260318": [
+      "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md"
+    ],
+    "can": [
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
+      "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
+      "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md",
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
+    ],
+    "candidate": [
+      "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md"
+    ],
+    "capability": [
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
+      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md",
+      "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
+      "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
+      "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md",
+      "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
+      "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md"
+    ],
+    "cardinality": [
+      "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md"
+    ],
+    "cardinality-aware": [
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md"
+    ],
+    "carried": [
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+    ],
+    "carries": [
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
+    ],
+    "carryover": [
+      "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md",
+      "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md",
+      "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md",
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md",
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
+      "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
+    ],
+    "carryover-mode": [
+      "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md"
+    ],
+    "case": [
+      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md"
+    ],
+    "causal-transformer": [
+      "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md"
+    ],
+    "ceiling": [
+      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
+      "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
+      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
+    ],
+    "change": [
+      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md",
+      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md",
+      "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+    ],
+    "changed": [
+      "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md"
+    ],
+    "changes": [
+      "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
+      "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
+    ],
+    "check": [
+      "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md"
+    ],
+    "claim": [
+      "docs/traces/20260317_phase8_neural_baseline_trace.md"
+    ],
+    "classification": [
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
+    ],
+    "claude": [
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
+      "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md",
+      "docs/traces/20260317_phase8_morphogenesis_large_trace.md",
+      "docs/traces/20260317_phase8_neural_baseline_trace.md"
+    ],
+    "claude-sonnet-4-6": [
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
+    ],
+    "code-level": [
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md"
+    ],
+    "codex": [
+      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md",
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
+      "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
+      "docs/traces/2026-03-18 2200 - Phase8 Recognition Route Bias.md",
+      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md",
+      "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
+      "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md",
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "coding": [
+      "docs/traces/2026-03-18 1640 - C Node Probe.md",
+      "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
+      "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md",
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+    ],
+    "cold": [
+      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
+      "docs/traces/20260317_1005_cyclic_transfer_trace.md"
+    ],
+    "cold-start": [
+      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md"
+    ],
+    "collapse": [
+      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md"
+    ],
+    "commitment": [
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md"
+    ],
+    "commits": [
+      "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md"
+    ],
+    "compare_self_selected_smoke": [
+      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
+    ],
+    "compare_transfer_matrix": [
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
+    ],
+    "comparison": [
+      "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md",
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md",
+      "docs/traces/20260317_phase8_neural_baseline_trace.md"
+    ],
+    "compatibility": [
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+    ],
+    "condition": [
+      "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md"
+    ],
+    "confidence": [
+      "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md"
+    ],
+    "confirmation": [
+      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
+      "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md"
+    ],
+    "confirmed": [
+      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md"
+    ],
+    "consolidation": [
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md"
+    ],
+    "constraintpattern": [
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md"
+    ],
+    "context": [
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
+      "docs/traces/2026-03-18 2145 - Latent Context Generalization.md",
+      "docs/traces/2026-03-18 2200 - Phase8 Recognition Route Bias.md",
+      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
+      "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md",
+      "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md",
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+    ],
+    "context_count": [
+      "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md"
+    ],
+    "context_growth_ready": [
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md"
+    ],
+    "context_promotion_ready": [
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md"
+    ],
+    "contradiction": [
+      "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md"
+    ],
+    "control": [
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
+      "docs/traces/2026-03-18 2200 - Phase8 Recognition Route Bias.md"
+    ],
+    "controller": [
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md"
+    ],
+    "coordination": [
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
+    ],
+    "core": [
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md"
+    ],
+    "coupled": [
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md"
+    ],
+    "coverage": [
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md"
+    ],
+    "credit": [
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md"
+    ],
+    "criterion": [
+      "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md",
+      "docs/traces/20260317_phase8_neural_baseline_trace.md",
+      "docs/traces/baseline_scale_comparisons.md"
+    ],
+    "current": [
+      "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
+      "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md",
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
+    ],
+    "current-cycle": [
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md"
+    ],
+    "cvt-1": [
+      "docs/traces/20260317_phase8_neural_baseline_trace.md"
+    ],
+    "cvt1_task_a_stage1": [
+      "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
+      "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md"
+    ],
+    "cvt1_task_b_stage1": [
+      "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
+      "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md"
+    ],
+    "cvt1_task_c_stage1": [
+      "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
+      "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md",
+      "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md"
+    ],
+    "cycle": [
+      "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
+      "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md"
+    ],
+    "cycles": [
+      "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
+      "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md",
+      "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
+      "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md"
+    ],
+    "cyclic": [
+      "docs/traces/20260317_1005_cyclic_transfer_trace.md"
+    ],
+    "cyclic_transfer": [
+      "docs/traces/20260317_1005_cyclic_transfer_trace.md"
+    ],
+    "cyclic_transfer_latent": [
+      "docs/traces/20260317_1005_cyclic_transfer_trace.md"
+    ],
+    "debt": [
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md"
+    ],
+    "decision": [
+      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
+    ],
+    "decisions": [
+      "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md"
+    ],
+    "delta": [
+      "docs/traces/20260317_1005_cyclic_transfer_trace.md",
+      "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
+      "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md"
+    ],
+    "design": [
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "deterministic": [
+      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md"
+    ],
+    "diagnose_b_to_c_carryover": [
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "diagnose_benchmark_node_probe": [
+      "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
+      "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
+      "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md"
+    ],
+    "diagnose_c_family_real": [
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md"
+    ],
+    "diagnose_c_node_probe": [
+      "docs/traces/2026-03-18 1640 - C Node Probe.md",
+      "docs/traces/2026-03-18 1702 - Identity Selector Revert.md"
+    ],
+    "diagnose_phase8_transfer_prediction_interaction": [
+      "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md"
+    ],
+    "diagnose_phase8_transfer_selector_interaction": [
+      "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md"
+    ],
+    "diagnosis": [
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md",
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
+      "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md",
+      "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "diagnostic": [
+      "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
+    ],
+    "directly": [
+      "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md"
+    ],
+    "down-weights": [
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md"
+    ],
+    "downstream": [
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md"
+    ],
+    "each": [
+      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md"
+    ],
+    "earlier": [
+      "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md"
+    ],
+    "early": [
+      "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md",
+      "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
+    ],
+    "earned": [
+      "docs/traces/20260317_phase8_morphogenesis_large_trace.md"
+    ],
+    "edge": [
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md"
+    ],
+    "effective": [
+      "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md",
+      "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md"
+    ],
+    "effective_has_context": [
+      "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md"
+    ],
+    "embedded": [
+      "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+    ],
+    "empty": [
+      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
+    ],
+    "enabled": [
+      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md",
+      "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md"
+    ],
+    "engine": [
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md"
+    ],
+    "entries": [
+      "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md"
+    ],
+    "environment": [
+      "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md",
+      "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "docs/traces/2026-03-18 2145 - Latent Context Generalization.md",
+      "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md",
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md",
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
+      "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
+    ],
+    "episodes": [
+      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
+    ],
+    "episodic": [
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md",
+      "docs/traces/20260317_phase8_morphogenesis_large_trace.md",
+      "docs/traces/20260317_phase8_neural_baseline_trace.md"
+    ],
+    "estimate": [
+      "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md"
+    ],
+    "eval": [
+      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
+    ],
+    "evaluate_experience_extension": [
+      "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md",
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md",
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
+    ],
+    "evaluate_runtime_slack": [
+      "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+    ],
+    "evaluation": [
+      "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md"
+    ],
+    "evidence": [
+      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
+      "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md"
+    ],
+    "exact": [
+      "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md",
+      "docs/traces/2026-03-18 1702 - Identity Selector Revert.md",
+      "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md",
+      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
+      "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md",
+      "docs/traces/20260317_1005_cyclic_transfer_trace.md",
+      "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
+      "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
+      "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md",
+      "docs/traces/baseline_scale_comparisons.md"
+    ],
+    "exception": [
+      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
+    ],
+    "existing": [
+      "docs/traces/2026-03-18 2200 - Phase8 Recognition Route Bias.md"
+    ],
+    "expectation": [
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md"
+    ],
+    "experiment": [
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "docs/traces/20260317_1005_cyclic_transfer_trace.md",
+      "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
+      "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
+      "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
+    ],
+    "experiment_outputs": [
+      "docs/traces/2026-03-18 1640 - C Node Probe.md",
+      "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md",
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
+      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
+      "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md",
+      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md",
+      "docs/traces/20260317_1005_cyclic_transfer_trace.md",
+      "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
+      "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
+      "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
+      "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
+    ],
+    "experiments": [
+      "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md"
+    ],
+    "explicit": [
+      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md"
+    ],
+    "exploration": [
+      "docs/traces/20260317_1005_cyclic_transfer_trace.md"
+    ],
+    "exposure": [
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md",
+      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
+      "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md"
+    ],
+    "extended": [
+      "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
+    ],
+    "families": [
+      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md"
+    ],
+    "family": [
+      "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md",
+      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md"
+    ],
+    "feedback": [
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md"
+    ],
+    "final": [
+      "docs/traces/20260317_1005_cyclic_transfer_trace.md"
+    ],
+    "first": [
+      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
+      "docs/traces/2026-03-18 1640 - C Node Probe.md",
+      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md",
+      "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md",
+      "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "fixed": [
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
+    ],
+    "fixed-latent": [
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
+      "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md"
+    ],
+    "float": [
+      "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md"
+    ],
+    "follow": [
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "frontier": [
+      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md"
+    ],
+    "full": [
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
+      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
+      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
+      "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md",
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "gap": [
+      "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md"
+    ],
+    "gate": [
+      "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
+      "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md",
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md"
+    ],
+    "generalization": [
+      "docs/traces/2026-03-18 2145 - Latent Context Generalization.md",
+      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
+      "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
+      "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md"
+    ],
+    "generalized": [
+      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md"
+    ],
+    "generated": [
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md",
+      "docs/traces/2026-03-18 2145 - Latent Context Generalization.md"
+    ],
+    "gpt-5": [
+      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md",
+      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
+      "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
+      "docs/traces/2026-03-18 2200 - Phase8 Recognition Route Bias.md",
+      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md",
+      "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "groundwork": [
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
+    ],
+    "growth": [
+      "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md",
+      "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
+      "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md"
+    ],
+    "growth-latent": [
+      "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md",
+      "docs/traces/2026-03-18 1702 - Identity Selector Revert.md"
+    ],
+    "h_e": [
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "docs/traces/20260317_1005_cyclic_transfer_trace.md",
+      "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
+      "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
+      "docs/traces/20260317_phase8_morphogenesis_large_trace.md",
+      "docs/traces/20260317_phase8_neural_baseline_trace.md"
+    ],
+    "had": [
+      "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md"
+    ],
+    "harness": [
+      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
+      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md",
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "has": [
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md"
+    ],
+    "head": [
+      "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md"
+    ],
+    "held-out": [
+      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
+    ],
+    "helper": [
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
+    ],
+    "hidden": [
+      "docs/traces/baseline_scale_comparisons.md"
+    ],
+    "hidden-memory": [
+      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md"
+    ],
+    "hookup": [
+      "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md"
+    ],
+    "hygiene": [
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md"
+    ],
+    "identity": [
+      "docs/traces/2026-03-18 1702 - Identity Selector Revert.md"
+    ],
+    "idle": [
+      "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md"
+    ],
+    "ids": [
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md"
+    ],
+    "improved": [
+      "docs/traces/2026-03-18 1702 - Identity Selector Revert.md"
+    ],
+    "independent": [
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "injection": [
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
+    ],
+    "inspectable": [
+      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md"
+    ],
+    "interaction": [
+      "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md"
+    ],
+    "interfaces": [
+      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
+    ],
+    "item": [
+      "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md"
+    ],
+    "ladder": [
+      "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md"
+    ],
+    "large": [
+      "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
+      "docs/traces/20260317_phase8_morphogenesis_large_trace.md"
+    ],
+    "large-topology": [
+      "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
+      "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md"
+    ],
+    "latent": [
+      "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
+      "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md",
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
+      "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
+      "docs/traces/2026-03-18 2145 - Latent Context Generalization.md",
+      "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md",
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md",
+      "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
+      "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
+      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md",
+      "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
+      "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md",
+      "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md",
+      "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
+      "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
+      "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
+      "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md"
+    ],
+    "latent-task": [
+      "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md"
+    ],
+    "latent_morphogenesis_large": [
+      "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md"
+    ],
+    "latent_resolution_weight": [
+      "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md"
+    ],
+    "learning": [
+      "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+    ],
+    "local": [
+      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
+      "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md"
+    ],
+    "mappings": [
+      "docs/traces/2026-03-18 2145 - Latent Context Generalization.md"
+    ],
+    "maps": [
+      "docs/traces/2026-03-18 2145 - Latent Context Generalization.md"
+    ],
+    "master": [
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
+    ],
+    "matches": [
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
+      "docs/traces/20260317_phase8_neural_baseline_trace.md",
+      "docs/traces/baseline_scale_comparisons.md"
+    ],
+    "matrix": [
+      "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md"
+    ],
+    "memory": [
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md"
+    ],
+    "method": [
+      "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md"
+    ],
+    "metrics": [
+      "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
+    ],
+    "models": [
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md"
+    ],
+    "modes": [
+      "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md"
+    ],
+    "morphogenesis": [
+      "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
+      "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
+      "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md",
+      "docs/traces/20260317_phase8_morphogenesis_large_trace.md"
+    ],
+    "morphogenesis_large_carryover_bridge": [
+      "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
+    ],
+    "morphogenesis_large_mode_switched": [
+      "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md"
+    ],
+    "morphogenesis_large_paired": [
+      "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md"
+    ],
+    "multi-state": [
+      "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md"
+    ],
+    "multistate": [
+      "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md"
+    ],
+    "narrow": [
+      "docs/traces/2026-03-18 2200 - Phase8 Recognition Route Bias.md"
+    ],
+    "neural": [
+      "docs/traces/20260317_phase8_neural_baseline_trace.md"
+    ],
+    "new": [
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
+      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md"
+    ],
+    "node": [
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
+      "docs/traces/2026-03-18 1640 - C Node Probe.md",
+      "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
+      "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
+      "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
+      "docs/traces/20260317_phase8_morphogenesis_large_trace.md"
+    ],
+    "node_agent": [
+      "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md"
+    ],
+    "none": [
+      "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md"
+    ],
+    "nscha": [
+      "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+    ],
+    "occupancy": [
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md",
+      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md",
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "one": [
+      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md"
+    ],
+    "optional": [
+      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
+    ],
+    "original": [
+      "docs/traces/2026-03-18 2145 - Latent Context Generalization.md",
+      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
+      "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md"
+    ],
+    "packet": [
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
+    ],
+    "pair": [
+      "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md"
+    ],
+    "paired": [
+      "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md"
+    ],
+    "parallel": [
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
+    ],
+    "partial": [
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md"
+    ],
+    "path": [
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
+      "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
+      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md",
+      "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md"
+    ],
+    "pattern": [
+      "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
+      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md"
+    ],
+    "patterns": [
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md"
+    ],
+    "persistence": [
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md"
+    ],
+    "phase8": [
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
+      "docs/traces/2026-03-18 1702 - Identity Selector Revert.md",
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md",
+      "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "docs/traces/2026-03-18 2145 - Latent Context Generalization.md",
+      "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
+      "docs/traces/2026-03-18 2200 - Phase8 Recognition Route Bias.md",
+      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md",
+      "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
+      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
+      "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md",
+      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
+      "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md",
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md",
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
+      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md",
+      "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+    ],
+    "phase8_session_synthesis": [
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
+    ],
+    "pilot": [
+      "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md"
+    ],
+    "point": [
+      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
+      "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md"
+    ],
+    "points": [
+      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
+    ],
+    "port": [
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
+    ],
+    "prediction": [
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
+      "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md",
+      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
+      "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md",
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "pressure": [
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md"
+    ],
+    "preview": [
+      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
+    ],
+    "probe": [
+      "docs/traces/2026-03-18 1640 - C Node Probe.md",
+      "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
+      "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
+      "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md",
+      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md",
+      "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
+      "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md",
+      "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md",
+      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md"
+    ],
+    "probe_phase8_recognition_bias": [
+      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md"
+    ],
+    "probe_phase8_transfer_recognition": [
+      "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md"
+    ],
+    "probe_time_exposure_prediction": [
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+    ],
+    "probe_transfer_adaptation_recognition": [
+      "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
+    ],
+    "probe_transfer_exposure_prediction": [
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md",
+      "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md"
+    ],
+    "proposal": [
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md"
+    ],
+    "pyproject": [
+      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
+    ],
+    "python": [
+      "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md"
+    ],
+    "quiet": [
+      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
+    ],
+    "rate": [
+      "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md"
+    ],
+    "reading": [
+      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md"
+    ],
+    "readme": [
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
+    ],
+    "real-neural-substrate": [
+      "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+    ],
+    "real_core": [
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
+      "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md"
+    ],
+    "recent": [
+      "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
+      "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md"
+    ],
+    "recognition": [
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
+      "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
+      "docs/traces/2026-03-18 2200 - Phase8 Recognition Route Bias.md",
+      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md",
+      "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
+      "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md",
+      "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md",
+      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
+      "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md",
+      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
+      "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
+      "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md",
+      "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md",
+      "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md"
+    ],
+    "recognized": [
+      "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md"
+    ],
+    "recognizer": [
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md"
+    ],
+    "recruitment": [
+      "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
+      "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md"
+    ],
+    "regression": [
+      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
+    ],
+    "relationally": [
+      "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+    ],
+    "relative": [
+      "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md"
+    ],
+    "repeat": [
+      "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md"
+    ],
+    "repeat-counts": [
+      "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md"
+    ],
+    "repeated": [
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md",
+      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md"
+    ],
+    "repeated_signal_scenarios": [
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
+    ],
+    "rerun": [
+      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md"
+    ],
+    "resolved": [
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md"
+    ],
+    "result": [
+      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
+    ],
+    "reusable": [
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md"
+    ],
+    "robustness": [
+      "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md"
+    ],
+    "rolling": [
+      "docs/traces/baseline_scale_comparisons.md"
+    ],
+    "route": [
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
+      "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md",
+      "docs/traces/2026-03-18 2200 - Phase8 Recognition Route Bias.md",
+      "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
+      "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md",
+      "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md",
+      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
+    ],
+    "route_transform": [
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md"
+    ],
+    "runtime": [
+      "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md"
+    ],
+    "scale": [
+      "docs/traces/baseline_scale_comparisons.md"
+    ],
+    "seed": [
+      "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
+      "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
+      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md",
+      "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md",
+      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md"
+    ],
+    "selected": [
+      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
+    ],
+    "selection": [
+      "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md"
+    ],
+    "selector": [
+      "docs/traces/2026-03-18 1702 - Identity Selector Revert.md",
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
+      "docs/traces/2026-03-18 2200 - Phase8 Recognition Route Bias.md",
+      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
+      "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md",
+      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
+      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md",
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+    ],
+    "self-selected": [
+      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md",
+      "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md",
+      "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
+      "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md"
+    ],
+    "self_selected": [
+      "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md"
+    ],
+    "sequence": [
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
+      "docs/traces/baseline_scale_comparisons.md"
+    ],
+    "sessions": [
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
+    ],
+    "shape": [
+      "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md"
+    ],
+    "signal": [
+      "docs/traces/baseline_scale_comparisons.md"
+    ],
+    "signals": [
+      "docs/traces/baseline_scale_comparisons.md"
+    ],
+    "slack": [
+      "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md"
+    ],
+    "slice": [
+      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md"
+    ],
+    "sonnet": [
+      "docs/traces/20260317_phase8_morphogenesis_large_trace.md"
+    ],
+    "source": [
+      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
+      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
+      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md",
+      "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
+      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md"
+    ],
+    "source-sequence": [
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md"
+    ],
+    "source-side": [
+      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
+    ],
+    "spot": [
+      "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md"
+    ],
+    "stage-1": [
+      "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md"
+    ],
+    "started": [
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "state": [
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md"
+    ],
+    "stream": [
+      "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
+      "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md"
+    ],
+    "structural": [
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "subagent": [
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
+    ],
+    "substrate": [
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md",
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "summary": [
+      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
+    ],
+    "support": [
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md"
+    ],
+    "sweep": [
+      "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
+      "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md"
+    ],
+    "synthesis": [
+      "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md"
+    ],
+    "tail": [
+      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
+    ],
+    "task_a": [
+      "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md"
+    ],
+    "task_b": [
+      "docs/traces/2026-03-18 1640 - C Node Probe.md"
+    ],
+    "task_c": [
+      "docs/traces/2026-03-18 1640 - C Node Probe.md",
+      "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md"
+    ],
+    "terms": [
+      "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md"
+    ],
+    "test_b_to_c_carryover_diagnosis": [
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "test_benchmark_node_probe": [
+      "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md"
+    ],
+    "test_c_family_real_diagnostic": [
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md"
+    ],
+    "test_compare_task_transfer_metrics": [
+      "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
+    ],
+    "test_experience_extension": [
+      "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md"
+    ],
+    "test_latent_route_transform_gate": [
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md"
+    ],
+    "test_phase8": [
+      "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
+      "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
+    ],
+    "test_phase8_expectation": [
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md"
+    ],
+    "test_phase8_recognition": [
+      "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
+      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md"
+    ],
+    "test_phase8_recognition_probe": [
+      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md"
+    ],
+    "test_phase8_transfer_prediction_interaction": [
+      "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md"
+    ],
+    "test_phase8_transfer_recognition_probe": [
+      "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md"
+    ],
+    "test_runtime_slack": [
+      "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md"
+    ],
+    "test_transfer_adaptation_recognition": [
+      "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
+    ],
+    "threshold": [
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md"
+    ],
+    "thresholds": [
+      "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md"
+    ],
+    "time": [
+      "docs/traces/20260317_phase8_neural_baseline_trace.md"
+    ],
+    "timing": [
+      "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md"
+    ],
+    "too": [
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+    ],
+    "topology": [
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
+      "docs/traces/20260317_phase8_morphogenesis_large_trace.md",
+      "docs/traces/baseline_scale_comparisons.md"
+    ],
+    "traces": [
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md"
+    ],
+    "transfer": [
+      "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
+      "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md",
+      "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md",
+      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
+      "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md",
+      "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md",
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md",
+      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md",
+      "docs/traces/20260317_1005_cyclic_transfer_trace.md",
+      "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
+      "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
+      "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
+      "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md",
+      "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md",
+      "docs/traces/20260317_phase8_morphogenesis_large_trace.md"
+    ],
+    "transform": [
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
+      "docs/traces/2026-03-18 2145 - Latent Context Generalization.md",
+      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
+      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
+      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md"
+    ],
+    "tuning": [
+      "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md"
+    ],
+    "tweak": [
+      "docs/traces/2026-03-18 1702 - Identity Selector Revert.md"
+    ],
+    "types": [
+      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
+    ],
+    "use": [
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md"
+    ],
+    "users": [
+      "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md",
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+    ],
+    "visible": [
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md",
+      "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
+      "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
+      "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
+    ],
+    "warm": [
+      "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
+      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
+      "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md"
+    ],
+    "was": [
+      "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
+      "docs/traces/2026-03-18 1702 - Identity Selector Revert.md",
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
+      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md",
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
+      "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md",
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+    ],
+    "were": [
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md"
+    ],
+    "widened": [
+      "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md"
+    ],
+    "win": [
+      "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
+      "docs/traces/20260317_phase8_morphogenesis_large_trace.md"
+    ],
+    "window": [
+      "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
+      "docs/traces/baseline_scale_comparisons.md"
+    ],
+    "without": [
+      "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md"
+    ]
+  },
+  "by_file": {
+    "AGENTS.md": [
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
+    ],
+    "README.md": [
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
+    ],
+    "docs/20260317_phase8_session_synthesis.md": [
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
+    ],
+    "docs/20260319_phase8_occupancy_v2_synthesis.md": [
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "docs/architecture_notes.md": [
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "docs/experiment_outputs/20260317_1002_cyclic_transfer.json": [
+      "docs/traces/20260317_1005_cyclic_transfer_trace.md"
+    ],
+    "docs/experiment_outputs/20260317_1002_latent_morphogenesis_large.json": [
+      "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md"
+    ],
+    "docs/experiment_outputs/20260317_1004_cyclic_transfer_latent.json": [
+      "docs/traces/20260317_1005_cyclic_transfer_trace.md"
+    ],
+    "docs/experiment_outputs/20260317_1019_morphogenesis_large_paired.json": [
+      "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md"
+    ],
+    "docs/experiment_outputs/20260317_1044_morphogenesis_large_mode_switched.json": [
+      "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md"
+    ],
+    "docs/experiment_outputs/20260317_1113_morphogenesis_large_carryover_bridge.json": [
+      "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
+    ],
+    "docs/experiment_outputs/c_family_credit_debt_spotcheck_20260318.json": [
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md"
+    ],
+    "docs/experiment_outputs/c_family_real_diagnostic_20260318_seed13.json": [
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md"
+    ],
+    "docs/experiment_outputs/c_family_real_diagnostic_c3_3seed_20260318.json": [
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md"
+    ],
+    "docs/experiment_outputs/c_family_real_diagnostic_c3_c4_seed13_postmulticontext_cold_20260318.json": [
+      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md"
+    ],
+    "docs/experiment_outputs/c_family_real_diagnostic_c3_seed13_postgrowthgate_cold_20260318.json": [
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md"
+    ],
+    "docs/experiment_outputs/c_family_real_diagnostic_c3_seed13_postmulticontext_20260318.json": [
+      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md"
+    ],
+    "docs/experiment_outputs/c_family_real_diagnostic_c3_seed13_postthresholdscale_cold_20260318.json": [
+      "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md"
+    ],
+    "docs/experiment_outputs/c_node_probe_c3_taskb_taskc_growth_latent_seed13_20260318.json": [
+      "docs/traces/2026-03-18 1640 - C Node Probe.md"
+    ],
+    "docs/experiment_outputs/c_node_probe_c3_taskb_taskc_growth_latent_seed13_postroutegate_20260318.json": [
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md"
+    ],
+    "docs/experiment_outputs/c_node_probe_c4_taskb_taskc_growth_latent_seed13_postroutegate_20260318.json": [
+      "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md"
+    ],
+    "docs/experiment_outputs/ceiling_benchmark_pilot_family_c_20260318.json": [
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md"
+    ],
+    "docs/experiment_outputs/occupancy_comparison_preview_20260319.json": [
+      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
+    ],
+    "docs/running_occupancy_v3.md": [
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md": [
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md"
+    ],
+    "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md": [
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md"
+    ],
+    "docs/traces/2026-03-18%202145%20-%20Latent%20Context%20Generalization.md": [
+      "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md"
+    ],
+    "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md": [
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "occupancy_baseline/session_splitter.py": [
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
+    ],
+    "phase8/adapters.py": [
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
+      "docs/traces/2026-03-18 1702 - Identity Selector Revert.md",
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md"
+    ],
+    "phase8/environment.py": [
+      "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md",
+      "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "docs/traces/2026-03-18 2145 - Latent Context Generalization.md",
+      "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md",
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md",
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
+      "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
+    ],
+    "phase8/expectation.py": [
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md"
+    ],
+    "phase8/models.py": [
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md"
+    ],
+    "phase8/node_agent.py": [
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
+      "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md"
+    ],
+    "phase8/scenarios.py": [
+      "docs/traces/baseline_scale_comparisons.md"
+    ],
+    "phase8/selector.py": [
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
+      "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md",
+      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
+      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md",
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+    ],
+    "phase8/substrate.py": [
+      "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md",
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
+    ],
+    "phase8/topology.py": [
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
+    ],
+    "pyproject.toml": [
+      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
+    ],
+    "real_core/__init__.py": [
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md"
+    ],
+    "real_core/consolidation.py": [
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md"
+    ],
+    "real_core/engine.py": [
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md"
+    ],
+    "real_core/interfaces.py": [
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
+    ],
+    "real_core/recognition.py": [
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
+      "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md"
+    ],
+    "real_core/selector.py": [
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md"
+    ],
+    "real_core/types.py": [
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
+    ],
+    "scripts/benchmark_anticipation_metrics.py": [
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+    ],
+    "scripts/ceiling_benchmark_suite.py": [
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md"
+    ],
+    "scripts/compare_self_selected_smoke.py": [
+      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
+    ],
+    "scripts/compare_transfer_matrix.py": [
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
+    ],
+    "scripts/diagnose_b_to_c_carryover.py": [
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "scripts/diagnose_benchmark_node_probe.py": [
+      "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
+      "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md"
+    ],
+    "scripts/diagnose_c_family_real.py": [
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md"
+    ],
+    "scripts/diagnose_c_node_probe.py": [
+      "docs/traces/2026-03-18 1640 - C Node Probe.md",
+      "docs/traces/2026-03-18 1702 - Identity Selector Revert.md"
+    ],
+    "scripts/diagnose_phase8_transfer_prediction_interaction.py": [
+      "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md"
+    ],
+    "scripts/diagnose_phase8_transfer_selector_interaction.py": [
+      "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md"
+    ],
+    "scripts/evaluate_experience_extension.py": [
+      "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md",
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md",
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
+    ],
+    "scripts/evaluate_runtime_slack.py": [
+      "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+    ],
+    "scripts/occupancy_real_v3.py": [
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "scripts/probe_phase8_recognition_bias.py": [
+      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md"
+    ],
+    "scripts/probe_phase8_transfer_recognition.py": [
+      "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md",
+      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md"
+    ],
+    "scripts/probe_time_exposure_prediction.py": [
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+    ],
+    "scripts/probe_transfer_adaptation_recognition.py": [
+      "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
+    ],
+    "scripts/probe_transfer_exposure_prediction.py": [
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
+    ],
+    "scripts/repeated_signal_scenarios.py": [
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
+    ],
+    "scripts/run_occupancy_real_v3.py": [
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "scripts/run_occupancy_tests_parallel.py": [
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "tests/test_b_to_c_carryover_diagnosis.py": [
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "tests/test_benchmark_node_probe.py": [
+      "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
+      "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md"
+    ],
+    "tests/test_c_family_real_diagnostic.py": [
+      "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md"
+    ],
+    "tests/test_compare_task_transfer_metrics.py": [
+      "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
+    ],
+    "tests/test_compare_transfer_matrix.py": [
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
+    ],
+    "tests/test_experience_extension.py": [
+      "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md"
+    ],
+    "tests/test_latent_context_tracker.py": [
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md"
+    ],
+    "tests/test_latent_route_transform_gate.py": [
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md"
+    ],
+    "tests/test_multicontext_substrate.py": [
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
+    ],
+    "tests/test_occupancy_real_v3.py": [
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "tests/test_phase8.py": [
+      "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
+      "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
+      "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
+      "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
+    ],
+    "tests/test_phase8_capability_prediction.py": [
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md"
+    ],
+    "tests/test_phase8_context_uncertainty.py": [
+      "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md"
+    ],
+    "tests/test_phase8_expectation.py": [
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md"
+    ],
+    "tests/test_phase8_recognition.py": [
+      "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
+      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+    ],
+    "tests/test_phase8_recognition_probe.py": [
+      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md"
+    ],
+    "tests/test_phase8_transfer_prediction_interaction.py": [
+      "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md",
+      "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md"
+    ],
+    "tests/test_phase8_transfer_recognition_probe.py": [
+      "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
+      "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md",
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md"
+    ],
+    "tests/test_phase8_transfer_selector_interaction.py": [
+      "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md"
+    ],
+    "tests/test_runtime_slack.py": [
+      "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md"
+    ],
+    "tests/test_transfer_adaptation_recognition.py": [
+      "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md",
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md"
+    ],
+    "tests/test_transfer_exposure_prediction.py": [
+      "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
+    ]
+  }
+}
