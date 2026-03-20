@@ -70,3 +70,4 @@ python -m occupancy_baseline.run_baseline \
 - The CLI can now optionally save a JSON artifact, which gives us a stable handoff point for later REAL-side comparison harnesses.
 - The canonical benchmark protocol is now frozen in `benchmark_protocol.md` and `presets.py` so the REAL mapping can target a stable baseline.
 - `scripts/compare_occupancy_baseline.py` now provides the first in-repo REAL comparison path using the same normalized rolling windows as the frozen baseline.
+- For a small but still evaluative REAL review slice, prefer `python -m scripts.compare_occupancy_baseline --preset synth_v1_default --selector-seed 13 --max-train-episodes 3 --eval-preview-per-label 1`; this pulls one held-out empty episode and one held-out occupied episode instead of only the first tail examples.

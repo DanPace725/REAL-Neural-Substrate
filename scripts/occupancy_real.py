@@ -106,6 +106,38 @@ def _bucket_to_bits(value: float) -> tuple[int, ...]:
     return tuple(1 if bucket_index == index else 0 for bucket_index in range(4))
 
 
+def _select_eval_preview(
+    episodes: Sequence[OccupancyEpisode],
+    *,
+    per_label: int,
+) -> tuple[OccupancyEpisode, ...]:
+    if per_label <= 0:
+        raise ValueError("eval_preview_per_label must be positive when provided")
+    selected_by_label: dict[int, list[OccupancyEpisode]] = {
+        0: [],
+        1: [],
+    }
+    for episode in episodes:
+        label = int(episode.label)
+        if label not in selected_by_label:
+            continue
+        if len(selected_by_label[label]) >= per_label:
+            continue
+        selected_by_label[label].append(episode)
+        if all(len(bucket) >= per_label for bucket in selected_by_label.values()):
+            break
+    selected_episode_indexes = {
+        episode.episode_index
+        for bucket in selected_by_label.values()
+        for episode in bucket
+    }
+    return tuple(
+        episode
+        for episode in episodes
+        if episode.episode_index in selected_episode_indexes
+    )
+
+
 def load_occupancy_episodes(config: OccupancyRealConfig) -> dict[str, object]:
     dataset = load_csv_dataset(config.csv_path, normalize=config.normalize)
     windowed = build_windowed_dataset(
@@ -140,16 +172,36 @@ def load_occupancy_episodes(config: OccupancyRealConfig) -> dict[str, object]:
     split_index = _split_index(len(episodes), config.train_fraction)
     train_episodes = episodes[:split_index]
     eval_episodes = episodes[split_index:]
+    full_eval_label_counts = {
+        0: sum(1 for episode in eval_episodes if int(episode.label) == 0),
+        1: sum(1 for episode in eval_episodes if int(episode.label) == 1),
+    }
     if config.max_train_episodes is not None:
         train_episodes = train_episodes[: config.max_train_episodes]
+    eval_selection = "tail"
+    if config.eval_preview_per_label is not None:
+        eval_episodes = list(
+            _select_eval_preview(
+                eval_episodes,
+                per_label=config.eval_preview_per_label,
+            )
+        )
+        eval_selection = "per_label_preview"
     if config.max_eval_episodes is not None:
         eval_episodes = eval_episodes[: config.max_eval_episodes]
+    selected_eval_label_counts = {
+        0: sum(1 for episode in eval_episodes if int(episode.label) == 0),
+        1: sum(1 for episode in eval_episodes if int(episode.label) == 1),
+    }
     return {
         "dataset_rows": dataset.size,
         "windowed_examples": len(episodes),
         "input_dim": windowed.input_dim,
         "train_episodes": tuple(train_episodes),
         "eval_episodes": tuple(eval_episodes),
+        "eval_selection": eval_selection,
+        "full_eval_label_counts": full_eval_label_counts,
+        "selected_eval_label_counts": selected_eval_label_counts,
     }
 
 
@@ -404,6 +456,10 @@ def run_occupancy_real_experiment(config: OccupancyRealConfig) -> dict[str, obje
         "input_dim": int(episode_payload["input_dim"]),
         "train_episode_count": len(train_results),
         "eval_episode_count": len(eval_results),
+        "eval_selection": str(episode_payload["eval_selection"]),
+        "full_eval_label_counts": dict(episode_payload["full_eval_label_counts"]),
+        "selected_eval_label_counts": dict(episode_payload["selected_eval_label_counts"]),
+        "eval_episode_indices": [int(result["episode_index"]) for result in eval_results],
         "topology": {
             "adjacency": adjacency,
             "positions": positions,
