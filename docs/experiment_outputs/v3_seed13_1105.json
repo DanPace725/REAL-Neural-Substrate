@@ -1,0 +1,1997 @@
+{
+  "v3_config": {
+    "csv_path": "occupancy_baseline/data/occupancy_synth_v1.csv",
+    "window_size": 5,
+    "normalize": true,
+    "selector_seed": 13,
+    "feedback_amount": 0.18,
+    "eval_feedback_fraction": 1.0,
+    "packet_ttl": 8,
+    "forward_drain_cycles": 16,
+    "feedback_drain_cycles": 4,
+    "train_session_fraction": 0.7,
+    "eval_mode": "persistent_eval",
+    "topology_mode": "multihop_routing",
+    "context_mode": "online_running_context",
+    "ingress_mode": "admission_source",
+    "max_train_sessions": 10,
+    "max_eval_sessions": 5,
+    "summary_only": false
+  },
+  "worker_policy": {
+    "requested_workers": 10,
+    "auto_cpu_target_fraction": 0.75,
+    "eval_workers_by_protocol": {
+      "persistent_eval": 2
+    }
+  },
+  "dataset_rows": 1344,
+  "total_episodes": 1340,
+  "total_sessions": 89,
+  "train_session_count": 10,
+  "eval_session_count": 5,
+  "co2_training_median": 0.974881,
+  "light_training_median": 1.045862,
+  "training_context_codes": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "train_inventory": {
+    "session_count": 10,
+    "by_label": {
+      "0": 5,
+      "1": 5
+    },
+    "by_context_code": {
+      "0": 4,
+      "1": 1,
+      "3": 5
+    },
+    "episode_lengths": {
+      "min": 1,
+      "mean": 13.4,
+      "max": 58
+    },
+    "context_codes_by_label": {
+      "0": [
+        0,
+        1,
+        3
+      ],
+      "1": [
+        0,
+        3
+      ]
+    }
+  },
+  "eval_inventory": {
+    "session_count": 5,
+    "by_label": {
+      "0": 3,
+      "1": 2
+    },
+    "by_context_code": {
+      "3": 1,
+      "2": 1,
+      "0": 3
+    },
+    "episode_lengths": {
+      "min": 1,
+      "mean": 13.2,
+      "max": 59
+    },
+    "context_codes_by_label": {
+      "0": [
+        0,
+        3
+      ],
+      "1": [
+        0,
+        2
+      ]
+    }
+  },
+  "train_summary": {
+    "episode_count": 134,
+    "metrics": {
+      "accuracy": 0.9104477611940298,
+      "precision": 0.8571428571428571,
+      "recall": 0.8571428571428571,
+      "f1": 0.8571428571428571,
+      "tp": 36.0,
+      "tn": 86.0,
+      "fp": 6.0,
+      "fn": 6.0
+    },
+    "mean_delivered_packets": 23.903,
+    "mean_dropped_packets": 1.097,
+    "mean_feedback_events": 21.3209,
+    "mean_feedback_total": 3.8378,
+    "occupied_prediction_rate": 0.3134,
+    "mean_delivery_ratio": 0.9561,
+    "mean_prediction_confidence": 0.8862
+  },
+  "train_system_summary": {
+    "capability_policy": "fixed-visible",
+    "cycles": 4743,
+    "injected_packets": 3350,
+    "admitted_packets": 3350,
+    "delivered_packets": 3203,
+    "delivery_ratio": 0.9561,
+    "dropped_packets": 147,
+    "drop_ratio": 0.0439,
+    "source_buffer": 0,
+    "mean_latency": 3.4074,
+    "mean_hops": 4.0,
+    "node_atp_total": 11.9321,
+    "mean_route_cost": 0.03259,
+    "mean_feedback_award": 0.1606,
+    "mean_source_admission": 0.7063,
+    "last_source_admission": 0,
+    "source_admission_support": 0.5,
+    "source_admission_velocity": 0.0,
+    "mean_source_efficiency": 0.0,
+    "exact_matches": 2857,
+    "mean_bit_accuracy": 0.892
+  },
+  "primary_eval_mode": "persistent_eval",
+  "primary_eval": {
+    "eval_protocol": "persistent_eval",
+    "warm_summary": {
+      "episode_count": 66,
+      "metrics": {
+        "accuracy": 0.8939393939393939,
+        "precision": 0.3333333333333333,
+        "recall": 0.4,
+        "f1": 0.3636363636363636,
+        "tp": 2.0,
+        "tn": 57.0,
+        "fp": 4.0,
+        "fn": 3.0
+      },
+      "mean_delivered_packets": 23.7121,
+      "mean_dropped_packets": 1.2879,
+      "mean_feedback_events": 21.5152,
+      "mean_feedback_total": 3.8727,
+      "occupied_prediction_rate": 0.0909,
+      "mean_delivery_ratio": 0.9485,
+      "mean_prediction_confidence": 0.9548
+    },
+    "cold_summary": {
+      "episode_count": 66,
+      "metrics": {
+        "accuracy": 0.9090909090909091,
+        "precision": 0.4,
+        "recall": 0.4,
+        "f1": 0.4000000000000001,
+        "tp": 2.0,
+        "tn": 58.0,
+        "fp": 3.0,
+        "fn": 3.0
+      },
+      "mean_delivered_packets": 24.1212,
+      "mean_dropped_packets": 0.8788,
+      "mean_feedback_events": 21.9545,
+      "mean_feedback_total": 3.9518,
+      "occupied_prediction_rate": 0.0758,
+      "mean_delivery_ratio": 0.9648,
+      "mean_prediction_confidence": 0.92
+    },
+    "efficiency": {
+      "warm_delivery_curve": [
+        1.0,
+        0.88,
+        0.9532,
+        0.88,
+        0.96
+      ],
+      "cold_delivery_curve": [
+        1.0,
+        0.94,
+        0.9681,
+        0.9067,
+        0.96
+      ],
+      "efficiency_ratio_curve": [
+        1.0,
+        0.9362,
+        0.9846,
+        0.9706,
+        1.0
+      ],
+      "mean_efficiency_ratio": 0.9783,
+      "warm_sessions_to_80pct": 0,
+      "cold_sessions_to_80pct": 0,
+      "session_1_delivery_delta": 0.0,
+      "session_1_efficiency_ratio": 1.0,
+      "mean_first_episode_delivery_delta": 0.0,
+      "mean_first_three_episode_delivery_delta": -0.0387,
+      "warm_first_episode_delivery_mean": 0.968,
+      "cold_first_episode_delivery_mean": 0.968,
+      "warm_first_three_episode_delivery_mean": 0.912,
+      "cold_first_three_episode_delivery_mean": 0.9507,
+      "warm_delivery_at": {
+        "session_1": 1.0,
+        "session_5": 0.96,
+        "session_10": null,
+        "session_20": null
+      },
+      "cold_delivery_at": {
+        "session_1": 1.0,
+        "session_5": 0.96,
+        "session_10": null,
+        "session_20": null
+      }
+    },
+    "context_transfer_probe": {
+      "context_mode": "online_running_context",
+      "training_context_codes": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "eval_context_codes": [
+        0,
+        2,
+        3
+      ],
+      "comparison_applicable": false,
+      "status": "not_applicable_all_eval_contexts_seen",
+      "warm_seen_mean_delivery": 0.9346,
+      "warm_unseen_mean_delivery": null,
+      "cold_seen_mean_delivery": 0.955,
+      "cold_unseen_mean_delivery": null,
+      "warm_seen_session_count": 5,
+      "warm_unseen_session_count": 0
+    },
+    "warm_system_summary": {
+      "capability_policy": "fixed-visible",
+      "cycles": 7104,
+      "injected_packets": 1650,
+      "admitted_packets": 1650,
+      "delivered_packets": 1565,
+      "delivery_ratio": 0.9485,
+      "dropped_packets": 85,
+      "drop_ratio": 0.0515,
+      "source_buffer": 0,
+      "mean_latency": 3.5419,
+      "mean_hops": 4.0,
+      "node_atp_total": 2.7147,
+      "mean_route_cost": 0.03223,
+      "mean_feedback_award": 0.1633,
+      "mean_source_admission": 0.6989,
+      "last_source_admission": 0,
+      "source_admission_support": 0.5,
+      "source_admission_velocity": 0.0,
+      "mean_source_efficiency": 0.0,
+      "exact_matches": 1420,
+      "mean_bit_accuracy": 0.9073
+    },
+    "cold_system_summary": {
+      "capability_policy": "fixed-visible",
+      "cycles": 2298,
+      "injected_packets": 1650,
+      "admitted_packets": 1650,
+      "delivered_packets": 1592,
+      "delivery_ratio": 0.9648,
+      "dropped_packets": 58,
+      "drop_ratio": 0.0352,
+      "source_buffer": 0,
+      "mean_latency": 3.3788,
+      "mean_hops": 4.0,
+      "node_atp_total": 2.6546,
+      "mean_route_cost": 0.03216,
+      "mean_feedback_award": 0.1638,
+      "mean_source_admission": 0.718,
+      "last_source_admission": 0,
+      "source_admission_support": 0.5,
+      "source_admission_velocity": 0.0,
+      "mean_source_efficiency": 0.0,
+      "exact_matches": 1449,
+      "mean_bit_accuracy": 0.9102
+    },
+    "warm_reset_count": 1,
+    "cold_reset_count": 1,
+    "workers_used": 2,
+    "parallelism_status": "process_pool:2",
+    "warm_session_results": [
+      {
+        "session_index": 62,
+        "label": 0,
+        "context_code": 3,
+        "context_codes_seen": [
+          3
+        ],
+        "episode_context_codes": [
+          3
+        ],
+        "episode_count": 1,
+        "delivery_ratio": 1.0,
+        "accuracy": 0.0,
+        "total_packets": 25,
+        "total_delivered": 25,
+        "total_dropped": 0,
+        "total_feedback_events": 10,
+        "first_episode_delivery_ratio": 1.0,
+        "first_three_episode_delivery_ratio": 1.0,
+        "first_episode_accuracy": 0.0,
+        "first_three_episode_accuracy": 0.0,
+        "admission_metrics": {
+          "admitted_packets": 25,
+          "mean_source_admission": 0.5102,
+          "max_source_admission": 4,
+          "mean_source_efficiency": 0.0,
+          "overload_events": 0
+        }
+      },
+      {
+        "session_index": 63,
+        "label": 1,
+        "context_code": 2,
+        "context_codes_seen": [
+          2
+        ],
+        "episode_context_codes": [
+          2,
+          2
+        ],
+        "episode_count": 2,
+        "delivery_ratio": 0.88,
+        "accuracy": 0.5,
+        "total_packets": 50,
+        "total_delivered": 44,
+        "total_dropped": 6,
+        "total_feedback_events": 18,
+        "first_episode_delivery_ratio": 1.0,
+        "first_three_episode_delivery_ratio": 0.88,
+        "first_episode_accuracy": 0.0,
+        "first_three_episode_accuracy": 0.5,
+        "admission_metrics": {
+          "admitted_packets": 50,
+          "mean_source_admission": 0.2778,
+          "max_source_admission": 4,
+          "mean_source_efficiency": 0.0,
+          "overload_events": 0
+        }
+      },
+      {
+        "session_index": 64,
+        "label": 0,
+        "context_code": 0,
+        "context_codes_seen": [
+          0,
+          2
+        ],
+        "episode_context_codes": [
+          2,
+          2,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "episode_count": 59,
+        "delivery_ratio": 0.9532,
+        "accuracy": 0.9661,
+        "total_packets": 1475,
+        "total_delivered": 1406,
+        "total_dropped": 69,
+        "total_feedback_events": 1366,
+        "first_episode_delivery_ratio": 0.96,
+        "first_three_episode_delivery_ratio": 0.84,
+        "first_episode_accuracy": 0.0,
+        "first_three_episode_accuracy": 0.3333,
+        "admission_metrics": {
+          "admitted_packets": 1475,
+          "mean_source_admission": 0.3277,
+          "max_source_admission": 4,
+          "mean_source_efficiency": 0.0,
+          "overload_events": 0
+        }
+      },
+      {
+        "session_index": 65,
+        "label": 1,
+        "context_code": 0,
+        "context_codes_seen": [
+          0
+        ],
+        "episode_context_codes": [
+          0,
+          0,
+          0
+        ],
+        "episode_count": 3,
+        "delivery_ratio": 0.88,
+        "accuracy": 0.3333,
+        "total_packets": 75,
+        "total_delivered": 66,
+        "total_dropped": 9,
+        "total_feedback_events": 26,
+        "first_episode_delivery_ratio": 0.92,
+        "first_three_episode_delivery_ratio": 0.88,
+        "first_episode_accuracy": 0.0,
+        "first_three_episode_accuracy": 0.3333,
+        "admission_metrics": {
+          "admitted_packets": 75,
+          "mean_source_admission": 0.2964,
+          "max_source_admission": 4,
+          "mean_source_efficiency": 0.0,
+          "overload_events": 0
+        }
+      },
+      {
+        "session_index": 66,
+        "label": 0,
+        "context_code": 0,
+        "context_codes_seen": [
+          0
+        ],
+        "episode_context_codes": [
+          0
+        ],
+        "episode_count": 1,
+        "delivery_ratio": 0.96,
+        "accuracy": 0.0,
+        "total_packets": 25,
+        "total_delivered": 24,
+        "total_dropped": 1,
+        "total_feedback_events": 0,
+        "first_episode_delivery_ratio": 0.96,
+        "first_three_episode_delivery_ratio": 0.96,
+        "first_episode_accuracy": 0.0,
+        "first_three_episode_accuracy": 0.0,
+        "admission_metrics": {
+          "admitted_packets": 25,
+          "mean_source_admission": 0.3623,
+          "max_source_admission": 4,
+          "mean_source_efficiency": 0.0,
+          "overload_events": 0
+        }
+      }
+    ],
+    "cold_session_results": [
+      {
+        "session_index": 62,
+        "label": 0,
+        "context_code": 3,
+        "context_codes_seen": [
+          3
+        ],
+        "episode_context_codes": [
+          3
+        ],
+        "episode_count": 1,
+        "delivery_ratio": 1.0,
+        "accuracy": 1.0,
+        "total_packets": 25,
+        "total_delivered": 25,
+        "total_dropped": 0,
+        "total_feedback_events": 15,
+        "first_episode_delivery_ratio": 1.0,
+        "first_three_episode_delivery_ratio": 1.0,
+        "first_episode_accuracy": 1.0,
+        "first_three_episode_accuracy": 1.0,
+        "admission_metrics": {
+          "admitted_packets": 25,
+          "mean_source_admission": 0.5814,
+          "max_source_admission": 4,
+          "mean_source_efficiency": 0.0,
+          "overload_events": 0
+        }
+      },
+      {
+        "session_index": 63,
+        "label": 1,
+        "context_code": 2,
+        "context_codes_seen": [
+          2
+        ],
+        "episode_context_codes": [
+          2,
+          2
+        ],
+        "episode_count": 2,
+        "delivery_ratio": 0.94,
+        "accuracy": 0.5,
+        "total_packets": 50,
+        "total_delivered": 47,
+        "total_dropped": 3,
+        "total_feedback_events": 21,
+        "first_episode_delivery_ratio": 0.92,
+        "first_three_episode_delivery_ratio": 0.94,
+        "first_episode_accuracy": 0.0,
+        "first_three_episode_accuracy": 0.5,
+        "admission_metrics": {
+          "admitted_packets": 50,
+          "mean_source_admission": 0.3333,
+          "max_source_admission": 4,
+          "mean_source_efficiency": 0.0,
+          "overload_events": 0
+        }
+      },
+      {
+        "session_index": 64,
+        "label": 0,
+        "context_code": 0,
+        "context_codes_seen": [
+          0,
+          2
+        ],
+        "episode_context_codes": [
+          2,
+          2,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "episode_count": 59,
+        "delivery_ratio": 0.9681,
+        "accuracy": 0.9661,
+        "total_packets": 1475,
+        "total_delivered": 1428,
+        "total_dropped": 47,
+        "total_feedback_events": 1383,
+        "first_episode_delivery_ratio": 1.0,
+        "first_three_episode_delivery_ratio": 0.9467,
+        "first_episode_accuracy": 0.0,
+        "first_three_episode_accuracy": 0.3333,
+        "admission_metrics": {
+          "admitted_packets": 1475,
+          "mean_source_admission": 0.3327,
+          "max_source_admission": 4,
+          "mean_source_efficiency": 0.0,
+          "overload_events": 0
+        }
+      },
+      {
+        "session_index": 65,
+        "label": 1,
+        "context_code": 0,
+        "context_codes_seen": [
+          0
+        ],
+        "episode_context_codes": [
+          0,
+          0,
+          0
+        ],
+        "episode_count": 3,
+        "delivery_ratio": 0.9067,
+        "accuracy": 0.3333,
+        "total_packets": 75,
+        "total_delivered": 68,
+        "total_dropped": 7,
+        "total_feedback_events": 30,
+        "first_episode_delivery_ratio": 0.96,
+        "first_three_episode_delivery_ratio": 0.9067,
+        "first_episode_accuracy": 0.0,
+        "first_three_episode_accuracy": 0.3333,
+        "admission_metrics": {
+          "admitted_packets": 75,
+          "mean_source_admission": 0.3219,
+          "max_source_admission": 4,
+          "mean_source_efficiency": 0.0,
+          "overload_events": 0
+        }
+      },
+      {
+        "session_index": 66,
+        "label": 0,
+        "context_code": 0,
+        "context_codes_seen": [
+          0
+        ],
+        "episode_context_codes": [
+          0
+        ],
+        "episode_count": 1,
+        "delivery_ratio": 0.96,
+        "accuracy": 0.0,
+        "total_packets": 25,
+        "total_delivered": 24,
+        "total_dropped": 1,
+        "total_feedback_events": 0,
+        "first_episode_delivery_ratio": 0.96,
+        "first_three_episode_delivery_ratio": 0.96,
+        "first_episode_accuracy": 0.0,
+        "first_three_episode_accuracy": 0.0,
+        "admission_metrics": {
+          "admitted_packets": 25,
+          "mean_source_admission": 0.3731,
+          "max_source_admission": 4,
+          "mean_source_efficiency": 0.0,
+          "overload_events": 0
+        }
+      }
+    ],
+    "warm_system_summaries": [
+      {
+        "capability_policy": "fixed-visible",
+        "cycles": 7104,
+        "injected_packets": 1650,
+        "admitted_packets": 1650,
+        "delivered_packets": 1565,
+        "delivery_ratio": 0.9485,
+        "dropped_packets": 85,
+        "drop_ratio": 0.0515,
+        "source_buffer": 0,
+        "mean_latency": 3.5419,
+        "mean_hops": 4.0,
+        "node_atp_total": 2.7147,
+        "mean_route_cost": 0.03223,
+        "mean_feedback_award": 0.1633,
+        "mean_source_admission": 0.6989,
+        "last_source_admission": 0,
+        "source_admission_support": 0.5,
+        "source_admission_velocity": 0.0,
+        "mean_source_efficiency": 0.0,
+        "exact_matches": 1420,
+        "mean_bit_accuracy": 0.9073
+      }
+    ],
+    "cold_system_summaries": [
+      {
+        "capability_policy": "fixed-visible",
+        "cycles": 2298,
+        "injected_packets": 1650,
+        "admitted_packets": 1650,
+        "delivered_packets": 1592,
+        "delivery_ratio": 0.9648,
+        "dropped_packets": 58,
+        "drop_ratio": 0.0352,
+        "source_buffer": 0,
+        "mean_latency": 3.3788,
+        "mean_hops": 4.0,
+        "node_atp_total": 2.6546,
+        "mean_route_cost": 0.03216,
+        "mean_feedback_award": 0.1638,
+        "mean_source_admission": 0.718,
+        "last_source_admission": 0,
+        "source_admission_support": 0.5,
+        "source_admission_velocity": 0.0,
+        "mean_source_efficiency": 0.0,
+        "exact_matches": 1449,
+        "mean_bit_accuracy": 0.9102
+      }
+    ]
+  },
+  "eval_protocols": {
+    "persistent_eval": {
+      "eval_protocol": "persistent_eval",
+      "warm_summary": {
+        "episode_count": 66,
+        "metrics": {
+          "accuracy": 0.8939393939393939,
+          "precision": 0.3333333333333333,
+          "recall": 0.4,
+          "f1": 0.3636363636363636,
+          "tp": 2.0,
+          "tn": 57.0,
+          "fp": 4.0,
+          "fn": 3.0
+        },
+        "mean_delivered_packets": 23.7121,
+        "mean_dropped_packets": 1.2879,
+        "mean_feedback_events": 21.5152,
+        "mean_feedback_total": 3.8727,
+        "occupied_prediction_rate": 0.0909,
+        "mean_delivery_ratio": 0.9485,
+        "mean_prediction_confidence": 0.9548
+      },
+      "cold_summary": {
+        "episode_count": 66,
+        "metrics": {
+          "accuracy": 0.9090909090909091,
+          "precision": 0.4,
+          "recall": 0.4,
+          "f1": 0.4000000000000001,
+          "tp": 2.0,
+          "tn": 58.0,
+          "fp": 3.0,
+          "fn": 3.0
+        },
+        "mean_delivered_packets": 24.1212,
+        "mean_dropped_packets": 0.8788,
+        "mean_feedback_events": 21.9545,
+        "mean_feedback_total": 3.9518,
+        "occupied_prediction_rate": 0.0758,
+        "mean_delivery_ratio": 0.9648,
+        "mean_prediction_confidence": 0.92
+      },
+      "efficiency": {
+        "warm_delivery_curve": [
+          1.0,
+          0.88,
+          0.9532,
+          0.88,
+          0.96
+        ],
+        "cold_delivery_curve": [
+          1.0,
+          0.94,
+          0.9681,
+          0.9067,
+          0.96
+        ],
+        "efficiency_ratio_curve": [
+          1.0,
+          0.9362,
+          0.9846,
+          0.9706,
+          1.0
+        ],
+        "mean_efficiency_ratio": 0.9783,
+        "warm_sessions_to_80pct": 0,
+        "cold_sessions_to_80pct": 0,
+        "session_1_delivery_delta": 0.0,
+        "session_1_efficiency_ratio": 1.0,
+        "mean_first_episode_delivery_delta": 0.0,
+        "mean_first_three_episode_delivery_delta": -0.0387,
+        "warm_first_episode_delivery_mean": 0.968,
+        "cold_first_episode_delivery_mean": 0.968,
+        "warm_first_three_episode_delivery_mean": 0.912,
+        "cold_first_three_episode_delivery_mean": 0.9507,
+        "warm_delivery_at": {
+          "session_1": 1.0,
+          "session_5": 0.96,
+          "session_10": null,
+          "session_20": null
+        },
+        "cold_delivery_at": {
+          "session_1": 1.0,
+          "session_5": 0.96,
+          "session_10": null,
+          "session_20": null
+        }
+      },
+      "context_transfer_probe": {
+        "context_mode": "online_running_context",
+        "training_context_codes": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "eval_context_codes": [
+          0,
+          2,
+          3
+        ],
+        "comparison_applicable": false,
+        "status": "not_applicable_all_eval_contexts_seen",
+        "warm_seen_mean_delivery": 0.9346,
+        "warm_unseen_mean_delivery": null,
+        "cold_seen_mean_delivery": 0.955,
+        "cold_unseen_mean_delivery": null,
+        "warm_seen_session_count": 5,
+        "warm_unseen_session_count": 0
+      },
+      "warm_system_summary": {
+        "capability_policy": "fixed-visible",
+        "cycles": 7104,
+        "injected_packets": 1650,
+        "admitted_packets": 1650,
+        "delivered_packets": 1565,
+        "delivery_ratio": 0.9485,
+        "dropped_packets": 85,
+        "drop_ratio": 0.0515,
+        "source_buffer": 0,
+        "mean_latency": 3.5419,
+        "mean_hops": 4.0,
+        "node_atp_total": 2.7147,
+        "mean_route_cost": 0.03223,
+        "mean_feedback_award": 0.1633,
+        "mean_source_admission": 0.6989,
+        "last_source_admission": 0,
+        "source_admission_support": 0.5,
+        "source_admission_velocity": 0.0,
+        "mean_source_efficiency": 0.0,
+        "exact_matches": 1420,
+        "mean_bit_accuracy": 0.9073
+      },
+      "cold_system_summary": {
+        "capability_policy": "fixed-visible",
+        "cycles": 2298,
+        "injected_packets": 1650,
+        "admitted_packets": 1650,
+        "delivered_packets": 1592,
+        "delivery_ratio": 0.9648,
+        "dropped_packets": 58,
+        "drop_ratio": 0.0352,
+        "source_buffer": 0,
+        "mean_latency": 3.3788,
+        "mean_hops": 4.0,
+        "node_atp_total": 2.6546,
+        "mean_route_cost": 0.03216,
+        "mean_feedback_award": 0.1638,
+        "mean_source_admission": 0.718,
+        "last_source_admission": 0,
+        "source_admission_support": 0.5,
+        "source_admission_velocity": 0.0,
+        "mean_source_efficiency": 0.0,
+        "exact_matches": 1449,
+        "mean_bit_accuracy": 0.9102
+      },
+      "warm_reset_count": 1,
+      "cold_reset_count": 1,
+      "workers_used": 2,
+      "parallelism_status": "process_pool:2",
+      "warm_session_results": [
+        {
+          "session_index": 62,
+          "label": 0,
+          "context_code": 3,
+          "context_codes_seen": [
+            3
+          ],
+          "episode_context_codes": [
+            3
+          ],
+          "episode_count": 1,
+          "delivery_ratio": 1.0,
+          "accuracy": 0.0,
+          "total_packets": 25,
+          "total_delivered": 25,
+          "total_dropped": 0,
+          "total_feedback_events": 10,
+          "first_episode_delivery_ratio": 1.0,
+          "first_three_episode_delivery_ratio": 1.0,
+          "first_episode_accuracy": 0.0,
+          "first_three_episode_accuracy": 0.0,
+          "admission_metrics": {
+            "admitted_packets": 25,
+            "mean_source_admission": 0.5102,
+            "max_source_admission": 4,
+            "mean_source_efficiency": 0.0,
+            "overload_events": 0
+          }
+        },
+        {
+          "session_index": 63,
+          "label": 1,
+          "context_code": 2,
+          "context_codes_seen": [
+            2
+          ],
+          "episode_context_codes": [
+            2,
+            2
+          ],
+          "episode_count": 2,
+          "delivery_ratio": 0.88,
+          "accuracy": 0.5,
+          "total_packets": 50,
+          "total_delivered": 44,
+          "total_dropped": 6,
+          "total_feedback_events": 18,
+          "first_episode_delivery_ratio": 1.0,
+          "first_three_episode_delivery_ratio": 0.88,
+          "first_episode_accuracy": 0.0,
+          "first_three_episode_accuracy": 0.5,
+          "admission_metrics": {
+            "admitted_packets": 50,
+            "mean_source_admission": 0.2778,
+            "max_source_admission": 4,
+            "mean_source_efficiency": 0.0,
+            "overload_events": 0
+          }
+        },
+        {
+          "session_index": 64,
+          "label": 0,
+          "context_code": 0,
+          "context_codes_seen": [
+            0,
+            2
+          ],
+          "episode_context_codes": [
+            2,
+            2,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "episode_count": 59,
+          "delivery_ratio": 0.9532,
+          "accuracy": 0.9661,
+          "total_packets": 1475,
+          "total_delivered": 1406,
+          "total_dropped": 69,
+          "total_feedback_events": 1366,
+          "first_episode_delivery_ratio": 0.96,
+          "first_three_episode_delivery_ratio": 0.84,
+          "first_episode_accuracy": 0.0,
+          "first_three_episode_accuracy": 0.3333,
+          "admission_metrics": {
+            "admitted_packets": 1475,
+            "mean_source_admission": 0.3277,
+            "max_source_admission": 4,
+            "mean_source_efficiency": 0.0,
+            "overload_events": 0
+          }
+        },
+        {
+          "session_index": 65,
+          "label": 1,
+          "context_code": 0,
+          "context_codes_seen": [
+            0
+          ],
+          "episode_context_codes": [
+            0,
+            0,
+            0
+          ],
+          "episode_count": 3,
+          "delivery_ratio": 0.88,
+          "accuracy": 0.3333,
+          "total_packets": 75,
+          "total_delivered": 66,
+          "total_dropped": 9,
+          "total_feedback_events": 26,
+          "first_episode_delivery_ratio": 0.92,
+          "first_three_episode_delivery_ratio": 0.88,
+          "first_episode_accuracy": 0.0,
+          "first_three_episode_accuracy": 0.3333,
+          "admission_metrics": {
+            "admitted_packets": 75,
+            "mean_source_admission": 0.2964,
+            "max_source_admission": 4,
+            "mean_source_efficiency": 0.0,
+            "overload_events": 0
+          }
+        },
+        {
+          "session_index": 66,
+          "label": 0,
+          "context_code": 0,
+          "context_codes_seen": [
+            0
+          ],
+          "episode_context_codes": [
+            0
+          ],
+          "episode_count": 1,
+          "delivery_ratio": 0.96,
+          "accuracy": 0.0,
+          "total_packets": 25,
+          "total_delivered": 24,
+          "total_dropped": 1,
+          "total_feedback_events": 0,
+          "first_episode_delivery_ratio": 0.96,
+          "first_three_episode_delivery_ratio": 0.96,
+          "first_episode_accuracy": 0.0,
+          "first_three_episode_accuracy": 0.0,
+          "admission_metrics": {
+            "admitted_packets": 25,
+            "mean_source_admission": 0.3623,
+            "max_source_admission": 4,
+            "mean_source_efficiency": 0.0,
+            "overload_events": 0
+          }
+        }
+      ],
+      "cold_session_results": [
+        {
+          "session_index": 62,
+          "label": 0,
+          "context_code": 3,
+          "context_codes_seen": [
+            3
+          ],
+          "episode_context_codes": [
+            3
+          ],
+          "episode_count": 1,
+          "delivery_ratio": 1.0,
+          "accuracy": 1.0,
+          "total_packets": 25,
+          "total_delivered": 25,
+          "total_dropped": 0,
+          "total_feedback_events": 15,
+          "first_episode_delivery_ratio": 1.0,
+          "first_three_episode_delivery_ratio": 1.0,
+          "first_episode_accuracy": 1.0,
+          "first_three_episode_accuracy": 1.0,
+          "admission_metrics": {
+            "admitted_packets": 25,
+            "mean_source_admission": 0.5814,
+            "max_source_admission": 4,
+            "mean_source_efficiency": 0.0,
+            "overload_events": 0
+          }
+        },
+        {
+          "session_index": 63,
+          "label": 1,
+          "context_code": 2,
+          "context_codes_seen": [
+            2
+          ],
+          "episode_context_codes": [
+            2,
+            2
+          ],
+          "episode_count": 2,
+          "delivery_ratio": 0.94,
+          "accuracy": 0.5,
+          "total_packets": 50,
+          "total_delivered": 47,
+          "total_dropped": 3,
+          "total_feedback_events": 21,
+          "first_episode_delivery_ratio": 0.92,
+          "first_three_episode_delivery_ratio": 0.94,
+          "first_episode_accuracy": 0.0,
+          "first_three_episode_accuracy": 0.5,
+          "admission_metrics": {
+            "admitted_packets": 50,
+            "mean_source_admission": 0.3333,
+            "max_source_admission": 4,
+            "mean_source_efficiency": 0.0,
+            "overload_events": 0
+          }
+        },
+        {
+          "session_index": 64,
+          "label": 0,
+          "context_code": 0,
+          "context_codes_seen": [
+            0,
+            2
+          ],
+          "episode_context_codes": [
+            2,
+            2,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "episode_count": 59,
+          "delivery_ratio": 0.9681,
+          "accuracy": 0.9661,
+          "total_packets": 1475,
+          "total_delivered": 1428,
+          "total_dropped": 47,
+          "total_feedback_events": 1383,
+          "first_episode_delivery_ratio": 1.0,
+          "first_three_episode_delivery_ratio": 0.9467,
+          "first_episode_accuracy": 0.0,
+          "first_three_episode_accuracy": 0.3333,
+          "admission_metrics": {
+            "admitted_packets": 1475,
+            "mean_source_admission": 0.3327,
+            "max_source_admission": 4,
+            "mean_source_efficiency": 0.0,
+            "overload_events": 0
+          }
+        },
+        {
+          "session_index": 65,
+          "label": 1,
+          "context_code": 0,
+          "context_codes_seen": [
+            0
+          ],
+          "episode_context_codes": [
+            0,
+            0,
+            0
+          ],
+          "episode_count": 3,
+          "delivery_ratio": 0.9067,
+          "accuracy": 0.3333,
+          "total_packets": 75,
+          "total_delivered": 68,
+          "total_dropped": 7,
+          "total_feedback_events": 30,
+          "first_episode_delivery_ratio": 0.96,
+          "first_three_episode_delivery_ratio": 0.9067,
+          "first_episode_accuracy": 0.0,
+          "first_three_episode_accuracy": 0.3333,
+          "admission_metrics": {
+            "admitted_packets": 75,
+            "mean_source_admission": 0.3219,
+            "max_source_admission": 4,
+            "mean_source_efficiency": 0.0,
+            "overload_events": 0
+          }
+        },
+        {
+          "session_index": 66,
+          "label": 0,
+          "context_code": 0,
+          "context_codes_seen": [
+            0
+          ],
+          "episode_context_codes": [
+            0
+          ],
+          "episode_count": 1,
+          "delivery_ratio": 0.96,
+          "accuracy": 0.0,
+          "total_packets": 25,
+          "total_delivered": 24,
+          "total_dropped": 1,
+          "total_feedback_events": 0,
+          "first_episode_delivery_ratio": 0.96,
+          "first_three_episode_delivery_ratio": 0.96,
+          "first_episode_accuracy": 0.0,
+          "first_three_episode_accuracy": 0.0,
+          "admission_metrics": {
+            "admitted_packets": 25,
+            "mean_source_admission": 0.3731,
+            "max_source_admission": 4,
+            "mean_source_efficiency": 0.0,
+            "overload_events": 0
+          }
+        }
+      ],
+      "warm_system_summaries": [
+        {
+          "capability_policy": "fixed-visible",
+          "cycles": 7104,
+          "injected_packets": 1650,
+          "admitted_packets": 1650,
+          "delivered_packets": 1565,
+          "delivery_ratio": 0.9485,
+          "dropped_packets": 85,
+          "drop_ratio": 0.0515,
+          "source_buffer": 0,
+          "mean_latency": 3.5419,
+          "mean_hops": 4.0,
+          "node_atp_total": 2.7147,
+          "mean_route_cost": 0.03223,
+          "mean_feedback_award": 0.1633,
+          "mean_source_admission": 0.6989,
+          "last_source_admission": 0,
+          "source_admission_support": 0.5,
+          "source_admission_velocity": 0.0,
+          "mean_source_efficiency": 0.0,
+          "exact_matches": 1420,
+          "mean_bit_accuracy": 0.9073
+        }
+      ],
+      "cold_system_summaries": [
+        {
+          "capability_policy": "fixed-visible",
+          "cycles": 2298,
+          "injected_packets": 1650,
+          "admitted_packets": 1650,
+          "delivered_packets": 1592,
+          "delivery_ratio": 0.9648,
+          "dropped_packets": 58,
+          "drop_ratio": 0.0352,
+          "source_buffer": 0,
+          "mean_latency": 3.3788,
+          "mean_hops": 4.0,
+          "node_atp_total": 2.6546,
+          "mean_route_cost": 0.03216,
+          "mean_feedback_award": 0.1638,
+          "mean_source_admission": 0.718,
+          "last_source_admission": 0,
+          "source_admission_support": 0.5,
+          "source_admission_velocity": 0.0,
+          "mean_source_efficiency": 0.0,
+          "exact_matches": 1449,
+          "mean_bit_accuracy": 0.9102
+        }
+      ]
+    }
+  },
+  "warm_eval_summary": {
+    "episode_count": 66,
+    "metrics": {
+      "accuracy": 0.8939393939393939,
+      "precision": 0.3333333333333333,
+      "recall": 0.4,
+      "f1": 0.3636363636363636,
+      "tp": 2.0,
+      "tn": 57.0,
+      "fp": 4.0,
+      "fn": 3.0
+    },
+    "mean_delivered_packets": 23.7121,
+    "mean_dropped_packets": 1.2879,
+    "mean_feedback_events": 21.5152,
+    "mean_feedback_total": 3.8727,
+    "occupied_prediction_rate": 0.0909,
+    "mean_delivery_ratio": 0.9485,
+    "mean_prediction_confidence": 0.9548
+  },
+  "cold_eval_summary": {
+    "episode_count": 66,
+    "metrics": {
+      "accuracy": 0.9090909090909091,
+      "precision": 0.4,
+      "recall": 0.4,
+      "f1": 0.4000000000000001,
+      "tp": 2.0,
+      "tn": 58.0,
+      "fp": 3.0,
+      "fn": 3.0
+    },
+    "mean_delivered_packets": 24.1212,
+    "mean_dropped_packets": 0.8788,
+    "mean_feedback_events": 21.9545,
+    "mean_feedback_total": 3.9518,
+    "occupied_prediction_rate": 0.0758,
+    "mean_delivery_ratio": 0.9648,
+    "mean_prediction_confidence": 0.92
+  },
+  "carryover_efficiency": {
+    "warm_delivery_curve": [
+      1.0,
+      0.88,
+      0.9532,
+      0.88,
+      0.96
+    ],
+    "cold_delivery_curve": [
+      1.0,
+      0.94,
+      0.9681,
+      0.9067,
+      0.96
+    ],
+    "efficiency_ratio_curve": [
+      1.0,
+      0.9362,
+      0.9846,
+      0.9706,
+      1.0
+    ],
+    "mean_efficiency_ratio": 0.9783,
+    "warm_sessions_to_80pct": 0,
+    "cold_sessions_to_80pct": 0,
+    "session_1_delivery_delta": 0.0,
+    "session_1_efficiency_ratio": 1.0,
+    "mean_first_episode_delivery_delta": 0.0,
+    "mean_first_three_episode_delivery_delta": -0.0387,
+    "warm_first_episode_delivery_mean": 0.968,
+    "cold_first_episode_delivery_mean": 0.968,
+    "warm_first_three_episode_delivery_mean": 0.912,
+    "cold_first_three_episode_delivery_mean": 0.9507,
+    "warm_delivery_at": {
+      "session_1": 1.0,
+      "session_5": 0.96,
+      "session_10": null,
+      "session_20": null
+    },
+    "cold_delivery_at": {
+      "session_1": 1.0,
+      "session_5": 0.96,
+      "session_10": null,
+      "session_20": null
+    }
+  },
+  "context_transfer_probe": {
+    "context_mode": "online_running_context",
+    "training_context_codes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "eval_context_codes": [
+      0,
+      2,
+      3
+    ],
+    "comparison_applicable": false,
+    "status": "not_applicable_all_eval_contexts_seen",
+    "warm_seen_mean_delivery": 0.9346,
+    "warm_unseen_mean_delivery": null,
+    "cold_seen_mean_delivery": 0.955,
+    "cold_unseen_mean_delivery": null,
+    "warm_seen_session_count": 5,
+    "warm_unseen_session_count": 0
+  },
+  "warm_system_summary": {
+    "capability_policy": "fixed-visible",
+    "cycles": 7104,
+    "injected_packets": 1650,
+    "admitted_packets": 1650,
+    "delivered_packets": 1565,
+    "delivery_ratio": 0.9485,
+    "dropped_packets": 85,
+    "drop_ratio": 0.0515,
+    "source_buffer": 0,
+    "mean_latency": 3.5419,
+    "mean_hops": 4.0,
+    "node_atp_total": 2.7147,
+    "mean_route_cost": 0.03223,
+    "mean_feedback_award": 0.1633,
+    "mean_source_admission": 0.6989,
+    "last_source_admission": 0,
+    "source_admission_support": 0.5,
+    "source_admission_velocity": 0.0,
+    "mean_source_efficiency": 0.0,
+    "exact_matches": 1420,
+    "mean_bit_accuracy": 0.9073
+  },
+  "cold_system_summary": {
+    "capability_policy": "fixed-visible",
+    "cycles": 2298,
+    "injected_packets": 1650,
+    "admitted_packets": 1650,
+    "delivered_packets": 1592,
+    "delivery_ratio": 0.9648,
+    "dropped_packets": 58,
+    "drop_ratio": 0.0352,
+    "source_buffer": 0,
+    "mean_latency": 3.3788,
+    "mean_hops": 4.0,
+    "node_atp_total": 2.6546,
+    "mean_route_cost": 0.03216,
+    "mean_feedback_award": 0.1638,
+    "mean_source_admission": 0.718,
+    "last_source_admission": 0,
+    "source_admission_support": 0.5,
+    "source_admission_velocity": 0.0,
+    "mean_source_efficiency": 0.0,
+    "exact_matches": 1449,
+    "mean_bit_accuracy": 0.9102
+  },
+  "train_session_results": [
+    {
+      "session_index": 0,
+      "label": 0,
+      "context_code": 0,
+      "context_codes_seen": [
+        0
+      ],
+      "episode_context_codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "episode_count": 28,
+      "delivery_ratio": 0.9714,
+      "accuracy": 1.0,
+      "total_packets": 700,
+      "total_delivered": 680,
+      "total_dropped": 20,
+      "total_feedback_events": 664,
+      "first_episode_delivery_ratio": 1.0,
+      "first_three_episode_delivery_ratio": 1.0,
+      "first_episode_accuracy": 1.0,
+      "first_three_episode_accuracy": 1.0,
+      "admission_metrics": {
+        "admitted_packets": 700,
+        "mean_source_admission": 0.3359,
+        "max_source_admission": 4,
+        "mean_source_efficiency": 0.0,
+        "overload_events": 0
+      }
+    },
+    {
+      "session_index": 1,
+      "label": 1,
+      "context_code": 0,
+      "context_codes_seen": [
+        0
+      ],
+      "episode_context_codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "episode_count": 9,
+      "delivery_ratio": 0.9467,
+      "accuracy": 0.7778,
+      "total_packets": 225,
+      "total_delivered": 213,
+      "total_dropped": 12,
+      "total_feedback_events": 171,
+      "first_episode_delivery_ratio": 0.96,
+      "first_three_episode_delivery_ratio": 0.88,
+      "first_episode_accuracy": 0.0,
+      "first_three_episode_accuracy": 0.3333,
+      "admission_metrics": {
+        "admitted_packets": 225,
+        "mean_source_admission": 0.3333,
+        "max_source_admission": 4,
+        "mean_source_efficiency": 0.0,
+        "overload_events": 0
+      }
+    },
+    {
+      "session_index": 2,
+      "label": 0,
+      "context_code": 1,
+      "context_codes_seen": [
+        1
+      ],
+      "episode_context_codes": [
+        1
+      ],
+      "episode_count": 1,
+      "delivery_ratio": 0.84,
+      "accuracy": 0.0,
+      "total_packets": 25,
+      "total_delivered": 21,
+      "total_dropped": 4,
+      "total_feedback_events": 3,
+      "first_episode_delivery_ratio": 0.84,
+      "first_three_episode_delivery_ratio": 0.84,
+      "first_episode_accuracy": 0.0,
+      "first_three_episode_accuracy": 0.0,
+      "admission_metrics": {
+        "admitted_packets": 25,
+        "mean_source_admission": 0.2809,
+        "max_source_admission": 4,
+        "mean_source_efficiency": 0.0,
+        "overload_events": 0
+      }
+    },
+    {
+      "session_index": 3,
+      "label": 1,
+      "context_code": 3,
+      "context_codes_seen": [
+        1,
+        3
+      ],
+      "episode_context_codes": [
+        1,
+        1,
+        3,
+        3,
+        3,
+        3
+      ],
+      "episode_count": 6,
+      "delivery_ratio": 0.9133,
+      "accuracy": 0.8333,
+      "total_packets": 150,
+      "total_delivered": 137,
+      "total_dropped": 13,
+      "total_feedback_events": 105,
+      "first_episode_delivery_ratio": 1.0,
+      "first_three_episode_delivery_ratio": 0.8533,
+      "first_episode_accuracy": 0.0,
+      "first_three_episode_accuracy": 0.6667,
+      "admission_metrics": {
+        "admitted_packets": 150,
+        "mean_source_admission": 0.3012,
+        "max_source_admission": 4,
+        "mean_source_efficiency": 0.0,
+        "overload_events": 0
+      }
+    },
+    {
+      "session_index": 4,
+      "label": 0,
+      "context_code": 3,
+      "context_codes_seen": [
+        3
+      ],
+      "episode_context_codes": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "episode_count": 4,
+      "delivery_ratio": 0.89,
+      "accuracy": 0.5,
+      "total_packets": 100,
+      "total_delivered": 89,
+      "total_dropped": 11,
+      "total_feedback_events": 39,
+      "first_episode_delivery_ratio": 1.0,
+      "first_three_episode_delivery_ratio": 0.9333,
+      "first_episode_accuracy": 0.0,
+      "first_three_episode_accuracy": 0.3333,
+      "admission_metrics": {
+        "admitted_packets": 100,
+        "mean_source_admission": 0.303,
+        "max_source_admission": 4,
+        "mean_source_efficiency": 0.0,
+        "overload_events": 0
+      }
+    },
+    {
+      "session_index": 5,
+      "label": 1,
+      "context_code": 3,
+      "context_codes_seen": [
+        1,
+        3
+      ],
+      "episode_context_codes": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "episode_count": 12,
+      "delivery_ratio": 0.94,
+      "accuracy": 0.9167,
+      "total_packets": 300,
+      "total_delivered": 282,
+      "total_dropped": 18,
+      "total_feedback_events": 248,
+      "first_episode_delivery_ratio": 0.96,
+      "first_three_episode_delivery_ratio": 0.8667,
+      "first_episode_accuracy": 0.0,
+      "first_three_episode_accuracy": 0.6667,
+      "admission_metrics": {
+        "admitted_packets": 300,
+        "mean_source_admission": 0.3282,
+        "max_source_admission": 4,
+        "mean_source_efficiency": 0.0,
+        "overload_events": 0
+      }
+    },
+    {
+      "session_index": 6,
+      "label": 0,
+      "context_code": 3,
+      "context_codes_seen": [
+        3
+      ],
+      "episode_context_codes": [
+        3
+      ],
+      "episode_count": 1,
+      "delivery_ratio": 0.96,
+      "accuracy": 0.0,
+      "total_packets": 25,
+      "total_delivered": 24,
+      "total_dropped": 1,
+      "total_feedback_events": 2,
+      "first_episode_delivery_ratio": 0.96,
+      "first_three_episode_delivery_ratio": 0.96,
+      "first_episode_accuracy": 0.0,
+      "first_three_episode_accuracy": 0.0,
+      "admission_metrics": {
+        "admitted_packets": 25,
+        "mean_source_admission": 0.3333,
+        "max_source_admission": 4,
+        "mean_source_efficiency": 0.0,
+        "overload_events": 0
+      }
+    },
+    {
+      "session_index": 7,
+      "label": 1,
+      "context_code": 3,
+      "context_codes_seen": [
+        3
+      ],
+      "episode_context_codes": [
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "episode_count": 5,
+      "delivery_ratio": 0.944,
+      "accuracy": 0.8,
+      "total_packets": 125,
+      "total_delivered": 118,
+      "total_dropped": 7,
+      "total_feedback_events": 102,
+      "first_episode_delivery_ratio": 0.84,
+      "first_three_episode_delivery_ratio": 0.92,
+      "first_episode_accuracy": 0.0,
+      "first_three_episode_accuracy": 0.6667,
+      "admission_metrics": {
+        "admitted_packets": 125,
+        "mean_source_admission": 0.3181,
+        "max_source_admission": 4,
+        "mean_source_efficiency": 0.0,
+        "overload_events": 0
+      }
+    },
+    {
+      "session_index": 8,
+      "label": 0,
+      "context_code": 0,
+      "context_codes_seen": [
+        0,
+        2
+      ],
+      "episode_context_codes": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "episode_count": 58,
+      "delivery_ratio": 0.9669,
+      "accuracy": 0.9655,
+      "total_packets": 1450,
+      "total_delivered": 1402,
+      "total_dropped": 48,
+      "total_feedback_events": 1330,
+      "first_episode_delivery_ratio": 0.96,
+      "first_three_episode_delivery_ratio": 0.9467,
+      "first_episode_accuracy": 0.0,
+      "first_three_episode_accuracy": 0.3333,
+      "admission_metrics": {
+        "admitted_packets": 1450,
+        "mean_source_admission": 0.3369,
+        "max_source_admission": 4,
+        "mean_source_efficiency": 0.0,
+        "overload_events": 0
+      }
+    },
+    {
+      "session_index": 9,
+      "label": 1,
+      "context_code": 0,
+      "context_codes_seen": [
+        0
+      ],
+      "episode_context_codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "episode_count": 10,
+      "delivery_ratio": 0.948,
+      "accuracy": 0.9,
+      "total_packets": 250,
+      "total_delivered": 237,
+      "total_dropped": 13,
+      "total_feedback_events": 193,
+      "first_episode_delivery_ratio": 0.96,
+      "first_three_episode_delivery_ratio": 0.9333,
+      "first_episode_accuracy": 0.0,
+      "first_three_episode_accuracy": 0.6667,
+      "admission_metrics": {
+        "admitted_packets": 250,
+        "mean_source_admission": 0.3149,
+        "max_source_admission": 4,
+        "mean_source_efficiency": 0.0,
+        "overload_events": 0
+      }
+    }
+  ],
+  "manifest": {
+    "run_id": "v3_seed13_20260320T180727",
+    "run_at": "2026-03-20T18:07:27+00:00",
+    "git_sha": "c5a20ac",
+    "csv": "occupancy_baseline/data/occupancy_synth_v1.csv",
+    "selector_seeds": [
+      13
+    ],
+    "window_size": 5,
+    "train_session_fraction": 0.7,
+    "eval_mode": "persistent_eval",
+    "topology_mode": "multihop_routing",
+    "context_mode": "online_running_context",
+    "ingress_mode": "admission_source",
+    "max_train_sessions": 10,
+    "max_eval_sessions": 5,
+    "workers": 10,
+    "feedback_amount": 0.18,
+    "eval_feedback_fraction": 1.0,
+    "packet_ttl": 8,
+    "summary_only": false,
+    "output_json": "docs/experiment_outputs/v3_seed13_1105.json",
+    "elapsed_seconds": 137.68254209999577
+  }
+}

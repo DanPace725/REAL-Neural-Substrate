@@ -1,29 +1,7 @@
 """
 run_occupancy_real_v3.py
 ------------------------
-CLI entrypoint for the v3 REAL occupancy experiment.
-
-This runner uses session-structured evaluation with carryover efficiency
-measurement.  It does NOT produce a direct accuracy-vs-MLP comparison — the
-primary outputs are learning curves, carryover efficiency ratios, and context
-transfer probe results.
-
-Basic usage
------------
-    python -m scripts.run_occupancy_real_v3 \\
-        --csv occupancy_baseline/data/occupancy_synth_v1.csv
-
-With JSON output
-----------------
-    python -m scripts.run_occupancy_real_v3 \\
-        --csv occupancy_baseline/data/occupancy_synth_v1.csv \\
-        --output-json docs/experiment_outputs/occupancy_v3_seed13.json
-
-Quiet summary-only run
------------------------
-    python -m scripts.run_occupancy_real_v3 \\
-        --csv occupancy_baseline/data/occupancy_synth_v1.csv \\
-        --summary-only
+CLI entrypoint for the REAL-native occupancy harness.
 """
 from __future__ import annotations
 
@@ -37,60 +15,72 @@ from pathlib import Path
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(
+    from scripts.occupancy_real_v3 import (
+        AUTO_CPU_TARGET_FRACTION,
+        CONTEXT_LATENT,
+        CONTEXT_OFFLINE,
+        CONTEXT_ONLINE,
+        EVAL_BOTH,
+        EVAL_FRESH,
+        EVAL_PERSISTENT,
+        INGRESS_ADMISSION,
+        INGRESS_DIRECT,
+        TOPOLOGY_FIXED,
+        TOPOLOGY_MULTIHOP,
+    )
+
+    parser = argparse.ArgumentParser(
         prog="run_occupancy_real_v3",
-        description="V3 REAL occupancy experiment: session-structured carryover test",
+        description="V3 REAL occupancy experiment: REAL-native carryover harness",
     )
-    p.add_argument(
-        "--csv",
-        default="occupancy_baseline/data/occupancy_synth_v1.csv",
-        help="Path to occupancy CSV (default: occupancy_baseline/data/occupancy_synth_v1.csv)",
+    parser.add_argument("--csv", default="occupancy_baseline/data/occupancy_synth_v1.csv")
+    parser.add_argument("--window-size", type=int, default=5)
+    parser.add_argument("--selector-seed", type=int, default=13)
+    parser.add_argument(
+        "--selector-seeds",
+        nargs="*",
+        type=int,
+        default=None,
+        help="Optional multi-seed sweep. When provided, this takes precedence over --selector-seed.",
     )
-    p.add_argument(
-        "--window-size", type=int, default=5,
-        help="Rolling window size for episode construction (default: 5)",
+    parser.add_argument("--feedback-amount", type=float, default=0.18)
+    parser.add_argument("--eval-feedback-fraction", type=float, default=1.0)
+    parser.add_argument("--train-session-fraction", type=float, default=0.70)
+    parser.add_argument(
+        "--eval-mode",
+        choices=[EVAL_PERSISTENT, EVAL_FRESH, EVAL_BOTH],
+        default=EVAL_FRESH,
     )
-    p.add_argument(
-        "--selector-seed", type=int, default=13,
-        help="Selector seed for the NativeSubstrateSystem (default: 13)",
+    parser.add_argument(
+        "--topology-mode",
+        choices=[TOPOLOGY_FIXED, TOPOLOGY_MULTIHOP],
+        default=TOPOLOGY_MULTIHOP,
     )
-    p.add_argument(
-        "--feedback-amount", type=float, default=0.18,
-        help="Feedback amount per matched packet (default: 0.18)",
+    parser.add_argument(
+        "--context-mode",
+        choices=[CONTEXT_OFFLINE, CONTEXT_ONLINE, CONTEXT_LATENT],
+        default=CONTEXT_ONLINE,
     )
-    p.add_argument(
-        "--eval-feedback-fraction", type=float, default=1.0,
-        help="Fraction of feedback_amount applied during eval (default: 1.0 = full)",
+    parser.add_argument(
+        "--ingress-mode",
+        choices=[INGRESS_ADMISSION, INGRESS_DIRECT],
+        default=INGRESS_ADMISSION,
     )
-    p.add_argument(
-        "--train-session-fraction", type=float, default=0.70,
-        help="Fraction of sessions (temporal order) used for training (default: 0.70)",
+    parser.add_argument("--packet-ttl", type=int, default=8)
+    parser.add_argument("--output-json", default=None)
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help=(
+            f"Eval workers. Omit to auto-use about {int(AUTO_CPU_TARGET_FRACTION * 100)}% "
+            "of visible CPU capacity."
+        ),
     )
-    p.add_argument(
-        "--packet-ttl", type=int, default=8,
-        help="Packet TTL cycles (default: 8)",
-    )
-    p.add_argument(
-        "--output-json", default=None,
-        help="Write full result to this JSON file",
-    )
-    p.add_argument(
-        "--workers", type=int, default=2,
-        help="Worker processes for warm/cold eval (2=parallel, 1=sequential; default: 2)",
-    )
-    p.add_argument(
-        "--max-train-sessions", type=int, default=None,
-        help="Cap training sessions (default: all).  Use for quick smoke tests.",
-    )
-    p.add_argument(
-        "--max-eval-sessions", type=int, default=None,
-        help="Cap eval sessions (default: all).  Use for quick smoke tests.",
-    )
-    p.add_argument(
-        "--summary-only", action="store_true",
-        help="Omit per-session result lists from JSON output",
-    )
-    return p
+    parser.add_argument("--max-train-sessions", type=int, default=None)
+    parser.add_argument("--max-eval-sessions", type=int, default=None)
+    parser.add_argument("--summary-only", action="store_true")
+    return parser
 
 
 def _git_sha() -> str | None:
@@ -105,24 +95,37 @@ def _git_sha() -> str | None:
         return None
 
 
-def _build_manifest(args: argparse.Namespace, elapsed: float | None = None) -> dict:
-    """
-    Compact run record printed at start and written into the JSON output.
+def _selected_seeds(args: argparse.Namespace) -> list[int]:
+    if args.selector_seeds:
+        return list(dict.fromkeys(int(seed) for seed in args.selector_seeds))
+    return [int(args.selector_seed)]
 
-    elapsed is None when the manifest is first printed (before the run),
-    then filled in and the manifest is updated in the result dict after.
-    """
+
+def _build_manifest(
+    args: argparse.Namespace,
+    *,
+    selector_seeds: list[int],
+    elapsed: float | None = None,
+) -> dict[str, object]:
     run_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    seed = args.selector_seed
-    ts = run_at.replace(":", "").replace("-", "")[:15]          # 20260319T170000Z style
+    timestamp = run_at.replace(":", "").replace("-", "")[:15]
+    seed_fragment = (
+        f"seed{selector_seeds[0]}"
+        if len(selector_seeds) == 1
+        else f"sweep{len(selector_seeds)}seeds"
+    )
     return {
-        "run_id": f"v3_seed{seed}_{ts}",
+        "run_id": f"v3_{seed_fragment}_{timestamp}",
         "run_at": run_at,
         "git_sha": _git_sha(),
         "csv": args.csv,
-        "selector_seed": seed,
+        "selector_seeds": list(selector_seeds),
         "window_size": args.window_size,
         "train_session_fraction": args.train_session_fraction,
+        "eval_mode": args.eval_mode,
+        "topology_mode": args.topology_mode,
+        "context_mode": args.context_mode,
+        "ingress_mode": args.ingress_mode,
         "max_train_sessions": args.max_train_sessions,
         "max_eval_sessions": args.max_eval_sessions,
         "workers": args.workers,
@@ -135,28 +138,43 @@ def _build_manifest(args: argparse.Namespace, elapsed: float | None = None) -> d
     }
 
 
-def _print_manifest(manifest: dict) -> None:
-    sep = "-" * 60
-    print(f"\n{sep}")
+def _print_manifest(manifest: dict[str, object]) -> None:
+    separator = "-" * 60
+    print(f"\n{separator}")
     print(f"  run_id:   {manifest['run_id']}")
     print(f"  run_at:   {manifest['run_at']}")
     if manifest["git_sha"]:
         print(f"  git_sha:  {manifest['git_sha']}")
     print(f"  csv:      {manifest['csv']}")
-    print(f"  seed:     {manifest['selector_seed']}  "
-          f"window: {manifest['window_size']}  "
-          f"train_frac: {manifest['train_session_fraction']}")
-    caps = []
-    if manifest["max_train_sessions"] is not None:
-        caps.append(f"train<={manifest['max_train_sessions']}")
-    if manifest["max_eval_sessions"] is not None:
-        caps.append(f"eval<={manifest['max_eval_sessions']}")
-    if caps:
-        print(f"  caps:     {', '.join(caps)}")
-    print(f"  workers:  {manifest['workers']}")
+    selector_seeds = list(manifest["selector_seeds"])
+    if len(selector_seeds) == 1:
+        print(
+            f"  seed:     {selector_seeds[0]}  "
+            f"window: {manifest['window_size']}  "
+            f"train_frac: {manifest['train_session_fraction']}"
+        )
+    else:
+        print(
+            f"  seeds:    {selector_seeds}  "
+            f"window: {manifest['window_size']}  "
+            f"train_frac: {manifest['train_session_fraction']}"
+        )
+    print(
+        f"  modes:    eval={manifest['eval_mode']}  "
+        f"topology={manifest['topology_mode']}  "
+        f"context={manifest['context_mode']}  "
+        f"ingress={manifest['ingress_mode']}"
+    )
+    if manifest["max_train_sessions"] is not None or manifest["max_eval_sessions"] is not None:
+        print(
+            f"  caps:     train<={manifest['max_train_sessions']}  "
+            f"eval<={manifest['max_eval_sessions']}"
+        )
+    worker_label = manifest["workers"] if manifest["workers"] is not None else "auto"
+    print(f"  workers:  {worker_label}")
     if manifest["elapsed_seconds"] is not None:
-        print(f"  elapsed:  {manifest['elapsed_seconds']:.1f}s")
-    print(sep)
+        print(f"  elapsed:  {float(manifest['elapsed_seconds']):.1f}s")
+    print(separator)
 
 
 def _print_section(title: str) -> None:
@@ -165,118 +183,183 @@ def _print_section(title: str) -> None:
     print(f"{'=' * 60}")
 
 
-def _print_inventory(label: str, inv: dict) -> None:
+def _print_inventory(label: str, inventory: dict[str, object]) -> None:
     print(f"\n{label}")
-    print(f"  sessions:       {inv['session_count']}")
-    print(f"  by label:       {inv['by_label']}")
-    print(f"  by context:     {inv['by_context_code']}")
-    ep = inv["episode_lengths"]
-    print(f"  episode length: min={ep['min']}  mean={ep['mean']}  max={ep['max']}")
-    print(f"  ctx by label:   {inv['context_codes_by_label']}")
+    print(f"  sessions:       {inventory['session_count']}")
+    print(f"  by label:       {inventory['by_label']}")
+    print(f"  by context:     {inventory['by_context_code']}")
+    lengths = inventory["episode_lengths"]
+    print(f"  episode length: min={lengths['min']}  mean={lengths['mean']}  max={lengths['max']}")
+    print(f"  ctx by label:   {inventory['context_codes_by_label']}")
 
 
-def _print_summary(label: str, summary: dict) -> None:
-    m = summary.get("metrics", {})
+def _print_summary(label: str, summary: dict[str, object]) -> None:
+    metrics = summary.get("metrics", {})
     print(f"\n{label}")
     print(f"  episodes:     {summary['episode_count']}")
-    print(f"  accuracy:     {m.get('accuracy', '—'):.4f}")
-    print(f"  F1:           {m.get('f1', '—'):.4f}")
-    print(f"  precision:    {m.get('precision', '—'):.4f}")
-    print(f"  recall:       {m.get('recall', '—'):.4f}")
+    print(f"  accuracy:     {metrics.get('accuracy', 0.0):.4f}")
+    print(f"  F1:           {metrics.get('f1', 0.0):.4f}")
+    print(f"  precision:    {metrics.get('precision', 0.0):.4f}")
+    print(f"  recall:       {metrics.get('recall', 0.0):.4f}")
+    print(f"  mean deliv:   {summary.get('mean_delivery_ratio', 0.0):.4f}")
     print(f"  mean dropped: {summary['mean_dropped_packets']:.2f}")
     print(f"  mean fdbk ev: {summary['mean_feedback_events']:.2f}")
 
 
-def _print_efficiency(eff: dict) -> None:
+def _print_efficiency(efficiency: dict[str, object]) -> None:
     print("\nCarryover efficiency")
-    print(f"  mean efficiency ratio:       {eff['mean_efficiency_ratio']}")
-    print(f"  warm sessions to 80% deliv:  {eff['warm_sessions_to_80pct']}")
-    print(f"  cold sessions to 80% deliv:  {eff['cold_sessions_to_80pct']}")
-
-    print("\n  Delivery ratio at session N:")
-    print(f"  {'Session':>10}  {'Warm':>8}  {'Cold':>8}  {'Ratio':>8}")
-    warm_at = eff["warm_delivery_at"]
-    cold_at = eff["cold_delivery_at"]
-    for key in ("session_1", "session_5", "session_10", "session_20"):
-        w = warm_at.get(key)
-        c = cold_at.get(key)
-        ratio = (
-            f"{w / c:.4f}" if (w is not None and c is not None and c > 0) else "—"
-        )
-        w_str = f"{w:.4f}" if w is not None else "—"
-        c_str = f"{c:.4f}" if c is not None else "—"
-        label = key.replace("session_", "session ")
-        print(f"  {label:>10}  {w_str:>8}  {c_str:>8}  {ratio:>8}")
+    print(f"  mean efficiency ratio:       {efficiency['mean_efficiency_ratio']}")
+    print(f"  session 1 delivery delta:    {efficiency['session_1_delivery_delta']}")
+    print(f"  session 1 efficiency ratio:  {efficiency['session_1_efficiency_ratio']}")
+    print(f"  mean first-episode delta:    {efficiency['mean_first_episode_delivery_delta']}")
+    print(f"  mean first-3-episode delta:  {efficiency['mean_first_three_episode_delivery_delta']}")
+    print(f"  warm sessions to 80% deliv:  {efficiency['warm_sessions_to_80pct']}")
+    print(f"  cold sessions to 80% deliv:  {efficiency['cold_sessions_to_80pct']}")
 
 
-def _print_transfer(probe: dict) -> None:
+def _print_transfer(probe: dict[str, object]) -> None:
     print("\nContext transfer probe")
+    print(f"  status: {probe['status']}")
     print(f"  training context codes: {probe['training_context_codes']}")
-    print(f"  seen   contexts (warm): {probe['warm_seen_mean_delivery']}  "
-          f"({probe['warm_seen_session_count']} sessions)")
-    print(f"  unseen contexts (warm): {probe['warm_unseen_mean_delivery']}  "
-          f"({probe['warm_unseen_session_count']} sessions)")
+    print(f"  eval context codes: {probe.get('eval_context_codes')}")
+    print(f"  seen   contexts (warm): {probe['warm_seen_mean_delivery']}  ({probe['warm_seen_session_count']} sessions)")
+    print(f"  unseen contexts (warm): {probe['warm_unseen_mean_delivery']}  ({probe['warm_unseen_session_count']} sessions)")
     print(f"  seen   contexts (cold): {probe['cold_seen_mean_delivery']}")
     print(f"  unseen contexts (cold): {probe['cold_unseen_mean_delivery']}")
+
+
+def _print_protocol(label: str, payload: dict[str, object]) -> None:
+    print(f"\n{label}")
+    _print_summary("Warm eval (with carryover)", payload["warm_summary"])
+    _print_summary("Cold eval (no carryover)", payload["cold_summary"])
+    print(f"\n  warm reset count: {payload['warm_reset_count']}")
+    print(f"  cold reset count: {payload['cold_reset_count']}")
+    print(f"  workers used:     {payload['workers_used']}")
+    print(f"  parallel status:  {payload['parallelism_status']}")
+    print(f"  warm admitted:    {payload['warm_system_summary'].get('admitted_packets')}")
+    print(f"  cold admitted:    {payload['cold_system_summary'].get('admitted_packets')}")
+    _print_efficiency(payload["efficiency"])
+    _print_transfer(payload["context_transfer_probe"])
+
+
+def _print_sweep_summary(result: dict[str, object]) -> None:
+    aggregate = result["aggregate"]
+    worker_policy = result["worker_policy"]
+    _print_section("Sweep aggregate")
+    print(f"\n  seeds:                {result['v3_sweep_config']['selector_seeds']}")
+    print(f"  primary eval mode:    {aggregate['primary_eval_mode']}")
+    print(f"  worker budget:        {worker_policy['worker_budget']}")
+    print(f"  seed workers:         {worker_policy['seed_workers']}")
+    print(f"  eval workers/seed:    {worker_policy['eval_workers_per_seed']}")
+    print(f"  total planned workers:{worker_policy['effective_total_workers']}")
+    print(f"  parallel status:      {worker_policy['parallelism_status']}")
+    print(f"  mean train accuracy:  {aggregate['mean_train_accuracy']}")
+    print(f"  mean warm accuracy:   {aggregate['mean_warm_accuracy']}")
+    print(f"  mean cold accuracy:   {aggregate['mean_cold_accuracy']}")
+    print(f"  mean warm delivery:   {aggregate['mean_warm_delivery_ratio']}")
+    print(f"  mean cold delivery:   {aggregate['mean_cold_delivery_ratio']}")
+    print(f"  mean efficiency:      {aggregate['mean_efficiency_ratio']}")
+    print(f"  mean s1 delta:        {aggregate['mean_session_1_delivery_delta']}")
+    print(f"  mean ep1 delta:       {aggregate['mean_first_episode_delivery_delta']}")
+    print(f"  mean ep3 delta:       {aggregate['mean_first_three_episode_delivery_delta']}")
+    print(f"  best efficiency seed: {aggregate['best_seed_by_efficiency_ratio']}")
+
+    _print_section("Per-seed summary")
+    for summary in result["seed_summaries"]:
+        print(f"\nSeed {summary['selector_seed']}")
+        print(f"  train accuracy:   {summary['train_accuracy']}")
+        print(f"  warm accuracy:    {summary['warm_accuracy']}")
+        print(f"  cold accuracy:    {summary['cold_accuracy']}")
+        print(f"  warm delivery:    {summary['warm_mean_delivery_ratio']}")
+        print(f"  cold delivery:    {summary['cold_mean_delivery_ratio']}")
+        print(f"  efficiency ratio: {summary['mean_efficiency_ratio']}")
+        print(f"  session 1 delta:  {summary['session_1_delivery_delta']}")
+        print(f"  eval workers:     {summary['eval_workers_by_protocol']}")
+        print(f"  protocol status:  {summary['protocol_parallelism']}")
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
 
-    # Import here to keep startup fast
-    from scripts.occupancy_real_v3 import OccupancyRealV3Config, run_occupancy_real_v3_experiment
+    from scripts.occupancy_real_v3 import (
+        OccupancyRealV3Config,
+        run_occupancy_real_v3_experiment,
+        run_occupancy_real_v3_sweep,
+    )
 
+    selector_seeds = _selected_seeds(args)
     config = OccupancyRealV3Config(
         csv_path=args.csv,
         window_size=args.window_size,
-        selector_seed=args.selector_seed,
+        selector_seed=selector_seeds[0],
         feedback_amount=args.feedback_amount,
         eval_feedback_fraction=args.eval_feedback_fraction,
         train_session_fraction=args.train_session_fraction,
+        eval_mode=args.eval_mode,
+        topology_mode=args.topology_mode,
+        context_mode=args.context_mode,
+        ingress_mode=args.ingress_mode,
         packet_ttl=args.packet_ttl,
         max_train_sessions=args.max_train_sessions,
         max_eval_sessions=args.max_eval_sessions,
         summary_only=args.summary_only,
     )
 
-    manifest = _build_manifest(args)
-    print("REAL Occupancy v3 — session-structured carryover experiment")
+    manifest = _build_manifest(args, selector_seeds=selector_seeds)
+    print("REAL Occupancy v3 - REAL-native carryover harness")
     _print_manifest(manifest)
 
-    t0 = time.monotonic()
-    result = run_occupancy_real_v3_experiment(config, workers=args.workers)
-    elapsed = time.monotonic() - t0
+    start = time.monotonic()
+    if len(selector_seeds) == 1:
+        result = run_occupancy_real_v3_experiment(config, workers=args.workers)
+    else:
+        result = run_occupancy_real_v3_sweep(
+            config,
+            selector_seeds=selector_seeds,
+            workers=args.workers,
+        )
+    elapsed = time.monotonic() - start
 
-    manifest = _build_manifest(args, elapsed=elapsed)
+    manifest = _build_manifest(args, selector_seeds=selector_seeds, elapsed=elapsed)
     result["manifest"] = manifest
 
-    _print_section("Session inventory")
-    _print_inventory("Training sessions", result["train_inventory"])
-    _print_inventory("Eval sessions", result["eval_inventory"])
-    print(f"\n  CO2 training median:   {result['co2_training_median']:.6f}")
-    print(f"  Light training median: {result['light_training_median']:.6f}")
-    print(f"  Training context codes seen: {result['training_context_codes']}")
+    if len(selector_seeds) == 1:
+        _print_section("Session inventory")
+        _print_inventory("Training sessions", result["train_inventory"])
+        _print_inventory("Eval sessions", result["eval_inventory"])
+        print(f"\n  CO2 training median:   {result['co2_training_median']:.6f}")
+        print(f"  Light training median: {result['light_training_median']:.6f}")
+        print(f"  Training context codes seen: {result['training_context_codes']}")
+        print(f"  Eval workers by protocol: {result['worker_policy']['eval_workers_by_protocol']}")
 
-    _print_section("Phase 2 — Training run summary")
-    _print_summary("Training (sequential)", result["train_summary"])
+        _print_section("Phase 2 - Training run summary")
+        _print_summary("Training (sequential)", result["train_summary"])
 
-    _print_section("Phase 3 — Carryover efficiency")
-    _print_summary("Warm eval (with carryover)", result["warm_eval_summary"])
-    _print_summary("Cold eval (no carryover)", result["cold_eval_summary"])
-    _print_efficiency(result["carryover_efficiency"])
+        _print_section("Phase 3 - Primary eval")
+        print(f"\nPrimary eval mode: {result['primary_eval_mode']}")
+        _print_protocol("Primary protocol", result["primary_eval"])
 
-    _print_section("Phase 4 — Context transfer probe")
-    _print_transfer(result["context_transfer_probe"])
+        secondary_protocols = {
+            name: payload
+            for name, payload in result["eval_protocols"].items()
+            if name != result["primary_eval_mode"]
+        }
+        if secondary_protocols:
+            _print_section("Secondary eval protocols")
+            for name, payload in secondary_protocols.items():
+                _print_protocol(name, payload)
+    else:
+        _print_sweep_summary(result)
 
-    print(f"\nFinal manifest:")
+    print("\nFinal manifest:")
     _print_manifest(manifest)
 
     if args.output_json:
         output_path = Path(args.output_json)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        with output_path.open("w", encoding="utf-8") as fh:
-            json.dump(result, fh, indent=2, default=str)
+        with output_path.open("w", encoding="utf-8") as handle:
+            json.dump(result, handle, indent=2, default=str)
         print(f"Result written to: {output_path}")
 
     return 0

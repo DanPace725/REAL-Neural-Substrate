@@ -49,6 +49,7 @@ After `pip install -e .`, the same runners are also available as console scripts
 - `scripts/diagnose_c_family_real.py`: REAL-only full-capability diagnostic for the generated `C` ambiguity ladder
 - `scripts/neural_baseline.py`: online MLP/RNN comparison harness for sample-efficiency checks
 - `scripts/compare_occupancy_baseline.py`: occupancy bridge comparison between the frozen MLP baseline and a Phase 8 packetized REAL slice
+- `scripts/run_occupancy_real_v3.py`: REAL-native occupancy harness with fresh-session vs persistent eval, admission-source ingress, and multi-seed sweep support. See `docs/running_occupancy_v3.md` for CLI usage.
 
 ## Reference Artifacts
 

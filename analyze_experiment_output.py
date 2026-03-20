@@ -617,9 +617,38 @@ def _md_metrics_table(metrics, ref=None):
 def is_v3_format(data: dict) -> bool:
     """Return True if this JSON was produced by the v3 occupancy runner."""
     return (
-        isinstance(data.get("v3_config"), dict)
-        and "carryover_efficiency" in data
+        (
+            isinstance(data.get("v3_config"), dict)
+            and (
+                "carryover_efficiency" in data
+                or isinstance(data.get("eval_protocols"), dict)
+            )
+        )
+        or (
+            isinstance(data.get("v3_sweep_config"), dict)
+            and isinstance(data.get("aggregate"), dict)
+            and isinstance(data.get("seed_summaries"), list)
+        )
     )
+
+
+def is_v3_sweep_format(data: dict) -> bool:
+    return (
+        isinstance(data.get("v3_sweep_config"), dict)
+        and isinstance(data.get("aggregate"), dict)
+        and isinstance(data.get("seed_summaries"), list)
+    )
+
+
+def _v3_selector_seeds(data: dict, manifest: dict | None = None) -> list[int]:
+    if manifest and isinstance(manifest.get("selector_seeds"), list):
+        return [int(seed) for seed in manifest["selector_seeds"]]
+    sweep_cfg = data.get("v3_sweep_config") or {}
+    if isinstance(sweep_cfg.get("selector_seeds"), list):
+        return [int(seed) for seed in sweep_cfg["selector_seeds"]]
+    cfg = data.get("v3_config") or {}
+    seed = cfg.get("selector_seed")
+    return [int(seed)] if seed is not None else []
 
 
 def _print_v3_manifest(manifest: dict | None) -> None:
@@ -632,11 +661,33 @@ def _print_v3_manifest(manifest: dict | None) -> None:
     if manifest.get("git_sha"):
         print(f"  git_sha:  {manifest['git_sha']}")
     print(f"  csv:      {manifest.get('csv', '?')}")
-    print(
-        f"  seed:     {manifest.get('selector_seed', '?')}  "
-        f"window: {manifest.get('window_size', '?')}  "
-        f"train_frac: {manifest.get('train_session_fraction', '?')}"
-    )
+    selector_seeds = manifest.get("selector_seeds")
+    if isinstance(selector_seeds, list) and selector_seeds:
+        if len(selector_seeds) == 1:
+            print(
+                f"  seed:     {selector_seeds[0]}  "
+                f"window: {manifest.get('window_size', '?')}  "
+                f"train_frac: {manifest.get('train_session_fraction', '?')}"
+            )
+        else:
+            print(
+                f"  seeds:    {selector_seeds}  "
+                f"window: {manifest.get('window_size', '?')}  "
+                f"train_frac: {manifest.get('train_session_fraction', '?')}"
+            )
+    else:
+        print(
+            f"  seed:     {manifest.get('selector_seed', '?')}  "
+            f"window: {manifest.get('window_size', '?')}  "
+            f"train_frac: {manifest.get('train_session_fraction', '?')}"
+        )
+    if manifest.get("eval_mode") is not None:
+        print(
+            f"  modes:    eval={manifest.get('eval_mode')}  "
+            f"topology={manifest.get('topology_mode')}  "
+            f"context={manifest.get('context_mode')}  "
+            f"ingress={manifest.get('ingress_mode')}"
+        )
     caps = []
     if manifest.get("max_train_sessions") is not None:
         caps.append(f"train<={manifest['max_train_sessions']}")
@@ -649,6 +700,25 @@ def _print_v3_manifest(manifest: dict | None) -> None:
     if es is not None:
         print(f"  elapsed:  {float(es):.1f}s")
     print(sep)
+
+
+def _print_v3_worker_policy(policy: dict | None) -> None:
+    if not policy:
+        return
+    print("\nWorker policy")
+    for key in (
+        "requested_workers",
+        "auto_cpu_target_fraction",
+        "worker_budget",
+        "seed_workers",
+        "eval_workers_per_seed",
+        "effective_total_workers",
+        "parallelism_status",
+    ):
+        if key in policy:
+            print(f"  {key:<26} : {policy.get(key)}")
+    if isinstance(policy.get("eval_workers_by_protocol"), dict):
+        print(f"  {'eval_workers_by_protocol':<26} : {policy.get('eval_workers_by_protocol')}")
 
 
 def _print_v3_inventory(label: str, inv: dict) -> None:
@@ -686,6 +756,10 @@ def _print_v3_phase_summary(title: str, summary: dict) -> None:
 def _print_v3_efficiency(eff: dict) -> None:
     print("\nCarryover efficiency")
     print(f"  mean efficiency ratio:       {eff.get('mean_efficiency_ratio')}")
+    print(f"  session 1 delivery delta:    {eff.get('session_1_delivery_delta')}")
+    print(f"  session 1 efficiency ratio:  {eff.get('session_1_efficiency_ratio')}")
+    print(f"  mean first-episode delta:    {eff.get('mean_first_episode_delivery_delta')}")
+    print(f"  mean first-3-episode delta:  {eff.get('mean_first_three_episode_delivery_delta')}")
     print(f"  warm sessions to 80% deliv:  {eff.get('warm_sessions_to_80pct')}")
     print(f"  cold sessions to 80% deliv:  {eff.get('cold_sessions_to_80pct')}")
     print("\n  Delivery ratio at session N:")
@@ -707,7 +781,9 @@ def _print_v3_efficiency(eff: dict) -> None:
 
 def _print_v3_transfer(probe: dict) -> None:
     print("\nContext transfer probe")
+    print(f"  status:                      {probe.get('status')}")
     print(f"  training context codes:    {probe.get('training_context_codes')}")
+    print(f"  eval context codes:        {probe.get('eval_context_codes')}")
     print(
         f"  seen contexts (warm):        {probe.get('warm_seen_mean_delivery')}  "
         f"({probe.get('warm_seen_session_count')} sessions)"
@@ -748,7 +824,124 @@ def _print_v3_system(label: str, sys_s: dict) -> None:
             print(f"  {key:<22} : {val}")
 
 
+def _print_v3_protocol(label: str, payload: dict) -> None:
+    print_header(label)
+    _print_v3_phase_summary("Warm eval (with carryover)", payload.get("warm_summary") or {})
+    _print_v3_phase_summary("Cold eval (fresh substrate)", payload.get("cold_summary") or {})
+    print(f"\n  warm_reset_count        : {payload.get('warm_reset_count')}")
+    print(f"  cold_reset_count        : {payload.get('cold_reset_count')}")
+    print(f"  workers_used            : {payload.get('workers_used')}")
+    print(f"  parallelism_status      : {payload.get('parallelism_status')}")
+    warm_sys = payload.get("warm_system_summary") or {}
+    cold_sys = payload.get("cold_system_summary") or {}
+    if warm_sys or cold_sys:
+        print(f"  warm admitted_packets   : {warm_sys.get('admitted_packets')}")
+        print(f"  cold admitted_packets   : {cold_sys.get('admitted_packets')}")
+    _print_v3_efficiency(payload.get("efficiency") or {})
+    _print_v3_transfer(payload.get("context_transfer_probe") or {})
+    print_header(f"{label} substrate system summaries")
+    _print_v3_system("Warm eval", warm_sys)
+    _print_v3_system("Cold eval", cold_sys)
+
+
+def _print_v3_seed_summary(summary: dict) -> None:
+    print(f"\nSeed {summary.get('selector_seed')}")
+    for key in (
+        "train_accuracy",
+        "warm_accuracy",
+        "cold_accuracy",
+        "warm_mean_delivery_ratio",
+        "cold_mean_delivery_ratio",
+        "mean_efficiency_ratio",
+        "session_1_delivery_delta",
+        "mean_first_episode_delivery_delta",
+        "mean_first_three_episode_delivery_delta",
+    ):
+        if key in summary:
+            print(f"  {key:<31} : {summary.get(key)}")
+    if "eval_workers_by_protocol" in summary:
+        print(f"  {'eval_workers_by_protocol':<31} : {summary.get('eval_workers_by_protocol')}")
+    if "protocol_parallelism" in summary:
+        print(f"  {'protocol_parallelism':<31} : {summary.get('protocol_parallelism')}")
+
+
 def analyze_v3(data: dict, args) -> None:
+    if is_v3_sweep_format(data):
+        manifest = data.get("manifest")
+        selector_seeds = _v3_selector_seeds(data, manifest)
+        if args.seed is not None and args.seed not in selector_seeds:
+            print(
+                f"[info] Skipping: sweep selector_seeds={selector_seeds} "
+                f"does not include --seed {args.seed}"
+            )
+            return
+
+        print_header("REAL Occupancy v3 - multi-seed sweep")
+        _print_v3_manifest(manifest)
+        sweep_cfg = data.get("v3_sweep_config") or {}
+        base_cfg = sweep_cfg.get("base_config") or {}
+        if base_cfg:
+            print("\nBase config")
+            for key in sorted(base_cfg.keys()):
+                print(f"  {key:<24} : {base_cfg.get(key)}")
+        _print_v3_worker_policy(data.get("worker_policy"))
+
+        aggregate = data.get("aggregate") or {}
+        print_header("Sweep aggregate")
+        for key in (
+            "selector_seed_count",
+            "primary_eval_mode",
+            "mean_train_accuracy",
+            "mean_warm_accuracy",
+            "mean_cold_accuracy",
+            "mean_warm_delivery_ratio",
+            "mean_cold_delivery_ratio",
+            "mean_efficiency_ratio",
+            "mean_session_1_delivery_delta",
+            "mean_first_episode_delivery_delta",
+            "mean_first_three_episode_delivery_delta",
+        ):
+            if key in aggregate:
+                print(f"  {key:<33} : {aggregate.get(key)}")
+        if "best_seed_by_efficiency_ratio" in aggregate:
+            print(f"  {'best_seed_by_efficiency_ratio':<33} : {aggregate.get('best_seed_by_efficiency_ratio')}")
+        if "best_seed_by_session_1_delivery_delta" in aggregate:
+            print(f"  {'best_seed_by_session_1_delivery_delta':<33} : {aggregate.get('best_seed_by_session_1_delivery_delta')}")
+
+        print_header("Per-seed summaries")
+        for summary in data.get("seed_summaries") or []:
+            if args.seed is not None and summary.get("selector_seed") != args.seed:
+                continue
+            _print_v3_seed_summary(summary)
+
+        if args.seed is not None:
+            detailed = next(
+                (
+                    item
+                    for item in (data.get("seed_results") or [])
+                    if (item.get("v3_config") or {}).get("selector_seed") == args.seed
+                ),
+                None,
+            )
+            if detailed is not None:
+                print_header(f"Detailed seed view - {args.seed}")
+                analyze_v3(
+                    detailed,
+                    argparse.Namespace(
+                        seed=args.seed,
+                        no_plots=args.no_plots,
+                        rolling=args.rolling,
+                        summary=None,
+                    ),
+                )
+            return
+
+        if HAS_PLT and not args.no_plots:
+            _plot_v3_sweep(data)
+            print("\n[info] Showing plots - close windows to exit.")
+            plt.show()
+        return
+
     cfg = data.get("v3_config") or {}
     seed = cfg.get("selector_seed")
     if args.seed is not None and seed != args.seed:
@@ -760,6 +953,7 @@ def analyze_v3(data: dict, args) -> None:
 
     print_header("REAL Occupancy v3 — session carryover experiment")
     _print_v3_manifest(data.get("manifest"))
+    _print_v3_worker_policy(data.get("worker_policy"))
 
     print(f"\n  dataset_rows:      {data.get('dataset_rows')}")
     print(f"  total_episodes:   {data.get('total_episodes')}")
@@ -776,6 +970,24 @@ def analyze_v3(data: dict, args) -> None:
 
     print_header("Phase 2 — Training")
     _print_v3_phase_summary("Training (sequential sessions)", data.get("train_summary") or {})
+    _print_v3_system("Train", data.get("train_system_summary") or {})
+
+    eval_protocols = data.get("eval_protocols") or {}
+    primary_eval_mode = data.get("primary_eval_mode")
+    if eval_protocols:
+        print(f"\n  primary_eval_mode : {primary_eval_mode}")
+        for protocol_name, payload in eval_protocols.items():
+            label = (
+                f"Phase 3 - Primary protocol ({protocol_name})"
+                if protocol_name == primary_eval_mode
+                else f"Phase 3 - Secondary protocol ({protocol_name})"
+            )
+            _print_v3_protocol(label, payload or {})
+        if HAS_PLT and not args.no_plots:
+            _plot_v3(data, args.rolling)
+            print("\n[info] Showing plots - close windows to exit.")
+            plt.show()
+        return
 
     print_header("Phase 3 — Carryover efficiency")
     _print_v3_phase_summary("Warm eval (with carryover)", data.get("warm_eval_summary") or {})
@@ -876,15 +1088,134 @@ def _plot_v3(data: dict, window: int) -> None:
     plt.tight_layout()
 
 
+def _plot_v3_sweep(data: dict) -> None:
+    seed_summaries = data.get("seed_summaries") or []
+    if not seed_summaries:
+        return
+
+    seeds = [str(summary.get("selector_seed")) for summary in seed_summaries]
+    warm_delivery = [float(summary.get("warm_mean_delivery_ratio") or 0.0) for summary in seed_summaries]
+    cold_delivery = [float(summary.get("cold_mean_delivery_ratio") or 0.0) for summary in seed_summaries]
+    efficiency = [
+        float(summary.get("mean_efficiency_ratio"))
+        if summary.get("mean_efficiency_ratio") is not None
+        else 0.0
+        for summary in seed_summaries
+    ]
+
+    fig = plt.figure(figsize=(12, 8))
+    fig.suptitle("Occupancy v3 sweep - per-seed delivery and efficiency", fontsize=11)
+    gs = gridspec.GridSpec(2, 1, figure=fig, hspace=0.35)
+
+    ax0 = fig.add_subplot(gs[0, 0])
+    x = list(range(len(seeds)))
+    ax0.plot(x, warm_delivery, marker="o", color="darkgreen", label="warm delivery")
+    ax0.plot(x, cold_delivery, marker="o", color="coral", label="cold delivery")
+    ax0.set_title("Per-seed delivery ratio")
+    ax0.set_xticks(x, seeds)
+    ax0.set_ylim(-0.05, 1.05)
+    ax0.set_ylabel("Delivery ratio")
+    ax0.grid(True, alpha=0.3)
+    ax0.legend(fontsize=8)
+
+    ax1 = fig.add_subplot(gs[1, 0])
+    ax1.bar(seeds, efficiency, color="mediumpurple")
+    ax1.axhline(1.0, color="gray", linestyle="--", linewidth=1)
+    ax1.set_title("Per-seed mean efficiency ratio")
+    ax1.set_ylabel("Warm / cold delivery ratio")
+    ax1.grid(True, axis="y", alpha=0.3)
+
+    plt.tight_layout()
+
+
 def write_summary_v3(data: dict, out_path) -> None:
     cfg = data.get("v3_config") or {}
     manifest = data.get("manifest") or {}
+    if is_v3_sweep_format(data):
+        sweep_cfg = data.get("v3_sweep_config") or {}
+        base_cfg = sweep_cfg.get("base_config") or {}
+        worker_policy = data.get("worker_policy") or {}
+        aggregate = data.get("aggregate") or {}
+        lines = [
+            "# REAL Occupancy v3 - multi-seed sweep",
+            "",
+            f"**run_id:** `{manifest.get('run_id', '?')}`  ",
+            f"**run_at:** `{manifest.get('run_at', '?')}`  ",
+            f"**git_sha:** `{manifest.get('git_sha', '')}`  ",
+            f"**selector_seeds:** {sweep_cfg.get('selector_seeds', _v3_selector_seeds(data, manifest))}  ",
+            "",
+            "## Base config",
+            "",
+            "| Key | Value |",
+            "|---|---|",
+        ]
+        for key in sorted(base_cfg.keys()):
+            lines.append(f"| {key} | {base_cfg.get(key)} |")
+        lines.extend(["", "## Worker policy", "", "| Key | Value |", "|---|---|"])
+        for key in (
+            "requested_workers",
+            "auto_cpu_target_fraction",
+            "worker_budget",
+            "seed_workers",
+            "eval_workers_per_seed",
+            "effective_total_workers",
+            "parallelism_status",
+        ):
+            if key in worker_policy:
+                lines.append(f"| {key} | {worker_policy.get(key)} |")
+        lines.extend(["", "## Aggregate", "", "| Metric | Value |", "|---|---|"])
+        for key in (
+            "selector_seed_count",
+            "primary_eval_mode",
+            "mean_train_accuracy",
+            "mean_warm_accuracy",
+            "mean_cold_accuracy",
+            "mean_warm_delivery_ratio",
+            "mean_cold_delivery_ratio",
+            "mean_efficiency_ratio",
+            "mean_session_1_delivery_delta",
+            "mean_first_episode_delivery_delta",
+            "mean_first_three_episode_delivery_delta",
+            "best_seed_by_efficiency_ratio",
+            "best_seed_by_session_1_delivery_delta",
+        ):
+            if key in aggregate:
+                lines.append(f"| {key} | {aggregate.get(key)} |")
+        lines.extend(
+            [
+                "",
+                "## Per-seed summary",
+                "",
+                "| selector_seed | train_accuracy | warm_accuracy | cold_accuracy | warm_delivery | cold_delivery | efficiency_ratio | session_1_delta |",
+                "|---:|---:|---:|---:|---:|---:|---:|---:|",
+            ]
+        )
+        for summary in data.get("seed_summaries") or []:
+            lines.append(
+                f"| {summary.get('selector_seed')} "
+                f"| {summary.get('train_accuracy')} "
+                f"| {summary.get('warm_accuracy')} "
+                f"| {summary.get('cold_accuracy')} "
+                f"| {summary.get('warm_mean_delivery_ratio')} "
+                f"| {summary.get('cold_mean_delivery_ratio')} "
+                f"| {summary.get('mean_efficiency_ratio')} "
+                f"| {summary.get('session_1_delivery_delta')} |"
+            )
+            lines.append(f"| protocol_parallelism | {summary.get('protocol_parallelism')} |  |  |  |  |  |  |")
+            lines.append(f"| eval_workers_by_protocol | {summary.get('eval_workers_by_protocol')} |  |  |  |  |  |  |")
+        out_path = Path(out_path)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text("\n".join(lines), encoding="utf-8")
+        print(f"[summary] Written to: {out_path}")
+        return
+
     lines = [
         "# REAL Occupancy v3 — session carryover experiment",
         "",
         f"**run_id:** `{manifest.get('run_id', '?')}`  ",
         f"**run_at:** `{manifest.get('run_at', '?')}`  ",
         f"**git_sha:** `{manifest.get('git_sha', '')}`  ",
+        f"**primary_eval_mode:** `{data.get('primary_eval_mode', '?')}`  ",
         "",
         "## Config",
         "",
@@ -893,6 +1224,12 @@ def write_summary_v3(data: dict, out_path) -> None:
     ]
     for k in sorted(cfg.keys()):
         lines.append(f"| {k} | {cfg[k]} |")
+    worker_policy = data.get("worker_policy") or {}
+    if worker_policy:
+        lines.extend(["", "## Worker policy", "", "| Key | Value |", "|---|---|"])
+        for key in ("requested_workers", "auto_cpu_target_fraction", "eval_workers_by_protocol"):
+            if key in worker_policy:
+                lines.append(f"| {key} | {worker_policy.get(key)} |")
     lines.extend(
         [
             "",
@@ -985,6 +1322,48 @@ def write_summary_v3(data: dict, out_path) -> None:
         lines.append("")
         lines.append(f"```\n{json.dumps(data.get(key), indent=2)}\n```")
         lines.append("")
+    eval_protocols = data.get("eval_protocols") or {}
+    if eval_protocols:
+        lines.extend(["## Eval protocols", ""])
+        for protocol_name, payload in eval_protocols.items():
+            eff = payload.get("efficiency") or {}
+            lines.extend(
+                [
+                    f"### {protocol_name}",
+                    "",
+                    f"- **workers_used**: {payload.get('workers_used')}",
+                    f"- **parallelism_status**: {payload.get('parallelism_status')}",
+                    f"- **warm_reset_count**: {payload.get('warm_reset_count')}",
+                    f"- **cold_reset_count**: {payload.get('cold_reset_count')}",
+                    "",
+                    "| Metric | Value |",
+                    "|---|---|",
+                    f"| mean_efficiency_ratio | {eff.get('mean_efficiency_ratio')} |",
+                    f"| session_1_delivery_delta | {eff.get('session_1_delivery_delta')} |",
+                    f"| mean_first_episode_delivery_delta | {eff.get('mean_first_episode_delivery_delta')} |",
+                    f"| mean_first_three_episode_delivery_delta | {eff.get('mean_first_three_episode_delivery_delta')} |",
+                    f"| warm_sessions_to_80pct | {eff.get('warm_sessions_to_80pct')} |",
+                    f"| cold_sessions_to_80pct | {eff.get('cold_sessions_to_80pct')} |",
+                    "",
+                    "**Context transfer probe:**",
+                    "",
+                ]
+            )
+            for key, value in (payload.get("context_transfer_probe") or {}).items():
+                lines.append(f"- **{key}**: {value}")
+            lines.extend(
+                [
+                    "",
+                    "**Warm system summary:**",
+                    "",
+                    f"```\n{json.dumps(payload.get('warm_system_summary'), indent=2)}\n```",
+                    "",
+                    "**Cold system summary:**",
+                    "",
+                    f"```\n{json.dumps(payload.get('cold_system_summary'), indent=2)}\n```",
+                    "",
+                ]
+            )
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("\n".join(lines), encoding="utf-8")

@@ -20,7 +20,7 @@ from the original occupancy_real.py:
 """
 from __future__ import annotations
 
-import tempfile
+import shutil
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from statistics import mean
@@ -367,13 +367,15 @@ def run_occupancy_real_v2_experiment(config: OccupancyRealV2Config) -> dict[str,
 
     # ---- Eval system prep ----
     if config.carryover_mode == "fresh_eval":
-        # Save trained substrate → fresh system → load substrate
-        with tempfile.TemporaryDirectory() as tmpdir:
-            carryover_dir = Path(tmpdir) / "carryover"
-            carryover_dir.mkdir()
+        carryover_dir = Path("tests_tmp") / "occupancy_v2_carryover"
+        carryover_dir.parent.mkdir(parents=True, exist_ok=True)
+        shutil.rmtree(carryover_dir, ignore_errors=True)
+        try:
             train_system.save_substrate_carryover(str(carryover_dir))
             eval_system = build_occupancy_system_v2(config)
             eval_system.load_substrate_carryover(str(carryover_dir))
+        finally:
+            shutil.rmtree(carryover_dir, ignore_errors=True)
     else:
         # "continuous" — same system, substrate already accumulated
         eval_system = train_system

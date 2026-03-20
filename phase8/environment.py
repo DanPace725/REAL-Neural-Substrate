@@ -1119,13 +1119,14 @@ class RoutingEnvironment:
         context_bit: int | None = None,
         task_id: str | None = None,
         target_bits: Sequence[int] | None = None,
+        origin: str | None = None,
     ) -> SignalPacket:
         packet_number = next(self.packet_counter)
         self._next_packet_id = packet_number + 1
         packet_id = f"pkt-{packet_number}"
         return SignalPacket(
             packet_id=packet_id,
-            origin=self.source_id,
+            origin=str(origin or self.source_id),
             target=self.sink_id,
             created_cycle=cycle,
             input_bits=list(input_bits or payload_bits or []),
@@ -3135,15 +3136,19 @@ class RoutingEnvironment:
 
         allowance = self._source_admission_allowance(available_slots)
         admitted = min(allowance, len(self.source_buffer))
+        touched_nodes: set[str] = set()
 
         for _ in range(admitted):
             packet = self.source_buffer.pop(0)
             packet.last_moved_cycle = self.current_cycle
-            self.inboxes[self.source_id].append(packet)
+            target_node = packet.origin if packet.origin in self.inboxes else self.source_id
+            self.inboxes[target_node].append(packet)
+            touched_nodes.add(target_node)
             self.admitted_packets += 1
         self.last_source_admission = admitted
         self.source_admission_history.append(admitted)
-        self._prioritize_inbox(self.source_id)
+        for node_id in touched_nodes | {self.source_id}:
+            self._prioritize_inbox(node_id)
         self.max_source_backlog = max(self.max_source_backlog, len(self.source_buffer))
 
     def _source_admission_allowance(self, available_slots: int) -> int:
@@ -3360,6 +3365,7 @@ class NativeSubstrateSystem:
                 context_bit=spec.context_bit,
                 task_id=spec.task_id,
                 target_bits=spec.target_bits,
+                origin=spec.origin,
             )
             for spec in signal_specs
         ]

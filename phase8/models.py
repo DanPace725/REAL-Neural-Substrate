@@ -62,6 +62,7 @@ class SignalSpec:
     context_bit: int | None = None
     task_id: str | None = None
     target_bits: List[int] | None = None
+    origin: str | None = None
 
 
 @dataclass

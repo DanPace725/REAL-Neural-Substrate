@@ -19,6 +19,7 @@ occupancy_baseline = ["data/*.csv", "data/*.md"]
 [project.scripts]
 real-occupancy-baseline = "occupancy_baseline.run_baseline:main"
 real-occupancy-compare = "scripts.compare_occupancy_baseline:main"
+real-occupancy-tests = "scripts.run_occupancy_tests_parallel:main"
 real-phase8-demo = "scripts.run_phase8_demo:main"
 real-cold-warm = "scripts.compare_cold_warm:main"
 real-task-transfer = "scripts.compare_task_transfer:main"

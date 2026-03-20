@@ -37,6 +37,7 @@ class OccupancyRealConfig:
     feedback_drain_cycles: int = 4
     max_train_episodes: int | None = None
     max_eval_episodes: int | None = None
+    eval_preview_per_label: int | None = None
     summary_only: bool = False
 
 

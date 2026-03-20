@@ -1,155 +1,118 @@
 # Running the V3 Occupancy Experiment
 
-All commands are run from the **repo root** (the folder containing `scripts/`, `occupancy_baseline/`, etc.).
-
----
+All commands are run from the repo root.
 
 ## Quick reference
 
 | Goal | Command |
 |---|---|
 | Smoke test (fast) | `python -m scripts.run_occupancy_real_v3 --max-train-sessions 8 --max-eval-sessions 5` |
-| Full run, results to JSON | `python -m scripts.run_occupancy_real_v3 --output-json docs/experiment_outputs/v3_seed13.json` |
-| Full run, summary only | `python -m scripts.run_occupancy_real_v3 --summary-only` |
-| Sequential (no parallelism) | `python -m scripts.run_occupancy_real_v3 --workers 1` |
-| Different seed | `python -m scripts.run_occupancy_real_v3 --selector-seed 23 --output-json docs/experiment_outputs/v3_seed23.json` |
+| Full single-seed run | `python -m scripts.run_occupancy_real_v3 --output-json docs/experiment_outputs/v3_seed13.json --summary-only` |
+| Sequential debug run | `python -m scripts.run_occupancy_real_v3 --workers 1` |
+| Different seed | `python -m scripts.run_occupancy_real_v3 --selector-seed 23 --output-json docs/experiment_outputs/v3_seed23.json --summary-only` |
+| Multi-seed sweep with auto CPU budgeting | `python -m scripts.run_occupancy_real_v3 --selector-seeds 13 23 37 --summary-only --output-json docs/experiment_outputs/v3_sweep_13_23_37.json` |
 
----
+## Key flags
 
-## All flags
-
-### Data
+### Data and split
 
 | Flag | Default | Description |
 |---|---|---|
-| `--csv PATH` | `occupancy_baseline/data/occupancy_synth_v1.csv` | Path to the occupancy CSV file. |
-| `--window-size N` | `5` | Number of timesteps per rolling episode window. |
+| `--csv PATH` | `occupancy_baseline/data/occupancy_synth_v1.csv` | Occupancy CSV path. |
+| `--window-size N` | `5` | Timesteps per rolling episode window. |
+| `--train-session-fraction F` | `0.70` | Temporal fraction used for training sessions. |
+| `--max-train-sessions N` | all | Optional training-session cap for smoke tests. |
+| `--max-eval-sessions N` | all | Optional eval-session cap for smoke tests. |
 
-### Session split
-
-| Flag | Default | Description |
-|---|---|---|
-| `--train-session-fraction F` | `0.70` | Fraction of state-transition sessions (in temporal order) used for training. The remaining sessions form the eval set. |
-| `--max-train-sessions N` | *(all)* | Hard cap on training sessions. Applied after the temporal split. Useful for smoke tests. |
-| `--max-eval-sessions N` | *(all)* | Hard cap on eval sessions. Applied after the temporal split. |
-
-### Substrate / feedback
+### Harness behavior
 
 | Flag | Default | Description |
 |---|---|---|
-| `--selector-seed N` | `13` | Seed for the `NativeSubstrateSystem` selector. Change this to get independent replications. |
-| `--feedback-amount F` | `0.18` | Feedback amount per correctly-routed packet. |
-| `--eval-feedback-fraction F` | `1.0` | Fraction of `feedback-amount` applied during eval sessions. Default is full feedback — do not reduce this below 1.0 without a specific reason (see v2 synthesis for why). |
+| `--eval-mode MODE` | `fresh_session_eval` | `fresh_session_eval`, `persistent_eval`, or `both`. |
+| `--topology-mode MODE` | `multihop_routing` | `fixed_small` control or `multihop_routing` benchmark default. |
+| `--context-mode MODE` | `online_running_context` | `offline_session_context`, `online_running_context`, or `latent_context`. |
+| `--ingress-mode MODE` | `admission_source` | REAL-native source admission or direct injection debug path. |
+
+### Seed and worker control
+
+| Flag | Default | Description |
+|---|---|---|
+| `--selector-seed N` | `13` | Single-seed run. |
+| `--selector-seeds N...` | none | Optional multi-seed sweep. When present, it overrides `--selector-seed`. |
+| `--workers N` | auto (~75% of visible CPUs) | Total worker budget. Single-seed runs use this for eval parallelism. Multi-seed sweeps partition it across concurrent seeds and per-seed eval workers. |
+
+### Feedback and output
+
+| Flag | Default | Description |
+|---|---|---|
+| `--feedback-amount F` | `0.18` | Feedback awarded per correctly routed packet. |
+| `--eval-feedback-fraction F` | `1.0` | Eval-time feedback multiplier. |
 | `--packet-ttl N` | `8` | Packet time-to-live in substrate cycles. |
+| `--output-json PATH` | none | Write the full result dict to JSON. |
+| `--summary-only` | off | Omit per-session episode lists from JSON output. |
 
-### Execution
+## Worker behavior
 
-| Flag | Default | Description |
-|---|---|---|
-| `--workers N` | `2` | Worker processes for the warm/cold eval phase. `2` runs them in parallel (recommended). `1` runs sequentially — useful for debugging or when process spawning is unavailable. |
+The runner now auto-targets about 75% of visible CPU capacity when `--workers` is omitted.
 
-### Output
+- Single-seed run: that budget goes to eval protocol parallelism.
+- Multi-seed sweep: that same budget is split across concurrent seed runs and per-seed eval workers.
+- `--workers 1` forces the whole run into a sequential/debug-friendly mode.
 
-| Flag | Default | Description |
-|---|---|---|
-| `--output-json PATH` | *(none)* | Write the full result dict to this JSON file. The directory is created if it does not exist. |
-| `--summary-only` | off | When set, per-session result lists are omitted from the JSON output (smaller files, same summary metrics). |
+Example on a 20-CPU machine:
 
----
+- auto worker budget: `floor(20 * 0.75) = 15`
+- sweep over `13 23 37`: `3` concurrent seeds, `5` eval workers per seed
+- single seed: up to `15` eval workers for the fresh-session protocol
 
-## Timing estimates
+If process pools are unavailable in the environment, the runner reports
+`fallback_sequential` in the output instead of failing.
 
-All timings on the synth_v1 dataset (89 sessions, 1,340 episodes):
+## Output shape
 
-| Mode | Approx. wall time |
-|---|---|
-| Smoke test (`--max-train-sessions 8 --max-eval-sessions 5`) | ~90s |
-| Full run, `--workers 2` (parallel eval) | ~6–7 min |
-| Full run, `--workers 1` (sequential) | ~10 min |
-
----
-
-## Manifest
-
-Every run prints a manifest block at the top and bottom of stdout:
-
-```
-------------------------------------------------------------
-  run_id:   v3_seed13_20260319T170000Z
-  run_at:   2026-03-19T17:00:00+00:00
-  git_sha:  c357957
-  csv:      occupancy_baseline/data/occupancy_synth_v1.csv
-  seed:     13  window: 5  train_frac: 0.7
-  workers:  2
-  elapsed:  412.3s
-------------------------------------------------------------
-```
-
-The manifest is also written into the JSON output under the key `"manifest"`, so every result file is self-describing. The `run_id` uses the format `v3_seed{N}_{timestamp}` — use it to label output filenames when running multi-seed sweeps.
-
----
+- Single-seed run: the manifest `run_id` looks like `v3_seed13_<timestamp>`.
+- Multi-seed sweep: the manifest `run_id` looks like `v3_sweep3seeds_<timestamp>`.
+- Sweep JSON includes both `aggregate` metrics and `seed_summaries`, plus the
+  full `seed_results` payload when deeper inspection is needed.
 
 ## Recommended runs
 
-### 1. Smoke test — verify the pipeline works
+### 1. Fast smoke
 
-```
-python -m scripts.run_occupancy_real_v3 ^
-    --max-train-sessions 8 ^
-    --max-eval-sessions 5 ^
-    --workers 1
-```
-
-Takes ~90s. No JSON output. Use `--workers 1` to keep all output in one process for easier debugging.
-
-### 2. Full single-seed run
-
-```
-python -m scripts.run_occupancy_real_v3 ^
-    --output-json docs/experiment_outputs/v3_seed13.json ^
-    --summary-only
+```powershell
+python -m scripts.run_occupancy_real_v3 `
+  --max-train-sessions 8 `
+  --max-eval-sessions 5 `
+  --workers 1
 ```
 
-Takes ~6–7 min with default `--workers 2`. `--summary-only` keeps the JSON file small (omits per-session episode lists while keeping all learning curves and metrics).
+### 2. Full single-seed benchmark
 
-### 3. Multi-seed sweep (seeds 13, 23, 37)
-
-Run each in a separate terminal or sequentially:
-
-```
-python -m scripts.run_occupancy_real_v3 --selector-seed 13 --output-json docs/experiment_outputs/v3_seed13.json --summary-only
-python -m scripts.run_occupancy_real_v3 --selector-seed 23 --output-json docs/experiment_outputs/v3_seed23.json --summary-only
-python -m scripts.run_occupancy_real_v3 --selector-seed 37 --output-json docs/experiment_outputs/v3_seed37.json --summary-only
+```powershell
+python -m scripts.run_occupancy_real_v3 `
+  --summary-only `
+  --output-json docs/experiment_outputs/v3_seed13.json
 ```
 
-Compare `carryover_efficiency.mean_efficiency_ratio` across seeds to distinguish signal from substrate noise.
+### 3. Multi-seed sweep
 
-### 4. Full run with per-session episode detail
-
+```powershell
+python -m scripts.run_occupancy_real_v3 `
+  --selector-seeds 13 23 37 `
+  --summary-only `
+  --output-json docs/experiment_outputs/v3_sweep_13_23_37.json
 ```
-python -m scripts.run_occupancy_real_v3 ^
-    --output-json docs/experiment_outputs/v3_seed13_full.json
-```
 
-Omit `--summary-only` to include `train_session_results`, `warm_eval_session_results`, and `cold_eval_session_results` in the JSON. These contain the per-session delivery ratio, accuracy, and episode count for every session — useful for plotting learning curves.
+The sweep output includes:
 
----
+- aggregate warm vs cold delivery and accuracy
+- aggregate early-session carryover deltas
+- best seed by efficiency ratio
+- per-seed summaries with protocol parallelism status
 
-## What to look for in the results
+## What to inspect in results
 
-The terminal output is structured in four sections:
-
-**Phase 1 — Session inventory**
-Confirms the dataset segmented correctly. Check `by_context_code` to verify all four context classes (0–3) are present in training. If any context code is absent from training but present in eval, the context transfer probe will show an unseen-context comparison.
-
-**Phase 2 — Training run summary**
-Episode-level accuracy and F1 across all training sessions run sequentially. Rising delivery ratio across sessions is the learning signal.
-
-**Phase 3 — Carryover efficiency**
-The core claim. Look at:
-- `mean_efficiency_ratio` — warm delivery / cold delivery averaged over all eval sessions. Values > 1.0 mean carryover helps.
-- `warm_sessions_to_80pct` vs `cold_sessions_to_80pct` — how many eval sessions before the system reaches 80% delivery ratio. A lower warm number confirms faster orientation with carryover.
-- The delivery-at-session-N table — shows the trajectory, not just the mean.
-
-**Phase 4 — Context transfer probe**
-`warm_seen_mean_delivery` vs `warm_unseen_mean_delivery` — if the substrate's context-indexed action supports are doing useful work, seen-context sessions should route better than unseen-context sessions on the warm path. The cold path should show no such difference (no context-indexed support exists in a cold substrate).
+- `aggregate.mean_efficiency_ratio` in a sweep, or `carryover_efficiency.mean_efficiency_ratio` in a single run, for the overall warm-vs-cold advantage.
+- `session_1_delivery_delta`, `mean_first_episode_delivery_delta`, and `mean_first_three_episode_delivery_delta` for the orientation signal.
+- `parallelism_status` and worker policy fields to confirm whether the run used process pools or fell back to sequential execution.
+- context transfer status to make sure unseen-context claims are actually applicable.
