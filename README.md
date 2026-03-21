@@ -1,17 +1,36 @@
 # REAL Neural Substrate
 
-REAL Neural Substrate is a standalone research prototype for native, local-learning neural-substrate experiments built on two layers:
+REAL stands for **Relationally Embedded Allostatic Learning**.
 
-- `real_core`: the generalized REAL engine, anticipation contracts, and memory substrate contracts
-- `phase8`: the multi-agent substrate where each node is a local REAL agent wired to a routing environment
+REAL Neural Substrate is a standalone research prototype exploring whether useful computation can emerge from many local agents adapting under metabolic pressure rather than from a single model trained by global gradient descent. In this repo, learning is supposed to show up as durable changes in substrate, carryover state, routing bias, and structural support, not as opaque end-to-end weight updates.
 
-The repo is intentionally focused on non-backprop, non-global-loss experiments around routing, carryover, transfer, emergent local specialization, and anticipatory local behavior. It is a clean spin-out from the broader umbrella workspace, not a full archive of every prior phase.
+The project is organized around two layers:
 
-At the current architecture, the generalized REAL loop is no longer just retrospective memory plus action selection. The core loop now includes local recognition and local prediction:
+- `real_core`: the reusable REAL engine, anticipation contracts, recognition and prediction interfaces, carryover, and shared substrate types
+- `phase8`: the native multi-agent substrate where each node is a local REAL agent embedded in a routing environment
+
+This repo is intentionally focused on non-backprop, non-global-loss experiments around routing, carryover, transfer, latent context, occupancy, emergent local specialization, and topology growth. It is a clean spin-out from a larger workspace, but this repository is meant to stand on its own.
+
+At the current architecture, the generalized REAL loop is:
 
 `observe -> recognize -> predict -> select -> execute -> score -> compare -> consolidate`
 
-`real_core` owns the reusable loop, anticipation types, recognition/prediction interfaces, and carryover plumbing. `phase8` binds those concepts to routing-specific substrate state, selector pressure, capability recruitment, and prediction-aware environment dynamics.
+`real_core` owns the reusable loop and contracts. `phase8` binds those concepts to routing-specific substrate state, selector pressure, capability recruitment, admission, morphogenesis, and prediction-aware environment dynamics.
+
+## Why This Repo Exists
+
+Most modern AI systems rely on a global objective, a centralized training pass, and parameter updates pushed through the whole model. REAL is testing a different hypothesis:
+
+- useful behavior can emerge from local allostatic adaptation
+- persistent learning can live in maintained substrate and carryover state
+- transfer can come from structurally conserved support rather than retraining from scratch
+- new capacity can appear through local growth pressure rather than fixed architecture alone
+
+The point of this repo is not to reproduce standard deep learning with unfamiliar vocabulary. The point is to test whether a genuinely different learning architecture can still become competitive on concrete tasks.
+
+## Current Status
+
+The repo is an active research prototype, not a polished library. The most notable recent result is the REAL-native occupancy harness, where the current V3 configuration reached near-parity with the existing MLP benchmark on a real sensor dataset while still using local substrate dynamics rather than backpropagation. The transfer, latent-context, and morphogenesis experiments remain central parts of the project as well.
 
 ## For AI Coding Agents
 
@@ -38,6 +57,15 @@ python -m scripts.compare_task_transfer
 
 After `pip install -e .`, the same runners are also available as console scripts such as `real-phase8-demo`, `real-task-transfer`, and `real-morphogenesis-large`.
 
+## Where To Start
+
+- If you want the architecture overview, start with `docs/summaries/architecture_notes.md`.
+- If you want the repo/package map, read `docs/summaries/project_overview_cross_phase.md`.
+- If you want the broad current state in prose, read `docs/reports/SYNTHESIS.md`.
+- If you want a non-technical version, read `docs/reports/PLAIN_ENGLISH_OVERVIEW.md`.
+- If you want the occupancy harness CLI, read `docs/running_occupancy_v3.md`.
+- If you need recent implementation history, use `docs/traces/INDEX.md`.
+
 ## Main Experiments
 
 - `scripts/run_phase8_demo.py`: interactive demo entrypoint for comparison, stress, trace, and transfer views
@@ -59,11 +87,13 @@ After `pip install -e .`, the same runners are also available as console scripts
 
 ## Reference Artifacts
 
-- `docs/technical_report.md`: current merged technical report
-- `docs/20260317_phase8_session_synthesis.md`: March 17 consolidated progress summary
+- `docs/reports/technical_report.md`: current merged technical report
+- `docs/summaries/20260317_phase8_session_synthesis.md`: March 17 consolidated progress summary
+- `docs/reports/SYNTHESIS.md`: current high-level project synthesis
+- `docs/reports/PLAIN_ENGLISH_OVERVIEW.md`: non-technical overview
 - `docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md`: March 19 synthesis covering anticipation, recognition, prediction, self-selection, and carryover hygiene
 - `docs/experiment_outputs/`: timestamped JSON experiment manifests
-- `docs/traces/`: selected March 17 episodic traces for neural baselines and large-topology morphogenesis
+- `docs/traces/`: implementation and decision traces, with `docs/traces/INDEX.md` as the entrypoint
 - `docs/visualizations/phase8_dashboard.html`: static Phase 8 dashboard snapshot carried over from the source workspace
 - `docs/visualizations/real_cycle.html`: saved cyclic-transfer visualization artifact
 

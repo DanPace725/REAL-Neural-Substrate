@@ -14,6 +14,8 @@ This works, but it has a big catch: it takes an enormous amount of data, a huge 
 
 ---
 
+REAL stands for **Relationally Embedded Allostatic Learning**. The short version is: learning happens through local relationships, local metabolic pressure, and persistent structural change, not through one giant global training pass.
+
 ## The Big Idea: Learning by Surviving
 
 Imagine a team of workers passing boxes along an assembly line. Each worker only knows about the boxes coming to them and the workers right next to them. They don't see the whole factory. They don't get instructions from a boss watching everything at once.
