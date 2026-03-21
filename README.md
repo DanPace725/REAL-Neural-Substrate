@@ -62,6 +62,7 @@ After `pip install -e .`, the same runners are also available as console scripts
 - If you want the architecture overview, start with `docs/summaries/architecture_notes.md`.
 - If you want the repo/package map, read `docs/summaries/project_overview_cross_phase.md`.
 - If you want the broad current state in prose, read `docs/reports/SYNTHESIS.md`.
+- If you want the interpretability and diagnostics overview, read `docs/reports/INTERPRETABILITY.md`.
 - If you want a non-technical version, read `docs/reports/PLAIN_ENGLISH_OVERVIEW.md`.
 - If you want the occupancy harness CLI, read `docs/running_occupancy_v3.md`.
 - If you need recent implementation history, use `docs/traces/INDEX.md`.
@@ -90,6 +91,7 @@ After `pip install -e .`, the same runners are also available as console scripts
 - `docs/reports/technical_report.md`: current merged technical report
 - `docs/summaries/20260317_phase8_session_synthesis.md`: March 17 consolidated progress summary
 - `docs/reports/SYNTHESIS.md`: current high-level project synthesis
+- `docs/reports/INTERPRETABILITY.md`: how node-level and selector-level analysis has been used to debug and shape the architecture
 - `docs/reports/PLAIN_ENGLISH_OVERVIEW.md`: non-technical overview
 - `docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md`: March 19 synthesis covering anticipation, recognition, prediction, self-selection, and carryover hygiene
 - `docs/experiment_outputs/`: timestamped JSON experiment manifests
