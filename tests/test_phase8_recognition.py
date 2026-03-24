@@ -439,13 +439,22 @@ class TestPhase8Recognition(unittest.TestCase):
             system.environment.observe_local = original_observe
 
         self.assertEqual(without_transfer["raw_context_action_support"], 0.24)
+        self.assertEqual(without_transfer["raw_action_support"], 0.24)
         self.assertLess(
             without_transfer["effective_context_action_support"],
             without_transfer["raw_context_action_support"],
         )
         self.assertLess(
+            without_transfer["effective_action_support"],
+            without_transfer["raw_action_support"],
+        )
+        self.assertLess(
             during_transfer["effective_context_action_support"],
             without_transfer["effective_context_action_support"],
+        )
+        self.assertLess(
+            during_transfer["effective_action_support"],
+            without_transfer["effective_action_support"],
         )
         self.assertLess(during_transfer["transfer_context_support_scale"], 1.0)
 
@@ -597,6 +606,71 @@ class TestPhase8Recognition(unittest.TestCase):
             stale_rotate["visible_task_incompatibility_penalty_term"],
             0.0,
         )
+        self.assertGreater(compatible_xor["total"], stale_rotate["total"])
+
+    def test_phase8_selector_blocks_context_support_leak_into_action_support_during_transfer(self) -> None:
+        system = NativeSubstrateSystem(
+            adjacency={
+                "n0": ("n1", "n2"),
+                "n1": ("sink",),
+                "n2": ("sink",),
+            },
+            positions={"n0": 0, "n1": 1, "n2": 1, "sink": 2},
+            source_id="n0",
+            sink_id="sink",
+            selector_seed=17,
+        )
+        agent = system.agents["n0"]
+        agent.substrate.seed_action_support(
+            "n2",
+            "rotate_left_1",
+            value=0.24,
+            context_bit=0,
+        )
+
+        original_observe = system.environment.observe_local
+        try:
+            system.environment.observe_local = lambda node_id: {
+                "effective_has_context": 1.0,
+                "effective_context_bit": 0.0,
+                "effective_context_confidence": 1.0,
+                "transfer_adaptation_phase": 1.0,
+                "task_transform_affinity_rotate_left_1": -1.0,
+                "task_transform_affinity_xor_mask_1010": 1.0,
+                "history_transform_evidence_rotate_left_1": 0.0,
+                "history_transform_evidence_xor_mask_1010": 0.0,
+                "feedback_credit_rotate_left_1": 0.0,
+                "feedback_credit_xor_mask_1010": 0.0,
+                "feedback_debt_rotate_left_1": 0.0,
+                "feedback_debt_xor_mask_1010": 0.0,
+                "context_feedback_credit_rotate_left_1": 0.0,
+                "context_feedback_credit_xor_mask_1010": 0.0,
+                "context_feedback_debt_rotate_left_1": 0.0,
+                "context_feedback_debt_xor_mask_1010": 0.0,
+                "branch_feedback_credit_n2_rotate_left_1": 0.0,
+                "branch_feedback_credit_n2_xor_mask_1010": 0.0,
+                "branch_feedback_debt_n2_rotate_left_1": 0.0,
+                "branch_feedback_debt_n2_xor_mask_1010": 0.0,
+                "context_branch_feedback_credit_n2_rotate_left_1": 0.0,
+                "context_branch_feedback_credit_n2_xor_mask_1010": 0.0,
+                "context_branch_feedback_debt_n2_rotate_left_1": 0.0,
+                "context_branch_feedback_debt_n2_xor_mask_1010": 0.0,
+                "branch_context_feedback_credit_n2": 0.0,
+                "branch_context_feedback_debt_n2": 0.0,
+            }
+            stale_rotate = agent.engine.selector.debug_route_score_breakdown(
+                "route_transform:n2:rotate_left_1",
+                history=[],
+            )
+            compatible_xor = agent.engine.selector.debug_route_score_breakdown(
+                "route_transform:n2:xor_mask_1010",
+                history=[],
+            )
+        finally:
+            system.environment.observe_local = original_observe
+
+        self.assertEqual(stale_rotate["raw_action_support"], 0.24)
+        self.assertLess(stale_rotate["effective_action_support"], 0.24)
         self.assertGreater(compatible_xor["total"], stale_rotate["total"])
 
 

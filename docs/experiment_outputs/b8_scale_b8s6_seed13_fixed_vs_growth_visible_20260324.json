@@ -1,0 +1,231 @@
+{
+  "title": "2026-03-24 1134 - b scale suite",
+  "timestamp": "2026-03-24T18:34:00.685234Z",
+  "harness": "b_scale_suite",
+  "seeds": [
+    13
+  ],
+  "scenarios": [
+    "B8S6"
+  ],
+  "result": {
+    "memory_window": 8,
+    "benchmark_ids": [
+      "B8S6"
+    ],
+    "task_keys": [
+      "task_a"
+    ],
+    "method_ids": [
+      "fixed-visible",
+      "growth-visible"
+    ],
+    "seeds": [
+      13
+    ],
+    "suite": [
+      {
+        "benchmark_id": "B8S6",
+        "label": "B8S6",
+        "family_id": "B",
+        "difficulty_index": 6,
+        "description": "100-node, 864-example aspirational hidden-memory scale point on a broader layered DAG.",
+        "source": "generated_topology",
+        "memory_window": 8,
+        "node_count": 100,
+        "expected_examples": 864,
+        "topology_depth": 10,
+        "task_keys": [
+          "task_a",
+          "task_b",
+          "task_c"
+        ]
+      }
+    ],
+    "runs": [
+      {
+        "benchmark_id": "B8S6",
+        "family_id": "B",
+        "difficulty_index": 6,
+        "label": "B8S6",
+        "description": "100-node, 864-example aspirational hidden-memory scale point on a broader layered DAG.",
+        "source": "generated_topology",
+        "memory_window": 8,
+        "task_key": "task_a",
+        "method_id": "fixed-visible",
+        "seed": 13,
+        "node_count": 100,
+        "expected_examples": 864,
+        "topology_depth": 10,
+        "cycles": 904,
+        "packet_ttl": 40,
+        "elapsed_seconds": 261.602,
+        "examples_per_second": 3.3027,
+        "cycles_per_second": 3.4556,
+        "exact_matches": 155,
+        "exact_match_rate": 0.1794,
+        "mean_bit_accuracy": 0.5451,
+        "criterion_reached": true,
+        "examples_to_criterion": 33,
+        "best_rolling_exact_rate": 0.875,
+        "best_rolling_bit_accuracy": 0.9375,
+        "mean_route_cost": 0.03808,
+        "mean_source_efficiency": 0.593,
+        "max_inbox_depth": 4,
+        "max_source_backlog": 0,
+        "dynamic_node_count": 0,
+        "node_count_runtime": 101,
+        "edge_count_runtime": 283,
+        "commitment": {
+          "memory_entry_count": 3872,
+          "pattern_count": 530,
+          "active_edge_count": 78,
+          "supported_context_count": 200,
+          "branch_context_credit_total": 0.837,
+          "branch_context_debt_total": 0.1995,
+          "context_branch_transform_credit_total": 1.5061,
+          "context_branch_transform_debt_total": 0.1222
+        }
+      },
+      {
+        "benchmark_id": "B8S6",
+        "family_id": "B",
+        "difficulty_index": 6,
+        "label": "B8S6",
+        "description": "100-node, 864-example aspirational hidden-memory scale point on a broader layered DAG.",
+        "source": "generated_topology",
+        "memory_window": 8,
+        "task_key": "task_a",
+        "method_id": "growth-visible",
+        "seed": 13,
+        "node_count": 100,
+        "expected_examples": 864,
+        "topology_depth": 10,
+        "cycles": 904,
+        "packet_ttl": 40,
+        "elapsed_seconds": 577.8997,
+        "examples_per_second": 1.4951,
+        "cycles_per_second": 1.5643,
+        "exact_matches": 273,
+        "exact_match_rate": 0.316,
+        "mean_bit_accuracy": 0.5961,
+        "criterion_reached": true,
+        "examples_to_criterion": 34,
+        "best_rolling_exact_rate": 1.0,
+        "best_rolling_bit_accuracy": 1.0,
+        "mean_route_cost": 0.03686,
+        "mean_source_efficiency": 0.5445,
+        "max_inbox_depth": 4,
+        "max_source_backlog": 0,
+        "dynamic_node_count": 2,
+        "node_count_runtime": 103,
+        "edge_count_runtime": 291,
+        "commitment": {
+          "memory_entry_count": 3880,
+          "pattern_count": 556,
+          "active_edge_count": 74,
+          "supported_context_count": 204,
+          "branch_context_credit_total": 2.4887,
+          "branch_context_debt_total": 0.0336,
+          "context_branch_transform_credit_total": 4.0321,
+          "context_branch_transform_debt_total": 0.0201
+        }
+      }
+    ],
+    "aggregates": [
+      {
+        "benchmark_id": "B8S6",
+        "family_id": "B",
+        "difficulty_index": 6,
+        "label": "B8S6",
+        "description": "100-node, 864-example aspirational hidden-memory scale point on a broader layered DAG.",
+        "source": "generated_topology",
+        "memory_window": 8,
+        "task_key": "task_a",
+        "method_id": "fixed-visible",
+        "node_count": 100,
+        "expected_examples": 864,
+        "topology_depth": 10,
+        "seed_count": 1,
+        "mean_elapsed_seconds": 261.602,
+        "mean_examples_per_second": 3.3027,
+        "mean_cycles_per_second": 3.4556,
+        "mean_exact_match_rate": 0.1794,
+        "mean_bit_accuracy": 0.5451,
+        "criterion_rate": 1.0,
+        "mean_best_rolling_exact_rate": 0.875,
+        "mean_best_rolling_bit_accuracy": 0.9375,
+        "mean_mean_route_cost": 0.0381,
+        "mean_mean_source_efficiency": 0.593,
+        "mean_max_inbox_depth": 4.0,
+        "mean_max_source_backlog": 0.0,
+        "mean_dynamic_node_count": 0.0,
+        "mean_memory_entry_count": 3872.0,
+        "mean_pattern_count": 530.0,
+        "mean_active_edge_count": 78.0,
+        "mean_supported_context_count": 200.0,
+        "mean_branch_context_credit_total": 0.837,
+        "mean_branch_context_debt_total": 0.1995
+      },
+      {
+        "benchmark_id": "B8S6",
+        "family_id": "B",
+        "difficulty_index": 6,
+        "label": "B8S6",
+        "description": "100-node, 864-example aspirational hidden-memory scale point on a broader layered DAG.",
+        "source": "generated_topology",
+        "memory_window": 8,
+        "task_key": "task_a",
+        "method_id": "growth-visible",
+        "node_count": 100,
+        "expected_examples": 864,
+        "topology_depth": 10,
+        "seed_count": 1,
+        "mean_elapsed_seconds": 577.8997,
+        "mean_examples_per_second": 1.4951,
+        "mean_cycles_per_second": 1.5643,
+        "mean_exact_match_rate": 0.316,
+        "mean_bit_accuracy": 0.5961,
+        "criterion_rate": 1.0,
+        "mean_best_rolling_exact_rate": 1.0,
+        "mean_best_rolling_bit_accuracy": 1.0,
+        "mean_mean_route_cost": 0.0369,
+        "mean_mean_source_efficiency": 0.5445,
+        "mean_max_inbox_depth": 4.0,
+        "mean_max_source_backlog": 0.0,
+        "mean_dynamic_node_count": 2.0,
+        "mean_memory_entry_count": 3880.0,
+        "mean_pattern_count": 556.0,
+        "mean_active_edge_count": 74.0,
+        "mean_supported_context_count": 204.0,
+        "mean_branch_context_credit_total": 2.4887,
+        "mean_branch_context_debt_total": 0.0336
+      }
+    ],
+    "method_summary": {
+      "fixed-visible": {
+        "mean_elapsed_seconds": 261.602,
+        "mean_examples_per_second": 3.3027,
+        "mean_exact_match_rate": 0.1794,
+        "mean_bit_accuracy": 0.5451
+      },
+      "growth-visible": {
+        "mean_elapsed_seconds": 577.8997,
+        "mean_examples_per_second": 1.4951,
+        "mean_exact_match_rate": 0.316,
+        "mean_bit_accuracy": 0.5961
+      }
+    },
+    "elapsed_seconds": 845.2581
+  },
+  "metadata": {
+    "task_keys": [
+      "task_a"
+    ],
+    "method_ids": [
+      "fixed-visible",
+      "growth-visible"
+    ],
+    "memory_window": 8
+  }
+}

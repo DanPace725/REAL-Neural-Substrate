@@ -272,16 +272,23 @@ class Phase8Selector:
             neighbor_id,
             transform_name,
         )
-        action_support = self.substrate.action_support(
+        raw_action_support = self.substrate.action_support(
             neighbor_id,
             transform_name,
             context_bit,
         )
-        action_velocity = self.substrate.action_velocity(
+        action_support = raw_action_support
+        generic_action_velocity = self.substrate.action_velocity(
+            neighbor_id,
+            transform_name,
+            None,
+        )
+        raw_action_velocity = self.substrate.action_velocity(
             neighbor_id,
             transform_name,
             context_bit,
         )
+        action_velocity = raw_action_velocity
         history_transform_evidence = observation.get(
             f"history_transform_evidence_{transform_name}",
             0.0,
@@ -515,10 +522,18 @@ class Phase8Selector:
                 transform_name,
                 context_bit,
             )
+            action_support = max(generic_action_support, context_action_support)
+            action_velocity = max(
+                generic_action_velocity,
+                context_action_velocity * transfer_context_support_scale,
+            )
             context_support_bonus = max(
                 0.0,
                 context_action_support - generic_action_support,
-            ) * (0.18 * context_weight) + max(0.0, context_action_velocity) * (0.08 * context_weight)
+            ) * (0.18 * context_weight) + max(
+                0.0,
+                context_action_velocity * transfer_context_support_scale,
+            ) * (0.08 * context_weight)
             context_support_penalty = max(
                 0.0,
                 generic_action_support - context_action_support,
@@ -710,7 +725,10 @@ class Phase8Selector:
             "raw_recent_delta": round(recent_delta, 6),
             "raw_context_delta": round(context_delta, 6),
             "raw_support": round(support, 6),
-            "raw_action_support": round(action_support, 6),
+            "raw_action_support": round(raw_action_support, 6),
+            "effective_action_support": round(action_support, 6),
+            "raw_action_velocity": round(raw_action_velocity, 6),
+            "effective_action_velocity": round(action_velocity, 6),
             "raw_task_transform_affinity": round(task_transform_affinity, 6),
             "raw_history_transform_evidence": round(history_transform_evidence, 6),
             "raw_latent_resolution_weight": round(float(latent_resolution_weight), 6),
@@ -1376,7 +1394,7 @@ class Phase8Selector:
         context_bit: int,
         observation: dict[str, float],
     ) -> float:
-        action_support = self.substrate.action_support(
+        raw_action_support = self.substrate.action_support(
             neighbor_id,
             transform_name,
             context_bit,
@@ -1423,6 +1441,35 @@ class Phase8Selector:
             f"history_transform_evidence_{transform_name}",
             0.0,
         )
+        action_support = raw_action_support
+        if context_bit is not None:
+            task_transform_affinity = observation.get(
+                f"task_transform_affinity_{transform_name}",
+                0.0,
+            )
+            (
+                _raw_context_action_support,
+                context_action_support,
+                _transfer_context_support_scale,
+            ) = self._effective_context_action_support(
+                neighbor_id=neighbor_id,
+                transform_name=transform_name,
+                context_bit=context_bit,
+                observation=observation,
+                task_transform_affinity=task_transform_affinity,
+                history_transform_evidence=transform_history_evidence,
+                feedback_credit=feedback_credit,
+                context_feedback_credit=context_feedback_credit,
+                branch_feedback_credit=branch_feedback_credit,
+                context_branch_feedback_credit=context_branch_feedback_credit,
+                branch_context_feedback_credit=branch_context_feedback_credit,
+                feedback_debt=feedback_debt,
+                context_feedback_debt=context_feedback_debt,
+                branch_feedback_debt=branch_feedback_debt,
+                context_branch_feedback_debt=context_branch_feedback_debt,
+                branch_context_feedback_debt=branch_context_feedback_debt,
+            )
+            action_support = max(generic_action_support, context_action_support)
         return self._candidate_evidence(
             neighbor_id=neighbor_id,
             transform_name=transform_name,

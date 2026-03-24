@@ -1,4 +1,4 @@
-% draft3.tex — ALIFE 2026 submission
+% draft3.tex - ALIFE 2026 submission
 % Compile from this directory with alifeconf.sty on the LaTeX path
 % (copy alifeconf.sty from the parent folder, or set TEXINPUTS=../:)
 % pdflatex draft3 && bibtex draft3 && pdflatex draft3 && pdflatex draft3
@@ -32,19 +32,22 @@ a passive unit updated by global gradient descent. Persistent routing substrate
 accumulates through allostatic self-regulation and stigmergic substrate writing,
 producing cross-task transfer, latent context inference, and difficulty-correlated
 topology growth as emergent properties rather than engineered objectives. On a
-real-world room occupancy dataset, the system reaches F1 of 0.952 against an MLP
-baseline of 0.963, with substrate that transfers to a fresh system at 99.15\%
-efficiency --- confirming that the routing substrate, not runtime state, is the
-actual knowledge carrier.
+realistic occupancy prediction benchmark, the system reaches a 3-seed mean F1 of
+0.936 (best seed: 0.952) against an MLP baseline of 0.963, competitive performance
+achieved without a global loss function, on fewer training examples, and under a
+session-native evaluation protocol the MLP does not model. On controlled transfer
+benchmarks, warm substrate carryover reaches 10.6 correct routings per session
+against 3.9 for cold start, confirming that the maintained substrate is the
+primary knowledge carrier.
 
 We distinguish two roles that native interpretability plays in this architecture:
-interpretability as structural \textbf{capability} --- local decisions, memory
+interpretability as structural \textbf{capability}, where local decisions, memory
 structures, and metabolic states are directly readable because they are explicit
-properties of local agents, not distributed consequences of global optimization
---- and interpretability as \textbf{development workflow} --- this readability was
-the primary tool by which failure modes were diagnosed and architectural changes
-were motivated throughout the system's development. We argue that building this
-system, rather than formalizing it, revealed several things about learning and
+properties of local agents rather than distributed consequences of global
+optimization; and interpretability as \textbf{development workflow}, where this
+readability was the primary tool by which failure modes were diagnosed and
+architectural changes were motivated throughout development. We argue that building
+this system, rather than formalizing it, revealed several things about learning and
 agency that prior theory did not anticipate.
 \end{abstract}
 
@@ -63,10 +66,10 @@ approximate explanations rather than read them.
 Biological learning systems are organized differently. Neurons maintain local
 energy budgets; synaptic change is local and conditional on pre- and post-synaptic
 activity; learning accumulates in substrate structure that persists beyond any
-episode. Allostasis --- regulation toward viable internal operating ranges --- is
-the primary organizing principle. The substrate encoding a biological system's
-history is, in principle, readable: its state at any moment reflects the causal
-record of the organism's experience.
+episode. Allostasis, the regulation of internal state toward viable operating
+ranges, is the primary organizing principle. The substrate encoding a biological
+system's history is, in principle, readable: its state at any moment reflects the
+causal record of the organism's experience.
 
 REAL (Relationally Embedded Allostatic Learning) Neural Substrate takes these
 principles as architectural constraints rather than metaphors. The system was
@@ -83,11 +86,11 @@ gradient is computed.
 This paper makes three connected claims. \textbf{Competence:} a network of such
 agents, without any global objective, develops cross-task transfer, latent context
 inference, difficulty-correlated topology growth, and near-MLP performance on a
-real-world dataset it was not designed for. \textbf{Interpretability as
-capability:} the architecture is natively inspectable because computation emerges
-from agents with explicit local state, not from global function composition.
+task it was not designed for. \textbf{Interpretability as capability:} the
+architecture is natively inspectable because computation emerges from agents with
+explicit local state, not from global function composition.
 \textbf{Interpretability as development workflow:} this readability was the
-primary development methodology --- and the experimental record documents it.
+primary development methodology, as the experimental record documents.
 
 \section{Background}
 
@@ -103,11 +106,13 @@ plausible biological analogue.
 Predictive processing frameworks \citep{rao1999predictive} propose that biological
 neural circuits are fundamentally anticipatory, maintaining generative models of
 expected inputs and updating on prediction error. REAL operationalizes this at the
-node level: each agent runs a local recognize--predict--select loop in which
-prediction error modulates the current selection context.
+node level: each agent runs a local recognize--predict--select loop. Prediction
+error is computed after action execution and can shape later local selection
+through updated local state, rather than feeding directly into the same-cycle
+selection context.
 
-Stigmergy --- learning through modification of a shared environment rather than
-through direct communication or centralized update --- underlies distributed
+Stigmergy, defined as learning through modification of a shared environment rather
+than through direct communication or centralized update, underlies distributed
 cognition in biological and artificial swarm systems
 \citep{theraulaz1999stigmergy}. REAL's substrate is stigmergic in this sense: it
 is written by action, read by future action, and persists across sessions.
@@ -127,8 +132,8 @@ transparent-by-design approaches. Post-hoc methods such as SHAP
 through input perturbation and activation analysis. They are correlational: they
 identify input sensitivity, not the decision procedure executed.
 
-Transparent-by-design approaches --- decision trees, linear models, rule-based
-systems --- achieve legibility at the cost of expressivity. REAL occupies a
+Transparent-by-design approaches such as decision trees, linear models, and
+rule-based systems achieve legibility at the cost of expressivity. REAL occupies a
 distinct position: expressive enough to reach near-MLP performance, while
 remaining natively interpretable as a structural consequence of the architecture,
 not as a post-hoc addition.
@@ -137,25 +142,27 @@ not as a post-hoc addition.
 
 \subsection{The REAL Node}
 
-Each node in REAL Neural Substrate runs an independent local loop: perceive,
-select, execute, evaluate, consolidate. Three architectural properties are
-central.
+Each node in REAL Neural Substrate runs an independent local loop: observe,
+recognize, predict, select, execute, score, compare, consolidate. Three
+architectural properties are central.
 
 \textbf{Observation is strictly local.} A node sees its own ATP balance, the
 packets currently present, the current context signal, and the substrate-key
 indices of its own prior routing history. It has no access to any other node's
 state or to a global objective.
 
-\textbf{Selection is substrate-biased.} The base ATP cost of action $a$ under
-context $k$ is discounted by accumulated substrate support:
+\textbf{Selection is substrate-biased.} The contribution of accumulated substrate
+support to action cost is captured conceptually as:
 \begin{equation}
   c_t(a \mid k) \;=\; c_0(a)\,\bigl(1 - \alpha \cdot M_s(a,\, k)\bigr)
   \label{eq:cost}
 \end{equation}
 where $c_0(a)$ is the base cost, $M_s(a,k) \in [0,1]$ is the substrate support
-for action $a$ under context $k$, and $\alpha$ is the discount rate. Actions that
-have historically earned feedback cost less to repeat --- allostasis in the
-literal sense.
+for action $a$ under context $k$, and $\alpha$ is the discount rate. In practice,
+the selector weighs additional terms including recognition confidence, prediction
+state, task affinity, and branch pressure; equation~\ref{eq:cost} isolates the
+substrate-bias mechanism. Actions that have historically earned feedback cost less
+to repeat, allostasis in the literal sense.
 
 \textbf{Consolidation is explicit and inspectable.} Useful patterns migrate from a
 fast episodic trace through a consolidated memory layer into the maintained
@@ -166,7 +173,8 @@ or excluded. A node's learning history is readable as structure.
 \subsection{Coherence Evaluation}
 
 Rather than measuring performance against an external loss, each node scores its
-own cycle outcome across six relational dimensions:
+own cycle outcome across six relational dimensions (currently implemented as a
+simple mean; equation~\ref{eq:coherence} expresses the general weighted form):
 \begin{equation}
   \Phi \;=\; \sum_{i=1}^{6} w_i\, \phi_i
   \label{eq:coherence}
@@ -197,15 +205,17 @@ In \textit{latent} mode, nodes infer context from packet flow statistics without
 an explicit label. Latent inference is slower to commit but accumulates substrate
 entries without context binding, making them transfer-safe by construction.
 
-When a node accumulates ATP surplus while failing to route productively, it can
-bud a new node or edge. The surplus gate means growth fires when the node is
-metabolically stressed --- exactly where additional routing capacity is most
-needed. Difficulty-correlated topology growth is a consequence of this gate, not
-a separately designed objective. A recognition--anticipation--prediction loop,
-added in the current architecture, lets each node compare incoming observations
-against consolidated patterns, generate predictions, and modulate selection on
-prediction error --- a local implementation of predictive processing
-\citep{rao1999predictive} with no global consistency requirement.
+Growth is gated by a combination of ATP surplus, anticipatory ingress backlog,
+routing feedback availability, and context-resolution state. The effect is that
+new nodes bud when the local area of the network is under metabolic pressure and
+routing clarity is sufficient to seed productive specialization. Difficulty-
+correlated topology growth is a consequence of this gating logic, not a separately
+designed objective. A recognition--anticipation--prediction loop, added in the
+current architecture, lets each node compare incoming observations against
+consolidated patterns, generate predictions, and allow prediction error to
+influence future local selection through updated observable state, providing a
+local implementation of predictive processing \citep{rao1999predictive} with no
+global consistency requirement.
 
 \section{Interpretability}
 
@@ -218,8 +228,8 @@ consequences follow.
 \textbf{Selection is readable as a term-by-term comparison.} The selector exposes
 the contributing scores for each candidate action: substrate support weight,
 coherence history bias, recognition confidence, and ATP cost, each as a named
-value. A routing decision is a record of what evidence supported what action ---
-not a matrix multiply.
+value. A routing decision is a record of what evidence supported what action, not
+a matrix multiply.
 
 \textbf{Memory is inspectable as structure.} What a node has learned is encoded in
 specific, named substrate entries. The question ``does Task A's substrate help or
@@ -237,7 +247,7 @@ constant.
 
 A further property: null results are diagnostically informative. When a mechanism
 produces no improvement in aggregate metrics, local observability allows a more
-precise question --- was the mechanism absent? Present but too late? Present but
+precise question: was the mechanism absent? Present but too late? Present but
 competing with a stronger signal and losing? This precision prevents false
 conclusions from aggregate accuracy alone.
 
@@ -252,12 +262,12 @@ document three cases.
 task variant underperformed a closely related variant despite identical behavior at
 the first latent node. A per-node probe revealed that a downstream node was
 repeatedly selecting transform-specific routes while latent context confidence was
-well below the promotion threshold --- in one representative trace, choosing a hard
-transform at cycles where confidence was 0.289, then 0.477, then 0.609, none of
-which crossed the 0.78 threshold for context promotion. The diagnosis was precise:
-the node had a packet and a task but was committing to transforms before it had
-sufficient contextual evidence. The intervention was targeted: a downstream action
-gate that suppresses non-identity transform choices while latent context is
+well below the promotion threshold. In one representative trace, the node chose a
+hard transform at cycles where confidence was 0.289, then 0.477, then 0.609, none
+of which crossed the 0.78 threshold for context promotion. The diagnosis was
+precise: the node had a packet and a task but was committing to transforms before
+it had sufficient contextual evidence. The intervention was targeted: a downstream
+action gate that suppresses non-identity transform choices while latent context is
 available but unpromoted. Task performance improved sharply in subsequent
 benchmarks. What the workflow provided was not ``change the learning rate'' or
 ``train longer,'' but a specific mechanistic claim followed by a minimal surgical
@@ -269,29 +279,30 @@ recognition was ineffective, the trace was inspected: route patterns were
 consolidated in substrate key space, but transfer-time observations did not expose
 those same keys, so the recognizer had no aligned coordinate system to compare
 against. After aligning the observation adapter to expose substrate-key indices,
-recognized route entry count moved from zero to five --- recognition was now
-genuinely active. A subsequent selector interaction probe then showed that sparse
-recognition was occasionally winning close routing decisions, but tipping them
+the recognized route entry count moved from zero to five; recognition was now
+genuinely active. A subsequent selector interaction probe showed that sparse
+recognition was occasionally winning close routing decisions but tipping them
 toward stale carried route families. The conclusion was not ``disable recognition''
 but ``recognition needs freshness discounting.'' Three distinct diagnostic
-conclusions --- absent, present but misaligned, present but blunt --- emerged from
-a sequence of local observations, each narrowing the question.
+conclusions (absent, present but misaligned, present but blunt) emerged from a
+sequence of local observations, each narrowing the question.
 
 \textbf{Case 3: Occupancy V1 failure diagnosed at the mechanism level.} The
 initial occupancy evaluation produced an eval F1 of 0.032. The traces were
 inspected rather than treating this as architectural incapacity. Three compounding
 failure modes were found: feedback was suppressed during evaluation, causing ATP to
-collapse as nodes spent their budgets without replenishment --- dropped packets
-surged from under 1 per episode during training to over 17 per episode during
-evaluation; no carryover round-trip was ever measured; and the context-indexed
-support layer was dormant because no context signal was injected. Addressing the
-first flaw alone --- enabling feedback during evaluation --- raised eval F1 from
-0.032 to 0.748, a 23$\times$ improvement, establishing that the failure was
-entirely in the evaluation harness.
+collapse as nodes spent their budgets without replenishment. Dropped packets
+surged from under 1 per episode during training to over 17 during evaluation. No
+carryover round-trip was ever measured, and the context-indexed support layer was
+dormant because no context signal was injected. Addressing the first flaw alone
+(enabling feedback during evaluation) raised eval F1 from 0.032 to 0.748, a
+23$\times$ improvement, establishing that the failure was entirely in the
+evaluation harness.
 
 \section{Experimental Results}
 
 \subsection{CVT-1: Transfer, Latent Context, and Sample Efficiency}
+\label{sec:cvt1}
 
 The primary controlled benchmark uses context-dependent bit-transform routing
 tasks (CVT-1). Three variants (A, B, C) form a structured transfer landscape where
@@ -307,8 +318,8 @@ some prior substrate provides a useful prior and some injects context poison.
     Task B cold start          & 3.9  & 0.477 \\
     A$\to$B substrate-only     & 7.3  & 0.586 \\
     A$\to$B full carryover     & 10.6 & 0.704 \\
-    A$\to$B latent carryover   & 7.0  & ---   \\
-    A$\to$B visible carryover  & 6.2  & ---   \\
+    A$\to$B latent carryover   & 7.0  & --    \\
+    A$\to$B visible carryover  & 6.2  & --    \\
     \bottomrule
   \end{tabular}
   \caption{CVT-1 transfer results, 6-node topology, 18-packet sessions.}
@@ -325,7 +336,7 @@ direct A$\to$C skip but via different substrate mechanisms. Neither path overwri
 prior structure: the substrate specializes through layered accumulation. An online
 neural baseline comparison (same 18-example session, predict-then-update) shows an
 Elman RNN requires approximately 144--162 examples to reach the criterion REAL
-achieves in a single 18-packet session --- an 8--9$\times$ sample efficiency
+achieves in a single 18-packet session, an 8--9$\times$ sample efficiency
 advantage in the low-data regime.
 
 \subsection{Morphogenesis: Emergent Difficulty-Correlated Growth}
@@ -350,27 +361,31 @@ that differ systematically by baseline task performance:
   \label{tab:morpho}
 \end{table}
 
-This pattern is not designed. High-performing tasks consume ATP efficiently,
-leaving little surplus to trigger growth. Struggling tasks fail more, spending ATP
-on misrouted packets and opening the surplus window that enables budding. New nodes
-then provide capacity precisely where the network is metabolically stressed.
-Earned growth rate improved from 20\% on the 6-node topology to 100\% on the
-10-node topology under task-carrying conditions, revealing a minimum topology
-complexity threshold: below it, the edge space is too constrained for new nodes to
-find productive specializations before the session ends.
+This pattern was not designed. On the tested topologies and scenarios,
+high-performing tasks consume ATP efficiently, leaving little surplus to trigger
+growth; struggling tasks fail more, opening the surplus window that enables
+budding. Earned growth rate improved from 20\% on the 6-node topology to 100\% on
+the 10-node topology under task-carrying conditions, indicating a minimum topology
+complexity threshold below which the edge space is too constrained for new nodes
+to find productive specializations before the session ends. Whether this
+difficulty-correlation generalizes beyond the tested conditions is an open
+question.
 
-\subsection{Occupancy: Real-World Generalization}
+\subsection{Occupancy: Benchmark Generalization}
 
-The occupancy series applies REAL to a 14-day room occupancy dataset: five
-environmental sensors (CO$_2$, temperature, humidity, light, humidity ratio) at
-15-minute intervals predict room occupancy. This is an external real-world dataset
-the system was not designed for.
+The occupancy series applies REAL to a realistic room-occupancy prediction
+benchmark derived from real-world sensor patterns (CO$_2$, temperature, humidity,
+light, humidity ratio at 15-minute intervals), designed to capture the temporal
+session structure of actual occupancy monitoring. The system was not trained or
+tuned for this task.
 
 Following the V1 harness diagnosis in Case 3, the V3 harness aligned the
-evaluation to REAL's native operating mode: sessions as first-class units, online
-multi-sensor context encoding (CO$_2$ and light combined into a 4-code context
-space), full multi-hop routing, and explicit fresh-session vs.\ persistent
-evaluation protocols. Results across three seeds:
+evaluation to REAL's native operating mode: sessions (contiguous same-label runs)
+as first-class temporal units, online multi-sensor context encoding (CO$_2$ and
+light combined into a 4-code context space), full multi-hop routing, and explicit
+per-session fresh-start evaluation. Both carryover and cold-start conditions use a
+fresh system per evaluation session; the carryover condition loads the trained
+substrate and the cold-start condition begins blank.
 
 \begin{table}[ht]
   \centering
@@ -379,23 +394,29 @@ evaluation protocols. Results across three seeds:
     \toprule
     Condition & Acc. & F1 & Delivery \\
     \midrule
-    MLP baseline (full data)        & 0.985 & 0.963 & ---    \\
-    REAL V3 warm (persistent)       & 0.973 & \textbf{0.952} & 0.969 \\
-    REAL V3 cold (fresh-session)    & 0.968 & 0.919 & 0.977  \\
-    Efficiency ratio (cold/warm del.) & --- & ---   & \textbf{0.991} \\
+    MLP baseline$^{\dagger}$                    & 0.985 & 0.963 & --    \\
+    REAL V3 carryover (3-seed mean)             & 0.973 & \textbf{0.936} & 0.969 \\
+    REAL V3 cold-start (3-seed mean)            & 0.968 & 0.921 & 0.977 \\
+    Delivery parity (carryover/cold-start)      & --    & --    & 0.991 \\
     \bottomrule
   \end{tabular}
-  \caption{V3 occupancy results, 3-seed mean. MLP trained on full 1,344-example
-  split; REAL trained on 926 sessions.}
+  \caption{V3 occupancy results. $^{\dagger}$MLP: 1,072 train / 268 test
+  episodes, flat rolling-window split. REAL V3: 926 training episodes across 62
+  sessions / 414 eval episodes across 27 sessions, session-native protocol.
+  Best single seed (seed 13) reaches carryover F1 of 0.952.}
   \label{tab:occupancy}
 \end{table}
 
-Warm F1 of 0.952 closes the gap to the MLP to 0.011. The remaining difference is
-a recall gap on the minority class attributable to the absence of class-weighted
-feedback; both systems achieve near-identical precision ($\sim$0.98). The
-efficiency ratio of 0.991 means a fresh system loaded with the trained substrate
-routes at 99.1\% of continuous-system delivery --- from the first session, without
-warm-up --- confirming that the substrate is the actual knowledge carrier.
+The 3-seed mean carryover F1 of 0.936 approaches the MLP baseline of 0.963 (gap:
+0.027; best seed gap: 0.011), achieved on fewer training examples than the MLP
+(926 vs 1,072) and under a fundamentally different evaluation regime. The
+remaining gap is a recall difference on the minority class; REAL and the MLP reach
+comparable precision. Class-weighted feedback is a plausible remedy but has not
+yet been tested. The delivery parity ratio of 0.991, with carryover and cold-start
+achieving near-identical routing delivery, reflects that both fresh protocols
+perform similarly on this benchmark. The stronger substrate carryover evidence is
+in the CVT-1 transfer results (Section~\ref{sec:cvt1}), where warm carryover
+reaches 10.6 exact routings against 3.9 for cold start.
 
 \section{Discussion}
 
@@ -406,31 +427,36 @@ applicable here. Several findings emerged from operating REAL that prior
 formalization did not anticipate.
 
 The most significant is that the right evaluation frame for this kind of system is
-not obvious and cannot be derived from the theory. The occupancy V1 result ---
-0.032 eval F1 --- appeared to be a system failure. Node-level traces showed
-instead a harness failure: the evaluation was actively starving the network by
-suppressing the feedback nodes require to maintain their ATP. When deprived of
-feedback, the system did exactly what an allostatic system should do: it conserved
-remaining budget and stopped routing. This was not incorrect behavior. It was the
+not obvious and cannot be derived from the theory. The occupancy V1 result
+(0.032 eval F1) appeared to be a system failure. Node-level traces showed instead
+a harness failure: the evaluation was actively starving the network by suppressing
+the feedback nodes require to maintain their ATP. When deprived of feedback, the
+system did exactly what an allostatic system should do: it conserved remaining
+budget and stopped routing. This was not incorrect behavior. It was the
 architecture working as designed under conditions the harness had not anticipated.
 The failure was in the measurement, not in the system, and only local observability
 made that distinction possible.
 
-A second discovery concerns substrate portability. The original research question
-was ``how does REAL compare to an MLP on classification accuracy?'' The more
-fundamental finding is that a fresh system loaded with trained substrate performs
-within 0.85\% of a continuously running system from the very first session. The
-routing substrate is not a snapshot of runtime state; it is a compressed record of
-which routing patterns have earned feedback, indexed by context, that transfers
-like a learned reflex rather than like a weight matrix. This property was not
-predicted by the theory; it emerged from measuring the right thing.
+A second discovery concerns what the right question for evaluating REAL actually
+is. The original research question was ``how does REAL compare to an MLP on
+classification accuracy?'' The occupancy V3 work revealed that this framing was
+misaligned with what REAL does: the system operates in sessions, accumulates
+substrate across them, and is naturally evaluated on how well session-level
+carryover accelerates orientation. Reframing the benchmark around sessions as
+first-class units and separating the carryover and cold-start conditions exposed
+near-MLP task performance under a REAL-native protocol. The CVT-1 results provide
+the clearer substrate portability demonstration: warm carryover (10.6 exact
+routings per session) substantially outperforms cold start (3.9), and
+substrate-only carryover (7.3) confirms the durable substrate, not the episodic
+trace, is responsible. This property was not foregrounded in the initial
+benchmarks; it emerged from asking what the right measurement was.
 
 A third discovery is the difficulty-correlated morphogenesis pattern. The ATP
 surplus gate was designed to prevent runaway growth. That it also produces
-self-allocation of structural resources tracking the network's own deficits ---
-without being told to --- was not predicted. It is the metabolic constraint
-producing behavior that resembles a biological property (allocate growth where
-stressed) through a mechanism that is entirely local and substrate-level.
+self-allocation of structural resources tracking the network's own deficits,
+without being told to, was not predicted. It is the metabolic constraint producing
+behavior that resembles a biological property (allocate growth where stressed)
+through a mechanism that is entirely local and substrate-level.
 
 These three discoveries share a structure: they were accessible only through
 operating the system and reading its local state. None appear in the formal
@@ -450,18 +476,21 @@ The workflow claim is empirical: this readability was used. Across three documen
 cases, the methodology was inspect $\to$ localize $\to$ change $\to$ verify, and
 each step was possible because of the structural capability. A transformer with
 richer logging would not produce the claim ``a downstream node is committing to
-transforms before context confidence is sufficient'' --- because there is no
+transforms before context confidence is sufficient,'' because there is no
 downstream node, there is no context confidence state, and there is no action
 vocabulary from which a premature commitment was made.
 
 \subsection{Limits}
 
-Morphogenesis requires task and context metadata; load-based growth in the absence
-of task structure remains outside the current design. Prediction's influence on
-routing decisions is currently observable but weak in the tested session lengths.
-The occupancy recall gap on the minority class would likely close with
-class-weighted feedback. The sample-efficiency advantage at small scale has not
-been tested at the scales where gradient-based methods dominate.
+Morphogenesis requires task and context metadata to seed productive growth;
+load-based growth in the absence of task structure remains outside the current
+design. Prediction's influence on routing decisions is structurally present and
+locally observable, but its effect on measured outcomes is small in the tested
+session lengths; whether longer sessions amplify its role is open. The occupancy
+recall gap on the minority class is plausibly addressable with class-weighted
+feedback, but this has not yet been tested. The sample-efficiency and transfer
+advantages demonstrated here are at scales where the low-data regime matters;
+comparison at the scales where gradient-based methods dominate remains future work.
 
 \section{Related Work}
 
@@ -483,45 +512,61 @@ Their substrates are random or fixed rather than learned through metabolic
 feedback, transfer is not a design objective, and local decisions are no more
 interpretable than in standard networks.
 
-\textbf{Interpretable machine learning.} Post-hoc methods \citep{lundberg2017shap,
-ribeiro2016lime, sundararajan2017integrated} approximate explanations of trained
-models and are correlational by construction. REAL's interpretability is causal:
-the explanation of a routing decision is the decision record itself, not an
-approximation derived from perturbing the input space.
+\textbf{Interpretable machine learning.} Post-hoc methods
+\citep{lundberg2017shap,ribeiro2016lime,sundararajan2017integrated} approximate
+explanations of trained models and are correlational by construction. REAL's
+interpretability is causal: the explanation of a routing decision is the decision
+record itself, not an approximation derived from perturbing the input space.
 
 \section{Conclusion}
 
 REAL Neural Substrate demonstrates that a network of local allostatic agents,
 without global gradient descent, can develop cross-task transfer, latent context
 inference, difficulty-correlated topology growth, and near-MLP performance on a
-real-world dataset. The biological principles it operationalizes --- metabolic
-constraint, allostatic coherence, stigmergic substrate --- are sufficient to
-produce competitive behavior without a global objective.
+task it was not designed for. The biological principles it operationalizes
+(metabolic constraint, allostatic coherence, and stigmergic substrate) are
+sufficient to produce competitive behavior without a global objective.
 
 The system is natively interpretable in two distinct senses. As a structural
 capability, REAL decisions are readable because they are made by agents with
 explicit local state; memory is inspectable because it is encoded in named
 substrate entries; and counterfactual analysis is mechanistically meaningful
 because mechanisms can be toggled without redesigning the computation. As a
-development workflow, this readability enabled an approach --- inspect, localize,
-change, verify --- that was productive across the documented cases and would not
+development workflow, this readability enabled an approach of inspect, localize,
+change, and verify that was productive across the documented cases and would not
 have been available in a gradient-trained system.
 
-Three experimental discoveries --- that the occupancy failure was a harness failure
-readable from metabolic traces, that substrate portability is the more fundamental
-capability, and that difficulty-correlated growth is an emergent property of the
-metabolic gate --- were all accessible only through building and operating the
-system. They constitute the experimental-philosophy contribution: the built
-artifact makes claims the formal specification does not, and some of those claims
-revise the theory.
+Three experimental discoveries were accessible only through building and operating
+the system: that the occupancy failure was a harness failure readable from
+metabolic traces, that substrate portability is the more fundamental capability,
+and that difficulty-correlated growth is an emergent property of the metabolic
+gate. They constitute the experimental-philosophy contribution: the built artifact
+makes claims the formal specification does not, and some of those claims revise the
+theory.
 
-The interpretability is not a feature. It is what the architecture makes possible.
+REAL's interpretability is not a feature added to the architecture. It is an
+embedded property that the architecture makes structurally inevitable, a direct
+consequence of building computation from agents that maintain explicit local state.
 
 \section*{Acknowledgements}
 
-The author thanks the Codex coding agent for implementation support throughout
-Phase 8 development, and Gemini for the generative question that initiated the
-neural substrate direction.
+This project was developed and overseen by the author in collaboration with
+multiple AI models across conceptualization, implementation, testing, and
+documentation. Each model operated under constraints specified in a shared
+development protocol, with tasks assigned according to model strengths. Principal
+contributions by model: \textit{ChatGPT o4 Thinking} provided code changes,
+experimentation, cross-examination and stress testing, fact checking, and source
+compilation via deep research tools. \textit{Claude Opus 4.6} contributed code
+development, hypothesis testing, conceptualization, high-level synthesis, and
+report consolidation. \textit{Claude Sonnet 4.6 (Cowork)} handled paper drafting
+and final composition. \textit{Gemini 2.5 Pro} provided high-level interpretation
+and consolidation of trace documents produced by other agents.
+
+This work is itself an instance of the principles underlying REAL, applied at a
+higher scale: human ideation, strategy, and multi-agent orchestration used to
+sustain consistent and accurate development over time. It treats AI as a
+collaborative partner in the research process rather than a substitute for human
+cognition and ingenuity.
 
 \footnotesize
 \bibliographystyle{apalike}

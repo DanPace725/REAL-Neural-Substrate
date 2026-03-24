@@ -1,8 +1,238 @@
 {
-  "generated_at": "2026-03-20T16:32:09-07:00",
+  "generated_at": "2026-03-24T11:34:14-07:00",
   "trace_root": "docs/traces",
-  "entry_count": 74,
+  "entry_count": 82,
   "entries": [
+    {
+      "path": "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
+      "filename": "2026-03-24 1310 - B Scale Suite Start.md",
+      "title": "2026-03-24 1310 - B Scale Suite Start",
+      "timestamp": "2026-03-24T13:10",
+      "date": "2026-03-24",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "scale",
+        "new",
+        "compare_b_scale_suite",
+        "suite",
+        "test_b_scale_suite",
+        "b2_scale_b2s5_seed13_initial_20260324",
+        "b2s1",
+        "binary",
+        "experiment_outputs",
+        "first",
+        "harness",
+        "hidden-memory"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/b2_scale_b2s5_seed13_initial_20260324.json",
+        "scripts/compare_b_scale_suite.py",
+        "tests/test_b_scale_suite.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md",
+      "filename": "2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md",
+      "title": "2026-03-24 1133 - Downstream Exact Transform Challenge Probe",
+      "timestamp": "2026-03-24T11:33",
+      "date": "2026-03-24",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "exact",
+        "downstream",
+        "transform",
+        "probe",
+        "selector",
+        "visible",
+        "nodes",
+        "added",
+        "analyze_b_to_c_visible_timecourse",
+        "b_to_c_visible_timecourse_23_37_postdownstream",
+        "but",
+        "challenge"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/2026-03-24_b_to_c_visible_timecourse_23_37_postdownstream.json",
+        "scripts/analyze_b_to_c_visible_timecourse.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
+      "filename": "2026-03-24 1130 - A Scale Suite Start.md",
+      "title": "2026-03-24 1130 - A Scale Suite Start",
+      "timestamp": "2026-03-24T11:30",
+      "date": "2026-03-24",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "suite",
+        "compare_a_scale_suite",
+        "harness",
+        "scale",
+        "test_a_scale_suite",
+        "was",
+        "a1-a4",
+        "benchmark",
+        "cases",
+        "ceiling",
+        "dedicated",
+        "examples"
+      ],
+      "referenced_files": [
+        "scripts/compare_a_scale_suite.py",
+        "tests/test_a_scale_suite.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md",
+      "filename": "2026-03-24 1120 - B to C Downstream Selector Read.md",
+      "title": "2026-03-24 1120 - B to C Downstream Selector Read",
+      "timestamp": "2026-03-24T11:20",
+      "date": "2026-03-24",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "analyze_b_to_c_visible_timecourse",
+        "downstream",
+        "selector",
+        "source",
+        "b_to_c_visible_timecourse_23_37",
+        "bad",
+        "branch",
+        "chosen",
+        "context-action",
+        "direct",
+        "even",
+        "experiment_outputs"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/2026-03-24_b_to_c_visible_timecourse_23_37.json",
+        "scripts/analyze_b_to_c_visible_timecourse.py",
+        "tests/test_b_to_c_visible_timecourse.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
+      "filename": "2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
+      "title": "2026-03-24 1101 - B to C Visible Timecourse Diagnostic",
+      "timestamp": "2026-03-24T11:01",
+      "date": "2026-03-24",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "visible",
+        "analyze_b_to_c_visible_timecourse",
+        "source",
+        "transfer",
+        "already",
+        "b_to_c_visible_timecourse_23_37",
+        "bridge",
+        "diagnostic",
+        "experiment_outputs",
+        "failure",
+        "fields",
+        "mostly"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/2026-03-24_b_to_c_visible_timecourse_23_37.json",
+        "scripts/analyze_b_to_c_visible_timecourse.py",
+        "tests/test_b_to_c_visible_timecourse.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md",
+      "filename": "2026-03-24 1049 - Selector Time Carryover Challenge Probe.md",
+      "title": "2026-03-24 1049 - Selector Time Carryover Challenge Probe",
+      "timestamp": "2026-03-24T10:49",
+      "date": "2026-03-24",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "selector",
+        "support",
+        "carryover",
+        "action_support",
+        "carried",
+        "challenge",
+        "context_action",
+        "phase8",
+        "already",
+        "b_to_c_carryover_bridge_split_13_23_37_postselector",
+        "back",
+        "context-specific"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/2026-03-24_b_to_c_carryover_bridge_split_13_23_37_postselector.json",
+        "phase8/selector.py",
+        "tests/test_phase8_recognition.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md",
+      "filename": "2026-03-24 1041 - B to C Carryover Split Ablations.md",
+      "title": "2026-03-24 1041 - B to C Carryover Split Ablations",
+      "timestamp": "2026-03-24T10:41",
+      "date": "2026-03-24",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "carryover",
+        "ablations",
+        "diagnose_b_to_c_carryover_bridge",
+        "b_to_c_carryover_bridge_split_13_23_37",
+        "bridge",
+        "bundle",
+        "carried",
+        "experiment_outputs",
+        "split",
+        "substrate",
+        "test_b_to_c_carryover_bridge",
+        "accumulator"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/2026-03-24_b_to_c_carryover_bridge_split_13_23_37.json",
+        "scripts/diagnose_b_to_c_carryover_bridge.py",
+        "tests/test_b_to_c_carryover_bridge.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
+      "filename": "2026-03-24 1033 - B to C Carryover Bridge.md",
+      "title": "2026-03-24 1033 - B to C Carryover Bridge",
+      "timestamp": "2026-03-24T10:33",
+      "date": "2026-03-24",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "carryover",
+        "was",
+        "bridge",
+        "diagnose_b_to_c_carryover_bridge",
+        "test_b_to_c_carryover_bridge",
+        "b_to_c_carryover_bridge_13_23_37",
+        "experiment_outputs",
+        "question",
+        "useful",
+        "added",
+        "already",
+        "already-known"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/2026-03-24_b_to_c_carryover_bridge_13_23_37.json",
+        "scripts/diagnose_b_to_c_carryover_bridge.py",
+        "tests/test_b_to_c_carryover_bridge.py"
+      ]
+    },
     {
       "path": "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
       "filename": "2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
@@ -2072,6 +2302,12 @@
     }
   ],
   "by_keyword": {
+    "a1-a4": [
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
+    ],
+    "ablations": [
+      "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md"
+    ],
     "about": [
       "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
     ],
@@ -2087,6 +2323,9 @@
     "accumulate": [
       "docs/traces/2026-03-18 2145 - Latent Context Generalization.md"
     ],
+    "accumulator": [
+      "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md"
+    ],
     "accuracy": [
       "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md",
       "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md",
@@ -2101,6 +2340,9 @@
     ],
     "action": [
       "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
+    ],
+    "action_support": [
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
     ],
     "actions": [
       "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
@@ -2141,7 +2383,9 @@
       "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md",
       "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
-      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md",
+      "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
     ],
     "agents": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
@@ -2173,7 +2417,13 @@
       "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
       "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md",
       "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
+      "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md",
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
+    ],
+    "already-known": [
+      "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md"
     ],
     "ambiguity": [
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
@@ -2185,6 +2435,11 @@
     ],
     "analysis": [
       "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md"
+    ],
+    "analyze_b_to_c_visible_timecourse": [
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md",
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
     ],
     "anticipation": [
       "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
@@ -2233,6 +2488,34 @@
       "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md",
       "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md"
     ],
+    "b2_scale_b2s5_seed13_initial_20260324": [
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
+    ],
+    "b2s1": [
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
+    ],
+    "b_to_c_carryover_bridge_13_23_37": [
+      "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md"
+    ],
+    "b_to_c_carryover_bridge_split_13_23_37": [
+      "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md"
+    ],
+    "b_to_c_carryover_bridge_split_13_23_37_postselector": [
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
+    ],
+    "b_to_c_visible_timecourse_23_37": [
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
+    ],
+    "b_to_c_visible_timecourse_23_37_postdownstream": [
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
+    ],
+    "back": [
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
+    ],
+    "bad": [
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
+    ],
     "band": [
       "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md"
     ],
@@ -2259,7 +2542,8 @@
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
       "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md",
       "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
-      "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md"
+      "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md",
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
     ],
     "benchmark_anticipation_metrics": [
       "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
@@ -2279,7 +2563,8 @@
       "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md"
     ],
     "binary": [
-      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
     ],
     "bit": [
       "docs/traces/2026-03-18 1640 - C Node Probe.md",
@@ -2298,17 +2583,24 @@
       "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
     ],
     "branch": [
-      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md"
+      "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
     ],
     "breakdown": [
       "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md"
     ],
     "bridge": [
       "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md",
+      "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
+      "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md",
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
       "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
     ],
     "bud": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md"
+    ],
+    "bundle": [
+      "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md"
     ],
     "but": [
       "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
@@ -2316,7 +2608,8 @@
       "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md",
       "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
       "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md",
-      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
     ],
     "c_family_real_diagnostic_20260318_seed13": [
       "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md"
@@ -2369,7 +2662,9 @@
     ],
     "carried": [
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
-      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
+      "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md",
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
     ],
     "carries": [
       "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
@@ -2383,6 +2678,9 @@
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
       "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
+      "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
+      "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md",
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md",
       "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
     ],
     "carryover-mode": [
@@ -2391,6 +2689,9 @@
     "case": [
       "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md"
     ],
+    "cases": [
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
+    ],
     "causal-transformer": [
       "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md"
     ],
@@ -2398,7 +2699,12 @@
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
       "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
       "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
-      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
+      "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md",
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
+    ],
+    "challenge": [
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md",
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
     ],
     "change": [
       "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
@@ -2417,6 +2723,9 @@
     ],
     "check": [
       "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md"
+    ],
+    "chosen": [
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
     ],
     "claim": [
       "docs/traces/20260317_phase8_neural_baseline_trace.md"
@@ -2477,6 +2786,12 @@
     "commits": [
       "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md"
     ],
+    "compare_a_scale_suite": [
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
+    ],
+    "compare_b_scale_suite": [
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
+    ],
     "compare_self_selected_smoke": [
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
     ],
@@ -2524,6 +2839,15 @@
       "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md",
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
       "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+    ],
+    "context-action": [
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
+    ],
+    "context-specific": [
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
+    ],
+    "context_action": [
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
     ],
     "context_count": [
       "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md"
@@ -2624,6 +2948,9 @@
     "decisions": [
       "docs/traces/2026-03-19 1020 - Phase8 Prediction Interaction Diagnosis.md"
     ],
+    "dedicated": [
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
+    ],
     "delta": [
       "docs/traces/20260317_1005_cyclic_transfer_trace.md",
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
@@ -2638,6 +2965,10 @@
     ],
     "diagnose_b_to_c_carryover": [
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "diagnose_b_to_c_carryover_bridge": [
+      "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
+      "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md"
     ],
     "diagnose_benchmark_node_probe": [
       "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
@@ -2667,7 +2998,11 @@
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
     ],
     "diagnostic": [
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
       "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
+    ],
+    "direct": [
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
     ],
     "directly": [
       "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md"
@@ -2676,7 +3011,9 @@
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md"
     ],
     "downstream": [
-      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md"
+      "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md",
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
     ],
     "each": [
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md"
@@ -2765,6 +3102,9 @@
     "evaluation": [
       "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md"
     ],
+    "even": [
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
+    ],
     "evidence": [
       "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
       "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
@@ -2777,11 +3117,15 @@
       "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md",
       "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
       "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md",
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md",
       "docs/traces/20260317_1005_cyclic_transfer_trace.md",
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
       "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
       "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md",
       "docs/traces/baseline_scale_comparisons.md"
+    ],
+    "examples": [
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
     ],
     "exception": [
       "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
@@ -2807,6 +3151,11 @@
       "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
       "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md",
       "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md",
+      "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
+      "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md",
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md",
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
       "docs/traces/20260317_1005_cyclic_transfer_trace.md",
       "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
@@ -2830,6 +3179,9 @@
     "extended": [
       "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
     ],
+    "failure": [
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md"
+    ],
     "families": [
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md"
     ],
@@ -2844,6 +3196,9 @@
     "feedback": [
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md"
     ],
+    "fields": [
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md"
+    ],
     "final": [
       "docs/traces/20260317_1005_cyclic_transfer_trace.md"
     ],
@@ -2853,7 +3208,8 @@
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md",
       "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md",
       "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
-      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md",
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
     ],
     "fixed": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
@@ -2941,7 +3297,9 @@
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
       "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md",
-      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
     ],
     "has": [
       "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md"
@@ -2959,7 +3317,8 @@
       "docs/traces/baseline_scale_comparisons.md"
     ],
     "hidden-memory": [
-      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md"
+      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
     ],
     "hookup": [
       "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md"
@@ -3102,6 +3461,9 @@
     "morphogenesis_large_paired": [
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md"
     ],
+    "mostly": [
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md"
+    ],
     "multi-state": [
       "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md"
     ],
@@ -3117,7 +3479,8 @@
     ],
     "new": [
       "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
-      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md"
+      "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
     ],
     "node": [
       "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
@@ -3129,6 +3492,9 @@
     ],
     "node_agent": [
       "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md"
+    ],
+    "nodes": [
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
     ],
     "none": [
       "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md"
@@ -3222,7 +3588,8 @@
       "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
-      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
     ],
     "phase8_session_synthesis": [
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
@@ -3269,7 +3636,8 @@
       "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md",
       "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
       "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md",
-      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md"
+      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
     ],
     "probe_phase8_recognition_bias": [
       "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md"
@@ -3296,6 +3664,9 @@
     ],
     "python": [
       "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md"
+    ],
+    "question": [
+      "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md"
     ],
     "quiet": [
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
@@ -3416,6 +3787,8 @@
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md"
     ],
     "scale": [
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
       "docs/traces/baseline_scale_comparisons.md"
     ],
     "seed": [
@@ -3446,7 +3819,10 @@
       "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md",
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
-      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md",
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md",
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
     ],
     "self-selected": [
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md",
@@ -3488,13 +3864,18 @@
       "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
       "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md",
       "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
-      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md"
+      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md",
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
     ],
     "source-sequence": [
       "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md"
     ],
     "source-side": [
       "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
+    ],
+    "split": [
+      "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md"
     ],
     "spot": [
       "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md"
@@ -3521,14 +3902,20 @@
     "substrate": [
       "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md",
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
-      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md",
+      "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md"
+    ],
+    "suite": [
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
     ],
     "summary": [
       "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
     ],
     "support": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
-      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md"
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
     ],
     "sweep": [
       "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
@@ -3552,6 +3939,16 @@
     ],
     "terms": [
       "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md"
+    ],
+    "test_a_scale_suite": [
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
+    ],
+    "test_b_scale_suite": [
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
+    ],
+    "test_b_to_c_carryover_bridge": [
+      "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
+      "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md"
     ],
     "test_b_to_c_carryover_diagnosis": [
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
@@ -3635,6 +4032,7 @@
       "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md",
       "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md",
       "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md",
       "docs/traces/20260317_1005_cyclic_transfer_trace.md",
       "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
@@ -3650,7 +4048,8 @@
       "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
       "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
       "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
-      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md"
+      "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md",
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
     ],
     "tuning": [
       "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md"
@@ -3666,6 +4065,9 @@
     "use": [
       "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md"
     ],
+    "useful": [
+      "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md"
+    ],
     "users": [
       "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
       "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
@@ -3675,6 +4077,8 @@
     "visible": [
       "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
       "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md",
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md",
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
       "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
@@ -3693,7 +4097,9 @@
       "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md",
       "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
       "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md",
-      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
+      "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
     ],
     "were": [
       "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md"
@@ -3731,6 +4137,22 @@
     "docs/architecture_notes.md": [
       "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
     ],
+    "docs/experiment_outputs/2026-03-24_b_to_c_carryover_bridge_13_23_37.json": [
+      "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md"
+    ],
+    "docs/experiment_outputs/2026-03-24_b_to_c_carryover_bridge_split_13_23_37.json": [
+      "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md"
+    ],
+    "docs/experiment_outputs/2026-03-24_b_to_c_carryover_bridge_split_13_23_37_postselector.json": [
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
+    ],
+    "docs/experiment_outputs/2026-03-24_b_to_c_visible_timecourse_23_37.json": [
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
+    ],
+    "docs/experiment_outputs/2026-03-24_b_to_c_visible_timecourse_23_37_postdownstream.json": [
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
+    ],
     "docs/experiment_outputs/20260317_1002_cyclic_transfer.json": [
       "docs/traces/20260317_1005_cyclic_transfer_trace.md"
     ],
@@ -3748,6 +4170,9 @@
     ],
     "docs/experiment_outputs/20260317_1113_morphogenesis_large_carryover_bridge.json": [
       "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
+    ],
+    "docs/experiment_outputs/b2_scale_b2s5_seed13_initial_20260324.json": [
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
     ],
     "docs/experiment_outputs/c_family_credit_debt_spotcheck_20260318.json": [
       "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md"
@@ -3851,7 +4276,8 @@
       "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md",
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
-      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
     ],
     "phase8/substrate.py": [
       "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
@@ -3894,11 +4320,22 @@
       "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
       "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
     ],
+    "scripts/analyze_b_to_c_visible_timecourse.py": [
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md",
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
+    ],
     "scripts/benchmark_anticipation_metrics.py": [
       "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
     ],
     "scripts/ceiling_benchmark_suite.py": [
       "docs/traces/2026-03-18 1535 - C Family Diagnostic.md"
+    ],
+    "scripts/compare_a_scale_suite.py": [
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
+    ],
+    "scripts/compare_b_scale_suite.py": [
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
     ],
     "scripts/compare_self_selected_smoke.py": [
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
@@ -3908,6 +4345,10 @@
     ],
     "scripts/diagnose_b_to_c_carryover.py": [
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "scripts/diagnose_b_to_c_carryover_bridge.py": [
+      "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
+      "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md"
     ],
     "scripts/diagnose_benchmark_node_probe.py": [
       "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
@@ -3968,8 +4409,22 @@
     "scripts/run_occupancy_tests_parallel.py": [
       "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
     ],
+    "tests/test_a_scale_suite.py": [
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
+    ],
+    "tests/test_b_scale_suite.py": [
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
+    ],
+    "tests/test_b_to_c_carryover_bridge.py": [
+      "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
+      "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md"
+    ],
     "tests/test_b_to_c_carryover_diagnosis.py": [
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "tests/test_b_to_c_visible_timecourse.py": [
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
     ],
     "tests/test_benchmark_node_probe.py": [
       "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
@@ -4023,7 +4478,8 @@
       "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
-      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
     ],
     "tests/test_phase8_recognition_probe.py": [
       "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md"

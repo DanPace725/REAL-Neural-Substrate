@@ -1,0 +1,140 @@
+{
+  "title": "2026-03-24 1035 - a scale suite",
+  "timestamp": "2026-03-24T17:35:36.887035Z",
+  "harness": "a_scale_suite",
+  "seeds": [
+    13
+  ],
+  "scenarios": [
+    "A6"
+  ],
+  "result": {
+    "benchmark_ids": [
+      "A6"
+    ],
+    "task_keys": [
+      "task_a"
+    ],
+    "method_ids": [
+      "fixed-latent"
+    ],
+    "seeds": [
+      13
+    ],
+    "suite": [
+      {
+        "benchmark_id": "A6",
+        "label": "A6",
+        "family_id": "A",
+        "difficulty_index": 6,
+        "description": "100-node, 864-example aspirational scale point on a broader layered DAG.",
+        "source": "generated",
+        "node_count": 100,
+        "expected_examples": 864,
+        "topology_depth": 10,
+        "task_keys": [
+          "task_a",
+          "task_b",
+          "task_c"
+        ]
+      }
+    ],
+    "runs": [
+      {
+        "benchmark_id": "A6",
+        "family_id": "A",
+        "difficulty_index": 6,
+        "label": "A6",
+        "description": "100-node, 864-example aspirational scale point on a broader layered DAG.",
+        "source": "generated",
+        "task_key": "task_a",
+        "method_id": "fixed-latent",
+        "seed": 13,
+        "node_count": 100,
+        "expected_examples": 864,
+        "topology_depth": 10,
+        "cycles": 904,
+        "packet_ttl": 40,
+        "elapsed_seconds": 104.7965,
+        "examples_per_second": 8.2446,
+        "cycles_per_second": 8.6262,
+        "exact_matches": 437,
+        "exact_match_rate": 0.5058,
+        "mean_bit_accuracy": 0.7228,
+        "criterion_reached": true,
+        "examples_to_criterion": 29,
+        "best_rolling_exact_rate": 0.875,
+        "best_rolling_bit_accuracy": 0.9375,
+        "mean_route_cost": 0.04117,
+        "mean_source_efficiency": 0.7833,
+        "max_inbox_depth": 4,
+        "max_source_backlog": 0,
+        "dynamic_node_count": 0,
+        "node_count_runtime": 101,
+        "edge_count_runtime": 283,
+        "commitment": {
+          "memory_entry_count": 3624,
+          "pattern_count": 160,
+          "active_edge_count": 37,
+          "supported_context_count": 200,
+          "branch_context_credit_total": 0.3424,
+          "branch_context_debt_total": 0.0024,
+          "context_branch_transform_credit_total": 0.571,
+          "context_branch_transform_debt_total": 0.0009
+        }
+      }
+    ],
+    "aggregates": [
+      {
+        "benchmark_id": "A6",
+        "family_id": "A",
+        "difficulty_index": 6,
+        "label": "A6",
+        "description": "100-node, 864-example aspirational scale point on a broader layered DAG.",
+        "source": "generated",
+        "task_key": "task_a",
+        "method_id": "fixed-latent",
+        "node_count": 100,
+        "expected_examples": 864,
+        "topology_depth": 10,
+        "seed_count": 1,
+        "mean_elapsed_seconds": 104.7965,
+        "mean_examples_per_second": 8.2446,
+        "mean_cycles_per_second": 8.6262,
+        "mean_exact_match_rate": 0.5058,
+        "mean_bit_accuracy": 0.7228,
+        "criterion_rate": 1.0,
+        "mean_best_rolling_exact_rate": 0.875,
+        "mean_best_rolling_bit_accuracy": 0.9375,
+        "mean_mean_route_cost": 0.0412,
+        "mean_mean_source_efficiency": 0.7833,
+        "mean_max_inbox_depth": 4.0,
+        "mean_max_source_backlog": 0.0,
+        "mean_dynamic_node_count": 0.0,
+        "mean_memory_entry_count": 3624.0,
+        "mean_pattern_count": 160.0,
+        "mean_active_edge_count": 37.0,
+        "mean_supported_context_count": 200.0,
+        "mean_branch_context_credit_total": 0.3424,
+        "mean_branch_context_debt_total": 0.0024
+      }
+    ],
+    "method_summary": {
+      "fixed-latent": {
+        "mean_elapsed_seconds": 104.7965,
+        "mean_examples_per_second": 8.2446,
+        "mean_exact_match_rate": 0.5058,
+        "mean_bit_accuracy": 0.7228
+      }
+    },
+    "elapsed_seconds": 106.2011
+  },
+  "metadata": {
+    "task_keys": [
+      "task_a"
+    ],
+    "method_ids": [
+      "fixed-latent"
+    ]
+  }
+}

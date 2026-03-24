@@ -1,0 +1,224 @@
+{
+  "title": "2026-03-24 1031 - a scale suite",
+  "timestamp": "2026-03-24T17:31:14.204562Z",
+  "harness": "a_scale_suite",
+  "seeds": [
+    13
+  ],
+  "scenarios": [
+    "A6"
+  ],
+  "result": {
+    "benchmark_ids": [
+      "A6"
+    ],
+    "task_keys": [
+      "task_a"
+    ],
+    "method_ids": [
+      "fixed-visible",
+      "growth-visible"
+    ],
+    "seeds": [
+      13
+    ],
+    "suite": [
+      {
+        "benchmark_id": "A6",
+        "label": "A6",
+        "family_id": "A",
+        "difficulty_index": 6,
+        "description": "100-node, 864-example aspirational scale point on a broader layered DAG.",
+        "source": "generated",
+        "node_count": 100,
+        "expected_examples": 864,
+        "topology_depth": 10,
+        "task_keys": [
+          "task_a",
+          "task_b",
+          "task_c"
+        ]
+      }
+    ],
+    "runs": [
+      {
+        "benchmark_id": "A6",
+        "family_id": "A",
+        "difficulty_index": 6,
+        "label": "A6",
+        "description": "100-node, 864-example aspirational scale point on a broader layered DAG.",
+        "source": "generated",
+        "task_key": "task_a",
+        "method_id": "fixed-visible",
+        "seed": 13,
+        "node_count": 100,
+        "expected_examples": 864,
+        "topology_depth": 10,
+        "cycles": 904,
+        "packet_ttl": 40,
+        "elapsed_seconds": 118.6634,
+        "examples_per_second": 7.2811,
+        "cycles_per_second": 7.6182,
+        "exact_matches": 505,
+        "exact_match_rate": 0.5845,
+        "mean_bit_accuracy": 0.7564,
+        "criterion_reached": true,
+        "examples_to_criterion": 29,
+        "best_rolling_exact_rate": 1.0,
+        "best_rolling_bit_accuracy": 1.0,
+        "mean_route_cost": 0.03661,
+        "mean_source_efficiency": 0.7107,
+        "max_inbox_depth": 4,
+        "max_source_backlog": 0,
+        "dynamic_node_count": 0,
+        "node_count_runtime": 101,
+        "edge_count_runtime": 283,
+        "commitment": {
+          "memory_entry_count": 3838,
+          "pattern_count": 414,
+          "active_edge_count": 60,
+          "supported_context_count": 200,
+          "branch_context_credit_total": 0.2964,
+          "branch_context_debt_total": 0.1893,
+          "context_branch_transform_credit_total": 0.532,
+          "context_branch_transform_debt_total": 0.1126
+        }
+      },
+      {
+        "benchmark_id": "A6",
+        "family_id": "A",
+        "difficulty_index": 6,
+        "label": "A6",
+        "description": "100-node, 864-example aspirational scale point on a broader layered DAG.",
+        "source": "generated",
+        "task_key": "task_a",
+        "method_id": "growth-visible",
+        "seed": 13,
+        "node_count": 100,
+        "expected_examples": 864,
+        "topology_depth": 10,
+        "cycles": 904,
+        "packet_ttl": 40,
+        "elapsed_seconds": 310.7339,
+        "examples_per_second": 2.7805,
+        "cycles_per_second": 2.9092,
+        "exact_matches": 621,
+        "exact_match_rate": 0.7188,
+        "mean_bit_accuracy": 0.8339,
+        "criterion_reached": true,
+        "examples_to_criterion": 29,
+        "best_rolling_exact_rate": 1.0,
+        "best_rolling_bit_accuracy": 1.0,
+        "mean_route_cost": 0.03552,
+        "mean_source_efficiency": 0.772,
+        "max_inbox_depth": 4,
+        "max_source_backlog": 0,
+        "dynamic_node_count": 1,
+        "node_count_runtime": 102,
+        "edge_count_runtime": 288,
+        "commitment": {
+          "memory_entry_count": 3716,
+          "pattern_count": 319,
+          "active_edge_count": 42,
+          "supported_context_count": 202,
+          "branch_context_credit_total": 1.9335,
+          "branch_context_debt_total": 0.0129,
+          "context_branch_transform_credit_total": 3.0063,
+          "context_branch_transform_debt_total": 0.0056
+        }
+      }
+    ],
+    "aggregates": [
+      {
+        "benchmark_id": "A6",
+        "family_id": "A",
+        "difficulty_index": 6,
+        "label": "A6",
+        "description": "100-node, 864-example aspirational scale point on a broader layered DAG.",
+        "source": "generated",
+        "task_key": "task_a",
+        "method_id": "fixed-visible",
+        "node_count": 100,
+        "expected_examples": 864,
+        "topology_depth": 10,
+        "seed_count": 1,
+        "mean_elapsed_seconds": 118.6634,
+        "mean_examples_per_second": 7.2811,
+        "mean_cycles_per_second": 7.6182,
+        "mean_exact_match_rate": 0.5845,
+        "mean_bit_accuracy": 0.7564,
+        "criterion_rate": 1.0,
+        "mean_best_rolling_exact_rate": 1.0,
+        "mean_best_rolling_bit_accuracy": 1.0,
+        "mean_mean_route_cost": 0.0366,
+        "mean_mean_source_efficiency": 0.7107,
+        "mean_max_inbox_depth": 4.0,
+        "mean_max_source_backlog": 0.0,
+        "mean_dynamic_node_count": 0.0,
+        "mean_memory_entry_count": 3838.0,
+        "mean_pattern_count": 414.0,
+        "mean_active_edge_count": 60.0,
+        "mean_supported_context_count": 200.0,
+        "mean_branch_context_credit_total": 0.2964,
+        "mean_branch_context_debt_total": 0.1893
+      },
+      {
+        "benchmark_id": "A6",
+        "family_id": "A",
+        "difficulty_index": 6,
+        "label": "A6",
+        "description": "100-node, 864-example aspirational scale point on a broader layered DAG.",
+        "source": "generated",
+        "task_key": "task_a",
+        "method_id": "growth-visible",
+        "node_count": 100,
+        "expected_examples": 864,
+        "topology_depth": 10,
+        "seed_count": 1,
+        "mean_elapsed_seconds": 310.7339,
+        "mean_examples_per_second": 2.7805,
+        "mean_cycles_per_second": 2.9092,
+        "mean_exact_match_rate": 0.7188,
+        "mean_bit_accuracy": 0.8339,
+        "criterion_rate": 1.0,
+        "mean_best_rolling_exact_rate": 1.0,
+        "mean_best_rolling_bit_accuracy": 1.0,
+        "mean_mean_route_cost": 0.0355,
+        "mean_mean_source_efficiency": 0.772,
+        "mean_max_inbox_depth": 4.0,
+        "mean_max_source_backlog": 0.0,
+        "mean_dynamic_node_count": 1.0,
+        "mean_memory_entry_count": 3716.0,
+        "mean_pattern_count": 319.0,
+        "mean_active_edge_count": 42.0,
+        "mean_supported_context_count": 202.0,
+        "mean_branch_context_credit_total": 1.9335,
+        "mean_branch_context_debt_total": 0.0129
+      }
+    ],
+    "method_summary": {
+      "fixed-visible": {
+        "mean_elapsed_seconds": 118.6634,
+        "mean_examples_per_second": 7.2811,
+        "mean_exact_match_rate": 0.5845,
+        "mean_bit_accuracy": 0.7564
+      },
+      "growth-visible": {
+        "mean_elapsed_seconds": 310.7339,
+        "mean_examples_per_second": 2.7805,
+        "mean_exact_match_rate": 0.7188,
+        "mean_bit_accuracy": 0.8339
+      }
+    },
+    "elapsed_seconds": 434.5802
+  },
+  "metadata": {
+    "task_keys": [
+      "task_a"
+    ],
+    "method_ids": [
+      "fixed-visible",
+      "growth-visible"
+    ]
+  }
+}
