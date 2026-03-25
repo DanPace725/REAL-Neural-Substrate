@@ -25,7 +25,15 @@
       "Bash(python -m scripts.evaluate_laminated_phase8 --benchmark B2S5 --task task_a --mode visible --seed 13 --max-slices 10 --initial-cycle-budget 95 --accuracy-threshold 0.8 --regulator-type real)",
       "Bash(python -m scripts.evaluate_laminated_phase8 -b B2S1 --reg real --thresh 0.8 --compact)",
       "Bash(python -m scripts.evaluate_laminated_phase8 --sweep all-b --reg real --thresh 0.8 --compact)",
-      "Bash(python -m scripts.evaluate_laminated_phase8 --sweep all-c --reg real --thresh 0.8 --compact)"
+      "Bash(python -m scripts.evaluate_laminated_phase8 --sweep all-c --reg real --thresh 0.8 --compact)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 -b B2S3 --reg real --thresh 0.8)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); lam=d[''''laminated_run'''']; [print\\(f''''slice {i+1}: mode={s[\"\"mode_used\"\"]} policy={s[\"\"metadata\"\"].get\\(\"\"chosen_policy\"\",\"\"?\"\"\\)} acc={s.get\\(\"\"context_accuracy\"\",{}\\)} budget={s[\"\"slice_budget\"\"]}''''\\) for i,s in enumerate\\(lam[''''slice_summaries'''']\\)]\")",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --sweep all-b --reg real --thresh 0.8 --compact --no-output)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --sweep B2S1,B2S3,B2S5 --reg real --thresh 0.8 --compact --no-output)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --sweep B2S1,B2S3,B2S5 --reg real --thresh 0.8 --compact)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --sweep all-b --reg real --thresh 0.8 --slices 10 --compact)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --sweep B2S1,B2S2 --reg real --thresh 0.8 --slices 10 --compact)",
+      "Bash(ls -lt \"C:\\\\Users\\\\nscha\\\\Coding\\\\Relationally Embedded Allostatic Learning\\\\REAL-Neural-Substrate\\\\docs\\\\experiment_outputs\\\\20260325_laminated_b2s\"*)"
     ]
   }
 }

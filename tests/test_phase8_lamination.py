@@ -73,12 +73,11 @@ class TestPhase8Lamination(unittest.TestCase):
             mode="visible",
             seed=13,
             capability_policy="self-selected",
-            max_slices=3,
             initial_cycle_budget=4,
+            safety_limit=10,
         )
 
         self.assertEqual(result["benchmark_id"], "B2S1")
-        self.assertIn("baseline_summary", result)
         self.assertIn("laminated_summary", result)
         self.assertIn("laminated_run", result)
         self.assertGreaterEqual(len(result["laminated_run"]["slice_summaries"]), 1)

@@ -67,19 +67,22 @@ class Phase8SliceRunner:
                 self.system.inject_signal(count=self.scenario.initial_packets)
             self._scenario_primed = True
 
-        cycles_remaining = max(self.scenario.cycles - self._scheduled_cycles_run, 0)
-        cycles_to_run = min(max(int(cycle_budget), 0), cycles_remaining)
+        cycles_to_run = max(int(cycle_budget), 0)
         for _ in range(cycles_to_run):
             absolute_cycle = self._scheduled_cycles_run + 1
-            scheduled_specs = (self.scenario.signal_schedule_specs or {}).get(absolute_cycle)
-            if scheduled_specs:
-                self.system.inject_signal_specs(scheduled_specs)
-            else:
-                scheduled_packets = self.scenario.packet_schedule.get(absolute_cycle, 0)
-                if scheduled_packets > 0:
-                    self.system.inject_signal(count=scheduled_packets)
+            injected = self._inject_for_cycle(absolute_cycle)
+            if not injected:
+                # Past the original schedule — wrap around so the system
+                # keeps receiving examples to learn from.
+                wrapped = self._wrap_cycle(absolute_cycle)
+                if wrapped is not None:
+                    self._inject_for_cycle(wrapped)
             self.system.run_global_cycle()
             self._scheduled_cycles_run += 1
+
+        # Consolidate at slice boundary: promote learned patterns into
+        # substrate before the next slice's carryover filter runs.
+        self._consolidate_agents()
 
         end_summary = self.system.summarize()
         return self._build_slice_summary(
@@ -91,6 +94,41 @@ class Phase8SliceRunner:
             end_summary=end_summary,
         )
 
+    def _consolidate_agents(self) -> None:
+        """Run consolidation on each agent, promoting episodic patterns into substrate."""
+        for agent in self.system.agents.values():
+            if len(agent.engine.memory.entries) > 20:
+                agent.engine._run_consolidation()
+
+    def _inject_for_cycle(self, cycle: int) -> bool:
+        """Inject signals/packets scheduled for *cycle*. Return True if anything was injected."""
+        scheduled_specs = (self.scenario.signal_schedule_specs or {}).get(cycle)
+        if scheduled_specs:
+            self.system.inject_signal_specs(scheduled_specs)
+            return True
+        scheduled_packets = self.scenario.packet_schedule.get(cycle, 0)
+        if scheduled_packets > 0:
+            self.system.inject_signal(count=scheduled_packets)
+            return True
+        return False
+
+    def _wrap_cycle(self, absolute_cycle: int) -> int | None:
+        """Map an absolute cycle past the schedule into the repeating range.
+
+        For signal_schedule_specs: wraps into [first_key .. last_key].
+        For packet_schedule: wraps into [first_key .. last_key].
+        Returns None if the schedule is empty.
+        """
+        schedule = self.scenario.signal_schedule_specs or self.scenario.packet_schedule
+        if not schedule:
+            return None
+        keys = sorted(schedule.keys())
+        first, last = keys[0], keys[-1]
+        span = last - first + 1
+        if span <= 0:
+            return first
+        return first + (absolute_cycle - first) % span
+
     def _apply_regulatory_signal(self, signal: RegulatorySignal | None) -> None:
         if signal is None:
             return
@@ -99,7 +137,8 @@ class Phase8SliceRunner:
         # Store the signal's metadata so _build_slice_summary can record what was applied.
         self._applied_signal_meta = dict(signal.metadata) if signal.metadata else {}
 
-        # Mode switch: rebuild the substrate if the regulator requests a new capability mode.
+        # Mode switch: rebuild the system but preserve learned substrate state
+        # and consolidated memories from the previous mode.
         if signal.capability_mode is not None and signal.capability_mode != self._current_mode:
             self._switch_mode(signal.capability_mode)
         # Apply guidance bias BEFORE carryover filter so we can read full entry history.
@@ -115,13 +154,17 @@ class Phase8SliceRunner:
                 weak_context_gap=weak_context_gap,
             )
         mode = signal.carryover_filter_mode
+        episodic_reset = float(signal.reset_flags.get("episodic", 0.0)) > 0.0
         for agent in self.system.agents.values():
             entries = list(agent.engine.memory.entries)
             if mode == "drop":
                 agent.engine.memory.entries = []
             elif mode == "soften" and len(entries) > self.config.soften_history_keep:
                 agent.engine.memory.entries = entries[-self.config.soften_history_keep :]
-            if float(signal.reset_flags.get("episodic", 0.0)) > 0.0:
+            if episodic_reset:
+                # Clear episodic memory but preserve substrate — the learned
+                # routing patterns in the substrate are still valuable even
+                # when the episodic narrative needs a fresh start.
                 agent.engine.memory.entries = []
 
     # Maps the mode-family names used by the policy layer to valid capability
@@ -135,13 +178,18 @@ class Phase8SliceRunner:
     }
 
     def _switch_mode(self, new_mode: str) -> None:
-        """Rebuild the substrate under a new capability policy.
+        """Rebuild the system under a new capability policy, preserving learned state.
 
         Scenario position (_scheduled_cycles_run) is preserved so the runner
-        continues from the right point in the packet schedule.  The new system
-        starts with no learned substrate state — mode switching is intentionally
-        a fresh start for the topology.
+        continues from the right point in the packet schedule.  Substrate state
+        and consolidated episodic memories are carried over into the new system
+        via export_carryover / load_carryover so prior learning is not lost.
         """
+        # Export carryover from each agent before rebuilding.
+        saved_carryovers: dict[str, object] = {}
+        for node_id, agent in self.system.agents.items():
+            saved_carryovers[node_id] = agent.engine.export_carryover()
+
         capability_policy = self._MODE_TO_CAPABILITY_POLICY.get(new_mode, new_mode)
         self.system = build_system_for_scenario(
             self.scenario,
@@ -151,6 +199,12 @@ class Phase8SliceRunner:
         self._current_mode = new_mode
         # Mark as primed so we don't re-inject the initial signal burst into the new system.
         self._scenario_primed = True
+
+        # Restore learned state into agents that exist in the new system.
+        for node_id, carryover in saved_carryovers.items():
+            agent = self.system.agents.get(node_id)
+            if agent is not None:
+                agent.engine.load_carryover(carryover)
 
     def _apply_guidance_bias(
         self,
@@ -518,24 +572,11 @@ def evaluate_laminated_scenario(
     task_key: str,
     seed: int,
     capability_policy: str = "self-selected",
-    max_slices: int = 4,
     initial_cycle_budget: int = 8,
+    safety_limit: int = 200,
     accuracy_threshold: float = 0.0,
     regulator_type: str = "heuristic",
 ) -> dict[str, object]:
-    baseline = build_system_for_scenario(
-        scenario,
-        seed=seed,
-        capability_policy=capability_policy,
-    )
-    baseline_result = baseline.run_workload(
-        cycles=scenario.cycles,
-        initial_packets=scenario.initial_packets,
-        packet_schedule=scenario.packet_schedule,
-        initial_signal_specs=scenario.initial_signal_specs,
-        signal_schedule_specs=scenario.signal_schedule_specs,
-    )
-
     laminated_system = build_system_for_scenario(
         scenario,
         seed=seed,
@@ -558,8 +599,8 @@ def evaluate_laminated_scenario(
     controller = LaminatedController(
         runner,
         regulator,
-        max_slices=max_slices,
         initial_cycle_budget=initial_cycle_budget,
+        safety_limit=safety_limit,
     )
     laminated_result: LaminatedRunResult = controller.run()
 
@@ -577,8 +618,7 @@ def evaluate_laminated_scenario(
         experience_log = regulator.engine_history()
 
     return {
-        "baseline_summary": baseline_result["summary"],
-        "laminated_summary": laminated_system.summarize(),
+        "laminated_summary": runner.system.summarize(),
         "experience_log": experience_log,
         "laminated_run": {
             "final_decision": laminated_result.final_decision.value,

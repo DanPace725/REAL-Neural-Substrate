@@ -7,6 +7,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 from scripts.analyze_experiment_output import analyze_v3, is_v3_format, write_summary_v3
+from scripts.analyze_experiment_output import is_laminated_phase8_format, write_summary_laminated_phase8
 
 
 def _single_v3_payload(seed: int = 13) -> dict[str, object]:
@@ -238,6 +239,66 @@ class TestAnalyzeExperimentOutput(unittest.TestCase):
         self.assertIn("## Aggregate", text)
         self.assertIn("## Per-seed summary", text)
         self.assertIn("selector_seed", text)
+
+    def test_write_summary_laminated_phase8_includes_baseline_and_slices(self) -> None:
+        payload = {
+            "title": "2026-03-25 1042 - laminated phase8",
+            "timestamp": "2026-03-25T17:42:59Z",
+            "harness": "laminated_phase8",
+            "seeds": [13],
+            "scenarios": ["B2S4"],
+            "result": {
+                "baseline_summary": {
+                    "cycles": 10,
+                    "delivered_packets": 9,
+                    "delivery_ratio": 0.9,
+                    "mean_latency": 2.0,
+                    "mean_hops": 4.0,
+                    "exact_matches": 3,
+                    "mean_bit_accuracy": 0.5,
+                    "total_action_cost": 1.23,
+                    "context_breakdown": {
+                        "context_0": {"count": 4, "exact_matches": 2, "mean_bit_accuracy": 0.6}
+                    },
+                },
+                "laminated_run": {
+                    "final_decision": "continue",
+                    "final_cycle_budget": 20,
+                    "final_signal": {"next_slice_budget": 20, "carryover_filter_mode": "keep"},
+                    "slice_summaries": [
+                        {
+                            "slice_id": 1,
+                            "slice_budget": 5,
+                            "cycles_used": 5,
+                            "mean_uncertainty": 0.7,
+                            "ambiguity_level": 1.0,
+                            "conflict_level": 0.2,
+                            "settlement_hint": "escalate",
+                            "context_accuracy": {"context_0": 0.5, "context_1": 0.6},
+                            "mode_used": "self-selected",
+                            "metadata": {"mean_bit_accuracy": 0.55},
+                            "cost_summary": {"total_action_cost": 0.5, "exact_matches": 1.0, "partial_matches": 3.0},
+                        }
+                    ],
+                },
+                "benchmark_id": "B2S4",
+                "task_key": "task_a",
+                "mode": "visible",
+                "capability_policy": "self-selected",
+                "seed": 13,
+                "delta_vs_baseline": {"exact_matches": -1.0},
+            },
+            "metadata": {"max_slices": 5, "initial_cycle_budget": 48, "accuracy_threshold": 0.8, "regulator_type": "real"},
+        }
+        self.assertTrue(is_laminated_phase8_format(payload))
+        out_dir = Path("tests_tmp") / "analyze_experiment_output"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path = out_dir / "laminated_summary.md"
+        write_summary_laminated_phase8(payload, out_path)
+        text = out_path.read_text(encoding="utf-8")
+        self.assertIn("## Baseline summary", text)
+        self.assertIn("## Slice summaries", text)
+        self.assertIn("final_decision", text)
 
 
 if __name__ == "__main__":

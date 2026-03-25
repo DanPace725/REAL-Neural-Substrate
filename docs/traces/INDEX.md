@@ -9,6 +9,7 @@ Generated: `2026-03-25T05:32:59-07:00`
 
 | Date | Title | Type | Keywords | Files |
 | --- | --- | --- | --- | --- |
+| `2026-03-25T16:00` | [2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep](/C:/Users/nscha/Coding/Relationally%20Embedded%20Allostatic%20Learning/REAL-Neural-Substrate/docs/traces/2026-03-25%201600%20-%20REAL%20Slow%20Layer%20Regulator%20Debugging%20and%20B%20Family%20Sweep.md) |  | `lamination, real_regulator, b_family, bugs, sweep` | 6 |
 | `2026-03-25T12:00` | [2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement](/C:/Users/nscha/Coding/Relationally%20Embedded%20Allostatic%20Learning/REAL-Neural-Substrate/docs/traces/2026-03-25%201200%20-%20B2S5%20Growth-Visible%20Lamination%20and%20Threshold%20Settlement.md) |  | `lamination, threshold, was, b2s5, phase8` | 4 |
 | `2026-03-24T22:30` | [2026-03-24 2230 - B2S5 48-Cycle Slices](/C:/Users/nscha/Coding/Relationally%20Embedded%20Allostatic%20Learning/REAL-Neural-Substrate/docs/traces/2026-03-24%202230%20-%20B2S5%2048-Cycle%20Slices.md) |  | `cycle, b2s5, escalate, bias, lamination` | 3 |
 | `2026-03-24T22:15` | [2026-03-24 2215 - B2S5 Per-Context Bias](/C:/Users/nscha/Coding/Relationally%20Embedded%20Allostatic%20Learning/REAL-Neural-Substrate/docs/traces/2026-03-24%202215%20-%20B2S5%20Per-Context%20Bias.md) |  | `b2s5, lamination, real_core, context_accuracy, per-context` | 5 |

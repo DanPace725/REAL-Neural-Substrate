@@ -105,15 +105,12 @@ class HeuristicSliceRegulator:
                     weak_context_bit = None
 
         next_slice_budget = current.slice_budget
-        if improving and uncertainty_dropping:
+        if not improving and previous is not None and current.mean_uncertainty >= previous.mean_uncertainty:
+            # Stalling: the system needs more time, not less.
             next_slice_budget = _clamp_budget(round(current.slice_budget * 1.25))
-        elif (
-            previous is not None
-            and not improving
-            and current.mean_uncertainty >= previous.mean_uncertainty
-            and weak_context_gap == 0.0
-        ):
-            next_slice_budget = _clamp_budget(round(current.slice_budget * 0.75))
+        elif improving and uncertainty_dropping:
+            # Converging well: maintain current budget (no need to grow).
+            next_slice_budget = current.slice_budget
 
         accuracy_gap = (
             max(0.0, self.accuracy_threshold - float(current.metadata.get("mean_bit_accuracy", 0.0)))
@@ -148,14 +145,18 @@ class HeuristicSliceRegulator:
 
     def _should_settle(self, history: List[SliceSummary]) -> bool:
         if self.accuracy_threshold > 0.0 and history:
-            latest = history[-1]
-            # Use min per-context accuracy if available, else fall back to mean
-            if latest.context_accuracy:
-                min_ctx_acc = min(latest.context_accuracy.values())
-                if min_ctx_acc >= self.accuracy_threshold:
-                    return True
-            elif float(latest.metadata.get("mean_bit_accuracy", 0.0)) >= self.accuracy_threshold:
-                return True
+            # Explicit accuracy target: only settle when threshold is met.
+            # Coherence-flatness paths are skipped — flat-but-inaccurate is not convergence.
+            window = history[-2:] if len(history) >= 2 else history[-1:]
+
+            def _meets_threshold(s: SliceSummary) -> bool:
+                if s.context_accuracy:
+                    return min(s.context_accuracy.values()) >= self.accuracy_threshold
+                return float(s.metadata.get("mean_bit_accuracy", 0.0)) >= self.accuracy_threshold
+
+            return all(_meets_threshold(s) for s in window)
+
+        # No accuracy target: fall back to coherence-flatness heuristics.
         if len(history) < 2:
             return False
         recent = history[-2:]
@@ -439,28 +440,37 @@ class LearningSliceRegulator:
 
 
 class LaminatedController:
-    """Reusable orchestration layer above bounded fast-layer slices."""
+    """Reusable orchestration layer above bounded fast-layer slices.
+
+    The loop is criteria-driven: it runs until the regulator issues a
+    non-CONTINUE settlement decision (SETTLE, ESCALATE, or BRANCH).
+    ``safety_limit`` exists only to prevent runaway loops during
+    development — it is not a budget and should not constrain normal
+    operation.
+    """
 
     def __init__(
         self,
         runner: SliceRunner,
         regulator: SliceRegulator | None = None,
         *,
-        max_slices: int = 4,
         initial_cycle_budget: int = 8,
+        safety_limit: int = 200,
     ) -> None:
         self.runner = runner
         self.regulator = regulator or HeuristicSliceRegulator()
-        self.max_slices = max(1, int(max_slices))
         self.initial_cycle_budget = _clamp_budget(initial_cycle_budget)
+        self.safety_limit = max(1, int(safety_limit))
 
     def run(self) -> LaminatedRunResult:
         history: List[SliceSummary] = []
         cycle_budget = self.initial_cycle_budget
         signal: RegulatorySignal | None = None
         decision = SettlementDecision.CONTINUE
+        slice_id = 0
 
-        for slice_id in range(1, self.max_slices + 1):
+        while True:
+            slice_id += 1
             summary = self.runner.run_slice(
                 slice_id=slice_id,
                 cycle_budget=cycle_budget,
@@ -478,12 +488,13 @@ class LaminatedController:
                 )
             cycle_budget = _clamp_budget(signal.next_slice_budget or cycle_budget)
 
-        return LaminatedRunResult(
-            summaries=history,
-            final_signal=signal,
-            final_decision=SettlementDecision.CONTINUE,
-            final_cycle_budget=cycle_budget,
-        )
+            if slice_id >= self.safety_limit:
+                return LaminatedRunResult(
+                    summaries=history,
+                    final_signal=signal,
+                    final_decision=decision,
+                    final_cycle_budget=cycle_budget,
+                )
 
     def _resolve_decision(
         self,

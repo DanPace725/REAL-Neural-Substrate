@@ -66,7 +66,6 @@ class TestLaminationContracts(unittest.TestCase):
         controller = LaminatedController(
             runner,
             regulator=HeuristicSliceRegulator(),
-            max_slices=4,
             initial_cycle_budget=4,
         )
 
@@ -107,7 +106,6 @@ class TestLaminationContracts(unittest.TestCase):
         controller = LaminatedController(
             runner,
             regulator=HeuristicSliceRegulator(),
-            max_slices=4,
             initial_cycle_budget=4,
         )
 
@@ -162,7 +160,6 @@ class TestLaminationContracts(unittest.TestCase):
         controller = LaminatedController(
             runner,
             regulator=HeuristicSliceRegulator(),
-            max_slices=4,
             initial_cycle_budget=6,
         )
 

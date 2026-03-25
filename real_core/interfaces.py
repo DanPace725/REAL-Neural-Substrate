@@ -42,7 +42,7 @@ class CoherenceModel(Protocol):
     def composite(self, dimensions: DimensionScores) -> float:
         """Return composite coherence score in [0, 1]."""
 
-    def gco_status(self, dimensions: DimensionScores, coherence: float) -> GCOStatus:
+    def gco_status(self, dimensions: DimensionScores, coherence: float, *, state_after: Dict[str, float] | None = None) -> GCOStatus:
         """Return global closure status."""
 
 

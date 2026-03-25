@@ -421,7 +421,7 @@ class RealCoreEngine:
             else coherence - self._prior_coherence
         )
         self._prior_coherence = coherence
-        gco = self.coherence.gco_status(dimensions, coherence)
+        gco = self.coherence.gco_status(dimensions, coherence, state_after=after)
         prediction = predictions.get(action)
         prediction_error = self._prediction_error(
             action,

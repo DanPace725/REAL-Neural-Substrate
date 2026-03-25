@@ -61,38 +61,41 @@ NAMED_POLICIES: Dict[str, Policy] = {
     # --- Visible family ---
     # Hold visible mode but soften memory to reduce stale context drag.
     "visible_explore":       ("visible",        "soften", 1.00, "medium"),
-    # Visible mode, hard carryover reset, larger budget — used when stalled.
-    "visible_push":          ("visible",        "drop",   1.25, "high"),
+    # Visible mode, hard carryover reset — used when stalled.
+    "visible_push":          ("visible",        "drop",   1.00, "high"),
 
     # --- Growth-visible family ---
     # Switch to growth, soften memory, keep budget — the standard upgrade path.
     "growth_engage":         ("growth-visible", "soften", 1.00, "high"),
-    # Growth has converged well; reduce budget and memory pressure.
-    "growth_consolidate":    ("growth-visible", "keep",   0.75, "low"),
-    # Growth is stalling; clear memory and give more cycles.
-    "growth_reset":          ("growth-visible", "drop",   1.25, "high"),
+    # Growth has converged well; maintain budget, reduce memory pressure.
+    "growth_consolidate":    ("growth-visible", "keep",   1.00, "low"),
+    # Growth is stalling; clear memory — budget stays constant.
+    "growth_reset":          ("growth-visible", "drop",   1.00, "high"),
     # Growth is active; maintain without pressure changes.
     "growth_hold":           ("growth-visible", "keep",   1.00, "medium"),
 
     # --- Latent family ---
     "latent_explore":        ("latent",         "soften", 1.00, "medium"),
-    "latent_push":           ("latent",         "drop",   1.25, "high"),
+    "latent_push":           ("latent",         "drop",   1.00, "high"),
 
     # --- Growth-latent family ---
     "growth_latent_engage":       ("growth-latent", "soften", 1.00, "high"),
-    "growth_latent_consolidate":  ("growth-latent", "keep",   0.75, "low"),
+    "growth_latent_consolidate":  ("growth-latent", "keep",   1.00, "low"),
 }
 
-# Which policies are available given the current scenario family.
+# Which policies are available given the current mode.
+# Growth modes get their own family so the engine can never step *back*
+# from growth-visible to plain visible (which would destroy accumulated growth).
 _MODE_FAMILY: Dict[str, str] = {
-    "visible":       "visible",
-    "self-selected": "visible",
-    "growth-visible":"visible",
-    "latent":        "latent",
-    "growth-latent": "latent",
+    "visible":        "visible",
+    "self-selected":  "visible",
+    "growth-visible": "growth-visible",
+    "latent":         "latent",
+    "growth-latent":  "growth-latent",
 }
 
 _POLICIES_BY_FAMILY: Dict[str, List[str]] = {
+    # From visible/self-selected: can stay or upgrade to growth.
     "visible": [
         "visible_explore",
         "visible_push",
@@ -101,9 +104,22 @@ _POLICIES_BY_FAMILY: Dict[str, List[str]] = {
         "growth_reset",
         "growth_hold",
     ],
+    # Once in growth-visible: only growth policies — no stepping back.
+    "growth-visible": [
+        "growth_engage",
+        "growth_consolidate",
+        "growth_reset",
+        "growth_hold",
+    ],
+    # From latent: can stay or upgrade to growth-latent.
     "latent": [
         "latent_explore",
         "latent_push",
+        "growth_latent_engage",
+        "growth_latent_consolidate",
+    ],
+    # Once in growth-latent: only growth-latent policies.
+    "growth-latent": [
         "growth_latent_engage",
         "growth_latent_consolidate",
     ],
@@ -145,9 +161,11 @@ class SliceSummaryObservationAdapter:
 
     def update(self, summary: SliceSummary, *, prev_min_ctx_acc: float | None = None) -> None:
         cur = _min_ctx_acc(summary)
+        mean_acc = float(summary.metadata.get("mean_bit_accuracy", 0.0))
         delta = (cur - prev_min_ctx_acc) if prev_min_ctx_acc is not None else 0.0
         self._current = {
             "min_ctx_acc": round(cur, 4),
+            "mean_bit_accuracy": round(mean_acc, 4),
             "delta_min_ctx_acc": round(delta, 4),
             "conflict": round(summary.conflict_level, 4),
             "ambiguity": round(summary.ambiguity_level, 4),
@@ -297,7 +315,11 @@ class SliceAccuracyCoherenceModel:
             4,
         )
 
-    def gco_status(self, dimensions: DimensionScores, coherence: float) -> GCOStatus:
+    def gco_status(self, dimensions: DimensionScores, coherence: float, *, state_after: Dict[str, float] | None = None) -> GCOStatus:
+        # STABLE = mean accuracy meets threshold (the actual task criterion).
+        mean_acc = float((state_after or {}).get("mean_bit_accuracy", 0.0))
+        if self.accuracy_threshold > 0.0 and mean_acc >= self.accuracy_threshold:
+            return GCOStatus.STABLE
         if dimensions.get("accuracy_level", 0.0) >= 0.95:
             return GCOStatus.STABLE
         if coherence >= 0.65:
@@ -356,6 +378,13 @@ class REALSliceRegulator:
         self._prev_min_ctx_acc: float | None = None
         self._current_budget: int = 0
         self._cycle: int = 0
+        # Growth-mode hysteresis: consecutive DEGRADED/CRITICAL cycles while in growth mode.
+        # Reversion to non-growth is only allowed after _GROWTH_LOCK_THRESHOLD bad cycles.
+        self._growth_degraded_streak: int = 0
+        self._GROWTH_LOCK_THRESHOLD: int = 2
+        # GCO-driven settlement: consecutive STABLE cycles before settle.
+        # No escalation — if criteria aren't met, the system keeps working.
+        self._gco_settle_window: int = 2
 
     @property
     def engine(self) -> RealCoreEngine:
@@ -399,14 +428,35 @@ class REALSliceRegulator:
         policy = NAMED_POLICIES.get(policy_name, NAMED_POLICIES["visible_explore"])
         chosen_mode, chosen_carryover, budget_mult, chosen_pressure = policy
 
-        # Delegate settle/escalate/GCO/bias to heuristic layer
+        # Growth-mode hysteresis: once in a growth mode, don't revert to a non-growth mode
+        # unless the engine has reported DEGRADED or CRITICAL for enough consecutive cycles.
+        in_growth = current.mode_used.startswith("growth-")
+        if in_growth:
+            if entry.gco.value in ("DEGRADED", "CRITICAL"):
+                self._growth_degraded_streak += 1
+            else:
+                self._growth_degraded_streak = 0
+
+            if not chosen_mode.startswith("growth-") and self._growth_degraded_streak < self._GROWTH_LOCK_THRESHOLD:
+                # Lock: override to growth_hold (keep carryover, neutral budget)
+                lock_policy = NAMED_POLICIES["growth_hold"]
+                policy_name = "growth_hold"
+                chosen_mode, chosen_carryover, budget_mult, chosen_pressure = lock_policy
+        else:
+            self._growth_degraded_streak = 0
+
+        # Consult heuristic only for tilt-style bias and gating signals.
+        # Settlement decisions come from the engine's own GCO trajectory.
         signal = self._heuristic.regulate(history)
 
-        # On terminal signal return it unchanged — engine doesn't override closure
-        if signal.decision_hint in (SettlementDecision.SETTLE, SettlementDecision.ESCALATE):
-            return signal
+        # --- GCO-driven settlement from the engine's own coherence ---
+        decision_hint = SettlementDecision.CONTINUE
+        stop_reason = ""
+        gco_decision = self._evaluate_gco_trajectory()
+        if gco_decision is not None:
+            decision_hint, stop_reason = gco_decision
 
-        # Compute next budget from multiplier (heuristic budget logic overridden)
+        # Compute next budget from multiplier
         next_budget = max(1, round(self._current_budget * budget_mult))
 
         # Only emit capability_mode if it differs from what's currently running
@@ -416,11 +466,11 @@ class REALSliceRegulator:
             next_slice_budget=next_budget,
             carryover_filter_mode=chosen_carryover,
             context_pressure=chosen_pressure,
-            decision_hint=signal.decision_hint,
+            decision_hint=decision_hint,
             capability_mode=new_mode,
             gating_updates=signal.gating_updates,
             bias_updates=signal.bias_updates,
-            stop_reason=signal.stop_reason,
+            stop_reason=stop_reason,
             metadata={
                 "engine_coherence": round(entry.coherence, 4),
                 "engine_delta": round(entry.delta, 4),
@@ -429,5 +479,27 @@ class REALSliceRegulator:
                 "chosen_mode": chosen_mode,
                 "chosen_carryover": chosen_carryover,
                 "budget_multiplier": budget_mult,
+                "growth_degraded_streak": self._growth_degraded_streak,
             },
         )
+
+    def _evaluate_gco_trajectory(self) -> tuple[SettlementDecision, str] | None:
+        """Derive settlement from the engine's own GCO history.
+
+        The only terminal condition is criteria being met consistently:
+        consecutive STABLE cycles mean the accuracy threshold has been
+        reached across all contexts.  There is no escalation based on
+        poor performance — if the system hasn't solved the problem, it
+        keeps working.  The safety_limit on the controller is the only
+        guard against infinite loops.
+        """
+        entries = self._engine.memory.entries
+        if len(entries) < self._gco_settle_window:
+            return None
+
+        # Settle: last N cycles all STABLE (accuracy criteria met consistently)
+        recent = entries[-self._gco_settle_window:]
+        if all(e.gco == GCOStatus.STABLE for e in recent):
+            return SettlementDecision.SETTLE, "engine_gco_stable"
+
+        return None

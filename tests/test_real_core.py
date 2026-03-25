@@ -72,7 +72,7 @@ class DummyCoherence:
     def composite(self, dimensions: dict[str, float]) -> float:
         return sum(dimensions.values()) / len(dimensions)
 
-    def gco_status(self, dimensions: dict[str, float], coherence: float) -> GCOStatus:
+    def gco_status(self, dimensions: dict[str, float], coherence: float, *, state_after: dict[str, float] | None = None) -> GCOStatus:
         if coherence >= 0.75:
             return GCOStatus.STABLE
         if coherence >= 0.55:

@@ -611,6 +611,199 @@ def _md_metrics_table(metrics, ref=None):
 
 
 # ---------------------------------------------------------------------------
+# Laminated Phase 8 format support (laminated_phase8 harness outputs)
+# ---------------------------------------------------------------------------
+
+def is_laminated_phase8_format(data: dict) -> bool:
+    """Return True if this JSON looks like a laminated Phase 8 experiment output."""
+    if data.get("harness") == "laminated_phase8":
+        return True
+    result = data.get("result")
+    if not isinstance(result, dict):
+        return False
+    # Heuristic signature: baseline_summary + laminated_run are both present.
+    return isinstance(result.get("baseline_summary"), dict) and isinstance(result.get("laminated_run"), dict)
+
+
+def _laminated_get(d: dict, path: tuple[str, ...], default=None):
+    cur = d
+    for key in path:
+        if not isinstance(cur, dict) or key not in cur:
+            return default
+        cur = cur[key]
+    return cur
+
+
+def _laminated_fmt_num(v, decimals: int = 4):
+    if v is None:
+        return "—"
+    try:
+        return f"{float(v):.{decimals}f}"
+    except (TypeError, ValueError):
+        return str(v)
+
+
+def write_summary_laminated_phase8(data: dict, out_path) -> None:
+    """Write a compact markdown summary for laminated_phase8 outputs."""
+    title = data.get("title", "Laminated Phase 8 experiment")
+    timestamp = data.get("timestamp", "?")
+    seeds = data.get("seeds", data.get("seed", []))
+    scenarios = data.get("scenarios", [])
+    meta = data.get("metadata") or {}
+    result = data.get("result") or {}
+
+    baseline = result.get("baseline_summary") or {}
+    laminated_run = result.get("laminated_run") or {}
+    slice_summaries = laminated_run.get("slice_summaries") or []
+    delta = result.get("delta_vs_baseline") or {}
+
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    lines: list[str] = []
+    lines.append(f"# {title}")
+    lines.append("")
+    lines.append(f"**timestamp:** `{timestamp}`  ")
+    lines.append(f"**harness:** `{data.get('harness', 'laminated_phase8')}`  ")
+    lines.append(f"**scenarios:** {scenarios}  ")
+    lines.append(f"**seeds:** {seeds}")
+    lines.append("")
+
+    lines.append("## Run identity")
+    lines.append("")
+    lines.append("| Key | Value |")
+    lines.append("|---|---|")
+    for key in (
+        "benchmark_id",
+        "task_key",
+        "mode",
+        "capability_policy",
+        "seed",
+    ):
+        val = result.get(key, meta.get(key))
+        if val is not None:
+            lines.append(f"| {key} | {val} |")
+    for key in ("max_slices", "safety_limit", "initial_cycle_budget", "accuracy_threshold", "regulator_type"):
+        if key in meta:
+            lines.append(f"| {key} | {meta.get(key)} |")
+    lines.append("")
+
+    lines.append("## Baseline summary")
+    lines.append("")
+    lines.append("| Metric | Value |")
+    lines.append("|---|---:|")
+    for key in (
+        "cycles",
+        "injected_packets",
+        "admitted_packets",
+        "delivered_packets",
+        "delivery_ratio",
+        "dropped_packets",
+        "drop_ratio",
+        "mean_latency",
+        "mean_hops",
+        "node_atp_total",
+        "node_reward_total",
+        "mean_route_cost",
+        "total_action_cost",
+        "exact_matches",
+        "partial_matches",
+        "mean_bit_accuracy",
+        "mean_feedback_award",
+        "node_count",
+        "edge_count",
+        "bud_successes",
+        "prune_events",
+        "apoptosis_events",
+    ):
+        if key in baseline:
+            lines.append(f"| {key} | {_laminated_fmt_num(baseline.get(key))} |")
+    lines.append("")
+
+    ctx_breakdown = baseline.get("context_breakdown") or {}
+    if isinstance(ctx_breakdown, dict) and ctx_breakdown:
+        lines.append("### Context breakdown (baseline)")
+        lines.append("")
+        lines.append("| context | count | exact_matches | mean_bit_accuracy |")
+        lines.append("|---|---:|---:|---:|")
+        for ctx, payload in sorted(ctx_breakdown.items()):
+            if not isinstance(payload, dict):
+                continue
+            lines.append(
+                f"| {ctx} | {payload.get('count')} | {payload.get('exact_matches')} | {_laminated_fmt_num(payload.get('mean_bit_accuracy'))} |"
+            )
+        lines.append("")
+
+    lines.append("## Laminated controller outcome")
+    lines.append("")
+    lines.append("| Key | Value |")
+    lines.append("|---|---|")
+    lines.append(f"| final_decision | `{laminated_run.get('final_decision', '—')}` |")
+    if laminated_run.get("final_cycle_budget") is not None:
+        lines.append(f"| final_cycle_budget | {laminated_run.get('final_cycle_budget')} |")
+    final_signal = laminated_run.get("final_signal") or {}
+    if isinstance(final_signal, dict) and final_signal:
+        for key in ("next_slice_budget", "carryover_filter_mode", "context_pressure", "decision_hint", "stop_reason"):
+            if key in final_signal:
+                v = final_signal.get(key)
+                if isinstance(v, str):
+                    lines.append(f"| final_signal.{key} | `{v}` |")
+                else:
+                    lines.append(f"| final_signal.{key} | {v} |")
+    lines.append("")
+
+    if delta:
+        lines.append("## Delta vs baseline (reported)")
+        lines.append("")
+        lines.append("| Metric | Delta |")
+        lines.append("|---|---:|")
+        for key, value in delta.items():
+            lines.append(f"| {key} | {_laminated_fmt_num(value)} |")
+        lines.append("")
+
+    if isinstance(slice_summaries, list) and slice_summaries:
+        lines.append("## Slice summaries")
+        lines.append("")
+        lines.append(
+            "| slice | budget | cycles | mode_used | min_ctx_acc | mean_bit_acc | conflict | ambiguity | uncertainty | cost | exact | partial | hint |"
+        )
+        lines.append("|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---|")
+        for s in slice_summaries:
+            if not isinstance(s, dict):
+                continue
+            ctx_acc = s.get("context_accuracy") or {}
+            min_ctx = None
+            if isinstance(ctx_acc, dict) and ctx_acc:
+                vals = []
+                for v in ctx_acc.values():
+                    try:
+                        vals.append(float(v))
+                    except (TypeError, ValueError):
+                        pass
+                min_ctx = min(vals) if vals else None
+            cost = s.get("cost_summary") or {}
+            lines.append(
+                f"| {s.get('slice_id')} "
+                f"| {s.get('slice_budget')} "
+                f"| {s.get('cycles_used')} "
+                f"| `{s.get('mode_used', '—')}` "
+                f"| {_laminated_fmt_num(min_ctx)} "
+                f"| {_laminated_fmt_num(_laminated_get(s, ('metadata', 'mean_bit_accuracy')))} "
+                f"| {_laminated_fmt_num(s.get('conflict_level'))} "
+                f"| {_laminated_fmt_num(s.get('ambiguity_level'))} "
+                f"| {_laminated_fmt_num(s.get('mean_uncertainty'))} "
+                f"| {_laminated_fmt_num(_laminated_get(cost, ('total_action_cost',)))} "
+                f"| {_laminated_fmt_num(_laminated_get(cost, ('exact_matches',)))} "
+                f"| {_laminated_fmt_num(_laminated_get(cost, ('partial_matches',)))} "
+                f"| `{s.get('settlement_hint', '—')}` |"
+            )
+        lines.append("")
+
+    out_path.write_text("\n".join(lines), encoding="utf-8")
+    print(f"[summary] Written to: {out_path}")
+
+
+# ---------------------------------------------------------------------------
 # V3 format support (session carryover output from run_occupancy_real_v3.py)
 # ---------------------------------------------------------------------------
 
@@ -1616,6 +1809,24 @@ def main():
         analyze_v3(data, args)
     elif is_v2_format(data):
         analyze_v2(data, args)
+    elif is_laminated_phase8_format(data):
+        print_header("Laminated Phase 8 (summary-only view)")
+        print(f"  title     : {data.get('title', '?')}")
+        print(f"  timestamp : {data.get('timestamp', '?')}")
+        result = data.get("result") or {}
+        baseline = result.get("baseline_summary") or {}
+        lam = result.get("laminated_run") or {}
+        print(f"  benchmark : {result.get('benchmark_id', '?')}")
+        print(f"  task_key  : {result.get('task_key', '?')}")
+        print(f"  mode      : {result.get('mode', '?')}")
+        print(f"  seed      : {result.get('seed', '?')}")
+        print(f"\n  Baseline:")
+        for key in ("cycles", "delivered_packets", "delivery_ratio", "mean_latency", "mean_hops", "exact_matches", "mean_bit_accuracy", "total_action_cost"):
+            if key in baseline:
+                print(f"    {key:<18} : {baseline.get(key)}")
+        print(f"\n  Laminated:")
+        print(f"    final_decision      : {lam.get('final_decision')}")
+        print(f"    slices_run          : {len(lam.get('slice_summaries') or [])}")
     else:
         analyze(data, args)
 
@@ -1628,6 +1839,8 @@ def main():
             write_summary_v3(data, out_path)
         elif is_v2_format(data):
             write_summary_v2(data, out_path)
+        elif is_laminated_phase8_format(data):
+            write_summary_laminated_phase8(data, out_path)
         else:
             write_summary(data, out_path)
 

@@ -230,7 +230,7 @@ class LocalNodeCoherenceModel:
     def composite(self, dimensions: Dict[str, float]) -> float:
         return sum(dimensions.values()) / max(1, len(dimensions))
 
-    def gco_status(self, dimensions: Dict[str, float], coherence: float):
+    def gco_status(self, dimensions: Dict[str, float], coherence: float, *, state_after: Dict[str, float] | None = None):
         from real_core.types import GCOStatus
 
         if coherence < 0.35:
