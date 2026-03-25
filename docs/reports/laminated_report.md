@@ -1,6 +1,6 @@
-# Laminated REAL Substrate Report - Families A, B, and C
+# Laminated REAL Substrate Report - Accuracy Analysis (Families A, B, and C)
 
-This report provides a comprehensive summary of the recent lamination tests across task families A, B, and C, based on the outputs generated in the `docs/experiment_outputs` directory.
+This report provides a comprehensive summary of the recent lamination tests across task families A, B, and C, based on the outputs generated in the `docs/experiment_outputs` directory. This analysis focuses specifically on the **accuracy metrics** achieved by the REAL multi-agent substrate under varying topologies and routing conditions.
 
 ## 1. Overview
 
@@ -9,74 +9,73 @@ Lamination tests explore the capacity of the REAL multi-agent substrate to handl
 * **Family B**: Tests on scaling and various setups, expanding on capability routing combinations, covering Task A, Task B, and Task C.
 * **Family C**: Tests targeting ambiguous routing scenarios with specific node architectures.
 
+The primary metrics evaluated in this report are:
+* **Delivery Ratio**: The percentage of successfully delivered packets. (Included for context on substrate stability).
+* **Mean Bit Accuracy**: The average accuracy of the feature bits delivered across the network.
+* **Exact Match Ratio**: The ratio of perfectly matched delivered packets compared to total delivered packets.
+
 ## 2. Experimental Results Summary
 
-The table below details the performance of each lamination scenario. Key metrics include:
-* **Delivery Ratio**: The percentage of successfully delivered packets.
-* **Drop Ratio**: The percentage of dropped packets.
-* **Latency**: The mean packet latency across the topology.
-* **Hops**: The mean number of hops taken to deliver a packet.
-* **Total ATP**: A measure of the energetic cost for the nodes within the substrate.
+### Detailed Accuracy Table
 
-### Detailed Table
-
-| Family | Task | Scenario | Setup | Delivery Ratio | Drop Ratio | Latency | Hops | Total ATP |
-|---|---|---|---|---|---|---|---|---|
-| A | Task A | a1 | Standard | 1.0000 | 0.0000 | 1.00 | 3.00 | 3.41 |
-| A | Task A | a2 | Standard | 1.0000 | 0.0000 | 1.00 | 5.00 | 8.42 |
-| A | Task A | a3 | Standard | 0.9844 | 0.0000 | 1.14 | 6.79 | 12.63 |
-| A | Task A | a4 | Standard | 0.9940 | 0.0000 | 1.77 | 7.57 | 17.83 |
-| B | Task A | b2s1 | Standard | 1.0000 | 0.0000 | 1.00 | 3.00 | 3.44 |
-| B | Task A | b2s1 | visible_s10_b2 | 1.0000 | 0.0000 | 1.00 | 3.00 | 5.03 |
-| B | Task A | b2s1 | visible_s10_b8 | 1.0000 | 0.0000 | 1.00 | 3.00 | 5.78 |
-| B | Task A | b2s1 | visible_s3_b8 | 1.0000 | 0.0000 | 1.00 | 3.00 | 5.78 |
-| B | Task A | b2s1 | visible_s3_b8 | 1.0000 | 0.0000 | 1.00 | 3.00 | 4.31 |
-| B | Task A | b2s1 | visible_s5_b4 | 1.0000 | 0.0000 | 1.00 | 3.00 | 5.57 |
-| B | Task A | b2s2 | Standard | 1.0000 | 0.0000 | 1.00 | 5.00 | 7.13 |
-| B | Task A | b2s2 | visible_s10_b4 | 1.0000 | 0.0000 | 1.00 | 5.00 | 7.06 |
-| B | Task A | b2s2 | visible_s10_b8 | 1.0000 | 0.0000 | 1.00 | 5.00 | 6.32 |
-| B | Task A | b2s2 | visible_s5_b8 | 1.0000 | 0.0000 | 1.00 | 5.00 | 8.52 |
-| B | Task A | b2s2 | visible_s5_b9 | 1.0000 | 0.0000 | 1.26 | 5.00 | 7.98 |
-| B | Task A | b2s3 | Standard | 1.0000 | 0.0000 | 1.00 | 6.25 | 14.03 |
-| B | Task A | b2s3 | visible_s10_b12 | 1.0000 | 0.0000 | 1.00 | 6.50 | 14.17 |
-| B | Task A | b2s3 | visible_s5_b25 | 1.0000 | 0.0000 | 1.23 | 6.37 | 11.38 |
-| B | Task A | b2s4 | Standard | 1.0000 | 0.0000 | 2.62 | 7.47 | 13.02 |
-| B | Task A | b2s4 | visible_s10_b24 | 0.9762 | 0.0000 | 2.48 | 7.84 | 12.49 |
-| B | Task A | b2s4 | visible_s5_b48 | 1.0000 | 0.0000 | 2.01 | 7.58 | 13.91 |
-| B | Task A | b2s5 | Standard | 0.9922 | 0.0000 | 2.62 | 11.00 | 23.53 |
-| B | Task A | b2s5 | visible_s10_b47 | 0.9896 | 0.0000 | 1.75 | 11.00 | 23.15 |
-| B | Task A | b2s5 | visible_s5_b95 | 1.0000 | 0.0000 | 1.27 | 11.00 | 9.92 |
-| B | Task A | b2s6 | Standard | 0.9922 | 0.0065 | 4.04 | 10.00 | 26.49 |
-| B | Task A | b2s6 | visible_s10_b90 | 0.9914 | 0.0043 | 3.38 | 10.00 | 21.66 |
-| B | Task A | b2s6 | visible_s5_b180 | 1.0000 | 0.0000 | 4.67 | 10.00 | 11.86 |
-| B | Task B | b2s1 | Standard | 1.0000 | 0.0000 | 1.00 | 3.00 | 4.61 |
-| B | Task B | b2s2 | Standard | 1.0000 | 0.0000 | 1.00 | 5.00 | 8.92 |
-| B | Task B | b2s3 | Standard | 1.0000 | 0.0000 | 1.46 | 6.79 | 15.63 |
-| B | Task B | b2s4 | Standard | 0.9837 | 0.0163 | 1.69 | 7.30 | 14.05 |
-| B | Task C | b2s1 | Standard | 1.0000 | 0.0000 | 1.00 | 3.00 | 4.68 |
-| B | Task C | b2s2 | Standard | 0.9821 | 0.0000 | 1.18 | 5.00 | 7.48 |
-| B | Task C | b2s3 | Standard | 1.0000 | 0.0000 | 1.00 | 6.75 | 11.03 |
-| B | Task C | b2s4 | Standard | 1.0000 | 0.0000 | 1.36 | 7.27 | 13.55 |
-| C | Task A | c3s1 | Standard | 0.9972 | 0.0021 | 2.07 | 3.00 | 3.57 |
-| C | Task A | c3s2 | Standard | 0.9911 | 0.0000 | 1.57 | 5.00 | 8.23 |
-| C | Task A | c3s3 | Standard | 0.9984 | 0.0000 | 1.64 | 6.85 | 11.25 |
-| C | Task A | c3s4 | Standard | 0.9967 | 0.0028 | 3.18 | 7.69 | 17.76 |
+| Family | Task | Scenario | Setup | Delivery Ratio | Mean Bit Accuracy | Exact Match Ratio |
+|---|---|---|---|---|---|---|
+| A | Task A | a1 | Standard | 1.0000 | 0.6477 | 0.4432 |
+| A | Task A | a2 | Standard | 1.0000 | 0.7344 | 0.6562 |
+| A | Task A | a3 | Standard | 0.9844 | 0.7063 | 0.5397 |
+| A | Task A | a4 | Standard | 0.9940 | 0.6168 | 0.3832 |
+| B | Task A | b2s1 | Standard | 1.0000 | 0.6979 | 0.4792 |
+| B | Task A | b2s1 | visible_s10_b2 | 1.0000 | 0.4643 | 0.1429 |
+| B | Task A | b2s1 | visible_s10_b8 | 1.0000 | 0.5625 | 0.2500 |
+| B | Task A | b2s1 | visible_s3_b8 | 1.0000 | 0.5625 | 0.2500 |
+| B | Task A | b2s1 | visible_s3_b8 | 1.0000 | 0.4722 | 0.1667 |
+| B | Task A | b2s1 | visible_s5_b4 | 1.0000 | 0.5357 | 0.2143 |
+| B | Task A | b2s2 | Standard | 1.0000 | 0.6761 | 0.5114 |
+| B | Task A | b2s2 | visible_s10_b4 | 1.0000 | 0.6607 | 0.4286 |
+| B | Task A | b2s2 | visible_s10_b8 | 1.0000 | 0.4286 | 0.0714 |
+| B | Task A | b2s2 | visible_s5_b8 | 1.0000 | 0.4464 | 0.0714 |
+| B | Task A | b2s2 | visible_s5_b9 | 1.0000 | 0.7593 | 0.5926 |
+| B | Task A | b2s3 | Standard | 1.0000 | 0.7031 | 0.4688 |
+| B | Task A | b2s3 | visible_s10_b12 | 1.0000 | 0.8056 | 0.6389 |
+| B | Task A | b2s3 | visible_s5_b25 | 1.0000 | 0.6491 | 0.4035 |
+| B | Task A | b2s4 | Standard | 1.0000 | 0.5583 | 0.2667 |
+| B | Task A | b2s4 | visible_s10_b24 | 0.9762 | 0.5325 | 0.2114 |
+| B | Task A | b2s4 | visible_s5_b48 | 1.0000 | 0.6054 | 0.2857 |
+| B | Task A | b2s5 | Standard | 0.9922 | 0.6575 | 0.4567 |
+| B | Task A | b2s5 | visible_s10_b47 | 0.9896 | 0.8158 | 0.7053 |
+| B | Task A | b2s5 | visible_s5_b95 | 1.0000 | 0.8635 | 0.7745 |
+| B | Task A | b2s6 | Standard | 0.9922 | 0.5532 | 0.2461 |
+| B | Task A | b2s6 | visible_s10_b90 | 0.9914 | 0.5152 | 0.1323 |
+| B | Task A | b2s6 | visible_s5_b180 | 1.0000 | 0.6173 | 0.3488 |
+| B | Task B | b2s1 | Standard | 1.0000 | 0.5938 | 0.3500 |
+| B | Task B | b2s2 | Standard | 1.0000 | 0.8333 | 0.7083 |
+| B | Task B | b2s3 | Standard | 1.0000 | 0.5759 | 0.2946 |
+| B | Task B | b2s4 | Standard | 0.9837 | 0.7044 | 0.5083 |
+| B | Task C | b2s1 | Standard | 1.0000 | 0.5312 | 0.5208 |
+| B | Task C | b2s2 | Standard | 0.9821 | 0.7273 | 0.6364 |
+| B | Task C | b2s3 | Standard | 1.0000 | 0.7625 | 0.6000 |
+| B | Task C | b2s4 | Standard | 1.0000 | 0.7266 | 0.5625 |
+| C | Task A | c3s1 | Standard | 0.9972 | 0.6417 | 0.4109 |
+| C | Task A | c3s2 | Standard | 0.9911 | 0.6622 | 0.4505 |
+| C | Task A | c3s3 | Standard | 0.9984 | 0.5843 | 0.3371 |
+| C | Task A | c3s4 | Standard | 0.9967 | 0.5232 | 0.2058 |
 
 ## 3. Analysis by Family
 
 ### Family A
-Family A acts as a baseline, showing near-perfect delivery ratios (0.98 - 1.0) with scaling scenarios (`a1` to `a4`). As the scenario scales, both the number of hops and the total ATP scale smoothly, maintaining zero dropped packets.
+Family A acts as the baseline for scaling. Accuracy results demonstrate that as the scale increases (`a1` to `a4`), the substrate maintains a relatively stable `Mean Bit Accuracy` (0.61 - 0.73). Notably, the `Exact Match Ratio` peaks at `a2` (0.65) but drops significantly in `a4` (0.38), indicating that while bits are generally correct, achieving perfectly exact pattern matching becomes substantially more difficult as path complexity and node count increase, even while keeping delivery ratios near perfect.
 
 ### Family B
-Family B is tested extensively, exploring variations in `visible` parameters alongside standard scenarios across tasks A, B, and C.
-* **Delivery rates** are mostly pristine, usually exactly 1.0 or very close. In large topologies like `b2s6`, we see some minor drop ratios (< 0.01) with certain setups.
-* **Task Variability**: It successfully scales across tasks A, B, and C, maintaining high delivery.
-* **Setups**: The visible configurations (e.g., `visible_s10_b90`, `visible_s5_b180`) generally manage equivalent delivery and latency to standard ones. Interestingly, specific visible setups sometimes exhibit lower total ATP despite high complexity (e.g., `b2s6 visible_s5_b180` at 11.86 ATP compared to `Standard` at 26.49 ATP).
+Family B introduces significant variations in setups (e.g., `visible_s10_b2`, `visible_s5_b48`).
+* **Setup Impact on Accuracy**: The `visible` setups demonstrate a wide variance in accuracy. For example, `b2s1` with standard setup reaches 0.69 `Mean Bit Accuracy`, but modifying it to `visible_s10_b2` drops it sharply to 0.46, with `Exact Match Ratio` dropping from 0.47 to 0.14.
+* **Large Scale Compensation**: Interestingly, in highly scaled scenarios like `b2s5`, specific visible setups actually *outperform* standard setups in accuracy. `b2s5 visible_s5_b95` achieved an impressive 0.86 `Mean Bit Accuracy` and 0.77 `Exact Match Ratio`, far exceeding the standard setup (0.65 and 0.45, respectively).
+* **Task Variability**: Accuracy fluctuates notably when testing Task B and Task C compared to Task A, indicating that routing and classification accuracy are strongly dependent on the inherent structure of the task, not just the topology scale.
 
 ### Family C
-Family C targets complex multi-agent bridging setups.
-* It maintains highly competitive performance on Task A across `c3s1` to `c3s4`, with delivery ratios consistently > 0.99.
-* Drop ratios appear slightly higher than early Family A & B tests but stay below 0.003, showing the REAL substrate successfully navigates complex topological ambiguities.
+Family C targets complex, ambiguous routing scenarios (bridging architectures).
+* Accuracy starts moderately strong in `c3s1` (0.64 `Mean Bit Accuracy`, 0.41 `Exact Match Ratio`) but exhibits a clear degradation pattern as the scenario scales up to `c3s4` (dropping to 0.52 `Mean Bit Accuracy` and just 0.20 `Exact Match Ratio`).
+* Despite the steady drop in feature accuracy in more complex ambiguous routing setups, the substrate's `Delivery Ratio` remains incredibly high (> 0.99). This highlights a key behavioral trait of the current REAL configuration: it prioritizes packet delivery and flow maintenance over pattern precision under highly ambiguous constraints.
 
 ## 4. Conclusion
-Across all three families and task configurations, the REAL multi-agent substrate shows robust routing and delivery capabilities. Even as latency and hop counts increase with topological scale, the delivery ratio remains exceptional (> 97% across all extreme scenarios and > 99% in almost all tests), confirming stability and energetic efficiency (ATP usage scales logically and can be optimized through explicit setups).
+The lamination tests reveal that while the REAL multi-agent substrate is extremely robust in maintaining delivery across complex and growing topologies, **accuracy (especially Exact Match Ratio) is highly sensitive to topological scale and capability routing setups**.
+The substrate often maintains a base level of mean bit accuracy (around 50-60%), but perfecting the output requires carefully matched configurations (like `b2s5 visible_s5_b95`). Furthermore, in highly ambiguous routing environments (Family C), the network trades accuracy for delivery stability, heavily degrading exact matches as complexity peaks.
