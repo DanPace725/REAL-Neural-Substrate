@@ -37,15 +37,15 @@ realistic occupancy prediction benchmark, the system reaches a 3-seed mean F1 of
 achieved without a global loss function, on fewer training examples, and under a
 session-native evaluation protocol the MLP does not model. On controlled transfer
 benchmarks, warm substrate carryover reaches 10.6 correct routings per session
-against 3.9 for cold start, confirming that the maintained substrate is the
-primary knowledge carrier.
+against 3.9 for cold start, consistent with the maintained substrate functioning
+as the central knowledge carrier.
 
 We distinguish two roles that native interpretability plays in this architecture:
 interpretability as structural \textbf{capability}, where local decisions, memory
 structures, and metabolic states are directly readable because they are explicit
 properties of local agents rather than distributed consequences of global
 optimization; and interpretability as \textbf{development workflow}, where this
-readability was the primary tool by which failure modes were diagnosed and
+readability was the central tool by which failure modes were diagnosed and
 architectural changes were motivated throughout development. We argue that building
 this system, rather than formalizing it, revealed several things about learning and
 agency that prior theory did not anticipate.
@@ -89,8 +89,8 @@ inference, difficulty-correlated topology growth, and near-MLP performance on a
 task it was not designed for. \textbf{Interpretability as capability:} the
 architecture is natively inspectable because computation emerges from agents with
 explicit local state, not from global function composition.
-\textbf{Interpretability as development workflow:} this readability was the
-primary development methodology, as the experimental record documents.
+\textbf{Interpretability as development workflow:} this readability served as the
+central development methodology, as the experimental record documents.
 
 \section{Background}
 
@@ -189,6 +189,18 @@ coherence dips). Together, these constitute endogenous evaluation: the node asks
 ``am I maintaining coherent operation?'' rather than ``did an external observer
 approve my output?''
 
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.82\columnwidth]{figures/real_loop.pdf}
+  \caption{The REAL node processing loop. Each node runs this cycle
+  independently, with no access to other nodes' state or to a global
+  objective. The persistent substrate $M_s$ is written by
+  \textit{consolidate} and biases action cost during \textit{select};
+  the ATP budget is drawn by \textit{execute} and partially replenished
+  by feedback arriving at \textit{score}.}
+  \label{fig:loop}
+\end{figure}
+
 \subsection{Phase 8: A Multi-Agent Routing Substrate}
 
 In Phase 8, many REAL nodes operate simultaneously in a routing graph. Packets
@@ -218,6 +230,19 @@ local implementation of predictive processing \citep{rao1999predictive} with no
 global consistency requirement.
 
 \section{Interpretability}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/interpretability.pdf}
+  \caption{Two roles of native interpretability. \textbf{Left:} A single routing
+  decision exposed as an explicit named record. Every term contributing to the
+  selection is a readable value; the decision record is its own explanation.
+  Row data is representative of Case~1 traces (node n3, latent context below
+  promotion threshold). \textbf{Right:} The development workflow enabled by this
+  structural property. Each of the three documented cases produced one targeted
+  architectural change through the same four-step cycle.}
+  \label{fig:interp}
+\end{figure*}
 
 \subsection{As Structural Capability}
 
@@ -253,7 +278,7 @@ conclusions from aggregate accuracy alone.
 
 \subsection{As Development Workflow}
 
-This structural capability was the primary engineering methodology throughout
+This structural capability was the central engineering methodology throughout
 development. The recurring pattern was: inspect local state $\rightarrow$ localize
 the specific failure $\rightarrow$ change that mechanism $\rightarrow$ verify. We
 document three cases.
@@ -296,40 +321,32 @@ surged from under 1 per episode during training to over 17 during evaluation. No
 carryover round-trip was ever measured, and the context-indexed support layer was
 dormant because no context signal was injected. Addressing the first flaw alone
 (enabling feedback during evaluation) raised eval F1 from 0.032 to 0.748, a
-23$\times$ improvement, establishing that the failure was entirely in the
-evaluation harness.
+23$\times$ improvement, strongly implicating the evaluation harness rather than
+architectural incapacity.
 
 \section{Experimental Results}
 
 \subsection{CVT-1: Transfer, Latent Context, and Sample Efficiency}
 \label{sec:cvt1}
 
-The primary controlled benchmark uses context-dependent bit-transform routing
+The controlled benchmark used throughout uses context-dependent bit-transform routing
 tasks (CVT-1). Three variants (A, B, C) form a structured transfer landscape where
 some prior substrate provides a useful prior and some injects context poison.
 
-\begin{table}[ht]
+\begin{figure}[ht]
   \centering
-  \small
-  \begin{tabular}{lcc}
-    \toprule
-    Condition & Exact / 18 & Bit acc. \\
-    \midrule
-    Task B cold start          & 3.9  & 0.477 \\
-    A$\to$B substrate-only     & 7.3  & 0.586 \\
-    A$\to$B full carryover     & 10.6 & 0.704 \\
-    A$\to$B latent carryover   & 7.0  & --    \\
-    A$\to$B visible carryover  & 6.2  & --    \\
-    \bottomrule
-  \end{tabular}
-  \caption{CVT-1 transfer results, 6-node topology, 18-packet sessions.}
-  \label{tab:cvt1}
-\end{table}
+  \includegraphics[width=0.92\columnwidth]{figures/cvt1_transfer.pdf}
+  \caption{CVT-1 transfer results, 6-node topology, 18-packet sessions.
+  Bit accuracy for the three primary conditions: cold start 0.477,
+  substrate-only 0.586, full carryover 0.704.}
+  \label{fig:cvt1}
+\end{figure}
 
-Both forms of carryover substantially outperform cold start, confirming the
-substrate is doing real work. Latent A$\to$B transfer (7.0 exact) slightly exceeds
-visible (6.2) because latent substrate entries carry no context binding and
-therefore cannot introduce poison into the new task's transform mapping.
+Both forms of carryover substantially outperform cold start (Figure~\ref{fig:cvt1}),
+consistent with the substrate carrying genuine learned structure. Latent A$\to$B
+transfer (7.0 exact) slightly exceeds visible (6.2) because latent substrate
+entries carry no context binding and therefore cannot introduce poison into the
+new task's transform mapping.
 
 Sequential A$\to$B$\to$C transfer reaches 7.6 exact matches on Task C, equal to a
 direct A$\to$C skip but via different substrate mechanisms. Neither path overwrites
@@ -342,24 +359,16 @@ advantage in the low-data regime.
 \subsection{Morphogenesis: Emergent Difficulty-Correlated Growth}
 
 On a 10-node topology with 36-packet sessions, morphogenesis produces outcomes
-that differ systematically by baseline task performance:
+that differ systematically by baseline task performance (Figure~\ref{fig:morpho}).
 
-\begin{table}[ht]
+\begin{figure}[ht]
   \centering
-  \small
-  \begin{tabular}{lccc}
-    \toprule
-    Task & Fixed & Growth & $\Delta$ \\
-    \midrule
-    A (high baseline: 14.8/36) & 14.8 & 13.2 & $-$1.6 \\
-    B (low baseline: 11.8/36)  & 11.8 & 19.2 & \textbf{+7.4} \\
-    C (mod.\ baseline: 17.0/36) & 17.0 & 16.0 & $-$1.0 \\
-    \bottomrule
-  \end{tabular}
-  \caption{Morphogenesis on 10-node topology. Growth helps where performance is
-  lowest and disrupts where it is already high.}
-  \label{tab:morpho}
-\end{table}
+  \includegraphics[width=0.96\columnwidth]{figures/morphogenesis.pdf}
+  \caption{Morphogenesis on the 10-node topology. Growth helps most where
+  performance is lowest (Task B: $+$7.4) and slightly disrupts where
+  routing is already efficient (Tasks A, C). Deltas shown above each pair.}
+  \label{fig:morpho}
+\end{figure}
 
 This pattern was not designed. On the tested topologies and scenarios,
 high-performing tasks consume ATP efficiently, leaving little surplus to trigger
@@ -407,9 +416,14 @@ substrate and the cold-start condition begins blank.
   \label{tab:occupancy}
 \end{table}
 
-The 3-seed mean carryover F1 of 0.936 approaches the MLP baseline of 0.963 (gap:
-0.027; best seed gap: 0.011), achieved on fewer training examples than the MLP
-(926 vs 1,072) and under a fundamentally different evaluation regime. The
+The MLP was trained and evaluated on a flat rolling-window split with no session
+boundaries; REAL was evaluated on contiguous session units under a session-native
+carryover protocol. These are structurally different evaluation regimes, so the
+F1 figures serve as a rough competence anchor rather than a controlled
+head-to-head comparison. With that framing, the 3-seed mean carryover F1 of 0.936
+approaches the MLP baseline of 0.963 (gap: 0.027; best seed gap: 0.011), achieved
+on fewer training examples (926 vs 1,072) and under a protocol the MLP does not
+model. The
 remaining gap is a recall difference on the minority class; REAL and the MLP reach
 comparable precision. Class-weighted feedback is a plausible remedy but has not
 yet been tested. The delivery parity ratio of 0.991, with carryover and cold-start

@@ -1,8 +1,37 @@
 {
-  "generated_at": "2026-03-24T11:34:14-07:00",
+  "generated_at": "2026-03-24T12:21:12-07:00",
   "trace_root": "docs/traces",
-  "entry_count": 82,
+  "entry_count": 83,
   "entries": [
+    {
+      "path": "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
+      "filename": "2026-03-24 1450 - C Scale Suite Start.md",
+      "title": "2026-03-24 1450 - C Scale Suite Start",
+      "timestamp": "2026-03-24T14:50",
+      "date": "2026-03-24",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "scale",
+        "new",
+        "compare_c_scale_suite",
+        "examples",
+        "harness",
+        "nodes",
+        "test_c_scale_suite",
+        "ambiguity",
+        "c-family",
+        "c3_scale_c3s5_seed13_initial_20260324",
+        "c3s1",
+        "ceiling"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/c3_scale_c3s5_seed13_initial_20260324.json",
+        "scripts/compare_c_scale_suite.py",
+        "tests/test_c_scale_suite.py"
+      ]
+    },
     {
       "path": "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
       "filename": "2026-03-24 1310 - B Scale Suite Start.md",
@@ -2428,7 +2457,8 @@
     "ambiguity": [
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
       "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
-      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md"
+      "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md",
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
     ],
     "ambiguity-rich": [
       "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md"
@@ -2611,6 +2641,15 @@
       "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
       "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
     ],
+    "c-family": [
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+    ],
+    "c3_scale_c3s5_seed13_initial_20260324": [
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+    ],
+    "c3s1": [
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+    ],
     "c_family_real_diagnostic_20260318_seed13": [
       "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md"
     ],
@@ -2700,7 +2739,8 @@
       "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
       "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md",
-      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
     ],
     "challenge": [
       "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md",
@@ -2791,6 +2831,9 @@
     ],
     "compare_b_scale_suite": [
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
+    ],
+    "compare_c_scale_suite": [
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
     ],
     "compare_self_selected_smoke": [
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
@@ -3125,7 +3168,8 @@
       "docs/traces/baseline_scale_comparisons.md"
     ],
     "examples": [
-      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
     ],
     "exception": [
       "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
@@ -3299,7 +3343,8 @@
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md",
       "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
       "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
-      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
     ],
     "has": [
       "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md"
@@ -3480,7 +3525,8 @@
     "new": [
       "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
       "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
-      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
     ],
     "node": [
       "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
@@ -3494,7 +3540,8 @@
       "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md"
     ],
     "nodes": [
-      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md",
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
     ],
     "none": [
       "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md"
@@ -3789,6 +3836,7 @@
     "scale": [
       "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
       "docs/traces/baseline_scale_comparisons.md"
     ],
     "seed": [
@@ -3959,6 +4007,9 @@
     "test_c_family_real_diagnostic": [
       "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
       "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md"
+    ],
+    "test_c_scale_suite": [
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
     ],
     "test_compare_task_transfer_metrics": [
       "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
@@ -4174,6 +4225,9 @@
     "docs/experiment_outputs/b2_scale_b2s5_seed13_initial_20260324.json": [
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
     ],
+    "docs/experiment_outputs/c3_scale_c3s5_seed13_initial_20260324.json": [
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+    ],
     "docs/experiment_outputs/c_family_credit_debt_spotcheck_20260318.json": [
       "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md"
     ],
@@ -4337,6 +4391,9 @@
     "scripts/compare_b_scale_suite.py": [
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
     ],
+    "scripts/compare_c_scale_suite.py": [
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+    ],
     "scripts/compare_self_selected_smoke.py": [
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
     ],
@@ -4434,6 +4491,9 @@
     "tests/test_c_family_real_diagnostic.py": [
       "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
       "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md"
+    ],
+    "tests/test_c_scale_suite.py": [
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
     ],
     "tests/test_compare_task_transfer_metrics.py": [
       "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
