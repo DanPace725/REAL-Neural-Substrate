@@ -5,7 +5,27 @@
       "Bash(python -m scripts.diagnose_c_family_real --benchmarks C3 C4 --seeds 13)",
       "Bash(find 'C:\\\\Users\\\\nscha\\\\Coding\\\\Relationally Embedded Allostatic Learning\\\\REAL-Neural-Substrate\\\\docs\\\\experiment_outputs' -name ceiling_benchmark_pilot_family_*.json -type f)",
       "Bash(python3:*)",
-      "Bash(python -c \":*)"
+      "Bash(python -c \":*)",
+      "Bash(python -m unittest tests.test_lamination tests.test_phase8_lamination)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --benchmark B2S5 --task task_a --mode visible --seed 13 --max-slices 5 --initial-cycle-budget 6)",
+      "Bash(python -m scripts.generate_trace_index)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --benchmark B2S5 --task task_a --mode visible --seed 13 --max-slices 10 --initial-cycle-budget 95 --accuracy-threshold 0.7)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --benchmark B2S5 --task task_a --mode visible --seed 13 --max-slices 10 --initial-cycle-budget 48 --accuracy-threshold 0.7)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --benchmark B2S5 --task task_a --mode visible --seed 13 --max-slices 15 --initial-cycle-budget 32 --accuracy-threshold 0.7)",
+      "Bash(grep -n \"class NativeSubstrateSystem\" phase8/*.py)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --help)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --benchmark B2S5 --task task_a --mode growth-visible --seed 13 --max-slices 15 --initial-cycle-budget 32 --accuracy-threshold 0.7)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --benchmark B2S5 --task task_a --mode growth-visible --seed 13 --max-slices 5 --initial-cycle-budget 95 --accuracy-threshold 0.8)",
+      "Bash(python -m unittest tests.test_lamination tests.test_phase8_lamination -v)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --benchmark B2S5 --task task_a --mode visible --seed 13 --max-slices 10 --initial-cycle-budget 95 --accuracy-threshold 0.8)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --benchmark B2S5 --task task_a --mode visible --seed 13 --max-slices 10 --initial-cycle-budget 95 --accuracy-threshold 0.8 --regulator-type learning)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --benchmark B2S1 --task task_a --mode visible --seed 13 --max-slices 3 --initial-cycle-budget 8 --no-output)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --benchmark B2S1 --task task_a --mode visible --seed 13 --max-slices 3 --initial-cycle-budget 8)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --benchmark B2S5 --task task_a --mode visible --seed 13 --max-slices 10 --initial-cycle-budget 95 --accuracy-threshold 0.8 --regulator-type real --no-output)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --benchmark B2S5 --task task_a --mode visible --seed 13 --max-slices 10 --initial-cycle-budget 95 --accuracy-threshold 0.8 --regulator-type real)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 -b B2S1 --reg real --thresh 0.8 --compact)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --sweep all-b --reg real --thresh 0.8 --compact)",
+      "Bash(python -m scripts.evaluate_laminated_phase8 --sweep all-c --reg real --thresh 0.8 --compact)"
     ]
   }
 }

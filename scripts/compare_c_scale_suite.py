@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import time
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from statistics import mean
@@ -18,6 +20,9 @@ DEFAULT_BENCHMARK_IDS = ("C3S1", "C3S2", "C3S3", "C3S4", "C3S5", "C3S6")
 DEFAULT_TASK_KEYS = ("task_a",)
 DEFAULT_METHOD_IDS = ("fixed-visible", "fixed-latent", "growth-visible", "growth-latent")
 DEFAULT_SEEDS = (13,)
+DEFAULT_TRANSFER_TASK_KEYS = ("task_c",)
+
+ROOT = Path(__file__).resolve().parents[1]
 
 AMBIGUOUS_4_TRANSFORM_MAPS: Dict[str, Dict[int, str]] = {
     "task_a": {0: "rotate_left_1", 1: "xor_mask_1010", 2: "xor_mask_0101", 3: "identity"},
@@ -576,6 +581,136 @@ def _run_scale_case(
     }
 
 
+def _run_spec(system: NativeSubstrateSystem, spec: ScenarioSpec) -> dict[str, object]:
+    return system.run_workload(
+        cycles=spec.cycles,
+        initial_packets=spec.initial_packets,
+        packet_schedule=spec.packet_schedule,
+        initial_signal_specs=spec.initial_signal_specs,
+        signal_schedule_specs=spec.signal_schedule_specs,
+    )
+
+
+def _transfer_run_payload(
+    *,
+    case: CScaleCase,
+    scenario: ScenarioSpec,
+    task_key: str,
+    transfer_task_key: str,
+    method_id: str,
+    seed: int,
+    transfer_mode: str,
+    elapsed_seconds: float,
+    summary: dict[str, object],
+    commitment: dict[str, float],
+    system: NativeSubstrateSystem,
+) -> dict[str, object]:
+    metrics = _system_metrics(system, expected_examples=case.expected_examples)
+    throughput_examples = case.expected_examples / max(elapsed_seconds, 1e-9)
+    throughput_cycles = scenario.cycles / max(elapsed_seconds, 1e-9)
+    return {
+        "benchmark_id": case.benchmark_id,
+        "family_id": case.family_id,
+        "difficulty_index": case.difficulty_index,
+        "label": case.label,
+        "description": case.description,
+        "source": case.source,
+        "task_key": task_key,
+        "transfer_task_key": transfer_task_key,
+        "method_id": method_id,
+        "seed": seed,
+        "transfer_mode": transfer_mode,
+        "node_count": case.node_count,
+        "expected_examples": case.expected_examples,
+        "topology_depth": case.topology_depth,
+        "cycles": int(scenario.cycles),
+        "packet_ttl": int(scenario.packet_ttl),
+        "elapsed_seconds": round(elapsed_seconds, 4),
+        "examples_per_second": round(throughput_examples, 4),
+        "cycles_per_second": round(throughput_cycles, 4),
+        "exact_matches": metrics["exact_matches"],
+        "exact_match_rate": metrics["exact_match_rate"],
+        "mean_bit_accuracy": metrics["mean_bit_accuracy"],
+        "criterion_reached": metrics["criterion_reached"],
+        "examples_to_criterion": metrics["examples_to_criterion"],
+        "best_rolling_exact_rate": metrics["best_rolling_exact_rate"],
+        "best_rolling_bit_accuracy": metrics["best_rolling_bit_accuracy"],
+        "mean_route_cost": round(float(summary.get("mean_route_cost", 0.0)), 5),
+        "mean_source_efficiency": round(float(summary.get("mean_source_efficiency", 0.0)), 4),
+        "max_inbox_depth": int(summary.get("max_inbox_depth", 0)),
+        "max_source_backlog": int(summary.get("max_source_backlog", 0)),
+        "dynamic_node_count": int(summary.get("dynamic_node_count", 0)),
+        "node_count_runtime": int(summary.get("node_count", case.node_count)),
+        "edge_count_runtime": int(summary.get("edge_count", 0)),
+        "commitment": commitment,
+    }
+
+
+def _run_transfer_pair(
+    *,
+    case: CScaleCase,
+    train_task_key: str,
+    transfer_task_key: str,
+    method_id: str,
+    seed: int,
+) -> list[dict[str, object]]:
+    train_scenario = _task_scenario(case, train_task_key, method_id)
+    transfer_scenario = _task_scenario(case, transfer_task_key, method_id)
+
+    cold_system = _build_system_from_spec(seed, transfer_scenario, method_id=method_id)
+    cold_start = time.monotonic()
+    cold_result = _run_spec(cold_system, transfer_scenario)
+    cold_elapsed = time.monotonic() - cold_start
+    cold_summary = cold_result["summary"]
+    cold_commitment = _runtime_commitment(cold_system)
+    cold_payload = _transfer_run_payload(
+        case=case,
+        scenario=transfer_scenario,
+        task_key=train_task_key,
+        transfer_task_key=transfer_task_key,
+        method_id=method_id,
+        seed=seed,
+        transfer_mode="cold",
+        elapsed_seconds=cold_elapsed,
+        summary=cold_summary,
+        commitment=cold_commitment,
+        system=cold_system,
+    )
+
+    base_dir = ROOT / "tests_tmp" / f"c_scale_transfer_{uuid.uuid4().hex}"
+    carryover_dir = base_dir / "memory"
+    carryover_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        train_system = _build_system_from_spec(seed, train_scenario, method_id=method_id)
+        _run_spec(train_system, train_scenario)
+        train_system.save_memory_carryover(carryover_dir)
+
+        warm_system = _build_system_from_spec(seed, transfer_scenario, method_id=method_id)
+        warm_system.load_memory_carryover(carryover_dir)
+        warm_start = time.monotonic()
+        warm_result = _run_spec(warm_system, transfer_scenario)
+        warm_elapsed = time.monotonic() - warm_start
+        warm_summary = warm_result["summary"]
+        warm_commitment = _runtime_commitment(warm_system)
+        warm_payload = _transfer_run_payload(
+            case=case,
+            scenario=transfer_scenario,
+            task_key=train_task_key,
+            transfer_task_key=transfer_task_key,
+            method_id=method_id,
+            seed=seed,
+            transfer_mode="warm",
+            elapsed_seconds=warm_elapsed,
+            summary=warm_summary,
+            commitment=warm_commitment,
+            system=warm_system,
+        )
+    finally:
+        shutil.rmtree(base_dir, ignore_errors=True)
+
+    return [cold_payload, warm_payload]
+
+
 def _mean(values: Iterable[float]) -> float:
     items = list(values)
     return round(mean(items), 4) if items else 0.0
@@ -647,6 +782,9 @@ def evaluate_c_scale_suite(
     task_keys: Sequence[str] = DEFAULT_TASK_KEYS,
     method_ids: Sequence[str] = DEFAULT_METHOD_IDS,
     seeds: Sequence[int] = DEFAULT_SEEDS,
+    include_transfer: bool = False,
+    train_task_key: str = "task_a",
+    transfer_task_keys: Sequence[str] = DEFAULT_TRANSFER_TASK_KEYS,
     output_path: Path | None = None,
 ) -> dict[str, object]:
     suite = c_scale_suite_by_id()
@@ -709,6 +847,107 @@ def evaluate_c_scale_suite(
             "mean_bit_accuracy": _mean(float(item["mean_bit_accuracy"]) for item in method_aggregates),
         }
 
+    transfer_runs: list[dict[str, object]] = []
+    transfer_aggregates: list[dict[str, object]] = []
+    if include_transfer:
+        for case in selected_cases:
+            for transfer_task_key in transfer_task_keys:
+                if transfer_task_key == train_task_key:
+                    continue
+                for method_id in method_ids:
+                    for seed in seeds:
+                        transfer_runs.extend(
+                            _run_transfer_pair(
+                                case=case,
+                                train_task_key=train_task_key,
+                                transfer_task_key=transfer_task_key,
+                                method_id=method_id,
+                                seed=seed,
+                            )
+                        )
+
+        transfer_keys = sorted(
+            {
+                (
+                    run["benchmark_id"],
+                    run["method_id"],
+                    run["transfer_task_key"],
+                    run["transfer_mode"],
+                )
+                for run in transfer_runs
+            }
+        )
+        for benchmark_id, method_id, transfer_task_key, transfer_mode in transfer_keys:
+            matching_runs = [
+                run
+                for run in transfer_runs
+                if run["benchmark_id"] == benchmark_id
+                and run["method_id"] == method_id
+                and run["transfer_task_key"] == transfer_task_key
+                and run["transfer_mode"] == transfer_mode
+            ]
+            case = suite[benchmark_id]
+            transfer_aggregates.append(
+                {
+                    "benchmark_id": benchmark_id,
+                    "family_id": case.family_id,
+                    "difficulty_index": case.difficulty_index,
+                    "label": case.label,
+                    "description": case.description,
+                    "source": case.source,
+                    "task_key": train_task_key,
+                    "transfer_task_key": transfer_task_key,
+                    "transfer_mode": transfer_mode,
+                    "method_id": method_id,
+                    "node_count": case.node_count,
+                    "expected_examples": case.expected_examples,
+                    "topology_depth": case.topology_depth,
+                    **_aggregate_runs(matching_runs),
+                }
+            )
+
+        for benchmark_id in benchmark_ids:
+            for transfer_task_key in transfer_task_keys:
+                if transfer_task_key == train_task_key:
+                    continue
+                for method_id in method_ids:
+                    cold = next(
+                        (
+                            item
+                            for item in transfer_aggregates
+                            if item["benchmark_id"] == benchmark_id
+                            and item["transfer_task_key"] == transfer_task_key
+                            and item["method_id"] == method_id
+                            and item["transfer_mode"] == "cold"
+                        ),
+                        None,
+                    )
+                    warm = next(
+                        (
+                            item
+                            for item in transfer_aggregates
+                            if item["benchmark_id"] == benchmark_id
+                            and item["transfer_task_key"] == transfer_task_key
+                            and item["method_id"] == method_id
+                            and item["transfer_mode"] == "warm"
+                        ),
+                        None,
+                    )
+                    if cold is None or warm is None:
+                        continue
+                    warm["exact_match_rate_delta_vs_cold"] = round(
+                        float(warm["mean_exact_match_rate"]) - float(cold["mean_exact_match_rate"]),
+                        4,
+                    )
+                    warm["bit_accuracy_delta_vs_cold"] = round(
+                        float(warm["mean_bit_accuracy"]) - float(cold["mean_bit_accuracy"]),
+                        4,
+                    )
+                    warm["elapsed_ratio_vs_cold"] = round(
+                        float(warm["mean_elapsed_seconds"]) / max(float(cold["mean_elapsed_seconds"]), 1e-9),
+                        4,
+                    )
+
     elapsed_seconds = round(time.monotonic() - start, 4)
     result = {
         "benchmark_ids": list(benchmark_ids),
@@ -733,6 +972,14 @@ def evaluate_c_scale_suite(
         "runs": runs,
         "aggregates": aggregate_rows,
         "method_summary": method_summary,
+        "transfer_slice": {
+            "train_task_key": train_task_key,
+            "transfer_task_keys": list(transfer_task_keys),
+            "runs": transfer_runs,
+            "aggregates": transfer_aggregates,
+        }
+        if include_transfer
+        else None,
         "elapsed_seconds": elapsed_seconds,
     }
     if output_path is not None:
@@ -744,6 +991,9 @@ def evaluate_c_scale_suite(
                 "task_keys": list(task_keys),
                 "method_ids": list(method_ids),
                 "ambiguity_mode": "c3_fixed",
+                "transfer_enabled": include_transfer,
+                "train_task_key": train_task_key,
+                "transfer_task_keys": list(transfer_task_keys),
             },
             result=result,
         )
@@ -757,6 +1007,9 @@ def main() -> None:
     parser.add_argument("--tasks", nargs="*", default=list(DEFAULT_TASK_KEYS))
     parser.add_argument("--methods", nargs="*", default=list(DEFAULT_METHOD_IDS))
     parser.add_argument("--seeds", nargs="*", type=int, default=list(DEFAULT_SEEDS))
+    parser.add_argument("--include-transfer", action="store_true")
+    parser.add_argument("--train-task", type=str, default="task_a")
+    parser.add_argument("--transfer-tasks", nargs="*", default=list(DEFAULT_TRANSFER_TASK_KEYS))
     parser.add_argument("--output", type=str)
     args = parser.parse_args()
 
@@ -765,6 +1018,9 @@ def main() -> None:
         task_keys=tuple(args.tasks),
         method_ids=tuple(args.methods),
         seeds=tuple(args.seeds),
+        include_transfer=bool(args.include_transfer),
+        train_task_key=args.train_task,
+        transfer_task_keys=tuple(args.transfer_tasks),
         output_path=Path(args.output) if args.output else None,
     )
     print(json.dumps(result, indent=2))
@@ -777,6 +1033,7 @@ __all__ = [
     "DEFAULT_METHOD_IDS",
     "DEFAULT_SEEDS",
     "DEFAULT_TASK_KEYS",
+    "DEFAULT_TRANSFER_TASK_KEYS",
     "build_c_scale_cases",
     "c_scale_suite_by_id",
     "evaluate_c_scale_suite",

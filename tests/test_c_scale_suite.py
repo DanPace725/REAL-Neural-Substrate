@@ -50,6 +50,43 @@ class TestCScaleSuite(unittest.TestCase):
         self.assertGreater(run["examples_per_second"], 0.0)
         self.assertIn("elapsed_ratio_vs_s1", aggregate)
         self.assertAlmostEqual(float(aggregate["elapsed_ratio_vs_s1"]), 1.0, places=4)
+        self.assertIsNone(result["transfer_slice"])
+
+    def test_evaluate_c_scale_suite_transfer_smoke(self) -> None:
+        result = evaluate_c_scale_suite(
+            benchmark_ids=("C3S1",),
+            task_keys=("task_a",),
+            method_ids=("fixed-visible",),
+            seeds=(13,),
+            include_transfer=True,
+            train_task_key="task_a",
+            transfer_task_keys=("task_c",),
+        )
+
+        transfer_slice = result["transfer_slice"]
+        self.assertIsNotNone(transfer_slice)
+        assert transfer_slice is not None
+        self.assertEqual(transfer_slice["train_task_key"], "task_a")
+        self.assertEqual(transfer_slice["transfer_task_keys"], ["task_c"])
+        self.assertEqual(len(transfer_slice["runs"]), 2)
+        self.assertEqual(
+            {run["transfer_mode"] for run in transfer_slice["runs"]},
+            {"cold", "warm"},
+        )
+        self.assertEqual(
+            {run["transfer_task_key"] for run in transfer_slice["runs"]},
+            {"task_c"},
+        )
+        warm_aggregate = next(
+            aggregate
+            for aggregate in transfer_slice["aggregates"]
+            if aggregate["transfer_mode"] == "warm"
+        )
+        self.assertIn("exact_match_rate_delta_vs_cold", warm_aggregate)
+        self.assertIn("bit_accuracy_delta_vs_cold", warm_aggregate)
+        self.assertIn("elapsed_ratio_vs_cold", warm_aggregate)
+        self.assertEqual(warm_aggregate["task_key"], "task_a")
+        self.assertEqual(warm_aggregate["transfer_task_key"], "task_c")
 
 
 if __name__ == "__main__":

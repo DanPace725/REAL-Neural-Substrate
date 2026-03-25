@@ -7,11 +7,15 @@ from .types import (
     GCOStatus,
     LocalPrediction,
     MemoryActionSpec,
+    ModeExperience,
     PredictionError,
     RecognitionMatch,
     RecognitionState,
+    RegulatorySignal,
     SelectionContext,
     SessionCarryover,
+    SettlementDecision,
+    SliceSummary,
     SubstrateSnapshot,
 )
 from .engine import RealCoreEngine
@@ -32,6 +36,9 @@ from .consolidation import BasicConsolidationPipeline
 from .session import SessionHistory, SessionRecord
 from .session_state import SessionStateStore
 from .substrate import MemorySubstrate, SubstrateConfig
+from .lamination import HeuristicSliceRegulator, LaminatedController, LaminatedRunResult, LearningSliceRegulator
+from .meta_agent import REALSliceRegulator, SliceSummaryObservationAdapter, PolicySelectionActionBackend, SliceAccuracyCoherenceModel, NAMED_POLICIES
+from .interfaces import CarryoverFilter, SliceRegulator, SliceRunner
 
 __all__ = [
     "ActionOutcome",
@@ -43,9 +50,12 @@ __all__ = [
     "PredictionError",
     "RecognitionMatch",
     "RecognitionState",
+    "RegulatorySignal",
     "SelectionContext",
     "RealCoreEngine",
     "SessionCarryover",
+    "SettlementDecision",
+    "SliceSummary",
     "SubstrateSnapshot",
     "EpisodicMemory",
     "ConstraintPattern",
@@ -58,12 +68,25 @@ __all__ = [
     "ContextualSelector",
     "DomainMemoryBinding",
     "ExpectationModel",
+    "CarryoverFilter",
     "AnticipatorySelector",
     "RecognitionModel",
+    "SliceRegulator",
+    "SliceRunner",
     "CFARSelector",
     "SelectionMode",
     "TiltRegulatoryMesh",
     "SessionHistory",
     "SessionRecord",
     "SessionStateStore",
+    "HeuristicSliceRegulator",
+    "LaminatedController",
+    "LaminatedRunResult",
+    "LearningSliceRegulator",
+    "ModeExperience",
+    "REALSliceRegulator",
+    "SliceSummaryObservationAdapter",
+    "PolicySelectionActionBackend",
+    "SliceAccuracyCoherenceModel",
+    "NAMED_POLICIES",
 ]

@@ -24,6 +24,12 @@ from .environment import CapabilityControlConfig
 from .models import FeedbackPulse, NodeRuntimeState, SignalPacket, SignalSpec
 from .node_agent import NodeAgent
 from .substrate import ConnectionSubstrate, ConnectionSubstrateConfig
+from .lamination import (
+    Phase8SliceRunner,
+    Phase8SliceRunnerConfig,
+    build_system_for_scenario,
+    evaluate_laminated_scenario,
+)
 from .topology import (
     EdgeSpec,
     GrowthProposal,
@@ -37,6 +43,8 @@ from .topology import (
 __all__ = [
     "ConnectionSubstrate",
     "ConnectionSubstrateConfig",
+    "Phase8SliceRunner",
+    "Phase8SliceRunnerConfig",
     "CapabilityControlConfig",
     "EdgeSpec",
     "GrowthProposal",
@@ -58,6 +66,8 @@ __all__ = [
     "NativeSubstrateSystem",
     "NodeAgent",
     "NodeRuntimeState",
+    "build_system_for_scenario",
+    "evaluate_laminated_scenario",
     "Phase8ConsolidationPipeline",
     "Phase8Selector",
     "RoutingEnvironment",

@@ -1,8 +1,158 @@
 {
-  "generated_at": "2026-03-24T12:21:12-07:00",
+  "generated_at": "2026-03-25T05:32:59-07:00",
   "trace_root": "docs/traces",
-  "entry_count": 83,
+  "entry_count": 88,
   "entries": [
+    {
+      "path": "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
+      "filename": "2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
+      "title": "2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement",
+      "timestamp": "2026-03-25T12:00",
+      "date": "2026-03-25",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "lamination",
+        "threshold",
+        "was",
+        "b2s5",
+        "phase8",
+        "settlement",
+        "growth-visible",
+        "hint",
+        "laminated",
+        "layer",
+        "mode",
+        "non-growth"
+      ],
+      "referenced_files": [
+        "phase8/environment.py",
+        "phase8/lamination.py",
+        "real_core/lamination.py",
+        "scripts/evaluate_laminated_phase8.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
+      "filename": "2026-03-24 2230 - B2S5 48-Cycle Slices.md",
+      "title": "2026-03-24 2230 - B2S5 48-Cycle Slices",
+      "timestamp": "2026-03-24T22:30",
+      "date": "2026-03-24",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "cycle",
+        "b2s5",
+        "escalate",
+        "bias",
+        "lamination",
+        "per-context",
+        "slices",
+        "examples",
+        "initial_cycle_budget",
+        "laminated",
+        "phase8",
+        "real_core"
+      ],
+      "referenced_files": [
+        "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
+        "phase8/lamination.py",
+        "real_core/lamination.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
+      "filename": "2026-03-24 2215 - B2S5 Per-Context Bias.md",
+      "title": "2026-03-24 2215 - B2S5 Per-Context Bias",
+      "timestamp": "2026-03-24T22:15",
+      "date": "2026-03-24",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "b2s5",
+        "lamination",
+        "real_core",
+        "context_accuracy",
+        "per-context",
+        "apply_guidance_bias",
+        "bias",
+        "context",
+        "laminated",
+        "phase8",
+        "types",
+        "weak_context_bit"
+      ],
+      "referenced_files": [
+        "docs/summaries/20260324_laminated_real_summary.md",
+        "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+        "phase8/lamination.py",
+        "real_core/lamination.py",
+        "real_core/types.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "filename": "2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "title": "2026-03-24 1930 - B2S5 Laminated First Benchmark",
+      "timestamp": "2026-03-24T19:30",
+      "date": "2026-03-24",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "lamination",
+        "b2s1",
+        "benchmark",
+        "test_lamination",
+        "test_phase8_lamination",
+        "b2s5",
+        "evaluate_laminated_phase8",
+        "first",
+        "laminated",
+        "phase8",
+        "real_core",
+        "all"
+      ],
+      "referenced_files": [
+        "phase8/lamination.py",
+        "real_core/lamination.py",
+        "scripts/evaluate_laminated_phase8.py",
+        "tests/test_lamination.py",
+        "tests/test_phase8_lamination.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md",
+      "filename": "2026-03-24 1705 - C Scale Transfer Slice.md",
+      "title": "2026-03-24 1705 - C Scale Transfer Slice",
+      "timestamp": "2026-03-24T17:05",
+      "date": "2026-03-24",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "transfer",
+        "compare_c_scale_suite",
+        "cold",
+        "scale",
+        "slice",
+        "test_c_scale_suite",
+        "warm",
+        "c-family",
+        "c3_scale_c3s5_transfer_task_a_to_c_seed13_visible_latent_20260324",
+        "experiment_outputs",
+        "new",
+        "optionally"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/c3_scale_c3s5_transfer_task_a_to_c_seed13_visible_latent_20260324.json",
+        "scripts/compare_c_scale_suite.py",
+        "tests/test_c_scale_suite.py"
+      ]
+    },
     {
       "path": "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
       "filename": "2026-03-24 1450 - C Scale Suite Start.md",
@@ -2425,6 +2575,7 @@
       "docs/traces/2026-03-18 1702 - Identity Selector Revert.md"
     ],
     "all": [
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
       "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
       "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
     ],
@@ -2488,6 +2639,9 @@
     "applied": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
     ],
+    "apply_guidance_bias": [
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md"
+    ],
     "architecture": [
       "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md"
     ],
@@ -2522,7 +2676,14 @@
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
     ],
     "b2s1": [
-      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md"
+    ],
+    "b2s5": [
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
     ],
     "b_to_c_carryover_bridge_13_23_37": [
       "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md"
@@ -2573,7 +2734,8 @@
       "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md",
       "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
       "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md",
-      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md"
     ],
     "benchmark_anticipation_metrics": [
       "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
@@ -2590,7 +2752,9 @@
       "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md",
       "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
       "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
-      "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md"
+      "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
     ],
     "binary": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
@@ -2642,10 +2806,14 @@
       "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
     ],
     "c-family": [
-      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md"
     ],
     "c3_scale_c3s5_seed13_initial_20260324": [
       "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+    ],
+    "c3_scale_c3s5_transfer_task_a_to_c_seed13_visible_latent_20260324": [
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md"
     ],
     "c3s1": [
       "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
@@ -2812,6 +2980,7 @@
     ],
     "cold": [
       "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md",
       "docs/traces/20260317_1005_cyclic_transfer_trace.md"
     ],
     "cold-start": [
@@ -2833,7 +3002,8 @@
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
     ],
     "compare_c_scale_suite": [
-      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md"
     ],
     "compare_self_selected_smoke": [
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
@@ -2881,13 +3051,17 @@
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
       "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md",
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
-      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+      "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md"
     ],
     "context-action": [
       "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
     ],
     "context-specific": [
       "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
+    ],
+    "context_accuracy": [
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md"
     ],
     "context_action": [
       "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
@@ -2965,7 +3139,8 @@
     ],
     "cycle": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
-      "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md"
+      "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
     ],
     "cycles": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
@@ -3127,6 +3302,9 @@
       "docs/traces/20260317_phase8_morphogenesis_large_trace.md",
       "docs/traces/20260317_phase8_neural_baseline_trace.md"
     ],
+    "escalate": [
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
+    ],
     "estimate": [
       "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md"
     ],
@@ -3137,6 +3315,9 @@
       "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md",
       "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md",
       "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
+    ],
+    "evaluate_laminated_phase8": [
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md"
     ],
     "evaluate_runtime_slack": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
@@ -3169,7 +3350,8 @@
     ],
     "examples": [
       "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
-      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
     ],
     "exception": [
       "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
@@ -3200,6 +3382,7 @@
       "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
       "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md",
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md",
       "docs/traces/20260317_1005_cyclic_transfer_trace.md",
       "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
@@ -3253,7 +3436,8 @@
       "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md",
       "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md",
-      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md"
     ],
     "fixed": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
@@ -3325,6 +3509,9 @@
       "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md",
       "docs/traces/2026-03-18 1702 - Identity Selector Revert.md"
     ],
+    "growth-visible": [
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+    ],
     "h_e": [
       "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
       "docs/traces/20260317_1005_cyclic_transfer_trace.md",
@@ -3365,6 +3552,9 @@
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
     ],
+    "hint": [
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+    ],
     "hookup": [
       "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md"
     ],
@@ -3386,6 +3576,9 @@
     "independent": [
       "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
     ],
+    "initial_cycle_budget": [
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
+    ],
     "injection": [
       "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
     ],
@@ -3406,6 +3599,18 @@
     ],
     "ladder": [
       "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md"
+    ],
+    "laminated": [
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+    ],
+    "lamination": [
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
     ],
     "large": [
       "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
@@ -3446,6 +3651,9 @@
     "latent_resolution_weight": [
       "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md"
     ],
+    "layer": [
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+    ],
     "learning": [
       "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
       "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
@@ -3483,6 +3691,9 @@
     ],
     "metrics": [
       "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
+    ],
+    "mode": [
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
     ],
     "models": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
@@ -3526,7 +3737,8 @@
       "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
       "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
-      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md"
     ],
     "node": [
       "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
@@ -3542,6 +3754,9 @@
     "nodes": [
       "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md",
       "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+    ],
+    "non-growth": [
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
     ],
     "none": [
       "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md"
@@ -3566,6 +3781,9 @@
     "optional": [
       "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
       "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
+    ],
+    "optionally": [
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md"
     ],
     "original": [
       "docs/traces/2026-03-18 2145 - Latent Context Generalization.md",
@@ -3604,6 +3822,10 @@
       "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
       "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md"
     ],
+    "per-context": [
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
+    ],
     "persistence": [
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md"
     ],
@@ -3636,7 +3858,11 @@
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
       "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
-      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md",
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
     ],
     "phase8_session_synthesis": [
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
@@ -3739,7 +3965,10 @@
       "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
       "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
       "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
-      "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md"
+      "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md",
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
     ],
     "recent": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
@@ -3837,6 +4066,7 @@
       "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
       "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md",
       "docs/traces/baseline_scale_comparisons.md"
     ],
     "seed": [
@@ -3889,6 +4119,9 @@
     "sessions": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
     ],
+    "settlement": [
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+    ],
     "shape": [
       "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md"
     ],
@@ -3902,7 +4135,11 @@
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md"
     ],
     "slice": [
-      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md"
+      "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md"
+    ],
+    "slices": [
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
     ],
     "sonnet": [
       "docs/traces/20260317_phase8_morphogenesis_large_trace.md"
@@ -4009,13 +4246,17 @@
       "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md"
     ],
     "test_c_scale_suite": [
-      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md"
     ],
     "test_compare_task_transfer_metrics": [
       "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
     ],
     "test_experience_extension": [
       "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md"
+    ],
+    "test_lamination": [
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md"
     ],
     "test_latent_route_transform_gate": [
       "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md"
@@ -4027,6 +4268,9 @@
     ],
     "test_phase8_expectation": [
       "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md"
+    ],
+    "test_phase8_lamination": [
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md"
     ],
     "test_phase8_recognition": [
       "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
@@ -4050,7 +4294,8 @@
       "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
     ],
     "threshold": [
-      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md"
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md",
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
     ],
     "thresholds": [
       "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md"
@@ -4084,6 +4329,7 @@
       "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md",
       "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
       "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md",
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md",
       "docs/traces/20260317_1005_cyclic_transfer_trace.md",
       "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
@@ -4111,7 +4357,8 @@
     "types": [
       "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
       "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
-      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md"
     ],
     "use": [
       "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md"
@@ -4139,7 +4386,8 @@
       "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
       "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
       "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
-      "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md"
+      "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md",
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md"
     ],
     "was": [
       "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
@@ -4150,7 +4398,11 @@
       "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md",
       "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
       "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
-      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
+      "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+    ],
+    "weak_context_bit": [
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md"
     ],
     "were": [
       "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md"
@@ -4228,6 +4480,9 @@
     "docs/experiment_outputs/c3_scale_c3s5_seed13_initial_20260324.json": [
       "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
     ],
+    "docs/experiment_outputs/c3_scale_c3s5_transfer_task_a_to_c_seed13_visible_latent_20260324.json": [
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md"
+    ],
     "docs/experiment_outputs/c_family_credit_debt_spotcheck_20260318.json": [
       "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md"
     ],
@@ -4267,6 +4522,9 @@
     "docs/running_occupancy_v3.md": [
       "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
     ],
+    "docs/summaries/20260324_laminated_real_summary.md": [
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md"
+    ],
     "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md": [
       "docs/traces/2026-03-18 1535 - C Family Diagnostic.md"
     ],
@@ -4278,6 +4536,12 @@
     ],
     "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md": [
       "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md": [
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md"
+    ],
+    "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md": [
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
     ],
     "occupancy_baseline/session_splitter.py": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
@@ -4301,11 +4565,18 @@
       "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
       "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
-      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md",
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
     ],
     "phase8/expectation.py": [
       "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
       "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md"
+    ],
+    "phase8/lamination.py": [
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
     ],
     "phase8/models.py": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
@@ -4359,6 +4630,12 @@
       "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
       "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
     ],
+    "real_core/lamination.py": [
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+    ],
     "real_core/recognition.py": [
       "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
       "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
@@ -4372,7 +4649,8 @@
       "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
       "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
       "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
-      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md"
     ],
     "scripts/analyze_b_to_c_visible_timecourse.py": [
       "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
@@ -4392,7 +4670,8 @@
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
     ],
     "scripts/compare_c_scale_suite.py": [
-      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md"
     ],
     "scripts/compare_self_selected_smoke.py": [
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
@@ -4430,6 +4709,10 @@
       "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md",
       "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md",
       "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
+    ],
+    "scripts/evaluate_laminated_phase8.py": [
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
     ],
     "scripts/evaluate_runtime_slack.py": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
@@ -4493,7 +4776,8 @@
       "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md"
     ],
     "tests/test_c_scale_suite.py": [
-      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md"
     ],
     "tests/test_compare_task_transfer_metrics.py": [
       "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
@@ -4503,6 +4787,9 @@
     ],
     "tests/test_experience_extension.py": [
       "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md"
+    ],
+    "tests/test_lamination.py": [
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md"
     ],
     "tests/test_latent_context_tracker.py": [
       "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md"
@@ -4531,6 +4818,9 @@
     "tests/test_phase8_expectation.py": [
       "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
       "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md"
+    ],
+    "tests/test_phase8_lamination.py": [
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md"
     ],
     "tests/test_phase8_recognition.py": [
       "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",

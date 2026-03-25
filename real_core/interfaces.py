@@ -11,8 +11,11 @@ from .types import (
     MemoryActionSpec,
     PredictionError,
     RecognitionState,
+    RegulatorySignal,
     SelectionContext,
     SessionCarryover,
+    SettlementDecision,
+    SliceSummary,
     SubstrateSnapshot,
 )
 
@@ -191,3 +194,38 @@ class DomainMemoryBinding(Protocol):
         history: List[CycleEntry],
     ) -> Dict[str, Any]:
         """Return optional domain-specific health signals derived from substrate state."""
+
+
+class SliceRunner(Protocol):
+    """Execute one bounded laminated slice and return a compact summary."""
+
+    def run_slice(
+        self,
+        *,
+        slice_id: int,
+        cycle_budget: int,
+        regulatory_signal: RegulatorySignal | None = None,
+    ) -> SliceSummary:
+        """Run one slice under the supplied regulatory signal."""
+
+
+class SliceRegulator(Protocol):
+    """Map slice history to the next low-bandwidth control signal."""
+
+    def regulate(
+        self,
+        history: List[SliceSummary],
+    ) -> RegulatorySignal:
+        """Return the next slice-level regulatory signal."""
+
+
+class CarryoverFilter(Protocol):
+    """Filter raw local carryover candidates into summary-safe candidates."""
+
+    def filter_candidates(
+        self,
+        candidates: Dict[str, Any],
+        *,
+        mode: str = "keep",
+    ) -> Dict[str, Any]:
+        """Return summary-safe carryover candidates for slice reporting."""
