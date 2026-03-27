@@ -21,6 +21,9 @@ def _clamp01(value: float) -> float:
     return max(0.0, min(1.0, float(value)))
 
 
+_MAX_GRADIENT_SLICE_BUDGET = 32
+
+
 def _intervention_status(observed_delta: float, *, epsilon: float = 0.01) -> str:
     if observed_delta > epsilon:
         return "improved"
@@ -739,12 +742,15 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
             + 0.14 * failed_hygiene_persistence
             + 0.12 * open_context_mass
         )
+        budget_saturation = _clamp01(current.slice_budget / max(_MAX_GRADIENT_SLICE_BUDGET, 1))
         portfolio_drive = _clamp01(
-            0.28 * debt_mass
-            + 0.22 * failed_hygiene_persistence
-            + 0.18 * stall
-            + 0.16 * spread
-            + 0.16 * hardened_commitment
+            0.24 * debt_mass
+            + 0.18 * failed_hygiene_persistence
+            + 0.14 * stall
+            + 0.12 * spread
+            + 0.12 * hardened_commitment
+            + 0.10 * floor_gap
+            + 0.10 * budget_saturation
         )
         settlement_confidence = _clamp01(
             0.50 * min(floor_accuracy / max(threshold, 1e-6), 1.0)
@@ -755,7 +761,10 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
 
         budget_scale = 0.80 + 0.65 * stall + 0.35 * pressure_level + 0.30 * portfolio_drive - 0.40 * settlement_confidence
         requested_budget = max(1.0, current.slice_budget * budget_scale)
-        max_growth_budget = max(12, current.slice_budget + max(2, current.slice_budget // 2))
+        max_growth_budget = min(
+            _MAX_GRADIENT_SLICE_BUDGET,
+            max(12, current.slice_budget + max(2, current.slice_budget // 2)),
+        )
         budget_target = float(
             _clamp_budget(
                 round(min(requested_budget, max_growth_budget)),
@@ -867,6 +876,7 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
             "commitment_hardness": round(commitment_hardness, 4),
             "provisional_ambiguity": round(provisional_ambiguity, 4),
             "hidden_provisional_ambiguity": round(hidden_ambiguity, 4),
+            "budget_saturation": round(budget_saturation, 4),
         }
 
         return RegulatorySignal(
@@ -945,18 +955,31 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
         # Keep adaptive slices bounded so a hard case does not silently turn
         # back into a monolithic long run. Rescue should happen through more
         # slices or a short portfolio, not by letting one slice balloon.
-        target = min(target, max(12, current_budget * 2))
+        target = min(
+            _MAX_GRADIENT_SLICE_BUDGET,
+            target,
+            max(12, current_budget * 2),
+        )
         initial_budget = _clamp_budget(
             max(1, round(target * (0.45 + 0.20 * (1.0 - hygiene_level)))),
-            maximum=max(target, current_budget * 2, 1),
+            maximum=min(
+                _MAX_GRADIENT_SLICE_BUDGET,
+                max(target, current_budget * 2, 1),
+            ),
         )
         extend_step = _clamp_budget(
             max(1, round(target * (0.20 + 0.15 * pressure_level))),
-            maximum=max(4, target // 2, current_budget, 1),
+            maximum=min(
+                _MAX_GRADIENT_SLICE_BUDGET,
+                max(4, target // 2, current_budget, 1),
+            ),
         )
         soft_cap = _clamp_budget(
             max(initial_budget, round(target * (1.0 + 0.15 * portfolio_drive))),
-            maximum=max(initial_budget, target + extend_step * 2, 1),
+            maximum=min(
+                _MAX_GRADIENT_SLICE_BUDGET,
+                max(initial_budget, target + extend_step * 2, 1),
+            ),
         )
         hard_cap = _clamp_budget(
             max(
@@ -964,11 +987,17 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
                 round(
                     min(
                         target * (1.25 + 0.35 * max(0.0, commitment_hardness - provisional_ambiguity)),
-                        max(target + extend_step * 3, current_budget * 3, 12),
+                        min(
+                            _MAX_GRADIENT_SLICE_BUDGET,
+                            max(target + extend_step * 3, current_budget * 3, 12),
+                        ),
                     )
                 ),
             ),
-            maximum=max(soft_cap, target + extend_step * 3, current_budget * 3, 12),
+            maximum=min(
+                _MAX_GRADIENT_SLICE_BUDGET,
+                max(soft_cap, target + extend_step * 3, current_budget * 3, 12),
+            ),
         )
         patience = 1 + int(max(0.0, provisional_ambiguity - commitment_hardness) >= 0.10)
         return SliceExecutionPlan(
@@ -1271,7 +1300,7 @@ class LaminatedController:
         *,
         initial_cycle_budget: int = 8,
         safety_limit: int = 200,
-        portfolio_threshold: float = 0.68,
+        portfolio_threshold: float = 0.45,
     ) -> None:
         self.runner = runner
         self.regulator = regulator or HeuristicSliceRegulator()
@@ -1306,11 +1335,14 @@ class LaminatedController:
                     final_decision=decision,
                     final_cycle_budget=cycle_budget,
                 )
-            cycle_budget = _clamp_budget(
+            next_budget = (
                 round(signal.budget_target)
                 if signal is not None and signal.budget_target is not None
-                else (signal.next_slice_budget or cycle_budget),
+                else (signal.next_slice_budget or cycle_budget)
             )
+            if signal is not None and str(signal.metadata.get("regulator_mode", "")) == "gradient":
+                next_budget = min(int(next_budget), _MAX_GRADIENT_SLICE_BUDGET)
+            cycle_budget = _clamp_budget(next_budget)
 
             if slice_id >= self.safety_limit:
                 return LaminatedRunResult(
@@ -1346,6 +1378,7 @@ class LaminatedController:
     ) -> SliceExecutionPlan:
         if signal is not None and signal.execution_plan is not None:
             return signal.execution_plan
+        cycle_budget = min(cycle_budget, _MAX_GRADIENT_SLICE_BUDGET)
         return SliceExecutionPlan(
             initial_budget=max(1, min(4, cycle_budget)),
             extend_step=max(1, max(2, cycle_budget // 4)),

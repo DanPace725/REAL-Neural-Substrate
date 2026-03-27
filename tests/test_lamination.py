@@ -1149,6 +1149,7 @@ class TestLaminationContracts(unittest.TestCase):
         self.assertGreaterEqual(signal.portfolio_drive, 0.0)
         self.assertLessEqual(signal.portfolio_drive, 1.0)
         self.assertIsNotNone(signal.execution_plan)
+        self.assertLessEqual(signal.execution_plan.hard_cap, 32)
         self.assertEqual(signal.metadata.get("regulator_mode"), "gradient")
 
     def test_controller_portfolio_prefers_floor_recovery_and_commits_winner_state(self) -> None:
