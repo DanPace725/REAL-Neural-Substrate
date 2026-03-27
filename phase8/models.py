@@ -114,6 +114,8 @@ class NodeRuntimeState:
     last_prediction_expected_delta: float = 0.0
     last_prediction_expected_match_ratio: float = 0.0
     last_prediction_error_magnitude: float = 0.0
+    provisional_transform_credit: Dict[str, float] = field(default_factory=dict)
+    provisional_context_transform_credit: Dict[str, float] = field(default_factory=dict)
     transform_credit: Dict[str, float] = field(default_factory=dict)
     context_transform_credit: Dict[str, float] = field(default_factory=dict)
     branch_transform_credit: Dict[str, float] = field(default_factory=dict)

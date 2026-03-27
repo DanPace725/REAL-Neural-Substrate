@@ -1,0 +1,1130 @@
+{
+  "title": "2026-03-26 1329 - hidden regime forecasting",
+  "timestamp": "2026-03-26T20:29:47.553282Z",
+  "harness": "hidden_regime_forecasting",
+  "seeds": [
+    13
+  ],
+  "scenarios": [
+    "HR4"
+  ],
+  "result": {
+    "laminated_summary": {
+      "capability_policy": "self-selected",
+      "cycles": 12,
+      "injected_packets": 12,
+      "delivered_packets": 12,
+      "delivery_ratio": 1.0,
+      "dropped_packets": 0,
+      "drop_ratio": 0.0,
+      "remaining_inboxes": 0,
+      "pending_feedback": 2,
+      "source_buffer": 0,
+      "mean_latency": 1.0,
+      "mean_hops": 3.0,
+      "node_atp_total": 5.49,
+      "node_reward_total": 4.14,
+      "mean_route_cost": 0.04479,
+      "total_action_cost": 0.9875,
+      "admitted_packets": 12,
+      "mean_source_admission": 1.0,
+      "last_source_admission": 0,
+      "source_admission_support": 0.6394,
+      "source_admission_velocity": 0.0273,
+      "mean_source_efficiency": 0.4333,
+      "last_source_efficiency": 1.0,
+      "exact_matches": 10,
+      "partial_matches": 0,
+      "mean_bit_accuracy": 0.8333,
+      "mean_feedback_award": 0.15,
+      "overload_events": 0,
+      "max_inbox_depth": 1,
+      "max_source_backlog": 0,
+      "node_count": 7,
+      "edge_count": 9,
+      "bud_attempts": 0,
+      "bud_successes": 0,
+      "prune_events": 0,
+      "apoptosis_events": 0,
+      "dynamic_node_count": 0,
+      "new_node_utilization": 0.0,
+      "mean_dynamic_node_value": null,
+      "mean_dynamic_net_energy": null,
+      "mean_dynamic_edge_value": null,
+      "time_to_first_feedback": null,
+      "context_breakdown": {
+        "context_None": {
+          "count": 12,
+          "exact_matches": 10,
+          "mean_bit_accuracy": 0.8333
+        }
+      },
+      "final_transform_counts": {
+        "xor_mask_1010": 1,
+        "xor_mask_0101": 1,
+        "identity": 10
+      },
+      "task_diagnostics": {
+        "packets_evaluated": 12,
+        "contexts": {
+          "context_None": {
+            "count": 12,
+            "expected_transform": null,
+            "exact_matches": 10,
+            "partial_matches": 0,
+            "zero_matches": 2,
+            "identity_fallbacks": 1,
+            "wrong_transform_family": 0,
+            "route_wrong_transform_potentially_right": 0,
+            "route_right_transform_wrong": 0,
+            "transform_unstable_across_inferred_context_boundary": 0,
+            "delayed_correction": 2,
+            "stale_context_support_suspicions": 0,
+            "final_transform_counts": {
+              "xor_mask_1010": 1,
+              "xor_mask_0101": 1,
+              "identity": 10
+            },
+            "mismatch_transform_counts": {
+              "xor_mask_0101": 1,
+              "identity": 1
+            },
+            "branch_counts": {
+              "n2": 6,
+              "n1": 6
+            },
+            "mismatch_branch_counts": {
+              "n1": 1,
+              "n2": 1
+            },
+            "mean_bit_accuracy": 0.8333
+          }
+        },
+        "overall": {
+          "exact_matches": 10,
+          "partial_matches": 0,
+          "zero_matches": 2,
+          "identity_fallbacks": 1,
+          "wrong_transform_family": 0,
+          "route_wrong_transform_potentially_right": 0,
+          "route_right_transform_wrong": 0,
+          "transform_unstable_across_inferred_context_boundary": 0,
+          "delayed_correction": 2,
+          "stale_context_support_suspicions": 0,
+          "branch_counts": {
+            "n2": 6,
+            "n1": 6
+          },
+          "mismatch_branch_counts": {
+            "n1": 1,
+            "n2": 1
+          },
+          "final_transform_counts": {
+            "xor_mask_1010": 1,
+            "xor_mask_0101": 1,
+            "identity": 10
+          },
+          "mismatch_transform_counts": {
+            "xor_mask_0101": 1,
+            "identity": 1
+          }
+        },
+        "admission": {
+          "mean_source_admission": 1.0,
+          "max_source_backlog": 0,
+          "mean_latency": 1.0,
+          "overload_events": 0
+        }
+      },
+      "active_edges": {
+        "n0": [],
+        "n1": [],
+        "n2": [],
+        "n3": [],
+        "n4": [
+          "sink"
+        ],
+        "n5": []
+      },
+      "pattern_counts": {
+        "n0": 5,
+        "n1": 2,
+        "n2": 1,
+        "n3": 1,
+        "n4": 2,
+        "n5": 0
+      },
+      "supports": {
+        "n0": {
+          "n1": 0.0,
+          "n2": 0.0
+        },
+        "n1": {
+          "n3": 0.0,
+          "n4": 0.075
+        },
+        "n2": {
+          "n4": 0.0,
+          "n5": 0.0
+        },
+        "n3": {
+          "sink": 0.0
+        },
+        "n4": {
+          "sink": 0.32
+        },
+        "n5": {
+          "sink": 0.15
+        }
+      },
+      "action_supports": {
+        "n0": {
+          "n1": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          },
+          "n2": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          }
+        },
+        "n1": {
+          "n3": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          },
+          "n4": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          }
+        },
+        "n2": {
+          "n4": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          },
+          "n5": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          }
+        },
+        "n3": {
+          "sink": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          }
+        },
+        "n4": {
+          "sink": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          }
+        },
+        "n5": {
+          "sink": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          }
+        }
+      },
+      "context_action_supports": {
+        "n0": {
+          "n1": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          },
+          "n2": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          }
+        },
+        "n1": {
+          "n3": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          },
+          "n4": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          }
+        },
+        "n2": {
+          "n4": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          },
+          "n5": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          }
+        },
+        "n3": {
+          "sink": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          }
+        },
+        "n4": {
+          "sink": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          }
+        },
+        "n5": {
+          "sink": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          }
+        }
+      },
+      "substrate_maintenance": {
+        "n0": {
+          "active_edge_count": 0.0,
+          "active_action_count": 0.0,
+          "recently_maintained_edge_count": 0.0,
+          "recently_maintained_action_count": 0.0,
+          "edge_maintenance_ratio": 0.0,
+          "action_maintenance_ratio": 0.0,
+          "maintenance_ratio": 0.0,
+          "mean_active_support": 0.0
+        },
+        "n1": {
+          "active_edge_count": 0.0,
+          "active_action_count": 0.0,
+          "recently_maintained_edge_count": 0.0,
+          "recently_maintained_action_count": 0.0,
+          "edge_maintenance_ratio": 0.0,
+          "action_maintenance_ratio": 0.0,
+          "maintenance_ratio": 0.0,
+          "mean_active_support": 0.0
+        },
+        "n2": {
+          "active_edge_count": 0.0,
+          "active_action_count": 0.0,
+          "recently_maintained_edge_count": 0.0,
+          "recently_maintained_action_count": 0.0,
+          "edge_maintenance_ratio": 0.0,
+          "action_maintenance_ratio": 0.0,
+          "maintenance_ratio": 0.0,
+          "mean_active_support": 0.0
+        },
+        "n3": {
+          "active_edge_count": 0.0,
+          "active_action_count": 0.0,
+          "recently_maintained_edge_count": 0.0,
+          "recently_maintained_action_count": 0.0,
+          "edge_maintenance_ratio": 0.0,
+          "action_maintenance_ratio": 0.0,
+          "maintenance_ratio": 0.0,
+          "mean_active_support": 0.0
+        },
+        "n4": {
+          "active_edge_count": 1.0,
+          "active_action_count": 0.0,
+          "recently_maintained_edge_count": 0.0,
+          "recently_maintained_action_count": 0.0,
+          "edge_maintenance_ratio": 0.0,
+          "action_maintenance_ratio": 0.0,
+          "maintenance_ratio": 0.0,
+          "mean_active_support": 0.32
+        },
+        "n5": {
+          "active_edge_count": 0.0,
+          "active_action_count": 0.0,
+          "recently_maintained_edge_count": 0.0,
+          "recently_maintained_action_count": 0.0,
+          "edge_maintenance_ratio": 0.0,
+          "action_maintenance_ratio": 0.0,
+          "maintenance_ratio": 0.0,
+          "mean_active_support": 0.0
+        }
+      },
+      "capability_timeline": [
+        {
+          "cycle": 1,
+          "source": {
+            "latent_recruitment_pressure": 0.02748,
+            "latent_confidence_estimate": 0.16,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 0.98,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.23194,
+            "growth_support": 0.0,
+            "growth_enabled": false,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 0
+        },
+        {
+          "cycle": 2,
+          "source": {
+            "latent_recruitment_pressure": 0.01398,
+            "latent_confidence_estimate": 0.0192,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 0.9604,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.22341,
+            "growth_support": 0.0,
+            "growth_enabled": false,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 0
+        },
+        {
+          "cycle": 3,
+          "source": {
+            "latent_recruitment_pressure": 0.10341,
+            "latent_confidence_estimate": 0.68259,
+            "latent_support": 0.10746,
+            "latent_enabled": false,
+            "visible_context_trust": 0.94119,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.3156,
+            "growth_support": 0.0,
+            "growth_enabled": false,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 0
+        },
+        {
+          "cycle": 4,
+          "source": {
+            "latent_recruitment_pressure": 0.05941,
+            "latent_confidence_estimate": 0.78658,
+            "latent_support": 0.17686,
+            "latent_enabled": false,
+            "visible_context_trust": 0.92237,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.28648,
+            "growth_support": 0.0,
+            "growth_enabled": false,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 0
+        },
+        {
+          "cycle": 5,
+          "source": {
+            "latent_recruitment_pressure": 0.00363,
+            "latent_confidence_estimate": 0.16935,
+            "latent_support": 0.13134,
+            "latent_enabled": false,
+            "visible_context_trust": 0.90392,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.357,
+            "growth_support": 0.0,
+            "growth_enabled": false,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 0
+        },
+        {
+          "cycle": 6,
+          "source": {
+            "latent_recruitment_pressure": 0.0,
+            "latent_confidence_estimate": 0.08236,
+            "latent_support": 0.05914,
+            "latent_enabled": false,
+            "visible_context_trust": 0.88584,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.31573,
+            "growth_support": 0.0,
+            "growth_enabled": false,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 0
+        },
+        {
+          "cycle": 7,
+          "source": {
+            "latent_recruitment_pressure": 0.02267,
+            "latent_confidence_estimate": 0.39014,
+            "latent_support": 0.06305,
+            "latent_enabled": false,
+            "visible_context_trust": 0.86813,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.37967,
+            "growth_support": 0.0,
+            "growth_enabled": false,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 0
+        },
+        {
+          "cycle": 8,
+          "source": {
+            "latent_recruitment_pressure": 0.0,
+            "latent_confidence_estimate": 0.09634,
+            "latent_support": 0.00226,
+            "latent_enabled": false,
+            "visible_context_trust": 0.85076,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.41895,
+            "growth_support": 0.0,
+            "growth_enabled": false,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 0
+        },
+        {
+          "cycle": 9,
+          "source": {
+            "latent_recruitment_pressure": 0.00187,
+            "latent_confidence_estimate": 0.2178,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 0.83375,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.44803,
+            "growth_support": 0.0,
+            "growth_enabled": false,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 0
+        },
+        {
+          "cycle": 10,
+          "source": {
+            "latent_recruitment_pressure": 0.0,
+            "latent_confidence_estimate": 0.00584,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 0.81707,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.46954,
+            "growth_support": 0.0,
+            "growth_enabled": false,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 0
+        },
+        {
+          "cycle": 11,
+          "source": {
+            "latent_recruitment_pressure": 0.00497,
+            "latent_confidence_estimate": 0.26248,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 0.80073,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.48546,
+            "growth_support": 0.0,
+            "growth_enabled": false,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 0
+        },
+        {
+          "cycle": 12,
+          "source": {
+            "latent_recruitment_pressure": 0.02068,
+            "latent_confidence_estimate": 0.42894,
+            "latent_support": 0.00923,
+            "latent_enabled": false,
+            "visible_context_trust": 0.78472,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.49724,
+            "growth_support": 0.0,
+            "growth_enabled": false,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 0
+        }
+      ],
+      "latent_recruitment_cycles": {
+        "n0": [],
+        "n1": [],
+        "n2": [],
+        "n3": [],
+        "n4": [],
+        "n5": []
+      },
+      "growth_recruitment_cycles": {
+        "n0": [],
+        "n1": [],
+        "n2": [],
+        "n3": [],
+        "n4": [],
+        "n5": []
+      },
+      "capability_supports": {
+        "n0": {
+          "latent_recruitment_pressure": 0.02068,
+          "latent_confidence_estimate": 0.42894,
+          "latent_support": 0.00923,
+          "latent_enabled": false,
+          "visible_context_trust": 0.78472,
+          "growth_recruitment_pressure": 0.0,
+          "growth_stabilization_readiness": 0.49724,
+          "growth_support": 0.0,
+          "growth_enabled": false,
+          "latent_recruitment_cycles": [],
+          "growth_recruitment_cycles": []
+        },
+        "n1": {
+          "latent_recruitment_pressure": 0.0,
+          "latent_confidence_estimate": 0.03973,
+          "latent_support": 0.0,
+          "latent_enabled": false,
+          "visible_context_trust": 0.78472,
+          "growth_recruitment_pressure": 0.0,
+          "growth_stabilization_readiness": 0.32948,
+          "growth_support": 0.0,
+          "growth_enabled": false,
+          "latent_recruitment_cycles": [],
+          "growth_recruitment_cycles": []
+        },
+        "n2": {
+          "latent_recruitment_pressure": 0.03827,
+          "latent_confidence_estimate": 0.35273,
+          "latent_support": 0.27052,
+          "latent_enabled": false,
+          "visible_context_trust": 0.78472,
+          "growth_recruitment_pressure": 0.0,
+          "growth_stabilization_readiness": 0.38768,
+          "growth_support": 0.0,
+          "growth_enabled": false,
+          "latent_recruitment_cycles": [],
+          "growth_recruitment_cycles": []
+        },
+        "n3": {
+          "latent_recruitment_pressure": 0.0,
+          "latent_confidence_estimate": 0.03732,
+          "latent_support": 0.0,
+          "latent_enabled": false,
+          "visible_context_trust": 0.78472,
+          "growth_recruitment_pressure": 0.0,
+          "growth_stabilization_readiness": 0.32752,
+          "growth_support": 0.0,
+          "growth_enabled": false,
+          "latent_recruitment_cycles": [],
+          "growth_recruitment_cycles": []
+        },
+        "n4": {
+          "latent_recruitment_pressure": 0.00751,
+          "latent_confidence_estimate": 0.3104,
+          "latent_support": 0.24702,
+          "latent_enabled": false,
+          "visible_context_trust": 0.78472,
+          "growth_recruitment_pressure": 0.0,
+          "growth_stabilization_readiness": 0.42488,
+          "growth_support": 0.0,
+          "growth_enabled": false,
+          "latent_recruitment_cycles": [],
+          "growth_recruitment_cycles": []
+        },
+        "n5": {
+          "latent_recruitment_pressure": 0.0,
+          "latent_confidence_estimate": 0.0,
+          "latent_support": 0.0,
+          "latent_enabled": false,
+          "visible_context_trust": 0.78472,
+          "growth_recruitment_pressure": 0.0,
+          "growth_stabilization_readiness": 0.1464,
+          "growth_support": 0.0,
+          "growth_enabled": false,
+          "latent_recruitment_cycles": [],
+          "growth_recruitment_cycles": []
+        }
+      }
+    },
+    "experience_log": [
+      {
+        "cycle": 1,
+        "action": "policy:visible_explore",
+        "coherence": 0.65,
+        "delta": 0.0,
+        "gco": "PARTIAL",
+        "state_before": {
+          "min_ctx_acc": 0.5,
+          "mean_bit_accuracy": 0.5,
+          "delta_min_ctx_acc": 0.0,
+          "conflict": 0.0,
+          "ambiguity": 0.0,
+          "coherence_delta": 0.0329,
+          "mean_uncertainty": 0.7175,
+          "mode_is_growth": 0.0
+        }
+      },
+      {
+        "cycle": 2,
+        "action": "policy:visible_push",
+        "coherence": 0.65,
+        "delta": 0.0,
+        "gco": "PARTIAL",
+        "state_before": {
+          "min_ctx_acc": 0.5,
+          "mean_bit_accuracy": 0.5,
+          "delta_min_ctx_acc": 0.0,
+          "conflict": 0.0,
+          "ambiguity": 0.25,
+          "coherence_delta": 0.0273,
+          "mean_uncertainty": 0.7057,
+          "mode_is_growth": 0.0
+        }
+      },
+      {
+        "cycle": 3,
+        "action": "policy:visible_push",
+        "coherence": 0.8675,
+        "delta": 0.2175,
+        "gco": "STABLE",
+        "state_before": {
+          "min_ctx_acc": 1.0,
+          "mean_bit_accuracy": 1.0,
+          "delta_min_ctx_acc": 0.5,
+          "conflict": 0.0,
+          "ambiguity": 0.825,
+          "coherence_delta": -0.0087,
+          "mean_uncertainty": 0.5826,
+          "mode_is_growth": 0.0
+        }
+      },
+      {
+        "cycle": 4,
+        "action": "policy:visible_push",
+        "coherence": 0.7175,
+        "delta": -0.15,
+        "gco": "STABLE",
+        "state_before": {
+          "min_ctx_acc": 1.0,
+          "mean_bit_accuracy": 1.0,
+          "delta_min_ctx_acc": 0.0,
+          "conflict": 0.0,
+          "ambiguity": 0.825,
+          "coherence_delta": 0.0023,
+          "mean_uncertainty": 0.5387,
+          "mode_is_growth": 0.0
+        }
+      }
+    ],
+    "laminated_run": {
+      "final_decision": "settle",
+      "final_cycle_budget": 4,
+      "final_signal": {
+        "next_slice_budget": 4,
+        "carryover_filter_mode": "drop",
+        "context_pressure": "high",
+        "decision_hint": "settle",
+        "stop_reason": "engine_gco_stable"
+      },
+      "slice_summaries": [
+        {
+          "slice_id": 1,
+          "slice_budget": 4,
+          "cycles_used": 4,
+          "examples_seen": 5,
+          "mean_coherence": 0.4615,
+          "final_coherence": 0.5179,
+          "coherence_delta": 0.0329,
+          "mean_uncertainty": 0.7175,
+          "ambiguity_level": 0.0,
+          "conflict_level": 0.0,
+          "guidance_alignment": 0.75,
+          "candidate_carryover_labels": [
+            "productive_route_support",
+            "sequence_guidance"
+          ],
+          "candidate_carryover_count": 2,
+          "cost_summary": {
+            "total_action_cost": 0.8745,
+            "mean_route_cost": 0.04954,
+            "bit_accuracy_per_cost": 0.57176,
+            "exact_matches": 2.0,
+            "partial_matches": 0.0
+          },
+          "settlement_hint": "continue",
+          "context_accuracy": {
+            "context_none": 0.5
+          },
+          "mode_used": "self-selected",
+          "metadata": {
+            "packets_evaluated": 4,
+            "mean_bit_accuracy": 0.5,
+            "capability_policy": "self-selected",
+            "context_pressure": "medium",
+            "forecast_metrics": {
+              "forecast_entry_count": 12,
+              "resolved_forecast_count": 4,
+              "forecast_accuracy": 0.5,
+              "forecast_mean_confidence": 0.5481,
+              "forecast_calibration_error": 0.4783,
+              "forecast_mean_error": 0.4783,
+              "forecast_regime_accuracy": {
+                "xor_mask_0101": 0.6667,
+                "xor_mask_1010": 0.0
+              }
+            },
+            "intervention_payoff_trend": {
+              "target_metric": "forecast_accuracy",
+              "status": "unavailable",
+              "signed_delta": null,
+              "payoff": null,
+              "regret": null,
+              "policy": null
+            }
+          }
+        },
+        {
+          "slice_id": 2,
+          "slice_budget": 4,
+          "cycles_used": 4,
+          "examples_seen": 4,
+          "mean_coherence": 0.5263,
+          "final_coherence": 0.605,
+          "coherence_delta": 0.0273,
+          "mean_uncertainty": 0.7057,
+          "ambiguity_level": 0.25,
+          "conflict_level": 0.0,
+          "guidance_alignment": 0.75,
+          "candidate_carryover_labels": [
+            "productive_route_support",
+            "sequence_guidance"
+          ],
+          "candidate_carryover_count": 2,
+          "cost_summary": {
+            "total_action_cost": 0.89803,
+            "mean_route_cost": 0.04516,
+            "bit_accuracy_per_cost": 0.55677,
+            "exact_matches": 2.0,
+            "partial_matches": 0.0
+          },
+          "settlement_hint": "continue",
+          "context_accuracy": {
+            "context_none": 0.5
+          },
+          "mode_used": "visible",
+          "metadata": {
+            "packets_evaluated": 4,
+            "mean_bit_accuracy": 0.5,
+            "capability_policy": "self-selected",
+            "context_pressure": "medium",
+            "forecast_metrics": {
+              "forecast_entry_count": 24,
+              "resolved_forecast_count": 4,
+              "forecast_accuracy": 0.5,
+              "forecast_mean_confidence": 0.5553,
+              "forecast_calibration_error": 0.4783,
+              "forecast_mean_error": 0.4783,
+              "forecast_regime_accuracy": {
+                "xor_mask_0101": 0.6667,
+                "xor_mask_1010": 0.0
+              }
+            },
+            "intervention_payoff_trend": {
+              "target_metric": "forecast_accuracy",
+              "status": "flat",
+              "signed_delta": 0.0,
+              "payoff": 0.0,
+              "regret": null,
+              "policy": "visible_explore",
+              "mode": "visible"
+            },
+            "engine_coherence": 0.65,
+            "engine_delta": 0.0,
+            "engine_gco": "PARTIAL",
+            "chosen_policy": "visible_explore",
+            "chosen_mode": "visible",
+            "chosen_carryover": "soften",
+            "budget_multiplier": 1.0,
+            "growth_degraded_streak": 0
+          }
+        },
+        {
+          "slice_id": 3,
+          "slice_budget": 4,
+          "cycles_used": 4,
+          "examples_seen": 4,
+          "mean_coherence": 0.5453,
+          "final_coherence": 0.57,
+          "coherence_delta": -0.0087,
+          "mean_uncertainty": 0.5826,
+          "ambiguity_level": 0.825,
+          "conflict_level": 0.0,
+          "guidance_alignment": 1.0,
+          "candidate_carryover_labels": [
+            "productive_route_support",
+            "sequence_guidance"
+          ],
+          "candidate_carryover_count": 2,
+          "cost_summary": {
+            "total_action_cost": 0.6667,
+            "mean_route_cost": 0.04139,
+            "bit_accuracy_per_cost": 1.49993,
+            "exact_matches": 4.0,
+            "partial_matches": 0.0
+          },
+          "settlement_hint": "escalate",
+          "context_accuracy": {
+            "context_none": 1.0
+          },
+          "mode_used": "visible",
+          "metadata": {
+            "packets_evaluated": 4,
+            "mean_bit_accuracy": 1.0,
+            "capability_policy": "self-selected",
+            "context_pressure": "high",
+            "forecast_metrics": {
+              "forecast_entry_count": 12,
+              "resolved_forecast_count": 0,
+              "forecast_accuracy": null,
+              "forecast_mean_confidence": 0.6008,
+              "forecast_calibration_error": null,
+              "forecast_mean_error": null,
+              "forecast_regime_accuracy": {}
+            },
+            "intervention_payoff_trend": {
+              "target_metric": "forecast_accuracy",
+              "status": "improved",
+              "signed_delta": 0.5,
+              "payoff": 0.5,
+              "regret": null,
+              "policy": "visible_push",
+              "mode": "visible"
+            },
+            "engine_coherence": 0.65,
+            "engine_delta": 0.0,
+            "engine_gco": "PARTIAL",
+            "chosen_policy": "visible_push",
+            "chosen_mode": "visible",
+            "chosen_carryover": "drop",
+            "budget_multiplier": 1.0,
+            "growth_degraded_streak": 0,
+            "intervention_target_metric": "min_ctx_acc",
+            "intervention_status": "flat",
+            "intervention_signed_delta": 0.0,
+            "intervention_payoff": 0.0,
+            "intervention_observed_delta": 0.0,
+            "intervention_policy": "visible_explore"
+          }
+        },
+        {
+          "slice_id": 4,
+          "slice_budget": 4,
+          "cycles_used": 4,
+          "examples_seen": 4,
+          "mean_coherence": 0.5338,
+          "final_coherence": 0.5792,
+          "coherence_delta": 0.0023,
+          "mean_uncertainty": 0.5387,
+          "ambiguity_level": 0.825,
+          "conflict_level": 0.0,
+          "guidance_alignment": 1.0,
+          "candidate_carryover_labels": [
+            "productive_route_support",
+            "sequence_guidance"
+          ],
+          "candidate_carryover_count": 2,
+          "cost_summary": {
+            "total_action_cost": 0.9875,
+            "mean_route_cost": 0.04479,
+            "bit_accuracy_per_cost": 1.01266,
+            "exact_matches": 4.0,
+            "partial_matches": 0.0
+          },
+          "settlement_hint": "escalate",
+          "context_accuracy": {
+            "context_none": 1.0
+          },
+          "mode_used": "visible",
+          "metadata": {
+            "packets_evaluated": 4,
+            "mean_bit_accuracy": 1.0,
+            "capability_policy": "self-selected",
+            "context_pressure": "high",
+            "forecast_metrics": {
+              "forecast_entry_count": 12,
+              "resolved_forecast_count": 0,
+              "forecast_accuracy": null,
+              "forecast_mean_confidence": 0.6112,
+              "forecast_calibration_error": null,
+              "forecast_mean_error": null,
+              "forecast_regime_accuracy": {}
+            },
+            "intervention_payoff_trend": {
+              "target_metric": "forecast_accuracy",
+              "status": "flat",
+              "signed_delta": 0.0,
+              "payoff": 0.0,
+              "regret": null,
+              "policy": "visible_push",
+              "mode": "visible"
+            },
+            "engine_coherence": 0.8675,
+            "engine_delta": 0.2175,
+            "engine_gco": "STABLE",
+            "chosen_policy": "visible_push",
+            "chosen_mode": "visible",
+            "chosen_carryover": "drop",
+            "budget_multiplier": 1.0,
+            "growth_degraded_streak": 0,
+            "intervention_target_metric": "min_ctx_acc",
+            "intervention_status": "improved",
+            "intervention_signed_delta": 0.5,
+            "intervention_payoff": 0.5,
+            "intervention_observed_delta": 0.5,
+            "intervention_policy": "visible_push"
+          }
+        }
+      ]
+    },
+    "benchmark_id": "HR4",
+    "task_key": "task_c",
+    "observable": "hidden",
+    "capability_policy": "self-selected",
+    "seed": 13,
+    "case": {
+      "label": "Binary hidden regime with mid-run rule shift",
+      "description": "Binary hidden regime with a mid-run remapping of regime-to-transform bindings, forcing the laminated controller to adapt after the shift.",
+      "regime_cardinality": 2,
+      "sequence_memory_window": 3,
+      "pass_count": 4,
+      "expected_examples": 72,
+      "topology_name": "branch_pressure",
+      "task_id": "hidden_regime_hr4_task_c"
+    }
+  },
+  "metadata": {
+    "task_key": "task_c",
+    "observable": "hidden",
+    "capability_policy": "self-selected",
+    "initial_cycle_budget": 4,
+    "accuracy_threshold": 0.0,
+    "regulator_type": "real",
+    "safety_limit": 30
+  }
+}

@@ -22,6 +22,26 @@ class SettlementDecision(str, Enum):
 
 
 @dataclass
+class SliceExecutionPlan:
+    """Stepped execution contract for one laminated slice."""
+
+    initial_budget: int
+    extend_step: int
+    soft_cap: int
+    hard_cap: int
+    early_stop_patience: int = 1
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        self.initial_budget = max(1, int(self.initial_budget))
+        self.extend_step = max(1, int(self.extend_step))
+        self.soft_cap = max(self.initial_budget, int(self.soft_cap))
+        self.hard_cap = max(self.soft_cap, int(self.hard_cap))
+        self.early_stop_patience = max(1, int(self.early_stop_patience))
+        _ensure_summary_safe(self.metadata, path="metadata")
+
+
+@dataclass
 class ActionOutcome:
     success: bool
     result: Dict[str, Any] = field(default_factory=dict)
@@ -47,6 +67,31 @@ class PredictionError:
     outcome_error: Dict[str, float] = field(default_factory=dict)
     coherence_error: float | None = None
     delta_error: float | None = None
+    magnitude: float = 0.0
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ForecastOutput:
+    """Explicit forecast readout kept separate from action-level anticipation."""
+
+    target_label: str
+    confidence: float = 0.0
+    candidates: Dict[str, float] = field(default_factory=dict)
+    domain: str = "unknown"
+    horizon: int = 1
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ForecastError:
+    """Comparison between a forecast readout and the later observed label."""
+
+    predicted_label: str
+    actual_label: str | None = None
+    correct: bool | None = None
+    resolved: bool = False
+    confidence_error: float | None = None
     magnitude: float = 0.0
     metadata: Dict[str, Any] = field(default_factory=dict)
 
@@ -101,6 +146,8 @@ class CycleEntry:
     recognition: RecognitionState | None = None
     prediction: LocalPrediction | None = None
     prediction_error: PredictionError | None = None
+    forecast: ForecastOutput | None = None
+    forecast_error: ForecastError | None = None
 
 
 @dataclass
@@ -162,6 +209,8 @@ def _ensure_summary_safe(value: Any, *, path: str) -> None:
             CycleEntry,
             LocalPrediction,
             PredictionError,
+            ForecastOutput,
+            ForecastError,
             RecognitionMatch,
             RecognitionState,
             SelectionContext,
@@ -223,10 +272,18 @@ class RegulatorySignal:
     """Low-bandwidth slow-layer control for the next slice."""
 
     next_slice_budget: int | None = None
+    budget_target: float | None = None
+    pressure_level: float = 0.5
+    hygiene_level: float = 0.0
+    growth_drive: float = 0.0
+    portfolio_drive: float = 0.0
+    settlement_confidence: float = 0.0
     carryover_filter_mode: str = "keep"
     context_pressure: str = "medium"
     decision_hint: SettlementDecision = SettlementDecision.CONTINUE
     capability_mode: str | None = None
+    growth_authorization: str | None = None
+    execution_plan: SliceExecutionPlan | None = None
     bias_updates: Dict[str, float] = field(default_factory=dict)
     gating_updates: Dict[str, float] = field(default_factory=dict)
     reset_flags: Dict[str, float] = field(default_factory=dict)
@@ -235,8 +292,19 @@ class RegulatorySignal:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
+        if self.next_slice_budget is not None:
+            self.next_slice_budget = max(1, int(self.next_slice_budget))
+        if self.budget_target is not None:
+            self.budget_target = max(1.0, float(self.budget_target))
+        self.pressure_level = max(0.0, min(1.0, float(self.pressure_level)))
+        self.hygiene_level = max(0.0, min(1.0, float(self.hygiene_level)))
+        self.growth_drive = max(0.0, min(1.0, float(self.growth_drive)))
+        self.portfolio_drive = max(0.0, min(1.0, float(self.portfolio_drive)))
+        self.settlement_confidence = max(0.0, min(1.0, float(self.settlement_confidence)))
         _ensure_summary_safe(self.bias_updates, path="bias_updates")
         _ensure_summary_safe(self.gating_updates, path="gating_updates")
         _ensure_summary_safe(self.reset_flags, path="reset_flags")
         _ensure_summary_safe(self.reframe_flags, path="reframe_flags")
+        if self.execution_plan is not None:
+            _ensure_summary_safe(self.execution_plan.metadata, path="execution_plan.metadata")
         _ensure_summary_safe(self.metadata, path="metadata")

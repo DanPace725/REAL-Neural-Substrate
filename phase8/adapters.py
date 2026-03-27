@@ -47,11 +47,21 @@ class LocalNodeActionBackend:
         self.neighbor_ids = neighbor_ids
         self.substrate = substrate
 
+    def _action_context(self, observation: Dict[str, float]) -> int | None:
+        if observation.get("effective_has_context", 0.0) >= 0.5:
+            return int(observation.get("effective_context_bit", 0.0))
+        if (
+            observation.get("packet_has_context", 0.0) >= 0.5
+            and observation.get("packet_context_confidence", 0.0) > 0.0
+        ):
+            return int(observation.get("packet_context_bit", observation.get("head_context_bit", 0.0)))
+        return None
+
     def available_actions(self, history_size: int) -> List[str]:
         actions = ["rest"]
         local_inbox = len(self.environment.inboxes[self.node_id])
         observation = self.environment.observe_local(self.node_id)
-        context_bit = None
+        context_bit = self._action_context(observation)
         latent_downstream_transform_gate = (
             self.node_id != self.environment.source_id
             and observation.get("head_has_task", 0.0) >= 0.5
@@ -59,15 +69,31 @@ class LocalNodeActionBackend:
             and observation.get("latent_context_available", 0.0) >= 0.5
             and observation.get("context_promotion_ready", 0.0) < 0.5
         )
-        if observation.get("effective_has_context", 0.0) >= 0.5:
-            context_bit = int(observation.get("effective_context_bit", 0.0))
+        packet_context_supported = (
+            observation.get("packet_has_context", 0.0) >= 0.5
+            and observation.get("packet_context_confidence", 0.0) > 0.0
+            and observation.get("head_has_task", 0.0) >= 0.5
+        )
+        allowed_hidden_transforms: set[str] | None = None
+        if latent_downstream_transform_gate and packet_context_supported:
+            allowed_hidden_transforms = {
+                transform_name
+                for transform_name in TRANSFORM_ACTIONS
+                if observation.get(f"expected_transform_{transform_name}", 0.0) >= 0.5
+                or observation.get(f"task_transform_affinity_{transform_name}", 0.0) > 0.0
+                or observation.get(f"source_sequence_transform_hint_{transform_name}", 0.0) > 0.0
+            }
         for neighbor_id in self.neighbor_ids:
             route_cost = self.substrate.use_cost(neighbor_id)
             if self.environment.route_available(self.node_id, neighbor_id, route_cost):
                 actions.append(f"route:{neighbor_id}")
                 for transform_name in TRANSFORM_ACTIONS:
-                    if latent_downstream_transform_gate and transform_name != "identity":
-                        continue
+                    if latent_downstream_transform_gate:
+                        if allowed_hidden_transforms is None:
+                            if transform_name != "identity":
+                                continue
+                        elif transform_name != "identity" and transform_name not in allowed_hidden_transforms:
+                            continue
                     transform_cost = self.substrate.use_cost(neighbor_id, transform_name, context_bit)
                     if self.environment.route_available(self.node_id, neighbor_id, transform_cost):
                         actions.append(f"route_transform:{neighbor_id}:{transform_name}")
@@ -105,9 +131,7 @@ class LocalNodeActionBackend:
         if action.startswith("route_transform:"):
             _, neighbor_id, transform_name = action.split(":", 2)
             observation = self.environment.observe_local(self.node_id)
-            context_bit = None
-            if observation.get("effective_has_context", 0.0) >= 0.5:
-                context_bit = int(observation.get("effective_context_bit", 0.0))
+            context_bit = self._action_context(observation)
             cost = self.substrate.use_cost(neighbor_id, transform_name, context_bit)
             result = self.environment.route_signal(
                 self.node_id,

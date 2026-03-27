@@ -2835,6 +2835,67 @@ class TestLatentContextProbe(unittest.TestCase):
         action, _ = system.agents["n0"].engine.selector.select(available, [])
         self.assertEqual(action, "route_transform:n2:xor_mask_0101")
 
+    def test_observation_preserves_packet_context_when_visible_context_is_suppressed(self) -> None:
+        system = NativeSubstrateSystem(
+            adjacency={"n0": ("n2",), "n2": ("sink",)},
+            positions={"n0": 0, "n2": 1, "sink": 2},
+            source_id="n0",
+            sink_id="sink",
+            capability_policy="self-selected",
+            selector_seed=11,
+        )
+        system.environment.capability_states["n2"].visible_context_trust = 0.10
+        packet = system.environment.create_packet(
+            cycle=0,
+            input_bits=[1, 1, 0, 0],
+            payload_bits=[1, 1, 0, 0],
+            context_bit=1,
+            task_id="task_b",
+            target_bits=[1, 0, 0, 1],
+        )
+        system.environment.inboxes["n2"] = [packet]
+
+        observed = system.environment.observe_local("n2")
+
+        self.assertEqual(observed["packet_has_context"], 1.0)
+        self.assertEqual(observed["packet_context_bit"], 1.0)
+        self.assertEqual(observed["head_has_context"], 0.0)
+        self.assertEqual(observed["effective_has_context"], 0.0)
+        self.assertGreater(observed["packet_context_confidence"], 0.0)
+        self.assertLess(observed["packet_context_confidence"], 0.5)
+        self.assertEqual(observed["expected_transform_xor_mask_0101"], 1.0)
+
+    def test_selector_uses_packet_context_when_visible_context_is_suppressed(self) -> None:
+        system = NativeSubstrateSystem(
+            adjacency={"n0": ("n2",), "n2": ("sink",)},
+            positions={"n0": 0, "n2": 1, "sink": 2},
+            source_id="n0",
+            sink_id="sink",
+            capability_policy="self-selected",
+            selector_seed=17,
+        )
+        system.environment.capability_states["n2"].visible_context_trust = 0.10
+        system.agents["n2"].substrate.seed_action_support(
+            "sink",
+            "xor_mask_0101",
+            value=0.6,
+            context_bit=1,
+        )
+        packet = system.environment.create_packet(
+            cycle=0,
+            input_bits=[1, 1, 0, 0],
+            payload_bits=[1, 1, 0, 0],
+            context_bit=1,
+            task_id="task_b",
+            target_bits=[1, 0, 0, 1],
+        )
+        system.environment.inboxes["n2"] = [packet]
+
+        available = system.agents["n2"].engine.actions.available_actions(0)
+        action, _ = system.agents["n2"].engine.selector.select(available, [])
+
+        self.assertEqual(action, "route_transform:sink:xor_mask_0101")
+
     def test_selector_prefers_task_compatible_transform_over_identity_under_hidden_context(self) -> None:
         system = NativeSubstrateSystem(
             adjacency={"n0": ("sink",)},

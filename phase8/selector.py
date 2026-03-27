@@ -156,6 +156,15 @@ class Phase8Selector:
         maturity = min(1.0, len(history) / 24.0)
         pressure_discount = min(0.06, local_inbox * 0.02)
         urgency_discount = min(0.05, urgency * 0.08)
+        ambiguity = max(
+            0.0,
+            min(1.0, observation.get("provisional_context_ambiguity", 0.0)),
+        )
+        commitment_margin = max(
+            0.0,
+            min(1.0, observation.get("transform_commitment_margin", 1.0)),
+        )
+        ambiguity_exploration = 0.14 * ambiguity + 0.10 * max(0.0, 1.0 - commitment_margin)
         transfer_exploration = 0.0
         if (
             self.node_id == self.environment.source_id
@@ -173,6 +182,7 @@ class Phase8Selector:
                 self.exploration_rate * (1.0 - 0.7 * maturity)
                 - pressure_discount
                 - urgency_discount
+                + ambiguity_exploration
                 + transfer_exploration,
             ),
         )
@@ -185,7 +195,24 @@ class Phase8Selector:
 
     def _sample_routes(self, route_actions: List[str], history: List[object]) -> str:
         route_scores = self._score_routes(route_actions, history)
-        scores = [max(0.01, route_scores[action] + 1.0) for action in route_actions]
+        observation = self.environment.observe_local(self.node_id)
+        ambiguity = max(
+            0.0,
+            min(1.0, observation.get("provisional_context_ambiguity", 0.0)),
+        )
+        commitment_margin = max(
+            0.0,
+            min(1.0, observation.get("transform_commitment_margin", 1.0)),
+        )
+        temperature = 1.0 + 1.6 * ambiguity + 0.8 * max(0.0, 1.0 - commitment_margin)
+        max_score = max(route_scores.values()) if route_scores else 0.0
+        scores = [
+            max(
+                0.01,
+                math.exp((route_scores[action] - max_score) / max(temperature, 1e-6)),
+            )
+            for action in route_actions
+        ]
         return self.rng.choices(route_actions, weights=scores, k=1)[0]
 
     def _best_invest(self, invest_actions: List[str], history: List[object]) -> str:
@@ -200,6 +227,11 @@ class Phase8Selector:
 
     def _effective_context(self, observation: dict[str, float]) -> tuple[int | None, float]:
         if observation.get("effective_has_context", 0.0) < 0.5:
+            if observation.get("packet_has_context", 0.0) >= 0.5:
+                return int(observation.get("packet_context_bit", observation.get("head_context_bit", 0.0))), max(
+                    0.0,
+                    min(1.0, observation.get("packet_context_confidence", 0.0)),
+                )
             return None, 0.0
         return int(observation.get("effective_context_bit", 0.0)), max(
             0.0,
@@ -212,6 +244,11 @@ class Phase8Selector:
             return int(float(state_before.get("effective_context_bit", 0.0))), max(
                 0.0,
                 min(1.0, float(state_before.get("effective_context_confidence", 0.0))),
+            )
+        if state_before.get("packet_has_context", 0.0) >= 0.5:
+            return int(float(state_before.get("packet_context_bit", state_before.get("head_context_bit", 0.0)))), max(
+                0.0,
+                min(1.0, float(state_before.get("packet_context_confidence", 0.0))),
             )
         if state_before.get("head_has_context", 0.0) >= 0.5:
             return int(float(state_before.get("head_context_bit", 0.0))), 1.0
@@ -328,9 +365,17 @@ class Phase8Selector:
             and observation.get("effective_has_context", 0.0) < 0.5
         )
         feedback_credit = observation.get(f"feedback_credit_{transform_name}", 0.0)
+        provisional_feedback_credit = observation.get(
+            f"provisional_feedback_credit_{transform_name}",
+            0.0,
+        )
         feedback_debt = observation.get(f"feedback_debt_{transform_name}", 0.0)
         context_feedback_credit = observation.get(
             f"context_feedback_credit_{transform_name}",
+            0.0,
+        )
+        provisional_context_feedback_credit = observation.get(
+            f"provisional_context_feedback_credit_{transform_name}",
             0.0,
         )
         context_feedback_debt = observation.get(
@@ -598,7 +643,9 @@ class Phase8Selector:
                 action_support=action_support,
                 generic_action_support=generic_action_support,
                 feedback_credit=feedback_credit,
+                provisional_feedback_credit=provisional_feedback_credit,
                 context_feedback_credit=context_feedback_credit,
+                provisional_context_feedback_credit=provisional_context_feedback_credit,
                 branch_feedback_credit=branch_feedback_credit,
                 context_branch_feedback_credit=context_branch_feedback_credit,
                 branch_context_feedback_credit=branch_context_feedback_credit,
@@ -651,6 +698,14 @@ class Phase8Selector:
         urgency = observation.get("oldest_packet_age", 0.0)
         queue_pressure = observation.get("queue_pressure", 0.0)
         ingress_backlog = observation.get("ingress_backlog", 0.0)
+        provisional_ambiguity = max(
+            0.0,
+            min(1.0, observation.get("provisional_context_ambiguity", 0.0)),
+        )
+        commitment_margin = max(
+            0.0,
+            min(1.0, observation.get("transform_commitment_margin", 1.0)),
+        )
         transform_cost = self.substrate.use_cost(
             neighbor_id,
             transform_name if action.startswith("route_transform:") else None,
@@ -680,7 +735,11 @@ class Phase8Selector:
             "support_velocity_term": 0.08 * support_velocity,
             "action_velocity_term": 0.06 * action_velocity,
             "feedback_credit_term": 0.18 * feedback_credit,
+            "provisional_feedback_credit_term": 0.12 * provisional_feedback_credit,
             "context_feedback_credit_term": 0.34 * context_feedback_credit * context_weight,
+            "provisional_context_feedback_credit_term": 0.20
+            * provisional_context_feedback_credit
+            * context_weight,
             "history_transform_term": 0.16 * history_transform_evidence,
             "match_ratio_term": 0.12 * last_match_ratio,
             "last_feedback_term": 0.08 * last_feedback_amount,
@@ -713,6 +772,10 @@ class Phase8Selector:
             "competition_penalty_term": -competition_penalty,
             "stale_penalty_term": -stale_penalty,
             "competition_bonus_term": competition_bonus,
+            "ambiguity_hold_bonus_term": 0.10
+            * provisional_ambiguity
+            * max(0.0, 1.0 - commitment_margin)
+            * max(0.0, min(1.0, 0.35 + task_transform_affinity)),
         }
         components: dict[str, float | int | str | None] = {
             "action": action,
@@ -734,9 +797,16 @@ class Phase8Selector:
             "raw_latent_resolution_weight": round(float(latent_resolution_weight), 6),
             "raw_latent_context_count": int(latent_context_count),
             "raw_feedback_credit": round(feedback_credit, 6),
+            "raw_provisional_feedback_credit": round(provisional_feedback_credit, 6),
             "raw_context_feedback_credit": round(context_feedback_credit, 6),
+            "raw_provisional_context_feedback_credit": round(
+                provisional_context_feedback_credit,
+                6,
+            ),
             "raw_feedback_debt": round(feedback_debt, 6),
             "raw_context_feedback_debt": round(context_feedback_debt, 6),
+            "raw_provisional_context_ambiguity": round(provisional_ambiguity, 6),
+            "raw_transform_commitment_margin": round(commitment_margin, 6),
             "raw_context_action_support": round(
                 raw_context_action_support if context_bit is not None else 0.0,
                 6,
@@ -1121,16 +1191,23 @@ class Phase8Selector:
         field: str,
         default: float,
     ) -> float:
-        entries = [entry for entry in history if entry.action == action]
+        # Use pre-indexed history when available (from _score_routes)
+        if hasattr(self, "_history_by_action"):
+            entries = self._history_by_action.get(action)
+        else:
+            entries = [entry for entry in history if entry.action == action]
         if not entries:
             return default
 
-        current_cycle = max(entry.cycle for entry in history)
+        current_cycle = getattr(self, "_history_current_cycle", None)
+        if current_cycle is None:
+            current_cycle = max(entry.cycle for entry in history)
+        half_life = max(self.recency_half_life, 1e-9)
         weighted_total = 0.0
         total_weight = 0.0
         for entry in entries[-24:]:
             age = max(0, current_cycle - entry.cycle)
-            weight = 0.5 ** (age / max(self.recency_half_life, 1e-9))
+            weight = 0.5 ** (age / half_life)
             weighted_total += weight * float(getattr(entry, field))
             total_weight += weight
         if total_weight <= 0.0:
@@ -1138,10 +1215,15 @@ class Phase8Selector:
         return weighted_total / total_weight
 
     def _stale_bias_penalty(self, history: List[object], action: str) -> float:
-        entries = [entry for entry in history if entry.action == action]
+        if hasattr(self, "_history_by_action"):
+            entries = self._history_by_action.get(action)
+        else:
+            entries = [entry for entry in history if entry.action == action]
         if not entries:
             return 0.0
-        current_cycle = max(entry.cycle for entry in history)
+        current_cycle = getattr(self, "_history_current_cycle", None)
+        if current_cycle is None:
+            current_cycle = max(entry.cycle for entry in history)
         latest = max(entry.cycle for entry in entries)
         age = max(0, current_cycle - latest)
         if age <= self.recency_half_life:
@@ -1156,18 +1238,24 @@ class Phase8Selector:
         field: str,
         default: float,
     ) -> float:
-        entries = [
-            entry for entry in history if _route_neighbor(entry.action) == neighbor_id
-        ]
+        if hasattr(self, "_history_by_neighbor"):
+            entries = self._history_by_neighbor.get(neighbor_id)
+        else:
+            entries = [
+                entry for entry in history if _route_neighbor(entry.action) == neighbor_id
+            ]
         if not entries:
             return default
 
-        current_cycle = max(entry.cycle for entry in history)
+        current_cycle = getattr(self, "_history_current_cycle", None)
+        if current_cycle is None:
+            current_cycle = max(entry.cycle for entry in history)
+        half_life = max(self.recency_half_life, 1e-9)
         weighted_total = 0.0
         total_weight = 0.0
         for entry in entries[-24:]:
             age = max(0, current_cycle - entry.cycle)
-            weight = 0.5 ** (age / max(self.recency_half_life, 1e-9))
+            weight = 0.5 ** (age / half_life)
             weighted_total += weight * float(getattr(entry, field))
             total_weight += weight
         if total_weight <= 0.0:
@@ -1186,21 +1274,30 @@ class Phase8Selector:
     ) -> float:
         if context_bit is None or context_weight <= 0.0:
             return default
+        # Use pre-indexed action entries when available, then filter by context
+        if hasattr(self, "_history_by_action"):
+            action_entries = self._history_by_action.get(action)
+        else:
+            action_entries = [entry for entry in history if entry.action == action]
+        if not action_entries:
+            return default
         entries = [
-            entry
-            for entry in history
-            if entry.action == action and self._entry_effective_context(entry)[0] == context_bit
+            entry for entry in action_entries
+            if self._entry_effective_context(entry)[0] == context_bit
         ]
         if not entries:
             return default
 
-        current_cycle = max(entry.cycle for entry in history)
+        current_cycle = getattr(self, "_history_current_cycle", None)
+        if current_cycle is None:
+            current_cycle = max(entry.cycle for entry in history)
+        half_life = max(self.recency_half_life, 1e-9)
         weighted_total = 0.0
         total_weight = 0.0
         for entry in entries[-16:]:
             age = max(0, current_cycle - entry.cycle)
             _, entry_weight = self._entry_effective_context(entry)
-            weight = (0.5 ** (age / max(self.recency_half_life, 1e-9))) * max(0.15, entry_weight)
+            weight = (0.5 ** (age / half_life)) * max(0.15, entry_weight)
             weighted_total += weight * float(getattr(entry, field))
             total_weight += weight
         if total_weight <= 0.0:
@@ -1208,6 +1305,25 @@ class Phase8Selector:
         return weighted_total / total_weight
 
     def _score_routes(self, route_actions: List[str], history: List[object]) -> dict[str, float]:
+        # Pre-compute history index: avoids O(N) scan per action per method call
+        self._history_current_cycle = max((entry.cycle for entry in history), default=0)
+        by_action: dict[str, list[object]] = {}
+        by_neighbor: dict[str, list[object]] = {}
+        for entry in history:
+            by_action.setdefault(entry.action, []).append(entry)
+            neighbor = _route_neighbor(entry.action)
+            if neighbor is not None:
+                by_neighbor.setdefault(neighbor, []).append(entry)
+        self._history_by_action = by_action
+        self._history_by_neighbor = by_neighbor
+        try:
+            return self._score_routes_inner(route_actions, history)
+        finally:
+            del self._history_by_action
+            del self._history_by_neighbor
+            del self._history_current_cycle
+
+    def _score_routes_inner(self, route_actions: List[str], history: List[object]) -> dict[str, float]:
         breakdowns: dict[str, dict[str, float | int | str | None]] | None = (
             {} if self.capture_route_breakdowns else None
         )
@@ -1306,7 +1422,9 @@ class Phase8Selector:
         action_support: float,
         generic_action_support: float,
         feedback_credit: float,
+        provisional_feedback_credit: float,
         context_feedback_credit: float,
+        provisional_context_feedback_credit: float,
         branch_feedback_credit: float,
         context_branch_feedback_credit: float,
         branch_context_feedback_credit: float,
@@ -1324,7 +1442,9 @@ class Phase8Selector:
             action_support=action_support,
             generic_action_support=generic_action_support,
             feedback_credit=feedback_credit,
+            provisional_feedback_credit=provisional_feedback_credit,
             context_feedback_credit=context_feedback_credit,
+            provisional_context_feedback_credit=provisional_context_feedback_credit,
             branch_feedback_credit=branch_feedback_credit,
             context_branch_feedback_credit=context_branch_feedback_credit,
             branch_context_feedback_credit=branch_context_feedback_credit,
@@ -1404,8 +1524,16 @@ class Phase8Selector:
             transform_name,
         )
         feedback_credit = observation.get(f"feedback_credit_{transform_name}", 0.0)
+        provisional_feedback_credit = observation.get(
+            f"provisional_feedback_credit_{transform_name}",
+            0.0,
+        )
         context_feedback_credit = observation.get(
             f"context_feedback_credit_{transform_name}",
+            0.0,
+        )
+        provisional_context_feedback_credit = observation.get(
+            f"provisional_context_feedback_credit_{transform_name}",
             0.0,
         )
         branch_feedback_credit = observation.get(
@@ -1478,7 +1606,9 @@ class Phase8Selector:
             action_support=action_support,
             generic_action_support=generic_action_support,
             feedback_credit=feedback_credit,
+            provisional_feedback_credit=provisional_feedback_credit,
             context_feedback_credit=context_feedback_credit,
+            provisional_context_feedback_credit=provisional_context_feedback_credit,
             branch_feedback_credit=branch_feedback_credit,
             context_branch_feedback_credit=context_branch_feedback_credit,
             branch_context_feedback_credit=branch_context_feedback_credit,
@@ -1550,7 +1680,9 @@ class Phase8Selector:
         action_support: float,
         generic_action_support: float,
         feedback_credit: float,
+        provisional_feedback_credit: float,
         context_feedback_credit: float,
+        provisional_context_feedback_credit: float,
         branch_feedback_credit: float,
         context_branch_feedback_credit: float,
         branch_context_feedback_credit: float,
@@ -1594,7 +1726,9 @@ class Phase8Selector:
             + 0.16 * context_action_support * context_weight
             + 0.16 * transform_history_evidence
             + 0.10 * feedback_credit
+            + 0.10 * provisional_feedback_credit
             + 0.14 * context_feedback_credit * context_weight
+            + 0.18 * provisional_context_feedback_credit * context_weight
             + 0.10 * branch_feedback_credit
             + 0.20 * context_branch_feedback_credit * context_weight
             + 0.16 * branch_context_feedback_credit * context_weight

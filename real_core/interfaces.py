@@ -6,6 +6,8 @@ from .types import (
     ActionOutcome,
     CycleEntry,
     DimensionScores,
+    ForecastError,
+    ForecastOutput,
     GCOStatus,
     LocalPrediction,
     MemoryActionSpec,
@@ -15,6 +17,7 @@ from .types import (
     SelectionContext,
     SessionCarryover,
     SettlementDecision,
+    SliceExecutionPlan,
     SliceSummary,
     SubstrateSnapshot,
 )
@@ -97,6 +100,32 @@ class ExpectationModel(Protocol):
         history: List[CycleEntry],
     ) -> PredictionError | None:
         """Return local prediction error for the executed action."""
+
+
+class ForecastReadout(Protocol):
+    def forecast(
+        self,
+        state_before: Dict[str, float],
+        available: List[str],
+        history: List[CycleEntry],
+        *,
+        recognition: RecognitionState | None = None,
+        predictions: Dict[str, LocalPrediction] | None = None,
+        prior_coherence: float | None = None,
+        substrate: MemorySubstrateProtocol | None = None,
+    ) -> ForecastOutput | None:
+        """Return an explicit forecast readout separate from action selection."""
+
+    def compare(
+        self,
+        forecast: ForecastOutput | None,
+        state_after: Dict[str, float],
+        dimensions: DimensionScores,
+        coherence: float,
+        delta: float,
+        history: List[CycleEntry],
+    ) -> ForecastError | None:
+        """Return forecast error for the current cycle, if resolvable."""
 
 
 class Consolidator(Protocol):
@@ -207,6 +236,25 @@ class SliceRunner(Protocol):
         regulatory_signal: RegulatorySignal | None = None,
     ) -> SliceSummary:
         """Run one slice under the supplied regulatory signal."""
+
+
+class AdaptiveSliceRunner(Protocol):
+    """Runner that supports stepped execution and speculative replay."""
+
+    def run_slice_plan(
+        self,
+        *,
+        slice_id: int,
+        execution_plan: SliceExecutionPlan,
+        regulatory_signal: RegulatorySignal | None = None,
+    ) -> SliceSummary:
+        """Run a slice using a stepped execution contract."""
+
+    def snapshot_fast_state(self) -> Dict[str, Any]:
+        """Return a serializable fast-layer snapshot suitable for replay."""
+
+    def restore_fast_state(self, snapshot: Dict[str, Any]) -> None:
+        """Restore a fast-layer snapshot captured earlier."""
 
 
 class SliceRegulator(Protocol):

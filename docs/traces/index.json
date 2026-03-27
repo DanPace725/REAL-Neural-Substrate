@@ -1,8 +1,271 @@
 {
-  "generated_at": "2026-03-25T05:32:59-07:00",
+  "generated_at": "2026-03-26T14:42:52-07:00",
   "trace_root": "docs/traces",
-  "entry_count": 88,
+  "entry_count": 96,
   "entries": [
+    {
+      "path": "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md",
+      "filename": "2026-03-26 1430 - Laminated Growth Continuity Audit.md",
+      "title": "2026-03-26 1430 - Laminated Growth Continuity Audit",
+      "timestamp": "2026-03-26T14:30",
+      "date": "2026-03-26",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "growth",
+        "continuity",
+        "laminated",
+        "state",
+        "whether",
+        "audit",
+        "carryover",
+        "has",
+        "actually",
+        "drifted",
+        "layer",
+        "mode"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
+      "filename": "2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
+      "title": "2026-03-26 1356 - Hidden Regime Forecasting Summary So Far",
+      "timestamp": "2026-03-26T13:56",
+      "date": "2026-03-26",
+      "trace_type": "Summary trace",
+      "author": "Codex",
+      "model": "GPT-5 Codex",
+      "keywords": [
+        "experiment_outputs",
+        "forecasting",
+        "codex",
+        "summary",
+        "benchmark",
+        "far",
+        "laminated",
+        "support",
+        "evaluate_hidden_regime_forecasting",
+        "explicit",
+        "gpt-5",
+        "hidden"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/20260326_133343_116940_hidden_regime_suite_hr1_hr2_hr4_all_tasks_hidden_self_selected_b8_s30_seed13.json",
+        "docs/experiment_outputs/20260326_133714_141319_hidden_regime_suite_hr1_hr2_hr4_all_tasks_hidden_self_selected_b4_s100_seed13.json",
+        "docs/experiment_outputs/20260326_hidden_regime_suite_hr1_hr2_hr4_task_a_hidden_self_selected_b4_seed13.json",
+        "docs/experiment_outputs/20260326_hidden_regime_suite_hr1_hr2_hr4_task_b_hidden_self_selected_b4_seed13.json",
+        "docs/experiment_outputs/20260326_hidden_regime_suite_hr1_hr2_hr4_task_c_hidden_self_selected_b4_seed13.json",
+        "phase8/lamination.py",
+        "scripts/evaluate_hidden_regime_forecasting.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md",
+      "filename": "2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md",
+      "title": "2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep",
+      "timestamp": "2026-03-26T13:38",
+      "date": "2026-03-26",
+      "trace_type": "Experiment trace",
+      "author": "Codex",
+      "model": "GPT-5 Codex",
+      "keywords": [
+        "experiment_outputs",
+        "budget",
+        "codex",
+        "hidden",
+        "safety",
+        "slice",
+        "sweep",
+        "benchmark",
+        "experiment",
+        "gpt-5",
+        "hidden_regime_hr1_task_a_hidden_self_selected_b4_s100_seed13",
+        "hidden_regime_hr1_task_b_hidden_self_selected_b4_s100_seed13"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr1_task_a_hidden_self_selected_b4_s100_seed13.json",
+        "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr1_task_b_hidden_self_selected_b4_s100_seed13.json",
+        "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr1_task_c_hidden_self_selected_b4_s100_seed13.json",
+        "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr2_task_a_hidden_self_selected_b4_s100_seed13.json",
+        "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr2_task_b_hidden_self_selected_b4_s100_seed13.json",
+        "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr2_task_c_hidden_self_selected_b4_s100_seed13.json",
+        "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr4_task_a_hidden_self_selected_b4_s100_seed13.json",
+        "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr4_task_b_hidden_self_selected_b4_s100_seed13.json",
+        "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr4_task_c_hidden_self_selected_b4_s100_seed13.json",
+        "docs/experiment_outputs/20260326_133714_141319_hidden_regime_suite_hr1_hr2_hr4_all_tasks_hidden_self_selected_b4_s100_seed13.json"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
+      "filename": "2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
+      "title": "2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep",
+      "timestamp": "2026-03-26T13:34",
+      "date": "2026-03-26",
+      "trace_type": "Implementation trace",
+      "author": "Codex",
+      "model": "GPT-5 Codex",
+      "keywords": [
+        "experiment_outputs",
+        "budget",
+        "codex",
+        "unique",
+        "benchmark",
+        "evaluate_hidden_regime_forecasting",
+        "hidden-regime",
+        "gpt-5",
+        "hidden",
+        "hidden_regime_hr1_task_a_hidden_self_selected_b8_s30_seed13",
+        "hidden_regime_hr1_task_b_hidden_self_selected_b8_s30_seed13",
+        "hidden_regime_hr1_task_c_hidden_self_selected_b8_s30_seed13"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr1_task_a_hidden_self_selected_b8_s30_seed13.json",
+        "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr1_task_b_hidden_self_selected_b8_s30_seed13.json",
+        "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr1_task_c_hidden_self_selected_b8_s30_seed13.json",
+        "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr2_task_a_hidden_self_selected_b8_s30_seed13.json",
+        "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr2_task_b_hidden_self_selected_b8_s30_seed13.json",
+        "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr2_task_c_hidden_self_selected_b8_s30_seed13.json",
+        "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr4_task_a_hidden_self_selected_b8_s30_seed13.json",
+        "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr4_task_b_hidden_self_selected_b8_s30_seed13.json",
+        "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr4_task_c_hidden_self_selected_b8_s30_seed13.json",
+        "docs/experiment_outputs/20260326_133343_116940_hidden_regime_suite_hr1_hr2_hr4_all_tasks_hidden_self_selected_b8_s30_seed13.json",
+        "scripts/evaluate_hidden_regime_forecasting.py",
+        "tests/test_hidden_regime_forecasting.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
+      "filename": "2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
+      "title": "2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs",
+      "timestamp": "2026-03-26T13:23",
+      "date": "2026-03-26",
+      "trace_type": "Implementation trace",
+      "author": "Codex",
+      "model": "GPT-5 Codex",
+      "keywords": [
+        "experiment_outputs",
+        "phase8",
+        "codex",
+        "shift",
+        "added",
+        "case",
+        "environment",
+        "family",
+        "hidden",
+        "hidden-regime",
+        "saved",
+        "benchmark"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/20260326_hidden_regime_hr1_task_a_hidden_self_selected_b4_seed13.json",
+        "docs/experiment_outputs/20260326_hidden_regime_hr2_task_a_hidden_self_selected_b4_seed13.json",
+        "docs/experiment_outputs/20260326_hidden_regime_hr4_task_a_hidden_self_selected_b4_seed13.json",
+        "docs/experiment_outputs/20260326_hidden_regime_suite_hr1_hr2_hr4_task_a_hidden_self_selected_b4_seed13.json",
+        "phase8/environment.py",
+        "phase8/hidden_regime.py",
+        "scripts/evaluate_hidden_regime_forecasting.py",
+        "tests/test_hidden_regime_forecasting.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
+      "filename": "2026-03-26 1318 - Hidden Regime Forecasting Family.md",
+      "title": "2026-03-26 1318 - Hidden Regime Forecasting Family",
+      "timestamp": "2026-03-26T13:18",
+      "date": "2026-03-26",
+      "trace_type": "Implementation trace",
+      "author": "Codex",
+      "model": "GPT-5 Codex",
+      "keywords": [
+        "phase8",
+        "regime",
+        "codex",
+        "family",
+        "forecasting",
+        "environment",
+        "hidden-regime",
+        "slice",
+        "symbolic",
+        "binary",
+        "evaluate_hidden_regime_forecasting",
+        "gpt-5"
+      ],
+      "referenced_files": [
+        "phase8/environment.py",
+        "phase8/hidden_regime.py",
+        "scripts/evaluate_hidden_regime_forecasting.py",
+        "tests/test_hidden_regime_forecasting.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "filename": "2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "title": "2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary",
+      "timestamp": "2026-03-26T13:03",
+      "date": "2026-03-26",
+      "trace_type": "Implementation trace",
+      "author": "Codex",
+      "model": "GPT-5 Codex",
+      "keywords": [
+        "real_core",
+        "phase8",
+        "forecast",
+        "lamination",
+        "codex",
+        "forecasting",
+        "init__",
+        "interfaces",
+        "laminated",
+        "types",
+        "implementation",
+        "intervention"
+      ],
+      "referenced_files": [
+        "phase8/__init__.py",
+        "phase8/environment.py",
+        "phase8/forecasting.py",
+        "phase8/lamination.py",
+        "phase8/node_agent.py",
+        "real_core/__init__.py",
+        "real_core/engine.py",
+        "real_core/interfaces.py",
+        "real_core/lamination.py",
+        "real_core/meta_agent.py",
+        "real_core/session_state.py",
+        "real_core/types.py",
+        "scripts/evaluate_laminated_phase8.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
+      "filename": "2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
+      "title": "2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep",
+      "timestamp": "2026-03-25T16:00",
+      "date": "2026-03-25",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "regulator",
+        "family",
+        "had",
+        "slice",
+        "sweep",
+        "debugging",
+        "evaluate_laminated_phase8",
+        "layer",
+        "mode",
+        "slow",
+        "was",
+        "bit_acc"
+      ],
+      "referenced_files": [
+        "real_core/meta_agent.py",
+        "scripts/evaluate_laminated_phase8.py"
+      ]
+    },
     {
       "path": "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
       "filename": "2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
@@ -2539,7 +2802,8 @@
     "actually": [
       "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md",
       "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
-      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
+      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md",
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
     ],
     "adaptation": [
       "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
@@ -2564,7 +2828,8 @@
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md",
       "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
-      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md",
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
     ],
     "agents": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
@@ -2661,6 +2926,9 @@
     "assumption": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
     ],
+    "audit": [
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
+    ],
     "available": [
       "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md"
     ],
@@ -2735,7 +3003,11 @@
       "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
       "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md",
       "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
-      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md"
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
     "benchmark_anticipation_metrics": [
       "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
@@ -2758,7 +3030,8 @@
     ],
     "binary": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
-      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
+      "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md"
     ],
     "bit": [
       "docs/traces/2026-03-18 1640 - C Node Probe.md",
@@ -2770,6 +3043,9 @@
     ],
     "bit-acc": [
       "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md"
+    ],
+    "bit_acc": [
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md"
     ],
     "both": [
       "docs/traces/2026-03-18 1640 - C Node Probe.md",
@@ -2792,6 +3068,10 @@
     ],
     "bud": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md"
+    ],
+    "budget": [
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
     ],
     "bundle": [
       "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md"
@@ -2888,13 +3168,15 @@
       "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
       "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md",
       "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md",
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md",
       "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
     ],
     "carryover-mode": [
       "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md"
     ],
     "case": [
-      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md"
+      "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md",
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
     ],
     "cases": [
       "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
@@ -2966,7 +3248,13 @@
       "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
       "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
       "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md",
-      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
     "coding": [
       "docs/traces/2026-03-18 1640 - C Node Probe.md",
@@ -3075,6 +3363,9 @@
     "context_promotion_ready": [
       "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md"
     ],
+    "continuity": [
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
+    ],
     "contradiction": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md"
     ],
@@ -3160,6 +3451,9 @@
     "debt": [
       "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md"
     ],
+    "debugging": [
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md"
+    ],
     "decision": [
       "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
     ],
@@ -3233,6 +3527,9 @@
       "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md",
       "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
     ],
+    "drifted": [
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
+    ],
     "each": [
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md"
     ],
@@ -3290,7 +3587,9 @@
       "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
       "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
-      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md",
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
     ],
     "episodes": [
       "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
@@ -3316,8 +3615,14 @@
       "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md",
       "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
     ],
+    "evaluate_hidden_regime_forecasting": [
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
+    ],
     "evaluate_laminated_phase8": [
-      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md"
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md"
     ],
     "evaluate_runtime_slack": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
@@ -3365,6 +3670,7 @@
     "experiment": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
       "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md",
       "docs/traces/20260317_1005_cyclic_transfer_trace.md",
       "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
       "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
@@ -3383,6 +3689,10 @@
       "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md",
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
       "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md",
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
       "docs/traces/20260317_1005_cyclic_transfer_trace.md",
       "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
@@ -3393,7 +3703,8 @@
       "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md"
     ],
     "explicit": [
-      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md"
+      "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
     "exploration": [
       "docs/traces/20260317_1005_cyclic_transfer_trace.md"
@@ -3418,7 +3729,13 @@
       "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
       "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
       "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md",
-      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md"
+      "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
+    ],
+    "far": [
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
     "feedback": [
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md"
@@ -3451,6 +3768,14 @@
     ],
     "follow": [
       "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "forecast": [
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+    ],
+    "forecasting": [
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
     "frontier": [
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md"
@@ -3494,7 +3819,11 @@
       "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md",
       "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
       "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
-      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
     "groundwork": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
@@ -3502,6 +3831,7 @@
     "growth": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
       "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md",
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md",
       "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md"
     ],
@@ -3522,7 +3852,8 @@
     ],
     "had": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
-      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md"
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md"
     ],
     "harness": [
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
@@ -3534,7 +3865,8 @@
       "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
     ],
     "has": [
-      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md"
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
     ],
     "head": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md"
@@ -3546,11 +3878,35 @@
       "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
     ],
     "hidden": [
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
       "docs/traces/baseline_scale_comparisons.md"
     ],
     "hidden-memory": [
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
+    ],
+    "hidden-regime": [
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
+    ],
+    "hidden_regime_hr1_task_a_hidden_self_selected_b4_s100_seed13": [
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
+    ],
+    "hidden_regime_hr1_task_a_hidden_self_selected_b8_s30_seed13": [
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
+    ],
+    "hidden_regime_hr1_task_b_hidden_self_selected_b4_s100_seed13": [
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
+    ],
+    "hidden_regime_hr1_task_b_hidden_self_selected_b8_s30_seed13": [
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
+    ],
+    "hidden_regime_hr1_task_c_hidden_self_selected_b8_s30_seed13": [
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
     ],
     "hint": [
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
@@ -3570,11 +3926,17 @@
     "ids": [
       "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md"
     ],
+    "implementation": [
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+    ],
     "improved": [
       "docs/traces/2026-03-18 1702 - Identity Selector Revert.md"
     ],
     "independent": [
       "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "init__": [
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
     ],
     "initial_cycle_budget": [
       "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
@@ -3592,7 +3954,11 @@
     "interfaces": [
       "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
       "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
-      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+    ],
+    "intervention": [
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
     ],
     "item": [
       "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md"
@@ -3604,13 +3970,17 @@
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
       "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
-      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
     ],
     "lamination": [
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
       "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
-      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
     ],
     "large": [
       "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
@@ -3652,7 +4022,9 @@
       "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md"
     ],
     "layer": [
-      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
     ],
     "learning": [
       "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
@@ -3693,7 +4065,9 @@
       "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
     ],
     "mode": [
-      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
     ],
     "models": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
@@ -3862,7 +4236,10 @@
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
       "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
-      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
     ],
     "phase8_session_synthesis": [
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
@@ -3968,7 +4345,8 @@
       "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md",
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
-      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
     ],
     "recent": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
@@ -4002,8 +4380,14 @@
       "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
       "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md"
     ],
+    "regime": [
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md"
+    ],
     "regression": [
       "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
+    ],
+    "regulator": [
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md"
     ],
     "relationally": [
       "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
@@ -4061,6 +4445,12 @@
     ],
     "runtime": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md"
+    ],
+    "safety": [
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
+    ],
+    "saved": [
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
     ],
     "scale": [
       "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
@@ -4125,6 +4515,9 @@
     "shape": [
       "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md"
     ],
+    "shift": [
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
+    ],
     "signal": [
       "docs/traces/baseline_scale_comparisons.md"
     ],
@@ -4136,10 +4529,16 @@
     ],
     "slice": [
       "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
-      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md"
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md",
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
     ],
     "slices": [
       "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
+    ],
+    "slow": [
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md"
     ],
     "sonnet": [
       "docs/traces/20260317_phase8_morphogenesis_large_trace.md"
@@ -4172,7 +4571,8 @@
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
     ],
     "state": [
-      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md"
+      "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
     ],
     "stream": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
@@ -4195,16 +4595,23 @@
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
     ],
     "summary": [
-      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
+      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
     "support": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
-      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
     "sweep": [
       "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
-      "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md"
+      "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md",
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
+    ],
+    "symbolic": [
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md"
     ],
     "synthesis": [
       "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md"
@@ -4358,7 +4765,11 @@
       "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
       "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
       "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
-      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md"
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+    ],
+    "unique": [
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
     ],
     "use": [
       "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md"
@@ -4399,13 +4810,17 @@
       "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
       "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
       "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
-      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md"
     ],
     "weak_context_bit": [
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md"
     ],
     "were": [
       "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md"
+    ],
+    "whether": [
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
     ],
     "widened": [
       "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md"
@@ -4473,6 +4888,87 @@
     ],
     "docs/experiment_outputs/20260317_1113_morphogenesis_large_carryover_bridge.json": [
       "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
+    ],
+    "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr1_task_a_hidden_self_selected_b8_s30_seed13.json": [
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr1_task_b_hidden_self_selected_b8_s30_seed13.json": [
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr1_task_c_hidden_self_selected_b8_s30_seed13.json": [
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr2_task_a_hidden_self_selected_b8_s30_seed13.json": [
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr2_task_b_hidden_self_selected_b8_s30_seed13.json": [
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr2_task_c_hidden_self_selected_b8_s30_seed13.json": [
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr4_task_a_hidden_self_selected_b8_s30_seed13.json": [
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr4_task_b_hidden_self_selected_b8_s30_seed13.json": [
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133343_116940_hidden_regime_hr4_task_c_hidden_self_selected_b8_s30_seed13.json": [
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133343_116940_hidden_regime_suite_hr1_hr2_hr4_all_tasks_hidden_self_selected_b8_s30_seed13.json": [
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
+    ],
+    "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr1_task_a_hidden_self_selected_b4_s100_seed13.json": [
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr1_task_b_hidden_self_selected_b4_s100_seed13.json": [
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr1_task_c_hidden_self_selected_b4_s100_seed13.json": [
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr2_task_a_hidden_self_selected_b4_s100_seed13.json": [
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr2_task_b_hidden_self_selected_b4_s100_seed13.json": [
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr2_task_c_hidden_self_selected_b4_s100_seed13.json": [
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr4_task_a_hidden_self_selected_b4_s100_seed13.json": [
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr4_task_b_hidden_self_selected_b4_s100_seed13.json": [
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133714_141319_hidden_regime_hr4_task_c_hidden_self_selected_b4_s100_seed13.json": [
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
+    ],
+    "docs/experiment_outputs/20260326_133714_141319_hidden_regime_suite_hr1_hr2_hr4_all_tasks_hidden_self_selected_b4_s100_seed13.json": [
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
+    ],
+    "docs/experiment_outputs/20260326_hidden_regime_hr1_task_a_hidden_self_selected_b4_seed13.json": [
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
+    ],
+    "docs/experiment_outputs/20260326_hidden_regime_hr2_task_a_hidden_self_selected_b4_seed13.json": [
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
+    ],
+    "docs/experiment_outputs/20260326_hidden_regime_hr4_task_a_hidden_self_selected_b4_seed13.json": [
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
+    ],
+    "docs/experiment_outputs/20260326_hidden_regime_suite_hr1_hr2_hr4_task_a_hidden_self_selected_b4_seed13.json": [
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
+    ],
+    "docs/experiment_outputs/20260326_hidden_regime_suite_hr1_hr2_hr4_task_b_hidden_self_selected_b4_seed13.json": [
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
+    ],
+    "docs/experiment_outputs/20260326_hidden_regime_suite_hr1_hr2_hr4_task_c_hidden_self_selected_b4_seed13.json": [
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
     "docs/experiment_outputs/b2_scale_b2s5_seed13_initial_20260324.json": [
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
@@ -4546,6 +5042,9 @@
     "occupancy_baseline/session_splitter.py": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
     ],
+    "phase8/__init__.py": [
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+    ],
     "phase8/adapters.py": [
       "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
       "docs/traces/2026-03-18 1702 - Identity Selector Revert.md",
@@ -4566,17 +5065,29 @@
       "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
       "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md",
-      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
     ],
     "phase8/expectation.py": [
       "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
       "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md"
     ],
+    "phase8/forecasting.py": [
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+    ],
+    "phase8/hidden_regime.py": [
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
+    ],
     "phase8/lamination.py": [
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
       "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
-      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
     "phase8/models.py": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
@@ -4585,7 +5096,8 @@
     "phase8/node_agent.py": [
       "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
       "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
-      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md"
+      "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
     ],
     "phase8/scenarios.py": [
       "docs/traces/baseline_scale_comparisons.md"
@@ -4616,25 +5128,33 @@
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
     ],
     "real_core/__init__.py": [
-      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md"
+      "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
     ],
     "real_core/consolidation.py": [
       "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md"
     ],
     "real_core/engine.py": [
-      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md"
+      "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
     ],
     "real_core/interfaces.py": [
       "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
       "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
       "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
-      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md"
+      "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
     ],
     "real_core/lamination.py": [
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
       "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
-      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+    ],
+    "real_core/meta_agent.py": [
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
     ],
     "real_core/recognition.py": [
       "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
@@ -4645,12 +5165,16 @@
       "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
       "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md"
     ],
+    "real_core/session_state.py": [
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+    ],
     "real_core/types.py": [
       "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
       "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
       "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
       "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
-      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md"
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
     ],
     "scripts/analyze_b_to_c_visible_timecourse.py": [
       "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
@@ -4710,9 +5234,17 @@
       "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md",
       "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
     ],
+    "scripts/evaluate_hidden_regime_forecasting.py": [
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
+    ],
     "scripts/evaluate_laminated_phase8.py": [
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
-      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
+      "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
     ],
     "scripts/evaluate_runtime_slack.py": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
@@ -4787,6 +5319,11 @@
     ],
     "tests/test_experience_extension.py": [
       "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md"
+    ],
+    "tests/test_hidden_regime_forecasting.py": [
+      "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
+      "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
     ],
     "tests/test_lamination.py": [
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md"

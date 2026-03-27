@@ -1,0 +1,1136 @@
+{
+  "title": "2026-03-26 1338 - hidden regime forecasting",
+  "timestamp": "2026-03-26T20:38:10.663344Z",
+  "harness": "hidden_regime_forecasting",
+  "seeds": [
+    13
+  ],
+  "scenarios": [
+    "HR4"
+  ],
+  "result": {
+    "laminated_summary": {
+      "capability_policy": "growth-visible",
+      "cycles": 12,
+      "injected_packets": 12,
+      "delivered_packets": 12,
+      "delivery_ratio": 1.0,
+      "dropped_packets": 0,
+      "drop_ratio": 0.0,
+      "remaining_inboxes": 0,
+      "pending_feedback": 2,
+      "source_buffer": 0,
+      "mean_latency": 1.0,
+      "mean_hops": 3.0,
+      "node_atp_total": 5.4364,
+      "node_reward_total": 4.12,
+      "mean_route_cost": 0.04315,
+      "total_action_cost": 3.36023,
+      "admitted_packets": 12,
+      "mean_source_admission": 1.0,
+      "last_source_admission": 0,
+      "source_admission_support": 0.6394,
+      "source_admission_velocity": 0.0273,
+      "mean_source_efficiency": 0.4333,
+      "last_source_efficiency": 1.0,
+      "exact_matches": 10,
+      "partial_matches": 0,
+      "mean_bit_accuracy": 0.8333,
+      "mean_feedback_award": 0.15,
+      "overload_events": 0,
+      "max_inbox_depth": 1,
+      "max_source_backlog": 0,
+      "node_count": 7,
+      "edge_count": 9,
+      "bud_attempts": 0,
+      "bud_successes": 0,
+      "prune_events": 0,
+      "apoptosis_events": 0,
+      "dynamic_node_count": 0,
+      "new_node_utilization": 0.0,
+      "mean_dynamic_node_value": null,
+      "mean_dynamic_net_energy": null,
+      "mean_dynamic_edge_value": null,
+      "time_to_first_feedback": null,
+      "context_breakdown": {
+        "context_None": {
+          "count": 12,
+          "exact_matches": 10,
+          "mean_bit_accuracy": 0.8333
+        }
+      },
+      "final_transform_counts": {
+        "xor_mask_1010": 1,
+        "xor_mask_0101": 1,
+        "identity": 10
+      },
+      "task_diagnostics": {
+        "packets_evaluated": 12,
+        "contexts": {
+          "context_None": {
+            "count": 12,
+            "expected_transform": null,
+            "exact_matches": 10,
+            "partial_matches": 0,
+            "zero_matches": 2,
+            "identity_fallbacks": 1,
+            "wrong_transform_family": 0,
+            "route_wrong_transform_potentially_right": 0,
+            "route_right_transform_wrong": 0,
+            "transform_unstable_across_inferred_context_boundary": 0,
+            "delayed_correction": 2,
+            "stale_context_support_suspicions": 0,
+            "final_transform_counts": {
+              "xor_mask_1010": 1,
+              "xor_mask_0101": 1,
+              "identity": 10
+            },
+            "mismatch_transform_counts": {
+              "xor_mask_0101": 1,
+              "identity": 1
+            },
+            "branch_counts": {
+              "n2": 5,
+              "n1": 7
+            },
+            "mismatch_branch_counts": {
+              "n1": 1,
+              "n2": 1
+            },
+            "mean_bit_accuracy": 0.8333
+          }
+        },
+        "overall": {
+          "exact_matches": 10,
+          "partial_matches": 0,
+          "zero_matches": 2,
+          "identity_fallbacks": 1,
+          "wrong_transform_family": 0,
+          "route_wrong_transform_potentially_right": 0,
+          "route_right_transform_wrong": 0,
+          "transform_unstable_across_inferred_context_boundary": 0,
+          "delayed_correction": 2,
+          "stale_context_support_suspicions": 0,
+          "branch_counts": {
+            "n2": 5,
+            "n1": 7
+          },
+          "mismatch_branch_counts": {
+            "n1": 1,
+            "n2": 1
+          },
+          "final_transform_counts": {
+            "xor_mask_1010": 1,
+            "xor_mask_0101": 1,
+            "identity": 10
+          },
+          "mismatch_transform_counts": {
+            "xor_mask_0101": 1,
+            "identity": 1
+          }
+        },
+        "admission": {
+          "mean_source_admission": 1.0,
+          "max_source_backlog": 0,
+          "mean_latency": 1.0,
+          "overload_events": 0
+        }
+      },
+      "active_edges": {
+        "n0": [],
+        "n1": [
+          "n3"
+        ],
+        "n2": [
+          "n4"
+        ],
+        "n3": [
+          "sink"
+        ],
+        "n4": [
+          "sink"
+        ],
+        "n5": []
+      },
+      "pattern_counts": {
+        "n0": 5,
+        "n1": 2,
+        "n2": 2,
+        "n3": 1,
+        "n4": 2,
+        "n5": 0
+      },
+      "supports": {
+        "n0": {
+          "n1": 0.0,
+          "n2": 0.0
+        },
+        "n1": {
+          "n3": 0.32,
+          "n4": 0.0
+        },
+        "n2": {
+          "n4": 0.295,
+          "n5": 0.0
+        },
+        "n3": {
+          "sink": 0.3575
+        },
+        "n4": {
+          "sink": 0.32
+        },
+        "n5": {
+          "sink": 0.15
+        }
+      },
+      "action_supports": {
+        "n0": {
+          "n1": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          },
+          "n2": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          }
+        },
+        "n1": {
+          "n3": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.24
+          },
+          "n4": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          }
+        },
+        "n2": {
+          "n4": {
+            "identity": 0.1775,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          },
+          "n5": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          }
+        },
+        "n3": {
+          "sink": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          }
+        },
+        "n4": {
+          "sink": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.1775,
+            "xor_mask_0101": 0.0
+          }
+        },
+        "n5": {
+          "sink": {
+            "identity": 0.0,
+            "rotate_left_1": 0.0,
+            "xor_mask_1010": 0.0,
+            "xor_mask_0101": 0.0
+          }
+        }
+      },
+      "context_action_supports": {
+        "n0": {
+          "n1": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          },
+          "n2": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          }
+        },
+        "n1": {
+          "n3": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.24
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.24
+            }
+          },
+          "n4": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          }
+        },
+        "n2": {
+          "n4": {
+            "context_0": {
+              "identity": 0.1775,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.1775,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          },
+          "n5": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          }
+        },
+        "n3": {
+          "sink": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          }
+        },
+        "n4": {
+          "sink": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.1775,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.1775,
+              "xor_mask_0101": 0.0
+            }
+          }
+        },
+        "n5": {
+          "sink": {
+            "context_0": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            },
+            "context_1": {
+              "identity": 0.0,
+              "rotate_left_1": 0.0,
+              "xor_mask_1010": 0.0,
+              "xor_mask_0101": 0.0
+            }
+          }
+        }
+      },
+      "substrate_maintenance": {
+        "n0": {
+          "active_edge_count": 0.0,
+          "active_action_count": 0.0,
+          "recently_maintained_edge_count": 0.0,
+          "recently_maintained_action_count": 0.0,
+          "edge_maintenance_ratio": 0.0,
+          "action_maintenance_ratio": 0.0,
+          "maintenance_ratio": 0.0,
+          "mean_active_support": 0.0
+        },
+        "n1": {
+          "active_edge_count": 1.0,
+          "active_action_count": 0.0,
+          "recently_maintained_edge_count": 1.0,
+          "recently_maintained_action_count": 0.0,
+          "edge_maintenance_ratio": 1.0,
+          "action_maintenance_ratio": 0.0,
+          "maintenance_ratio": 1.0,
+          "mean_active_support": 0.32
+        },
+        "n2": {
+          "active_edge_count": 1.0,
+          "active_action_count": 0.0,
+          "recently_maintained_edge_count": 1.0,
+          "recently_maintained_action_count": 0.0,
+          "edge_maintenance_ratio": 1.0,
+          "action_maintenance_ratio": 0.0,
+          "maintenance_ratio": 1.0,
+          "mean_active_support": 0.295
+        },
+        "n3": {
+          "active_edge_count": 1.0,
+          "active_action_count": 0.0,
+          "recently_maintained_edge_count": 1.0,
+          "recently_maintained_action_count": 0.0,
+          "edge_maintenance_ratio": 1.0,
+          "action_maintenance_ratio": 0.0,
+          "maintenance_ratio": 1.0,
+          "mean_active_support": 0.3575
+        },
+        "n4": {
+          "active_edge_count": 1.0,
+          "active_action_count": 0.0,
+          "recently_maintained_edge_count": 0.0,
+          "recently_maintained_action_count": 0.0,
+          "edge_maintenance_ratio": 0.0,
+          "action_maintenance_ratio": 0.0,
+          "maintenance_ratio": 0.0,
+          "mean_active_support": 0.32
+        },
+        "n5": {
+          "active_edge_count": 0.0,
+          "active_action_count": 0.0,
+          "recently_maintained_edge_count": 0.0,
+          "recently_maintained_action_count": 0.0,
+          "edge_maintenance_ratio": 0.0,
+          "action_maintenance_ratio": 0.0,
+          "maintenance_ratio": 0.0,
+          "mean_active_support": 0.0
+        }
+      },
+      "capability_timeline": [
+        {
+          "cycle": 1,
+          "source": {
+            "latent_recruitment_pressure": 0.0,
+            "latent_confidence_estimate": 0.0,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 1.0,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.0,
+            "growth_support": 1.0,
+            "growth_enabled": true,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 6
+        },
+        {
+          "cycle": 2,
+          "source": {
+            "latent_recruitment_pressure": 0.0,
+            "latent_confidence_estimate": 0.0,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 1.0,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.0,
+            "growth_support": 1.0,
+            "growth_enabled": true,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 6
+        },
+        {
+          "cycle": 3,
+          "source": {
+            "latent_recruitment_pressure": 0.0,
+            "latent_confidence_estimate": 0.0,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 1.0,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.0,
+            "growth_support": 1.0,
+            "growth_enabled": true,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 6
+        },
+        {
+          "cycle": 4,
+          "source": {
+            "latent_recruitment_pressure": 0.0,
+            "latent_confidence_estimate": 0.0,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 1.0,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.0,
+            "growth_support": 1.0,
+            "growth_enabled": true,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 6
+        },
+        {
+          "cycle": 5,
+          "source": {
+            "latent_recruitment_pressure": 0.0,
+            "latent_confidence_estimate": 0.0,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 1.0,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.0,
+            "growth_support": 1.0,
+            "growth_enabled": true,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 6
+        },
+        {
+          "cycle": 6,
+          "source": {
+            "latent_recruitment_pressure": 0.0,
+            "latent_confidence_estimate": 0.0,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 1.0,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.0,
+            "growth_support": 1.0,
+            "growth_enabled": true,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 6
+        },
+        {
+          "cycle": 7,
+          "source": {
+            "latent_recruitment_pressure": 0.0,
+            "latent_confidence_estimate": 0.0,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 1.0,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.0,
+            "growth_support": 1.0,
+            "growth_enabled": true,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 6
+        },
+        {
+          "cycle": 8,
+          "source": {
+            "latent_recruitment_pressure": 0.0,
+            "latent_confidence_estimate": 0.0,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 1.0,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.0,
+            "growth_support": 1.0,
+            "growth_enabled": true,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 6
+        },
+        {
+          "cycle": 9,
+          "source": {
+            "latent_recruitment_pressure": 0.0,
+            "latent_confidence_estimate": 0.0,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 1.0,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.0,
+            "growth_support": 1.0,
+            "growth_enabled": true,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 6
+        },
+        {
+          "cycle": 10,
+          "source": {
+            "latent_recruitment_pressure": 0.0,
+            "latent_confidence_estimate": 0.0,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 1.0,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.0,
+            "growth_support": 1.0,
+            "growth_enabled": true,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 6
+        },
+        {
+          "cycle": 11,
+          "source": {
+            "latent_recruitment_pressure": 0.0,
+            "latent_confidence_estimate": 0.0,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 1.0,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.0,
+            "growth_support": 1.0,
+            "growth_enabled": true,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 6
+        },
+        {
+          "cycle": 12,
+          "source": {
+            "latent_recruitment_pressure": 0.0,
+            "latent_confidence_estimate": 0.0,
+            "latent_support": 0.0,
+            "latent_enabled": false,
+            "visible_context_trust": 1.0,
+            "growth_recruitment_pressure": 0.0,
+            "growth_stabilization_readiness": 0.0,
+            "growth_support": 1.0,
+            "growth_enabled": true,
+            "latent_recruitment_cycles": [],
+            "growth_recruitment_cycles": []
+          },
+          "active_latent_nodes": 0,
+          "active_growth_nodes": 6
+        }
+      ],
+      "latent_recruitment_cycles": {
+        "n0": [],
+        "n1": [],
+        "n2": [],
+        "n3": [],
+        "n4": [],
+        "n5": []
+      },
+      "growth_recruitment_cycles": {
+        "n0": [],
+        "n1": [],
+        "n2": [],
+        "n3": [],
+        "n4": [],
+        "n5": []
+      },
+      "capability_supports": {
+        "n0": {
+          "latent_recruitment_pressure": 0.0,
+          "latent_confidence_estimate": 0.0,
+          "latent_support": 0.0,
+          "latent_enabled": false,
+          "visible_context_trust": 1.0,
+          "growth_recruitment_pressure": 0.0,
+          "growth_stabilization_readiness": 0.0,
+          "growth_support": 1.0,
+          "growth_enabled": true,
+          "latent_recruitment_cycles": [],
+          "growth_recruitment_cycles": []
+        },
+        "n1": {
+          "latent_recruitment_pressure": 0.0,
+          "latent_confidence_estimate": 0.0,
+          "latent_support": 0.0,
+          "latent_enabled": false,
+          "visible_context_trust": 1.0,
+          "growth_recruitment_pressure": 0.0,
+          "growth_stabilization_readiness": 0.0,
+          "growth_support": 1.0,
+          "growth_enabled": true,
+          "latent_recruitment_cycles": [],
+          "growth_recruitment_cycles": []
+        },
+        "n2": {
+          "latent_recruitment_pressure": 0.0,
+          "latent_confidence_estimate": 0.0,
+          "latent_support": 0.0,
+          "latent_enabled": false,
+          "visible_context_trust": 1.0,
+          "growth_recruitment_pressure": 0.0,
+          "growth_stabilization_readiness": 0.0,
+          "growth_support": 1.0,
+          "growth_enabled": true,
+          "latent_recruitment_cycles": [],
+          "growth_recruitment_cycles": []
+        },
+        "n3": {
+          "latent_recruitment_pressure": 0.0,
+          "latent_confidence_estimate": 0.0,
+          "latent_support": 0.0,
+          "latent_enabled": false,
+          "visible_context_trust": 1.0,
+          "growth_recruitment_pressure": 0.0,
+          "growth_stabilization_readiness": 0.0,
+          "growth_support": 1.0,
+          "growth_enabled": true,
+          "latent_recruitment_cycles": [],
+          "growth_recruitment_cycles": []
+        },
+        "n4": {
+          "latent_recruitment_pressure": 0.0,
+          "latent_confidence_estimate": 0.0,
+          "latent_support": 0.0,
+          "latent_enabled": false,
+          "visible_context_trust": 1.0,
+          "growth_recruitment_pressure": 0.0,
+          "growth_stabilization_readiness": 0.0,
+          "growth_support": 1.0,
+          "growth_enabled": true,
+          "latent_recruitment_cycles": [],
+          "growth_recruitment_cycles": []
+        },
+        "n5": {
+          "latent_recruitment_pressure": 0.0,
+          "latent_confidence_estimate": 0.0,
+          "latent_support": 0.0,
+          "latent_enabled": false,
+          "visible_context_trust": 1.0,
+          "growth_recruitment_pressure": 0.0,
+          "growth_stabilization_readiness": 0.0,
+          "growth_support": 1.0,
+          "growth_enabled": true,
+          "latent_recruitment_cycles": [],
+          "growth_recruitment_cycles": []
+        }
+      }
+    },
+    "experience_log": [
+      {
+        "cycle": 1,
+        "action": "policy:growth_engage",
+        "coherence": 0.65,
+        "delta": 0.0,
+        "gco": "PARTIAL",
+        "state_before": {
+          "min_ctx_acc": 0.5,
+          "mean_bit_accuracy": 0.5,
+          "delta_min_ctx_acc": 0.0,
+          "conflict": 0.0,
+          "ambiguity": 0.0,
+          "coherence_delta": 0.0329,
+          "mean_uncertainty": 0.7175,
+          "mode_is_growth": 0.0
+        }
+      },
+      {
+        "cycle": 2,
+        "action": "policy:growth_engage",
+        "coherence": 0.6325,
+        "delta": -0.0175,
+        "gco": "DEGRADED",
+        "state_before": {
+          "min_ctx_acc": 0.5,
+          "mean_bit_accuracy": 0.5,
+          "delta_min_ctx_acc": 0.0,
+          "conflict": 0.0,
+          "ambiguity": 0.275,
+          "coherence_delta": 0.0273,
+          "mean_uncertainty": 0.7057,
+          "mode_is_growth": 1.0
+        }
+      },
+      {
+        "cycle": 3,
+        "action": "policy:growth_hold",
+        "coherence": 0.8525,
+        "delta": 0.22,
+        "gco": "STABLE",
+        "state_before": {
+          "min_ctx_acc": 1.0,
+          "mean_bit_accuracy": 1.0,
+          "delta_min_ctx_acc": 0.5,
+          "conflict": 0.0,
+          "ambiguity": 0.825,
+          "coherence_delta": 0.0259,
+          "mean_uncertainty": 0.5856,
+          "mode_is_growth": 1.0
+        }
+      },
+      {
+        "cycle": 4,
+        "action": "policy:growth_hold",
+        "coherence": 0.71,
+        "delta": -0.1425,
+        "gco": "STABLE",
+        "state_before": {
+          "min_ctx_acc": 1.0,
+          "mean_bit_accuracy": 1.0,
+          "delta_min_ctx_acc": 0.0,
+          "conflict": 0.0,
+          "ambiguity": 0.75,
+          "coherence_delta": 0.0034,
+          "mean_uncertainty": 0.5255,
+          "mode_is_growth": 1.0
+        }
+      }
+    ],
+    "laminated_run": {
+      "final_decision": "settle",
+      "final_cycle_budget": 4,
+      "final_signal": {
+        "next_slice_budget": 4,
+        "carryover_filter_mode": "keep",
+        "context_pressure": "medium",
+        "decision_hint": "settle",
+        "stop_reason": "engine_gco_stable"
+      },
+      "slice_summaries": [
+        {
+          "slice_id": 1,
+          "slice_budget": 4,
+          "cycles_used": 4,
+          "examples_seen": 5,
+          "mean_coherence": 0.4615,
+          "final_coherence": 0.5179,
+          "coherence_delta": 0.0329,
+          "mean_uncertainty": 0.7175,
+          "ambiguity_level": 0.0,
+          "conflict_level": 0.0,
+          "guidance_alignment": 0.75,
+          "candidate_carryover_labels": [
+            "productive_route_support",
+            "sequence_guidance"
+          ],
+          "candidate_carryover_count": 2,
+          "cost_summary": {
+            "total_action_cost": 0.8745,
+            "mean_route_cost": 0.04954,
+            "bit_accuracy_per_cost": 0.57176,
+            "exact_matches": 2.0,
+            "partial_matches": 0.0
+          },
+          "settlement_hint": "continue",
+          "context_accuracy": {
+            "context_none": 0.5
+          },
+          "mode_used": "self-selected",
+          "metadata": {
+            "packets_evaluated": 4,
+            "mean_bit_accuracy": 0.5,
+            "capability_policy": "self-selected",
+            "context_pressure": "medium",
+            "forecast_metrics": {
+              "forecast_entry_count": 12,
+              "resolved_forecast_count": 4,
+              "forecast_accuracy": 0.5,
+              "forecast_mean_confidence": 0.5481,
+              "forecast_calibration_error": 0.4783,
+              "forecast_mean_error": 0.4783,
+              "forecast_regime_accuracy": {
+                "xor_mask_0101": 0.6667,
+                "xor_mask_1010": 0.0
+              }
+            },
+            "intervention_payoff_trend": {
+              "target_metric": "forecast_accuracy",
+              "status": "unavailable",
+              "signed_delta": null,
+              "payoff": null,
+              "regret": null,
+              "policy": null
+            }
+          }
+        },
+        {
+          "slice_id": 2,
+          "slice_budget": 4,
+          "cycles_used": 4,
+          "examples_seen": 4,
+          "mean_coherence": 0.5263,
+          "final_coherence": 0.605,
+          "coherence_delta": 0.0273,
+          "mean_uncertainty": 0.7057,
+          "ambiguity_level": 0.275,
+          "conflict_level": 0.0,
+          "guidance_alignment": 0.75,
+          "candidate_carryover_labels": [
+            "productive_route_support",
+            "sequence_guidance"
+          ],
+          "candidate_carryover_count": 2,
+          "cost_summary": {
+            "total_action_cost": 0.89803,
+            "mean_route_cost": 0.04516,
+            "bit_accuracy_per_cost": 0.55677,
+            "exact_matches": 2.0,
+            "partial_matches": 0.0
+          },
+          "settlement_hint": "continue",
+          "context_accuracy": {
+            "context_none": 0.5
+          },
+          "mode_used": "growth-visible",
+          "metadata": {
+            "packets_evaluated": 4,
+            "mean_bit_accuracy": 0.5,
+            "capability_policy": "growth-visible",
+            "context_pressure": "high",
+            "forecast_metrics": {
+              "forecast_entry_count": 24,
+              "resolved_forecast_count": 4,
+              "forecast_accuracy": 0.5,
+              "forecast_mean_confidence": 0.5553,
+              "forecast_calibration_error": 0.4783,
+              "forecast_mean_error": 0.4783,
+              "forecast_regime_accuracy": {
+                "xor_mask_0101": 0.6667,
+                "xor_mask_1010": 0.0
+              }
+            },
+            "intervention_payoff_trend": {
+              "target_metric": "forecast_accuracy",
+              "status": "flat",
+              "signed_delta": 0.0,
+              "payoff": 0.0,
+              "regret": null,
+              "policy": "growth_engage",
+              "mode": "growth-visible"
+            },
+            "engine_coherence": 0.65,
+            "engine_delta": 0.0,
+            "engine_gco": "PARTIAL",
+            "chosen_policy": "growth_engage",
+            "chosen_mode": "growth-visible",
+            "chosen_carryover": "soften",
+            "budget_multiplier": 1.0,
+            "growth_degraded_streak": 0
+          }
+        },
+        {
+          "slice_id": 3,
+          "slice_budget": 4,
+          "cycles_used": 4,
+          "examples_seen": 4,
+          "mean_coherence": 0.678,
+          "final_coherence": 0.7085,
+          "coherence_delta": 0.0259,
+          "mean_uncertainty": 0.5856,
+          "ambiguity_level": 0.825,
+          "conflict_level": 0.0,
+          "guidance_alignment": 1.0,
+          "candidate_carryover_labels": [
+            "productive_route_support",
+            "sequence_guidance"
+          ],
+          "candidate_carryover_count": 2,
+          "cost_summary": {
+            "total_action_cost": 0.6027,
+            "mean_route_cost": 0.04023,
+            "bit_accuracy_per_cost": 1.6592,
+            "exact_matches": 4.0,
+            "partial_matches": 0.0
+          },
+          "settlement_hint": "continue",
+          "context_accuracy": {
+            "context_none": 1.0
+          },
+          "mode_used": "growth-visible",
+          "metadata": {
+            "packets_evaluated": 4,
+            "mean_bit_accuracy": 1.0,
+            "capability_policy": "growth-visible",
+            "context_pressure": "high",
+            "forecast_metrics": {
+              "forecast_entry_count": 12,
+              "resolved_forecast_count": 0,
+              "forecast_accuracy": null,
+              "forecast_mean_confidence": 0.6157,
+              "forecast_calibration_error": null,
+              "forecast_mean_error": null,
+              "forecast_regime_accuracy": {}
+            },
+            "intervention_payoff_trend": {
+              "target_metric": "forecast_accuracy",
+              "status": "improved",
+              "signed_delta": 0.5,
+              "payoff": 0.5,
+              "regret": null,
+              "policy": "growth_engage",
+              "mode": "growth-visible"
+            },
+            "engine_coherence": 0.6325,
+            "engine_delta": -0.0175,
+            "engine_gco": "DEGRADED",
+            "chosen_policy": "growth_engage",
+            "chosen_mode": "growth-visible",
+            "chosen_carryover": "soften",
+            "budget_multiplier": 1.0,
+            "growth_degraded_streak": 1,
+            "intervention_target_metric": "min_ctx_acc",
+            "intervention_status": "flat",
+            "intervention_signed_delta": 0.0,
+            "intervention_payoff": 0.0,
+            "intervention_observed_delta": 0.0,
+            "intervention_policy": "growth_engage"
+          }
+        },
+        {
+          "slice_id": 4,
+          "slice_budget": 4,
+          "cycles_used": 4,
+          "examples_seen": 4,
+          "mean_coherence": 0.7199,
+          "final_coherence": 0.7221,
+          "coherence_delta": 0.0034,
+          "mean_uncertainty": 0.5255,
+          "ambiguity_level": 0.75,
+          "conflict_level": 0.0,
+          "guidance_alignment": 1.0,
+          "candidate_carryover_labels": [
+            "productive_route_support",
+            "sequence_guidance"
+          ],
+          "candidate_carryover_count": 2,
+          "cost_summary": {
+            "total_action_cost": 0.985,
+            "mean_route_cost": 0.04208,
+            "bit_accuracy_per_cost": 1.01523,
+            "exact_matches": 4.0,
+            "partial_matches": 0.0
+          },
+          "settlement_hint": "escalate",
+          "context_accuracy": {
+            "context_none": 1.0
+          },
+          "mode_used": "growth-visible",
+          "metadata": {
+            "packets_evaluated": 4,
+            "mean_bit_accuracy": 1.0,
+            "capability_policy": "growth-visible",
+            "context_pressure": "medium",
+            "forecast_metrics": {
+              "forecast_entry_count": 12,
+              "resolved_forecast_count": 0,
+              "forecast_accuracy": null,
+              "forecast_mean_confidence": 0.5887,
+              "forecast_calibration_error": null,
+              "forecast_mean_error": null,
+              "forecast_regime_accuracy": {}
+            },
+            "intervention_payoff_trend": {
+              "target_metric": "forecast_accuracy",
+              "status": "flat",
+              "signed_delta": 0.0,
+              "payoff": 0.0,
+              "regret": null,
+              "policy": "growth_hold",
+              "mode": "growth-visible"
+            },
+            "engine_coherence": 0.8525,
+            "engine_delta": 0.22,
+            "engine_gco": "STABLE",
+            "chosen_policy": "growth_hold",
+            "chosen_mode": "growth-visible",
+            "chosen_carryover": "keep",
+            "budget_multiplier": 1.0,
+            "growth_degraded_streak": 0,
+            "intervention_target_metric": "min_ctx_acc",
+            "intervention_status": "improved",
+            "intervention_signed_delta": 0.5,
+            "intervention_payoff": 0.5,
+            "intervention_observed_delta": 0.5,
+            "intervention_policy": "growth_engage"
+          }
+        }
+      ]
+    },
+    "benchmark_id": "HR4",
+    "task_key": "task_c",
+    "observable": "hidden",
+    "capability_policy": "self-selected",
+    "seed": 13,
+    "case": {
+      "label": "Binary hidden regime with mid-run rule shift",
+      "description": "Binary hidden regime with a mid-run remapping of regime-to-transform bindings, forcing the laminated controller to adapt after the shift.",
+      "regime_cardinality": 2,
+      "sequence_memory_window": 3,
+      "pass_count": 4,
+      "expected_examples": 72,
+      "topology_name": "branch_pressure",
+      "task_id": "hidden_regime_hr4_task_c"
+    }
+  },
+  "metadata": {
+    "task_key": "task_c",
+    "observable": "hidden",
+    "capability_policy": "self-selected",
+    "initial_cycle_budget": 4,
+    "accuracy_threshold": 0.0,
+    "regulator_type": "real",
+    "safety_limit": 100
+  }
+}
