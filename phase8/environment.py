@@ -1408,10 +1408,8 @@ class RoutingEnvironment:
             self.pending_feedback = []
             self.inboxes = {node_id: [] for node_id in self.positions}
             self.source_buffer = []
-            self.pending_growth_proposals = []
             self.load_latent_context_state(None)
             latent_threshold = self.capability_control_config.latent_activation_threshold
-            growth_threshold = self.capability_control_config.growth_activation_threshold
             for capability in self.capability_states.values():
                 capability.latent_recruitment_pressure *= 0.40
                 capability.latent_confidence_estimate *= 0.40
@@ -1421,10 +1419,6 @@ class RoutingEnvironment:
                     0.55,
                     min(1.0, 0.5 * capability.visible_context_trust + 0.275),
                 )
-                capability.growth_recruitment_pressure *= 0.40
-                capability.growth_stabilization_readiness *= 0.60
-                capability.growth_support *= 0.45
-                capability.growth_enabled = capability.growth_support >= growth_threshold
 
     def capability_snapshot(self, node_id: str) -> dict[str, object]:
         state = self.capability_states.get(node_id, self._initial_capability_state())
@@ -1637,8 +1631,8 @@ class RoutingEnvironment:
                     else 0.0
                 )
                 + 0.06 * capability.growth_support
-                - 0.28 * max(0.0, 1.0 - stabilization)
-                - 0.18 * capability.latent_enabled * max(0.0, 1.0 - effective_latent_confidence)
+                + 0.12 * task_active * max(0.0, 1.0 - stabilization)
+                + 0.18 * capability.latent_enabled * max(0.0, 1.0 - effective_latent_confidence)
                 - 0.10 * visible_reliability,
                 ),
             )
@@ -2508,6 +2502,10 @@ class RoutingEnvironment:
             return []
         capability = self.capability_states.get(node_id, self._initial_capability_state())
         slow_growth_authorization = str(self.slow_growth_authorization or "auto")
+        bottom_up_growth_requested = bool(
+            capability.growth_enabled
+            or capability.growth_recruitment_pressure >= 0.45
+        )
         if slow_growth_authorization == "hold":
             return []
         top_down_growth_ready = (
@@ -2523,11 +2521,7 @@ class RoutingEnvironment:
             and not (
                 capability.growth_enabled
                 or top_down_growth_ready
-                or (
-                    slow_growth_authorization == "authorize"
-                    and capability.growth_recruitment_pressure >= 0.55
-                    and capability.growth_stabilization_readiness >= 0.45
-                )
+                or (slow_growth_authorization == "authorize" and bottom_up_growth_requested)
             )
         ):
             return []
@@ -2615,8 +2609,7 @@ class RoutingEnvironment:
             growth_ready = (
                 growth_ready
                 or (
-                    capability.growth_recruitment_pressure >= 0.55
-                    and capability.growth_stabilization_readiness >= 0.45
+                    bottom_up_growth_requested
                     and routing_has_feedback
                     and not self.topology_state.max_dynamic_nodes_reached(self.morphogenesis_config)
                 )

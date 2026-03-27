@@ -1,8 +1,175 @@
 {
-  "generated_at": "2026-03-26T14:42:52-07:00",
+  "generated_at": "2026-03-27T12:30:26-07:00",
   "trace_root": "docs/traces",
-  "entry_count": 96,
+  "entry_count": 101,
   "entries": [
+    {
+      "path": "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md",
+      "filename": "2026-03-27 1700 - Laminated Trace Sequence Summary.md",
+      "title": "2026-03-27 1700 - Laminated Trace Sequence Summary",
+      "timestamp": "2026-03-27T17:00",
+      "date": "2026-03-27",
+      "trace_type": "Summary trace",
+      "author": "Codex",
+      "model": "GPT-5 Codex",
+      "keywords": [
+        "traces",
+        "laminated",
+        "growth",
+        "layer",
+        "summary",
+        "ambiguity",
+        "codex",
+        "continuity",
+        "differentiation",
+        "retention",
+        "semantics",
+        "audit"
+      ],
+      "referenced_files": [
+        "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md",
+        "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+        "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
+        "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+        "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "filename": "2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "title": "2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation",
+      "timestamp": "2026-03-27T16:00",
+      "date": "2026-03-27",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "growth",
+        "layer",
+        "real_core",
+        "authorize",
+        "controller",
+        "lamination",
+        "phase8",
+        "bounded",
+        "gradient",
+        "initiate",
+        "portfolio",
+        "rescue"
+      ],
+      "referenced_files": [
+        "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+        "phase8/environment.py",
+        "phase8/lamination.py",
+        "real_core/__init__.py",
+        "real_core/lamination.py",
+        "real_core/regulatory_substrate.py",
+        "scripts/debug_force_growth.py",
+        "scripts/evaluate_hidden_regime_forecasting.py",
+        "tests/test_debug_force_growth.py",
+        "tests/test_lamination.py",
+        "tests/test_latent_growth_gate.py",
+        "tests/test_phase8_lamination.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+      "filename": "2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+      "title": "2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio",
+      "timestamp": "2026-03-27T10:30",
+      "date": "2026-03-27",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "real_core",
+        "controller",
+        "slices",
+        "lamination",
+        "portfolio",
+        "adaptive",
+        "ambiguity",
+        "branch",
+        "c-family",
+        "fast",
+        "first",
+        "gradient"
+      ],
+      "referenced_files": [
+        "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
+        "phase8/lamination.py",
+        "real_core/interfaces.py",
+        "real_core/lamination.py",
+        "real_core/meta_agent.py",
+        "real_core/types.py",
+        "scripts/evaluate_laminated_phase8.py",
+        "tests/test_lamination.py",
+        "tests/test_phase8_lamination.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
+      "filename": "2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
+      "title": "2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization",
+      "timestamp": "2026-03-26T22:10",
+      "date": "2026-03-26",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "layer",
+        "context",
+        "differentiation",
+        "slow",
+        "branch",
+        "collapse",
+        "fast",
+        "laminated",
+        "reframe",
+        "traces",
+        "was",
+        "ambiguity"
+      ],
+      "referenced_files": [
+        "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "filename": "2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "title": "2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe",
+      "timestamp": "2026-03-26T16:45",
+      "date": "2026-03-26",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "laminated",
+        "continuity",
+        "experiment_outputs",
+        "growth",
+        "lamination",
+        "real_core",
+        "slow-layer",
+        "audit",
+        "collapse",
+        "context",
+        "differentiation",
+        "fast-layer"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/20260326_155827_299789_hidden_regime_suite_hr1_hr2_hr3_all_tasks_hidden_self_selected_b6_s40_t08_seed13.json",
+        "docs/experiment_outputs/20260326_laminated_b2s2_task_c_visible_b6_t08_real_seed13.json",
+        "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md",
+        "phase8/lamination.py",
+        "real_core/lamination.py",
+        "real_core/meta_agent.py",
+        "scripts/experiment_manifest.py",
+        "tests/test_experiment_manifest.py",
+        "tests/test_lamination.py",
+        "tests/test_phase8_lamination.py"
+      ]
+    },
     {
       "path": "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md",
       "filename": "2026-03-26 1430 - Laminated Growth Continuity Audit.md",
@@ -2813,6 +2980,9 @@
       "docs/traces/2026-03-18 1702 - Identity Selector Revert.md",
       "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md"
     ],
+    "adaptive": [
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md"
+    ],
     "added": [
       "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
       "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
@@ -2874,7 +3044,10 @@
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
       "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
       "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md",
-      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
+      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
     ],
     "ambiguity-rich": [
       "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md"
@@ -2927,7 +3100,12 @@
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
     ],
     "audit": [
-      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md",
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
+    ],
+    "authorize": [
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "available": [
       "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md"
@@ -3052,9 +3230,14 @@
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md",
       "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
     ],
+    "bounded": [
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+    ],
     "branch": [
       "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
-      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md",
+      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md"
     ],
     "breakdown": [
       "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md"
@@ -3087,7 +3270,8 @@
     ],
     "c-family": [
       "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
-      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md"
+      "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md"
     ],
     "c3_scale_c3s5_seed13_initial_20260324": [
       "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
@@ -3254,7 +3438,8 @@
       "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
       "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
       "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md",
-      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
     ],
     "coding": [
       "docs/traces/2026-03-18 1640 - C Node Probe.md",
@@ -3275,7 +3460,9 @@
       "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md"
     ],
     "collapse": [
-      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md"
+      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md"
     ],
     "commitment": [
       "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md"
@@ -3340,7 +3527,9 @@
       "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md",
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
       "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
-      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md"
+      "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md"
     ],
     "context-action": [
       "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
@@ -3364,7 +3553,9 @@
       "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md"
     ],
     "continuity": [
-      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md",
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
     ],
     "contradiction": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md"
@@ -3374,7 +3565,9 @@
       "docs/traces/2026-03-18 2200 - Phase8 Recognition Route Bias.md"
     ],
     "controller": [
-      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md"
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "coordination": [
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
@@ -3512,6 +3705,11 @@
     "diagnostic": [
       "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
       "docs/traces/20260317_1117_morphogenesis_large_carryover_bridge_trace.md"
+    ],
+    "differentiation": [
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
     ],
     "direct": [
       "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
@@ -3693,6 +3891,7 @@
       "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
       "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md",
       "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
       "docs/traces/20260317_1005_cyclic_transfer_trace.md",
       "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
@@ -3737,6 +3936,13 @@
     "far": [
       "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
+    "fast": [
+      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md"
+    ],
+    "fast-layer": [
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md"
+    ],
     "feedback": [
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md"
     ],
@@ -3754,7 +3960,8 @@
       "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md",
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
-      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md"
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md"
     ],
     "fixed": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
@@ -3825,6 +4032,10 @@
       "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md",
       "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
+    "gradient": [
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+    ],
     "groundwork": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
     ],
@@ -3832,6 +4043,9 @@
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
       "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md",
       "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md",
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md",
       "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md"
     ],
@@ -3941,6 +4155,9 @@
     "initial_cycle_budget": [
       "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
     ],
+    "initiate": [
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+    ],
     "injection": [
       "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
     ],
@@ -3973,14 +4190,20 @@
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
       "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
       "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
-      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md",
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
     ],
     "lamination": [
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
       "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
-      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "large": [
       "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
@@ -4024,7 +4247,10 @@
     "layer": [
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
       "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
-      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md",
+      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
     ],
     "learning": [
       "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
@@ -4239,7 +4465,8 @@
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
       "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
       "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
-      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "phase8_session_synthesis": [
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
@@ -4257,6 +4484,10 @@
     ],
     "port": [
       "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
+    ],
+    "portfolio": [
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "prediction": [
       "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
@@ -4346,7 +4577,10 @@
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
       "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
-      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "recent": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
@@ -4379,6 +4613,9 @@
     "recruitment": [
       "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
       "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md"
+    ],
+    "reframe": [
+      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md"
     ],
     "regime": [
       "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md"
@@ -4414,12 +4651,18 @@
     "rerun": [
       "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md"
     ],
+    "rescue": [
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+    ],
     "resolved": [
       "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md"
     ],
     "result": [
       "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
       "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
+    ],
+    "retention": [
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
     ],
     "reusable": [
       "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md"
@@ -4501,6 +4744,9 @@
     "self_selected": [
       "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md"
     ],
+    "semantics": [
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
+    ],
     "sequence": [
       "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
@@ -4535,10 +4781,15 @@
       "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
     ],
     "slices": [
-      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md"
     ],
     "slow": [
-      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md"
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
+      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md"
+    ],
+    "slow-layer": [
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md"
     ],
     "sonnet": [
       "docs/traces/20260317_phase8_morphogenesis_large_trace.md"
@@ -4596,7 +4847,8 @@
     ],
     "summary": [
       "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md",
-      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
     ],
     "support": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
@@ -4722,7 +4974,9 @@
       "docs/traces/baseline_scale_comparisons.md"
     ],
     "traces": [
-      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md"
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
+      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
     ],
     "transfer": [
       "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
@@ -4811,7 +5065,8 @@
       "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
       "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
-      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md"
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
+      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md"
     ],
     "weak_context_bit": [
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md"
@@ -4951,6 +5206,9 @@
       "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md",
       "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
+    "docs/experiment_outputs/20260326_155827_299789_hidden_regime_suite_hr1_hr2_hr3_all_tasks_hidden_self_selected_b6_s40_t08_seed13.json": [
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md"
+    ],
     "docs/experiment_outputs/20260326_hidden_regime_hr1_task_a_hidden_self_selected_b4_seed13.json": [
       "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
     ],
@@ -4969,6 +5227,9 @@
     ],
     "docs/experiment_outputs/20260326_hidden_regime_suite_hr1_hr2_hr4_task_c_hidden_self_selected_b4_seed13.json": [
       "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
+    ],
+    "docs/experiment_outputs/20260326_laminated_b2s2_task_c_visible_b6_t08_real_seed13.json": [
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md"
     ],
     "docs/experiment_outputs/b2_scale_b2s5_seed13_initial_20260324.json": [
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
@@ -5039,6 +5300,25 @@
     "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md": [
       "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
     ],
+    "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md": [
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
+    ],
+    "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md": [
+      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
+    ],
+    "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md": [
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
+    ],
+    "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md": [
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
+    ],
+    "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md": [
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
+    ],
     "occupancy_baseline/session_splitter.py": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
     ],
@@ -5068,7 +5348,8 @@
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
       "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
       "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
-      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "phase8/expectation.py": [
       "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
@@ -5087,7 +5368,10 @@
       "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
       "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
-      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "phase8/models.py": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
@@ -5129,7 +5413,8 @@
     ],
     "real_core/__init__.py": [
       "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
-      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "real_core/consolidation.py": [
       "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md"
@@ -5143,23 +5428,32 @@
       "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md",
       "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
       "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
-      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md"
     ],
     "real_core/lamination.py": [
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
       "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
-      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "real_core/meta_agent.py": [
       "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
-      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md"
     ],
     "real_core/recognition.py": [
       "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
       "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
       "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md"
+    ],
+    "real_core/regulatory_substrate.py": [
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "real_core/selector.py": [
       "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md",
@@ -5174,7 +5468,8 @@
       "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
       "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
-      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md"
     ],
     "scripts/analyze_b_to_c_visible_timecourse.py": [
       "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
@@ -5202,6 +5497,9 @@
     ],
     "scripts/compare_transfer_matrix.py": [
       "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
+    ],
+    "scripts/debug_force_growth.py": [
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "scripts/diagnose_b_to_c_carryover.py": [
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
@@ -5238,17 +5536,22 @@
       "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
       "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
       "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
-      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "scripts/evaluate_laminated_phase8.py": [
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
       "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
-      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md"
     ],
     "scripts/evaluate_runtime_slack.py": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
       "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+    ],
+    "scripts/experiment_manifest.py": [
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md"
     ],
     "scripts/occupancy_real_v3.py": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
@@ -5317,8 +5620,14 @@
     "tests/test_compare_transfer_matrix.py": [
       "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
     ],
+    "tests/test_debug_force_growth.py": [
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+    ],
     "tests/test_experience_extension.py": [
       "docs/traces/2026-03-18 2059 - Repeated Experience Probe.md"
+    ],
+    "tests/test_experiment_manifest.py": [
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md"
     ],
     "tests/test_hidden_regime_forecasting.py": [
       "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
@@ -5326,10 +5635,16 @@
       "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md"
     ],
     "tests/test_lamination.py": [
-      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md"
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "tests/test_latent_context_tracker.py": [
       "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md"
+    ],
+    "tests/test_latent_growth_gate.py": [
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "tests/test_latent_route_transform_gate.py": [
       "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md"
@@ -5357,7 +5672,10 @@
       "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md"
     ],
     "tests/test_phase8_lamination.py": [
-      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md"
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
     "tests/test_phase8_recognition.py": [
       "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",

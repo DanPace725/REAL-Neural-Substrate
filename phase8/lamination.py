@@ -419,30 +419,29 @@ class Phase8SliceRunner:
         carryover_mode = signal.carryover_filter_mode
         if gradient_mode:
             hygiene = float(signal.hygiene_level)
-            if hygiene >= 0.72:
+            if hygiene >= 0.68:
                 carryover_mode = "drop"
-            elif hygiene >= 0.30:
+            elif hygiene >= 0.28:
                 carryover_mode = "soften"
             else:
                 carryover_mode = "keep"
         self._context_pressure = signal.context_pressure
         if gradient_mode:
             pressure = float(signal.pressure_level)
-            if pressure >= 0.72:
+            if pressure >= 0.66:
                 self._context_pressure = "high"
-            elif pressure >= 0.38:
+            elif pressure >= 0.36:
                 self._context_pressure = "medium"
             else:
                 self._context_pressure = "low"
         growth_authorization = str(signal.growth_authorization or "auto")
         if gradient_mode:
-            growth_drive = float(signal.growth_drive)
-            if growth_drive >= 0.72:
-                growth_authorization = "initiate"
-            elif growth_drive >= 0.42:
-                growth_authorization = "authorize"
-            elif growth_drive <= 0.12:
-                growth_authorization = "hold"
+            if signal.growth_authorization is None:
+                growth_drive = float(signal.growth_drive)
+                if growth_drive >= 0.64:
+                    growth_authorization = "initiate"
+                elif growth_drive <= 0.12:
+                    growth_authorization = "hold"
         self.system.environment.slow_growth_authorization = growth_authorization
         weak_context_bit = signal.bias_updates.get("weak_context_bit")
         self.system.environment.slow_weak_context_bit = (
