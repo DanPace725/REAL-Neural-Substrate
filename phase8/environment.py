@@ -17,6 +17,11 @@ _CURRENT_TRANSFORM_MAPS: Dict[str, Dict[int, str]] = {
     "task_b": {0: "rotate_left_1", 1: "xor_mask_0101"},
     "task_c": {0: "xor_mask_1010", 1: "xor_mask_0101"},
 }
+_HIDDEN_REGIME_SHIFT_TRANSFORM_MAPS: Dict[str, Dict[int, str]] = {
+    "task_a": {0: "xor_mask_1010", 1: "rotate_left_1"},
+    "task_b": {0: "xor_mask_0101", 1: "rotate_left_1"},
+    "task_c": {0: "xor_mask_0101", 1: "xor_mask_1010"},
+}
 _AMBIGUOUS_3_TRANSFORM_MAPS: Dict[str, Dict[int, str]] = {
     "task_a": {0: "rotate_left_1", 1: "xor_mask_1010", 2: "xor_mask_0101", 3: "xor_mask_1010"},
     "task_b": {0: "rotate_left_1", 1: "xor_mask_0101", 2: "xor_mask_1010", 3: "xor_mask_0101"},
@@ -26,6 +31,11 @@ _AMBIGUOUS_4_TRANSFORM_MAPS: Dict[str, Dict[int, str]] = {
     "task_a": {0: "rotate_left_1", 1: "xor_mask_1010", 2: "xor_mask_0101", 3: "identity"},
     "task_b": {0: "rotate_left_1", 1: "xor_mask_0101", 2: "identity", 3: "xor_mask_1010"},
     "task_c": {0: "xor_mask_1010", 1: "xor_mask_0101", 2: "rotate_left_1", 3: "identity"},
+}
+_HIDDEN_REGIME_SEQUENCE_WINDOWS: Dict[str, int] = {
+    "hidden_regime_hr1": 1,
+    "hidden_regime_hr2": 3,
+    "hidden_regime_hr4": 3,
 }
 TASK_CONTEXT_MATCH_FLOOR = 0.75
 DEBT_ACTIVATION_CREDIT = 0.30
@@ -48,6 +58,8 @@ LATENT_SOURCE_COMMITMENT_BOOST = 0.12
 LATENT_SOURCE_COMMITMENT_DAMP = 0.82
 LATENT_SOURCE_FEEDBACK_REWRITE_MARGIN = 0.18
 LATENT_TRANSFER_ADAPTATION_BOOST_SCALE = 0.05
+PROVISIONAL_GENERIC_CREDIT_DECAY = 0.91
+PROVISIONAL_CONTEXT_CREDIT_DECAY = 0.93
 LATENT_TRANSFER_ADAPTATION_DAMP_BLEND = 0.95
 LATENT_TRANSFER_ADAPTATION_REWRITE_SCALE = 0.10
 LATENT_TRANSFER_EFFECTIVE_THRESHOLD_BOOST = 0.18
@@ -86,6 +98,27 @@ def _branch_context_debt_key(neighbor_id: str, context_bit: int) -> str:
     return f"{neighbor_id}:context_{int(context_bit)}"
 
 
+def _matches_context_suffix(key: str, context_bit: int | None) -> bool:
+    if context_bit is None:
+        return True
+    return str(key).endswith(f":context_{int(context_bit)}")
+
+
+def _scale_sparse_mapping(
+    values: Dict[str, float],
+    scale: float,
+    *,
+    context_bit: int | None = None,
+) -> None:
+    scale = max(0.0, min(1.0, float(scale)))
+    for key in list(values.keys()):
+        if context_bit is not None and not _matches_context_suffix(key, context_bit):
+            continue
+        values[key] = float(values.get(key, 0.0)) * scale
+        if abs(values[key]) < 1e-4:
+            del values[key]
+
+
 def _parity_bits(bits: Sequence[int] | None) -> int | None:
     if bits is None:
         return None
@@ -110,6 +143,13 @@ def _task_transform_map(task_id: str | None) -> Dict[int, str] | None:
     if task_family not in _CURRENT_TRANSFORM_MAPS:
         return None
     task_key = str(task_id or "")
+    if task_key.startswith("hidden_regime_hr4_phase2_"):
+        return _HIDDEN_REGIME_SHIFT_TRANSFORM_MAPS[task_family]
+    if task_key.startswith("hidden_regime_hr3_"):
+        return _AMBIGUOUS_4_TRANSFORM_MAPS[task_family]
+    for prefix in _HIDDEN_REGIME_SEQUENCE_WINDOWS:
+        if task_key.startswith(f"{prefix}_"):
+            return _CURRENT_TRANSFORM_MAPS[task_family]
     if task_key.startswith("ceiling_c1_"):
         base = _CURRENT_TRANSFORM_MAPS[task_family]
         return {0: base[0], 1: base[1], 2: base[0], 3: base[1]}
@@ -129,6 +169,9 @@ def _task_context_candidates(task_id: str | None) -> tuple[int, ...]:
 
 def _sequence_window_for_task(task_id: str | None) -> int | None:
     task_key = str(task_id or "")
+    for prefix, window in _HIDDEN_REGIME_SEQUENCE_WINDOWS.items():
+        if task_key.startswith(f"{prefix}_"):
+            return window
     if task_key.startswith("ceiling_b1"):
         return 1
     if task_key.startswith("ceiling_b2"):
@@ -147,6 +190,12 @@ def _sequence_context_estimate_for_task(
 ) -> tuple[int | None, float]:
     task_key = str(task_id or "")
     parity_history = [int(bit) & 1 for bit in list(prior_parities or [])]
+    if task_key.startswith("hidden_regime_hr3_"):
+        if len(parity_history) < 2:
+            return None, 0.0
+        low = int(parity_history[-1])
+        high = int(parity_history[-2])
+        return int(low + 2 * high), 0.95
     if task_key.startswith("ceiling_c"):
         if len(parity_history) < 2:
             return None, 0.0
@@ -970,6 +1019,42 @@ def _transform_matches_resolved_context(
     return expected_transform == _normalize_transform_name(transform_name)
 
 
+def _generic_promotion_scale(
+    state: NodeRuntimeState,
+    *,
+    task_id: str | None,
+    transform_name: str,
+    resolved_context_bit: int | None,
+) -> float:
+    if task_id is None or resolved_context_bit is None:
+        return 1.0
+    supporting_credit = max(
+        float(state.context_transform_credit.get(_context_credit_key(transform_name, int(resolved_context_bit)), 0.0)),
+        float(state.provisional_context_transform_credit.get(_context_credit_key(transform_name, int(resolved_context_bit)), 0.0)),
+        0.60 * float(state.provisional_transform_credit.get(transform_name, 0.0)),
+    )
+    opposing_credit = 0.0
+    for context_bit in _task_context_candidates(task_id):
+        if int(context_bit) == int(resolved_context_bit):
+            continue
+        if _expected_transform_for_task(task_id, int(context_bit)) == transform_name:
+            continue
+        opposing_credit = max(
+            opposing_credit,
+            float(state.context_transform_credit.get(_context_credit_key(transform_name, int(context_bit)), 0.0)),
+            float(state.provisional_context_transform_credit.get(_context_credit_key(transform_name, int(context_bit)), 0.0)),
+        )
+    support_gate = max(
+        0.0,
+        min(1.0, 0.12 + 0.88 * pow(max(0.0, min(1.0, supporting_credit)), 1.18)),
+    )
+    contradiction_gate = max(
+        0.10,
+        1.0 - 0.82 * pow(max(0.0, min(1.0, opposing_credit)), 1.05),
+    )
+    return max(0.08, min(1.0, support_gate * contradiction_gate))
+
+
 @dataclass
 class RoutingEnvironment:
     adjacency: Dict[str, tuple[str, ...]]
@@ -995,6 +1080,9 @@ class RoutingEnvironment:
     transfer_adaptation_window: int = 10
     capability_policy: str = "fixed-visible"
     capability_control_config: CapabilityControlConfig = field(default_factory=CapabilityControlConfig)
+    slow_growth_authorization: str = "auto"
+    slow_weak_context_bit: int | None = None
+    slow_weak_context_gap: float = 0.0
 
     def __post_init__(self) -> None:
         if self.topology_state is None:
@@ -1255,6 +1343,89 @@ class RoutingEnvironment:
             for node_id in self.node_states
         }
 
+    def scrub_poisoned_runtime_state(
+        self,
+        *,
+        context_bit: int | None = None,
+        intensity: str = "soften",
+    ) -> None:
+        """Dampen stale context-bound runtime state without wiping topology."""
+        hard = str(intensity) == "drop"
+        provisional_scale = 0.45 if hard else 0.72
+        contextual_scale = 0.22 if hard else 0.60
+        debt_scale = 0.28 if hard else 0.68
+        generic_scale = 0.88 if hard else 0.96
+
+        for state in self.node_states.values():
+            _scale_sparse_mapping(state.provisional_transform_credit, provisional_scale)
+            _scale_sparse_mapping(state.transform_credit, generic_scale)
+            _scale_sparse_mapping(state.branch_transform_credit, generic_scale)
+            _scale_sparse_mapping(state.transform_debt, generic_scale)
+            _scale_sparse_mapping(state.branch_transform_debt, generic_scale)
+
+            _scale_sparse_mapping(
+                state.provisional_context_transform_credit,
+                contextual_scale,
+                context_bit=context_bit,
+            )
+            _scale_sparse_mapping(
+                state.context_transform_credit,
+                contextual_scale,
+                context_bit=context_bit,
+            )
+            _scale_sparse_mapping(
+                state.context_branch_transform_credit,
+                contextual_scale,
+                context_bit=context_bit,
+            )
+            _scale_sparse_mapping(
+                state.context_transform_debt,
+                debt_scale,
+                context_bit=context_bit,
+            )
+            _scale_sparse_mapping(
+                state.context_branch_transform_debt,
+                debt_scale,
+                context_bit=context_bit,
+            )
+            _scale_sparse_mapping(
+                state.branch_context_credit,
+                contextual_scale,
+                context_bit=context_bit,
+            )
+            _scale_sparse_mapping(
+                state.branch_context_debt,
+                debt_scale,
+                context_bit=context_bit,
+            )
+            if hard:
+                state.last_prediction_confidence *= 0.5
+                state.last_prediction_expected_delta *= 0.5
+                state.last_prediction_expected_match_ratio *= 0.5
+                state.last_prediction_error_magnitude *= 0.5
+
+        if hard:
+            self.pending_feedback = []
+            self.inboxes = {node_id: [] for node_id in self.positions}
+            self.source_buffer = []
+            self.pending_growth_proposals = []
+            self.load_latent_context_state(None)
+            latent_threshold = self.capability_control_config.latent_activation_threshold
+            growth_threshold = self.capability_control_config.growth_activation_threshold
+            for capability in self.capability_states.values():
+                capability.latent_recruitment_pressure *= 0.40
+                capability.latent_confidence_estimate *= 0.40
+                capability.latent_support *= 0.45
+                capability.latent_enabled = capability.latent_support >= latent_threshold
+                capability.visible_context_trust = max(
+                    0.55,
+                    min(1.0, 0.5 * capability.visible_context_trust + 0.275),
+                )
+                capability.growth_recruitment_pressure *= 0.40
+                capability.growth_stabilization_readiness *= 0.60
+                capability.growth_support *= 0.45
+                capability.growth_enabled = capability.growth_support >= growth_threshold
+
     def capability_snapshot(self, node_id: str) -> dict[str, object]:
         state = self.capability_states.get(node_id, self._initial_capability_state())
         return {
@@ -1472,7 +1643,22 @@ class RoutingEnvironment:
                 ),
             )
             prior_growth_enabled = capability.growth_enabled
+            slow_growth_authorization = str(self.slow_growth_authorization or "auto")
+            top_down_growth_initiation = (
+                slow_growth_authorization == "initiate"
+                and stabilization >= max(0.35, config.growth_stability_threshold - 0.10)
+                and (
+                    task_active >= 0.45
+                    or contradiction >= max(0.15, self.morphogenesis_config.contradiction_threshold * 0.75)
+                    or local_load >= 0.25
+                )
+            )
             capability.growth_recruitment_pressure = max(0.0, min(1.0, growth_pressure))
+            if top_down_growth_initiation:
+                capability.growth_recruitment_pressure = max(
+                    capability.growth_recruitment_pressure,
+                    min(1.0, 0.35 + 0.25 * max(contradiction, local_load)),
+                )
             capability.growth_stabilization_readiness = stabilization
             capability.growth_support = max(
                 0.0,
@@ -1484,6 +1670,11 @@ class RoutingEnvironment:
                     - 0.12 * max(0.0, 1.0 - stabilization),
                 ),
             )
+            if top_down_growth_initiation:
+                capability.growth_support = max(
+                    capability.growth_support,
+                    min(1.0, config.growth_activation_threshold * 0.92),
+                )
             capability.growth_enabled = (
                 capability.growth_support >= config.growth_activation_threshold
                 and stabilization >= config.growth_stability_threshold
@@ -1493,6 +1684,16 @@ class RoutingEnvironment:
                     or visible_context_present >= 0.5
                 )
             )
+            if (
+                not capability.growth_enabled
+                and top_down_growth_initiation
+                and (
+                    not capability.latent_enabled
+                    or effective_latent_confidence >= LATENT_CONTEXT_CONFIDENCE_THRESHOLD
+                    or visible_context_present >= 0.5
+                )
+            ):
+                capability.growth_enabled = True
             if capability.growth_enabled and not prior_growth_enabled:
                 capability.growth_recruitment_cycles.append(self.current_cycle)
 
@@ -1735,6 +1936,11 @@ class RoutingEnvironment:
             )
             else 0.0
         )
+        packet_has_context = (
+            1.0
+            if head_packet is not None and head_packet.context_bit is not None
+            else 0.0
+        )
         raw_has_context = (
             1.0
             if head_packet is not None and head_packet.context_bit is not None and visible_context_exposed
@@ -1757,6 +1963,21 @@ class RoutingEnvironment:
             )
             else 0.0
         )
+        visible_context_trust = float(
+            self.capability_states.get(node_id, self._initial_capability_state()).visible_context_trust
+        )
+        packet_context_confidence = 0.0
+        if packet_has_context >= 0.5:
+            if raw_has_context >= 0.5:
+                packet_context_confidence = 1.0
+            else:
+                # Keep an explicit packet context available as a low-confidence
+                # relational cue even when local capability policy suppresses
+                # full visible-context exposure.
+                packet_context_confidence = max(
+                    0.18,
+                    min(0.45, 0.18 + 0.45 * visible_context_trust),
+                )
         latent_available = 1.0 if latent_snapshot.get("available") else 0.0
         latent_estimate = latent_snapshot.get("estimate")
         latent_confidence = float(latent_snapshot.get("confidence", 0.0))
@@ -1815,6 +2036,7 @@ class RoutingEnvironment:
             ),
             "has_packet": 1.0 if head_packet is not None else 0.0,
             "head_has_task": 1.0 if head_task_id is not None else 0.0,
+            "packet_has_context": packet_has_context,
             "head_transform_depth": (
                 min(1.0, len(head_packet.transform_trace) / 4.0)
                 if head_packet is not None
@@ -1828,6 +2050,13 @@ class RoutingEnvironment:
                 if head_packet is not None and head_packet.context_bit is not None
                 else 0.0
             ),
+            "packet_context_bit": (
+                float(head_packet.context_bit)
+                if head_packet is not None and head_packet.context_bit is not None
+                else 0.0
+            ),
+            "packet_context_confidence": packet_context_confidence,
+            "visible_context_exposed": 1.0 if visible_context_exposed else 0.0,
             "latent_context_available": latent_available,
             "latent_context_estimate": (
                 float(latent_estimate) if latent_estimate is not None else 0.0
@@ -1864,9 +2093,7 @@ class RoutingEnvironment:
             "recent_latent_context_confidence": float(recent_latent.get("confidence", 0.0)),
             "recent_latent_promotion_ready": float(recent_latent.get("promotion_ready", 0.0)),
             "recent_latent_growth_ready": float(recent_latent.get("growth_ready", 0.0)),
-            "visible_context_trust": float(
-                self.capability_states.get(node_id, self._initial_capability_state()).visible_context_trust
-            ),
+            "visible_context_trust": visible_context_trust,
             "latent_recruitment_pressure": float(
                 self.capability_states.get(node_id, self._initial_capability_state()).latent_recruitment_pressure
             ),
@@ -1913,7 +2140,7 @@ class RoutingEnvironment:
             "dormant": 1.0 if state.dormant else 0.0,
         }
         transform_evidence = dict(latent_snapshot.get("transform_evidence", {}))
-        candidate_transforms = set(_candidate_transforms_for_task(head_task_id))
+        task_candidate_transforms = set(_candidate_transforms_for_task(head_task_id))
         sequence_estimate = latent_snapshot.get("sequence_context_estimate")
         sequence_confidence = float(latent_snapshot.get("sequence_context_confidence", 0.0))
         sequence_prev_bits = list(latent_snapshot.get("sequence_prev_bits", []))
@@ -1937,7 +2164,7 @@ class RoutingEnvironment:
             )
             if head_task_id is None:
                 affinity = 0.0
-            elif transform_name in candidate_transforms:
+            elif transform_name in task_candidate_transforms:
                 affinity = 1.0
             elif transform_name == "identity":
                 affinity = 0.0
@@ -1948,13 +2175,34 @@ class RoutingEnvironment:
             if source_sequence_available >= 0.5 and expected_sequence_transform is not None:
                 if transform_name == expected_sequence_transform:
                     sequence_hint = sequence_confidence
-                elif transform_name in candidate_transforms:
+                elif transform_name in task_candidate_transforms:
                     sequence_hint = (0.10 if transform_name == "identity" else 0.15) * sequence_confidence
                 elif transform_name == "identity":
                     sequence_hint = -0.35 * sequence_confidence
                 else:
                     sequence_hint = -0.20 * sequence_confidence
             local[f"source_sequence_transform_hint_{transform_name}"] = sequence_hint
+        expected_transform_label = None
+        expected_context_bit = effective_context_bit
+        if (
+            expected_context_bit is None
+            and packet_has_context >= 0.5
+            and head_packet is not None
+            and head_packet.context_bit is not None
+        ):
+            expected_context_bit = int(head_packet.context_bit)
+        if head_task_id is not None and expected_context_bit is not None:
+            expected_transform_label = _expected_transform_for_task(
+                head_task_id,
+                int(expected_context_bit),
+            )
+        elif source_sequence_available >= 0.5 and expected_sequence_transform is not None:
+            expected_transform_label = expected_sequence_transform
+        local["expected_transform_available"] = 1.0 if expected_transform_label is not None else 0.0
+        for transform_name in TRANSFORM_NAMES:
+            local[f"expected_transform_{transform_name}"] = (
+                1.0 if expected_transform_label == transform_name else 0.0
+            )
         contradiction_pressure = self._contradiction_pressure(node_id)
         node_spec = self.topology_state.node_specs.get(node_id) if self.topology_state is not None else None
         candidate_targets = self._candidate_growth_targets(node_id)
@@ -2006,15 +2254,50 @@ class RoutingEnvironment:
             else 0.0
         )
         observed_context_bit = effective_context_bit
+        if (
+            observed_context_bit is None
+            and packet_has_context >= 0.5
+            and head_packet is not None
+            and head_packet.context_bit is not None
+        ):
+            # When explicit packet context is present but locally suppressed,
+            # still expose context-indexed credit/debt ledgers so downstream
+            # transform competition can differentiate contexts instead of
+            # collapsing onto generic transform credit alone.
+            observed_context_bit = int(head_packet.context_bit)
+        weak_context_match = 0.0
+        if self.slow_weak_context_bit is not None:
+            local["slow_weak_context_target"] = 1.0
+            local["slow_weak_context_bit"] = float(self.slow_weak_context_bit)
+            local["slow_weak_context_gap"] = max(
+                0.0,
+                min(1.0, float(self.slow_weak_context_gap)),
+            )
+            if (
+                observed_context_bit is not None
+                and int(observed_context_bit) == int(self.slow_weak_context_bit)
+            ):
+                weak_context_match = 1.0
+        else:
+            local["slow_weak_context_target"] = 0.0
+            local["slow_weak_context_bit"] = 0.0
+            local["slow_weak_context_gap"] = 0.0
+        local["slow_weak_context_match"] = weak_context_match
         payload_bits = head_packet.payload_bits if head_packet is not None else []
         for index in range(4):
             local[f"payload_bit_{index}"] = (
                 float(payload_bits[index]) if index < len(payload_bits) else 0.0
             )
+        provisional_candidate_scores: list[float] = []
         for transform_name in TRANSFORM_NAMES:
+            provisional_credit = state.provisional_transform_credit.get(transform_name, 0.0)
             local[f"feedback_credit_{transform_name}"] = min(
                 1.0,
                 max(0.0, state.transform_credit.get(transform_name, 0.0)),
+            )
+            local[f"provisional_feedback_credit_{transform_name}"] = min(
+                1.0,
+                max(0.0, provisional_credit),
             )
             local[f"feedback_debt_{transform_name}"] = min(
                 1.0,
@@ -2022,6 +2305,7 @@ class RoutingEnvironment:
             )
             context_credit = 0.0
             context_debt = 0.0
+            provisional_context_credit = 0.0
             if observed_context_bit is not None:
                 context_credit = state.context_transform_credit.get(
                     _context_credit_key(transform_name, int(observed_context_bit)),
@@ -2031,14 +2315,58 @@ class RoutingEnvironment:
                     _context_credit_key(transform_name, int(observed_context_bit)),
                     0.0,
                 )
+                provisional_context_credit = state.provisional_context_transform_credit.get(
+                    _context_credit_key(transform_name, int(observed_context_bit)),
+                    0.0,
+                )
             local[f"context_feedback_credit_{transform_name}"] = min(
                 1.0,
                 max(0.0, context_credit),
+            )
+            local[f"provisional_context_feedback_credit_{transform_name}"] = min(
+                1.0,
+                max(0.0, provisional_context_credit),
             )
             local[f"context_feedback_debt_{transform_name}"] = min(
                 1.0,
                 max(0.0, context_debt),
             )
+            if transform_name in task_candidate_transforms:
+                provisional_candidate_scores.append(
+                    max(
+                        0.0,
+                        min(
+                            1.0,
+                            max(
+                                provisional_context_credit,
+                                0.72 * provisional_credit,
+                                0.62 * context_credit,
+                                0.40 * state.transform_credit.get(transform_name, 0.0),
+                            ),
+                        ),
+                    )
+                )
+        if len(provisional_candidate_scores) >= 2:
+            provisional_candidate_scores.sort(reverse=True)
+            top_score = provisional_candidate_scores[0]
+            second_score = provisional_candidate_scores[1]
+            ambiguity = max(
+                0.0,
+                min(1.0, second_score / max(top_score, 1e-9)),
+            )
+            commitment_margin = max(
+                0.0,
+                min(1.0, top_score - second_score),
+            )
+        elif len(provisional_candidate_scores) == 1:
+            top_score = provisional_candidate_scores[0]
+            ambiguity = max(0.0, min(1.0, 1.0 - top_score))
+            commitment_margin = max(0.0, min(1.0, top_score))
+        else:
+            ambiguity = 0.0
+            commitment_margin = 0.0
+        local["provisional_context_ambiguity"] = ambiguity
+        local["transform_commitment_margin"] = commitment_margin
         sink_position = self.positions[self.sink_id]
         span = max(abs(sink_position - self.positions[self.source_id]), 1)
 
@@ -2178,9 +2506,29 @@ class RoutingEnvironment:
             return []
         if node_id not in self.node_states:
             return []
+        capability = self.capability_states.get(node_id, self._initial_capability_state())
+        slow_growth_authorization = str(self.slow_growth_authorization or "auto")
+        if slow_growth_authorization == "hold":
+            return []
+        top_down_growth_ready = (
+            slow_growth_authorization == "initiate"
+            and capability.growth_stabilization_readiness >= max(
+                0.35,
+                self.capability_control_config.growth_stability_threshold - 0.10,
+            )
+            and not self.topology_state.max_dynamic_nodes_reached(self.morphogenesis_config)
+        )
         if (
             self.capability_policy == "self-selected"
-            and not self.capability_states.get(node_id, self._initial_capability_state()).growth_enabled
+            and not (
+                capability.growth_enabled
+                or top_down_growth_ready
+                or (
+                    slow_growth_authorization == "authorize"
+                    and capability.growth_recruitment_pressure >= 0.55
+                    and capability.growth_stabilization_readiness >= 0.45
+                )
+            )
         ):
             return []
         state = self.state_for(node_id)
@@ -2263,6 +2611,24 @@ class RoutingEnvironment:
             and not self.topology_state.max_dynamic_nodes_reached(self.morphogenesis_config)
             and routing_has_feedback
         )
+        if slow_growth_authorization == "authorize":
+            growth_ready = (
+                growth_ready
+                or (
+                    capability.growth_recruitment_pressure >= 0.55
+                    and capability.growth_stabilization_readiness >= 0.45
+                    and routing_has_feedback
+                    and not self.topology_state.max_dynamic_nodes_reached(self.morphogenesis_config)
+                )
+            )
+        elif slow_growth_authorization == "initiate":
+            growth_ready = (
+                growth_ready
+                or (
+                    top_down_growth_ready
+                    and routing_has_feedback
+                )
+            )
         latent_idle_growth_gate_active = (
             context_gate > 0.0
             and latent_recent_idle_task
@@ -2558,6 +2924,10 @@ class RoutingEnvironment:
             credit_signal = min(1.0, pulse.amount / max(self.feedback_amount, 1e-9))
             prior_credit = state.transform_credit.get(transform_name, 0.0)
             prior_debt = state.transform_debt.get(transform_name, 0.0)
+            prior_provisional_credit = state.provisional_transform_credit.get(
+                transform_name,
+                0.0,
+            )
             branch_key = _branch_debt_key(neighbor_id, transform_name)
             transform_matches_context = False
             resolved_context_bit, resolved_context_confidence, context_promotion_ready = self._resolved_feedback_context(
@@ -2567,9 +2937,16 @@ class RoutingEnvironment:
                 credit_signal=credit_signal,
             )
             if resolved_context_bit is None:
+                provisional_mix = 0.58
+                generic_mix = 0.18
+                state.provisional_transform_credit[transform_name] = min(
+                    1.0,
+                    (1.0 - provisional_mix) * prior_provisional_credit
+                    + provisional_mix * credit_signal,
+                )
                 state.transform_credit[transform_name] = min(
                     1.0,
-                    0.55 * prior_credit + 0.45 * credit_signal,
+                    (1.0 - generic_mix) * prior_credit + generic_mix * credit_signal,
                 )
                 state.branch_transform_credit[branch_key] = min(
                     1.0,
@@ -2589,6 +2966,10 @@ class RoutingEnvironment:
                     int(resolved_context_bit),
                 )
                 prior_context_credit = state.context_transform_credit.get(context_key, 0.0)
+                prior_provisional_context_credit = state.provisional_context_transform_credit.get(
+                    context_key,
+                    0.0,
+                )
                 prior_branch_credit = state.branch_transform_credit.get(branch_key, 0.0)
                 prior_context_branch_credit = state.context_branch_transform_credit.get(
                     context_branch_key,
@@ -2617,6 +2998,31 @@ class RoutingEnvironment:
                         transform_name,
                     )
                 )
+                promotion_scale = _generic_promotion_scale(
+                    state,
+                    task_id=pulse.task_id,
+                    transform_name=transform_name,
+                    resolved_context_bit=int(resolved_context_bit),
+                )
+                weak_branch_match = (
+                    self.slow_weak_context_bit is not None
+                    and int(resolved_context_bit) == int(self.slow_weak_context_bit)
+                )
+                weak_branch_gap = max(
+                    0.0,
+                    min(1.0, float(self.slow_weak_context_gap)),
+                )
+                weak_branch_damp = (
+                    max(0.35, 1.0 - 0.50 * weak_branch_gap)
+                    if weak_branch_match and weak_branch_gap > 0.0
+                    else 1.0
+                )
+                weak_branch_provisional_boost = (
+                    1.0 + 0.18 * weak_branch_gap
+                    if weak_branch_match and weak_branch_gap > 0.0
+                    else 1.0
+                )
+                promotion_scale *= weak_branch_damp
                 if match_ratio < TASK_CONTEXT_MATCH_FLOOR:
                     contradiction = (
                         TASK_CONTEXT_MATCH_FLOOR - match_ratio
@@ -2651,11 +3057,37 @@ class RoutingEnvironment:
                         residual_generic = max(0.16 * credit_signal, 0.14 * quality_credit)
                         residual_context = max(0.14 * credit_signal, 0.18 * quality_credit)
                         residual_branch = max(0.10 * credit_signal, 0.10 * quality_credit)
+                        state.provisional_transform_credit[transform_name] = min(
+                            1.0,
+                            max(
+                                max(
+                                    residual_generic,
+                                    0.22 * credit_signal * weak_branch_provisional_boost,
+                                ),
+                                prior_provisional_credit
+                                * max(0.55, 0.90 - 0.10 * contradiction),
+                            ),
+                        )
+                        state.provisional_context_transform_credit[context_key] = min(
+                            1.0,
+                            max(
+                                max(
+                                    residual_context,
+                                    0.24 * quality_credit * weak_branch_provisional_boost,
+                                ),
+                                prior_provisional_context_credit
+                                * max(0.58, 0.92 - 0.08 * contradiction),
+                            ),
+                        )
                         state.transform_credit[transform_name] = min(
                             1.0,
                             max(
                                 residual_generic,
-                                prior_credit * max(0.45, 0.84 - 0.12 * contradiction),
+                                prior_credit
+                                * max(
+                                    0.45,
+                                    0.84 - 0.12 * contradiction - 0.18 * (1.0 - promotion_scale),
+                                ),
                             ),
                         )
                         state.context_transform_credit[context_key] = min(
@@ -2740,6 +3172,22 @@ class RoutingEnvironment:
                                 prior_context_credit * max(0.05, 0.32 - 0.18 * contradiction),
                             ),
                         )
+                        state.provisional_transform_credit[transform_name] = min(
+                            1.0,
+                            max(
+                                0.08 * credit_signal * weak_branch_provisional_boost,
+                                prior_provisional_credit
+                                * max(0.22, 0.64 - 0.18 * contradiction),
+                            ),
+                        )
+                        state.provisional_context_transform_credit[context_key] = min(
+                            1.0,
+                            max(
+                                0.04 * credit_signal * weak_branch_provisional_boost,
+                                prior_provisional_context_credit
+                                * max(0.12, 0.40 - 0.22 * contradiction),
+                            ),
+                        )
                         state.branch_transform_credit[branch_key] = min(
                             1.0,
                             max(
@@ -2808,12 +3256,34 @@ class RoutingEnvironment:
                             )
                 else:
                     quality_credit = _quality_scaled_credit(match_ratio)
-                    generic_mix = 0.18 + 0.12 * quality_credit
+                    provisional_generic_mix = 0.55 + 0.18 * quality_credit
+                    provisional_context_mix = 0.65 + 0.18 * quality_credit
+                    generic_mix = (0.14 + 0.10 * quality_credit) * promotion_scale
                     context_mix = 0.42 + 0.23 * quality_credit
-                    branch_mix = 0.30 + 0.18 * quality_credit
+                    branch_mix = (0.24 + 0.14 * quality_credit) * (0.50 + 0.40 * promotion_scale)
+                    if weak_branch_match and weak_branch_gap > 0.0:
+                        provisional_generic_mix = min(
+                            0.95,
+                            provisional_generic_mix + 0.10 * weak_branch_gap,
+                        )
+                        provisional_context_mix = min(
+                            0.98,
+                            provisional_context_mix + 0.10 * weak_branch_gap,
+                        )
+                        branch_mix *= max(0.65, 1.0 - 0.25 * weak_branch_gap)
                     context_branch_mix = 0.46 + 0.24 * quality_credit
                     branch_context_mix = 0.34 + 0.24 * quality_credit
                     effective_credit = 0.55 * credit_signal + 0.45 * quality_credit
+                    state.provisional_transform_credit[transform_name] = min(
+                        1.0,
+                        (1.0 - provisional_generic_mix) * prior_provisional_credit
+                        + provisional_generic_mix * effective_credit,
+                    )
+                    state.provisional_context_transform_credit[context_key] = min(
+                        1.0,
+                        (1.0 - provisional_context_mix) * prior_provisional_context_credit
+                        + provisional_context_mix * effective_credit,
+                    )
                     state.transform_credit[transform_name] = min(
                         1.0,
                         (1.0 - generic_mix) * prior_credit + generic_mix * effective_credit,
@@ -2898,6 +3368,10 @@ class RoutingEnvironment:
             state.last_prediction_expected_delta *= 0.92
             state.last_prediction_expected_match_ratio *= 0.92
             state.last_prediction_error_magnitude *= 0.90
+            for transform_name in list(state.provisional_transform_credit.keys()):
+                state.provisional_transform_credit[transform_name] *= PROVISIONAL_GENERIC_CREDIT_DECAY
+                if state.provisional_transform_credit[transform_name] < 1e-4:
+                    del state.provisional_transform_credit[transform_name]
             for transform_name in list(state.transform_credit.keys()):
                 state.transform_credit[transform_name] *= 0.92
                 if state.transform_credit[transform_name] < 1e-4:
@@ -2906,6 +3380,10 @@ class RoutingEnvironment:
                 state.transform_debt[transform_name] *= 0.90
                 if state.transform_debt[transform_name] < 1e-4:
                     del state.transform_debt[transform_name]
+            for key in list(state.provisional_context_transform_credit.keys()):
+                state.provisional_context_transform_credit[key] *= PROVISIONAL_CONTEXT_CREDIT_DECAY
+                if state.provisional_context_transform_credit[key] < 1e-4:
+                    del state.provisional_context_transform_credit[key]
             for key in list(state.context_transform_credit.keys()):
                 state.context_transform_credit[key] *= 0.94
                 if state.context_transform_credit[key] < 1e-4:
@@ -2995,6 +3473,9 @@ class RoutingEnvironment:
             "max_source_backlog": self.max_source_backlog,
             "pending_growth_proposals": len(self.pending_growth_proposals),
             "capability_policy": self.capability_policy,
+            "slow_growth_authorization": self.slow_growth_authorization,
+            "slow_weak_context_bit": self.slow_weak_context_bit,
+            "slow_weak_context_gap": round(float(self.slow_weak_context_gap), 4),
             "capability_summary": self.capability_summary(),
         }
 
@@ -3029,6 +3510,9 @@ class RoutingEnvironment:
             "latent_context_trackers": self.export_latent_context_state(),
             "capability_states": self.export_capability_state(),
             "capability_policy": self.capability_policy,
+            "slow_growth_authorization": self.slow_growth_authorization,
+            "slow_weak_context_bit": self.slow_weak_context_bit,
+            "slow_weak_context_gap": self.slow_weak_context_gap,
         }
 
     def load_runtime_state(self, payload: dict) -> None:
@@ -3086,6 +3570,14 @@ class RoutingEnvironment:
         ]
         self.load_latent_context_state(payload.get("latent_context_trackers"))
         self.capability_policy = str(payload.get("capability_policy", self.capability_policy))
+        self.slow_growth_authorization = str(
+            payload.get("slow_growth_authorization", self.slow_growth_authorization),
+        )
+        weak_context_bit = payload.get("slow_weak_context_bit", self.slow_weak_context_bit)
+        self.slow_weak_context_bit = None if weak_context_bit is None else int(weak_context_bit)
+        self.slow_weak_context_gap = float(
+            payload.get("slow_weak_context_gap", self.slow_weak_context_gap),
+        )
         self.load_capability_state(payload.get("capability_states"))
 
     def _feedback_pending_ratio(self, node_id: str) -> float:
@@ -3401,10 +3893,13 @@ class NativeSubstrateSystem:
             if packet.delivered_cycle is None:
                 packet.delivered_cycle = self.global_cycle
         feedback = self.environment.advance_feedback()
+        feedback_by_node: dict[str, list[dict]] = {}
+        for event in feedback:
+            nid = event.get("node_id")
+            if nid is not None:
+                feedback_by_node.setdefault(nid, []).append(event)
         for node_id, agent in self.agents.items():
-            local_feedback = [
-                event for event in feedback if event.get("node_id") == node_id
-            ]
+            local_feedback = feedback_by_node.get(node_id)
             if local_feedback:
                 agent.absorb_feedback(local_feedback)
         self.environment.tick(self.global_cycle)
@@ -3413,20 +3908,19 @@ class NativeSubstrateSystem:
             topology_events = self.topology_manager.apply_checkpoint(self, self.global_cycle)
             self.rebuild_agents_from_topology()
         source_capability = self.environment.capability_snapshot(self.environment.source_id)
+        _latent_count = 0
+        _growth_count = 0
+        for state in self.environment.capability_states.values():
+            if state.latent_enabled:
+                _latent_count += 1
+            if state.growth_enabled:
+                _growth_count += 1
         self.capability_timeline.append(
             {
                 "cycle": self.global_cycle,
                 "source": source_capability,
-                "active_latent_nodes": sum(
-                    1
-                    for state in self.environment.capability_states.values()
-                    if state.latent_enabled
-                ),
-                "active_growth_nodes": sum(
-                    1
-                    for state in self.environment.capability_states.values()
-                    if state.growth_enabled
-                ),
+                "active_latent_nodes": _latent_count,
+                "active_growth_nodes": _growth_count,
             }
         )
         return {
@@ -3444,6 +3938,8 @@ class NativeSubstrateSystem:
         ]
         context_breakdown = {}
         transform_counts = {}
+        exact_matches = 0
+        partial_matches = 0
         task_diagnostics = self._task_diagnostics(scored_packets)
         for packet in scored_packets:
             context_key = f"context_{packet.context_bit}"
@@ -3452,7 +3948,11 @@ class NativeSubstrateSystem:
                 {"count": 0, "exact_matches": 0, "bit_accuracy_total": 0.0},
             )
             stats["count"] += 1
-            stats["exact_matches"] += 1 if packet.matched_target else 0
+            if packet.matched_target:
+                stats["exact_matches"] += 1
+                exact_matches += 1
+            elif packet.bit_match_ratio is not None and 0.0 < packet.bit_match_ratio < 1.0:
+                partial_matches += 1
             stats["bit_accuracy_total"] += float(packet.bit_match_ratio or 0.0)
             if packet.transform_trace:
                 transform_key = packet.transform_trace[-1]
@@ -3463,49 +3963,35 @@ class NativeSubstrateSystem:
                 4,
             )
             del stats["bit_accuracy_total"]
-        exact_matches = sum(1 for packet in scored_packets if packet.matched_target)
-        partial_matches = sum(
-            1
-            for packet in scored_packets
-            if packet.bit_match_ratio is not None and 0.0 < packet.bit_match_ratio < 1.0
-        )
-        mean_latency = (
-            sum(
-                max(0, (packet.delivered_cycle or self.global_cycle) - packet.created_cycle)
-                for packet in delivered
-            ) / len(delivered)
-            if delivered
-            else 0.0
-        )
-        mean_hops = (
-            sum(len(packet.edge_path) for packet in delivered) / len(delivered)
-            if delivered
-            else 0.0
-        )
+        # Single pass over delivered packets for latency and hops
+        total_latency = 0
+        total_hops = 0
+        for packet in delivered:
+            total_latency += max(0, (packet.delivered_cycle or self.global_cycle) - packet.created_cycle)
+            total_hops += len(packet.edge_path)
+        n_delivered = len(delivered)
+        mean_latency = total_latency / n_delivered if n_delivered else 0.0
+        mean_hops = total_hops / n_delivered if n_delivered else 0.0
         remaining_inboxes = sum(len(packets) for packets in self.environment.inboxes.values())
-        node_atp_total = sum(
-            state.atp for state in self.environment.node_states.values()
-        )
-        node_reward_total = sum(
-            state.reward_buffer for state in self.environment.node_states.values()
-        )
+        # Single pass over node_states for atp and reward
+        node_atp_total = 0.0
+        node_reward_total = 0.0
+        for state in self.environment.node_states.values():
+            node_atp_total += state.atp
+            node_reward_total += state.reward_buffer
         dropped = self.environment.dropped_packets
-        all_entries = [
-            entry
-            for agent in self.agents.values()
-            for entry in agent.engine.memory.entries
-        ]
-        route_entries = [
-            entry
-            for entry in all_entries
-            if entry.action.startswith("route:") or entry.action.startswith("route_transform:")
-        ]
-        mean_route_cost = (
-            sum(entry.cost_secs for entry in route_entries) / len(route_entries)
-            if route_entries
-            else 0.0
-        )
-        total_action_cost = sum(entry.cost_secs for entry in all_entries)
+        # Single pass over memory entries for route costs and total cost
+        total_action_cost = 0.0
+        route_cost_total = 0.0
+        route_count = 0
+        for agent in self.agents.values():
+            for entry in agent.engine.memory.entries:
+                total_action_cost += entry.cost_secs
+                action = entry.action
+                if action.startswith("route:") or action.startswith("route_transform:"):
+                    route_cost_total += entry.cost_secs
+                    route_count += 1
+        mean_route_cost = route_cost_total / route_count if route_count else 0.0
         session_cycles = max(1, self.global_cycle - self.session_start_cycle)
         topology_events = list(self.topology_state.events) if self.topology_state is not None else []
         bud_events = [event for event in topology_events if event.event_type in ("bud_edge", "bud_node")]

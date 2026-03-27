@@ -13,6 +13,8 @@ from real_core import (
     CFARSelector,
     ConstraintPattern,
     CycleEntry,
+    ForecastError,
+    ForecastOutput,
     GCOStatus,
     LocalPrediction,
     MemorySubstrate,
@@ -179,6 +181,61 @@ class DummyRecognitionModel:
             novelty=0.8,
             matches=[],
             metadata={"recognized_shape": "unknown"},
+        )
+
+
+@dataclass
+class DummyForecastModel:
+    last_recognition: RecognitionState | None = None
+    last_predictions: dict[str, LocalPrediction] | None = None
+
+    def forecast(
+        self,
+        state_before: dict[str, float],
+        available: list[str],
+        history: list[CycleEntry],
+        *,
+        recognition: RecognitionState | None = None,
+        predictions: dict[str, LocalPrediction] | None = None,
+        prior_coherence: float | None = None,
+        substrate: object | None = None,
+    ) -> ForecastOutput | None:
+        self.last_recognition = recognition
+        self.last_predictions = dict(predictions or {})
+        signal = float(state_before.get("signal", 0.0))
+        direction = "rise" if signal >= 0.5 else "fall"
+        confidence = 0.75 if direction == "rise" else 0.65
+        return ForecastOutput(
+            target_label=direction,
+            confidence=confidence,
+            candidates={"rise": signal, "fall": 1.0 - signal},
+            domain="dummy_signal_trend",
+            metadata={"source": "dummy_forecast"},
+        )
+
+    def compare(
+        self,
+        forecast: ForecastOutput | None,
+        state_after: dict[str, float],
+        dimensions: dict[str, float],
+        coherence: float,
+        delta: float,
+        history: list[CycleEntry],
+    ) -> ForecastError | None:
+        if forecast is None:
+            return None
+        actual_label = "rise" if float(state_after.get("signal", 0.0)) >= 0.5 else "fall"
+        correct = forecast.target_label == actual_label
+        correctness = 1.0 if correct else 0.0
+        confidence_error = float(forecast.confidence) - correctness
+        return ForecastError(
+            predicted_label=forecast.target_label,
+            actual_label=actual_label,
+            correct=correct,
+            resolved=True,
+            confidence_error=confidence_error,
+            magnitude=abs(confidence_error),
+            metadata={"source": "dummy_forecast"},
         )
 
 
@@ -356,6 +413,36 @@ class TestRealCoreEngine(unittest.TestCase):
         self.assertIn("anticipation", selector.last_context.state_before)
         self.assertIsNotNone(selector.last_context.recognition)
 
+    def test_engine_records_explicit_forecast_readout(self) -> None:
+        forecast_model = DummyForecastModel()
+        engine = RealCoreEngine(
+            observer=DummyObserver(),
+            actions=DummyActions(),
+            coherence=DummyCoherence(),
+            selector=CFARSelector(exploration_rate=0.0),
+            recognition_model=DummyRecognitionModel(),
+            expectation_model=DummyExpectationModel(),
+            forecast_model=forecast_model,
+            domain_name="forecast.domain",
+        )
+
+        entry = engine.run_cycle(1)
+
+        self.assertIsNotNone(entry.forecast)
+        self.assertIsNotNone(entry.forecast_error)
+        self.assertIn("forecast", entry.state_before)
+        assert entry.forecast is not None
+        assert entry.forecast_error is not None
+        self.assertEqual(entry.forecast.domain, "dummy_signal_trend")
+        self.assertEqual(entry.forecast.metadata.get("source"), "dummy_forecast")
+        self.assertTrue(entry.forecast_error.resolved)
+        self.assertEqual(entry.forecast_error.metadata.get("source"), "dummy_forecast")
+        self.assertEqual(
+            forecast_model.last_recognition.metadata.get("recognized_shape"),
+            "low_signal",
+        )
+        self.assertIn("nudge", forecast_model.last_predictions)
+
     def test_anticipatory_selector_prefers_high_confidence_prediction(self) -> None:
         selector = AnticipatorySelector(exploration_rate=0.0)
         context = SelectionContext(
@@ -513,6 +600,39 @@ class TestSessionStateStore(unittest.TestCase):
                 "dummy_expectation",
             )
             self.assertIsNotNone(loaded.episodic_entries[0].prediction_error)
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_session_state_store_round_trips_forecast_fields(self) -> None:
+        temp_dir = ROOT / "tests_tmp" / f"real_core_forecast_state_{uuid.uuid4().hex}"
+        temp_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            path = SessionStateStore(Path(temp_dir) / "session_state.json")
+            engine = RealCoreEngine(
+                observer=DummyObserver(),
+                actions=DummyActions(),
+                coherence=DummyCoherence(),
+                selector=CFARSelector(exploration_rate=0.0),
+                recognition_model=DummyRecognitionModel(),
+                expectation_model=DummyExpectationModel(),
+                forecast_model=DummyForecastModel(),
+                session_state_store=path,
+                domain_name="forecast.state.domain",
+            )
+            engine.run_session(cycles=2)
+
+            saved = engine.save_session_state()
+            loaded = path.load()
+
+            self.assertIsNotNone(loaded)
+            self.assertIsNotNone(saved.episodic_entries[0].forecast)
+            self.assertIsNotNone(loaded.episodic_entries[0].forecast)
+            self.assertIsNotNone(loaded.episodic_entries[0].forecast_error)
+            assert loaded.episodic_entries[0].forecast is not None
+            self.assertEqual(
+                loaded.episodic_entries[0].forecast.metadata.get("source"),
+                "dummy_forecast",
+            )
         finally:
             shutil.rmtree(temp_dir, ignore_errors=True)
 

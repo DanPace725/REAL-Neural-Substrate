@@ -4,6 +4,8 @@ from .types import (
     ActionOutcome,
     CycleEntry,
     DimensionScores,
+    ForecastError,
+    ForecastOutput,
     GCOStatus,
     LocalPrediction,
     MemoryActionSpec,
@@ -15,6 +17,7 @@ from .types import (
     SelectionContext,
     SessionCarryover,
     SettlementDecision,
+    SliceExecutionPlan,
     SliceSummary,
     SubstrateSnapshot,
 )
@@ -25,6 +28,7 @@ from .interfaces import (
     ContextualSelector,
     DomainMemoryBinding,
     ExpectationModel,
+    ForecastReadout,
     MemorySubstrateProtocol,
     RecognitionModel,
 )
@@ -36,14 +40,22 @@ from .consolidation import BasicConsolidationPipeline
 from .session import SessionHistory, SessionRecord
 from .session_state import SessionStateStore
 from .substrate import MemorySubstrate, SubstrateConfig
-from .lamination import HeuristicSliceRegulator, LaminatedController, LaminatedRunResult, LearningSliceRegulator
+from .lamination import (
+    GradientSliceRegulator,
+    HeuristicSliceRegulator,
+    LaminatedController,
+    LaminatedRunResult,
+    LearningSliceRegulator,
+)
 from .meta_agent import REALSliceRegulator, SliceSummaryObservationAdapter, PolicySelectionActionBackend, SliceAccuracyCoherenceModel, NAMED_POLICIES
-from .interfaces import CarryoverFilter, SliceRegulator, SliceRunner
+from .interfaces import AdaptiveSliceRunner, CarryoverFilter, SliceRegulator, SliceRunner
 
 __all__ = [
     "ActionOutcome",
     "CycleEntry",
     "DimensionScores",
+    "ForecastError",
+    "ForecastOutput",
     "GCOStatus",
     "LocalPrediction",
     "MemoryActionSpec",
@@ -55,6 +67,7 @@ __all__ = [
     "RealCoreEngine",
     "SessionCarryover",
     "SettlementDecision",
+    "SliceExecutionPlan",
     "SliceSummary",
     "SubstrateSnapshot",
     "EpisodicMemory",
@@ -68,11 +81,13 @@ __all__ = [
     "ContextualSelector",
     "DomainMemoryBinding",
     "ExpectationModel",
+    "ForecastReadout",
     "CarryoverFilter",
     "AnticipatorySelector",
     "RecognitionModel",
     "SliceRegulator",
     "SliceRunner",
+    "AdaptiveSliceRunner",
     "CFARSelector",
     "SelectionMode",
     "TiltRegulatoryMesh",
@@ -80,6 +95,7 @@ __all__ = [
     "SessionRecord",
     "SessionStateStore",
     "HeuristicSliceRegulator",
+    "GradientSliceRegulator",
     "LaminatedController",
     "LaminatedRunResult",
     "LearningSliceRegulator",

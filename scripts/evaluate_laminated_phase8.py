@@ -165,12 +165,20 @@ def _compact_row(benchmark_id: str, task_key: str, result: dict) -> str:
     slices = len(slices_data)
     decision = lam.get("final_decision", "?")
 
-    # Final accuracy = last slice's mean_bit_accuracy (where the system ended up)
+    # Final accuracy = last slice's aggregate overall accuracy.
     final_acc = 0.0
     ctx_str = ""
+    forecast_str = ""
     if slices_data:
         last = slices_data[-1]
-        final_acc = last.get("metadata", {}).get("mean_bit_accuracy", 0.0)
+        final_acc = last.get("metadata", {}).get(
+            "final_accuracy",
+            last.get("metadata", {}).get("mean_bit_accuracy", 0.0),
+        )
+        forecast_metrics = last.get("metadata", {}).get("forecast_metrics", {})
+        forecast_acc = forecast_metrics.get("forecast_accuracy")
+        if isinstance(forecast_acc, (int, float)):
+            forecast_str = f"  forecast={forecast_acc:.3f}"
         ca = last.get("context_accuracy", {})
         if ca:
             ctx_str = " | " + " ".join(f"{k}={v:.2f}" for k, v in sorted(ca.items()))
@@ -178,7 +186,7 @@ def _compact_row(benchmark_id: str, task_key: str, result: dict) -> str:
     return (
         f"  {benchmark_id:6s} {task_key:6s}  "
         f"final={final_acc:.3f}  "
-        f"slices={slices} [{decision}]{ctx_str}"
+        f"slices={slices} [{decision}]{forecast_str}{ctx_str}"
     )
 
 
@@ -216,8 +224,8 @@ def main() -> None:
                    default="self-selected",
                    help="Capability policy for non-growth modes.")
     p.add_argument("--reg", "--regulator-type", dest="regulator_type",
-                   choices=("heuristic", "learning", "real"), default="heuristic",
-                   help="Regulator type: heuristic / learning / real.")
+                   choices=("heuristic", "learning", "real", "gradient"), default="heuristic",
+                   help="Regulator type: heuristic / learning / real / gradient.")
 
     # Run parameters
     p.add_argument("-s", "--seed", type=int, default=13)
@@ -228,7 +236,7 @@ def main() -> None:
                    help="Safety guard on max slices to prevent runaway loops (not a budget).")
     p.add_argument("--thresh", "--accuracy-threshold", dest="accuracy_threshold",
                    type=float, default=0.0,
-                   help="Min-context accuracy threshold to trigger settle (0 = disabled).")
+                   help="Final overall accuracy threshold to trigger settle (0 = disabled).")
 
     # Output
     p.add_argument("--output", type=str, default=None,

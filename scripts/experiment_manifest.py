@@ -12,6 +12,32 @@ def _default_title(harness: str) -> str:
     return f"{timestamp_local} - {title_suffix}"
 
 
+def _extract_run_summary(result: dict[str, object]) -> dict[str, object]:
+    laminated_run = result.get("laminated_run")
+    if not isinstance(laminated_run, dict):
+        return {}
+
+    slice_summaries = laminated_run.get("slice_summaries")
+    if not isinstance(slice_summaries, list):
+        return {}
+
+    summary: dict[str, object] = {
+        "total_slices": len(slice_summaries),
+    }
+    if slice_summaries:
+        last = slice_summaries[-1]
+        if isinstance(last, dict):
+            metadata = last.get("metadata", {})
+            if isinstance(metadata, dict):
+                final_accuracy = metadata.get(
+                    "final_accuracy",
+                    metadata.get("mean_bit_accuracy"),
+                )
+                if isinstance(final_accuracy, (int, float)):
+                    summary["final_accuracy"] = round(float(final_accuracy), 4)
+    return summary
+
+
 def build_run_manifest(
     *,
     harness: str,
@@ -28,6 +54,7 @@ def build_run_manifest(
         "harness": harness,
         "seeds": list(seeds),
         "scenarios": list(scenarios),
+        **_extract_run_summary(result),
         "result": result,
     }
     if latent_context is not None:

@@ -21,6 +21,8 @@ from .adapters import (
 )
 from .environment import NativeSubstrateSystem, RoutingEnvironment
 from .environment import CapabilityControlConfig
+from .forecasting import Phase8ForecastReadout
+from .hidden_regime import HiddenRegimeCase, HiddenRegimeTaskSpec, hidden_regime_suite_by_id
 from .models import FeedbackPulse, NodeRuntimeState, SignalPacket, SignalSpec
 from .node_agent import NodeAgent
 from .substrate import ConnectionSubstrate, ConnectionSubstrateConfig
@@ -46,10 +48,13 @@ __all__ = [
     "Phase8SliceRunner",
     "Phase8SliceRunnerConfig",
     "CapabilityControlConfig",
+    "Phase8ForecastReadout",
     "EdgeSpec",
     "GrowthProposal",
     "AdmissionSubstrate",
     "FeedbackPulse",
+    "HiddenRegimeCase",
+    "HiddenRegimeTaskSpec",
     "MorphogenesisConfig",
     "NodeSpec",
     "ScenarioSpec",
@@ -76,6 +81,7 @@ __all__ = [
     "TopologyEvent",
     "TopologyManager",
     "TopologyState",
+    "hidden_regime_suite_by_id",
     "phase8_scenarios",
     "sustained_pressure_topology",
     "sustained_pressure_workload",
