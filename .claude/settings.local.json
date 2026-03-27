@@ -33,7 +33,16 @@
       "Bash(python -m scripts.evaluate_laminated_phase8 --sweep B2S1,B2S3,B2S5 --reg real --thresh 0.8 --compact)",
       "Bash(python -m scripts.evaluate_laminated_phase8 --sweep all-b --reg real --thresh 0.8 --slices 10 --compact)",
       "Bash(python -m scripts.evaluate_laminated_phase8 --sweep B2S1,B2S2 --reg real --thresh 0.8 --slices 10 --compact)",
-      "Bash(ls -lt \"C:\\\\Users\\\\nscha\\\\Coding\\\\Relationally Embedded Allostatic Learning\\\\REAL-Neural-Substrate\\\\docs\\\\experiment_outputs\\\\20260325_laminated_b2s\"*)"
+      "Bash(ls -lt \"C:\\\\Users\\\\nscha\\\\Coding\\\\Relationally Embedded Allostatic Learning\\\\REAL-Neural-Substrate\\\\docs\\\\experiment_outputs\\\\20260325_laminated_b2s\"*)",
+      "Bash(python -m pytest tests/ -x -q)",
+      "Bash(python -m pytest tests/test_phase8.py tests/test_lamination.py tests/test_phase8_lamination.py tests/test_real_core.py -x -q)",
+      "Bash(python -c \"import tests.test_phase8; print\\(''import ok''\\)\")",
+      "Bash(python -m pytest tests/test_phase8.py tests/test_lamination.py tests/test_phase8_lamination.py tests/test_real_core.py -x -q -o \"tool.pytest.ini_options=\" --no-header --override-ini=\"addopts=\")",
+      "Bash(python -m pytest tests/test_phase8.py tests/test_lamination.py tests/test_phase8_lamination.py tests/test_real_core.py -x -q -c /dev/null)",
+      "Bash(python -m pytest tests/test_phase8.py tests/test_lamination.py tests/test_phase8_lamination.py tests/test_real_core.py -x -q --rootdir=. --override-ini=\"tool.pytest.ini_options=\")",
+      "Bash(python -m unittest tests.test_lamination tests.test_real_core -v)",
+      "Bash(python -m unittest tests.test_phase8_lamination tests.test_latent_growth_gate tests.test_latent_route_transform_gate -v)",
+      "Bash(python -m unittest tests.test_experiment_manifest tests.test_hidden_regime_forecasting -v)"
     ]
   }
 }
