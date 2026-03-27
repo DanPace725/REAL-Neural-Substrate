@@ -16,6 +16,7 @@ from .adapters import (
 from .consolidation import Phase8ConsolidationPipeline
 from .environment import RoutingEnvironment
 from .expectation import Phase8ExpectationModel
+from .forecasting import Phase8ForecastReadout
 from .selector import Phase8Selector
 from .substrate import ConnectionSubstrate
 
@@ -79,6 +80,10 @@ class NodeAgent:
             memory_binding=binding,
             recognition_model=PatternRecognitionModel(),
             expectation_model=Phase8ExpectationModel(
+                environment=environment,
+                node_id=node_id,
+            ),
+            forecast_model=Phase8ForecastReadout(
                 environment=environment,
                 node_id=node_id,
             ),

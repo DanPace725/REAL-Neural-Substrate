@@ -6,6 +6,8 @@ from pathlib import Path
 
 from .types import (
     CycleEntry,
+    ForecastError,
+    ForecastOutput,
     GCOStatus,
     LocalPrediction,
     PredictionError,
@@ -111,6 +113,67 @@ def _deserialize_prediction_error(data: dict | None) -> PredictionError | None:
     )
 
 
+def _serialize_forecast(forecast: ForecastOutput | None) -> dict | None:
+    if forecast is None:
+        return None
+    return {
+        "target_label": forecast.target_label,
+        "confidence": forecast.confidence,
+        "candidates": dict(forecast.candidates),
+        "domain": forecast.domain,
+        "horizon": forecast.horizon,
+        "metadata": dict(forecast.metadata),
+    }
+
+
+def _deserialize_forecast(data: dict | None) -> ForecastOutput | None:
+    if not data:
+        return None
+    return ForecastOutput(
+        target_label=str(data.get("target_label", "unknown")),
+        confidence=float(data.get("confidence", 0.0)),
+        candidates={
+            str(key): float(value)
+            for key, value in dict(data.get("candidates", {})).items()
+        },
+        domain=str(data.get("domain", "unknown")),
+        horizon=int(data.get("horizon", 1)),
+        metadata=dict(data.get("metadata", {})),
+    )
+
+
+def _serialize_forecast_error(error: ForecastError | None) -> dict | None:
+    if error is None:
+        return None
+    return {
+        "predicted_label": error.predicted_label,
+        "actual_label": error.actual_label,
+        "correct": error.correct,
+        "resolved": error.resolved,
+        "confidence_error": error.confidence_error,
+        "magnitude": error.magnitude,
+        "metadata": dict(error.metadata),
+    }
+
+
+def _deserialize_forecast_error(data: dict | None) -> ForecastError | None:
+    if not data:
+        return None
+    return ForecastError(
+        predicted_label=str(data.get("predicted_label", "unknown")),
+        actual_label=(
+            None
+            if data.get("actual_label") is None
+            else str(data.get("actual_label"))
+        ),
+        correct=data.get("correct"),
+        resolved=bool(data.get("resolved", False)),
+        confidence_error=data.get("confidence_error"),
+        magnitude=float(data.get("magnitude", 0.0)),
+        metadata=dict(data.get("metadata", {})),
+    )
+
+
 def _serialize_cycle_entry(entry: CycleEntry) -> dict:
     return {
         "cycle": entry.cycle,
@@ -126,6 +189,8 @@ def _serialize_cycle_entry(entry: CycleEntry) -> dict:
         "recognition": _serialize_recognition(entry.recognition),
         "prediction": _serialize_prediction(entry.prediction),
         "prediction_error": _serialize_prediction_error(entry.prediction_error),
+        "forecast": _serialize_forecast(entry.forecast),
+        "forecast_error": _serialize_forecast_error(entry.forecast_error),
     }
 
 
@@ -149,6 +214,8 @@ def _deserialize_cycle_entry(data: dict) -> CycleEntry:
         prediction_error=_deserialize_prediction_error(
             data.get("prediction_error")
         ),
+        forecast=_deserialize_forecast(data.get("forecast")),
+        forecast_error=_deserialize_forecast_error(data.get("forecast_error")),
     )
 
 

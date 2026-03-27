@@ -35,7 +35,7 @@ from typing import Dict, List, Tuple
 
 from .engine import RealCoreEngine
 from .episodic import EpisodicMemory
-from .lamination import HeuristicSliceRegulator
+from .lamination import GradientSliceRegulator, _context_debt_summary
 from .substrate import MemorySubstrate, SubstrateConfig
 from .types import (
     ActionOutcome,
@@ -51,47 +51,40 @@ from .types import (
 # ---------------------------------------------------------------------------
 # Named policies
 # ---------------------------------------------------------------------------
-# Each policy is (capability_mode, carryover_filter, budget_multiplier, context_pressure).
+# Each policy is
+# (capability_mode, growth_authorization, carryover_filter, budget_multiplier, context_pressure).
 # The REAL agent selects one policy per slice; the substrate learns which policy
 # produces the best accuracy trajectory given the current observation context.
 
-Policy = Tuple[str, str, float, str]
+Policy = Tuple[str | None, str | None, str, float, str]
 
 NAMED_POLICIES: Dict[str, Policy] = {
     # --- Visible family ---
-    # Hold visible mode but soften memory to reduce stale context drag.
-    "visible_explore":       ("visible",        "soften", 1.00, "medium"),
-    # Visible mode, hard carryover reset — used when stalled.
-    "visible_push":          ("visible",        "drop",   1.00, "high"),
+    "visible_explore":       (None,             "hold",      "soften", 1.00, "medium"),
+    "visible_push":          (None,             "hold",      "drop",   1.15, "high"),
 
-    # --- Growth-visible family ---
-    # Switch to growth, soften memory, keep budget — the standard upgrade path.
-    "growth_engage":         ("growth-visible", "soften", 1.00, "high"),
-    # Growth has converged well; maintain budget, reduce memory pressure.
-    "growth_consolidate":    ("growth-visible", "keep",   1.00, "low"),
-    # Growth is stalling; clear memory — budget stays constant.
-    "growth_reset":          ("growth-visible", "drop",   1.00, "high"),
-    # Growth is active; maintain without pressure changes.
-    "growth_hold":           ("growth-visible", "keep",   1.00, "medium"),
+    # --- Growth authorization family ---
+    "growth_engage":         (None,             "authorize", "soften", 1.15, "high"),
+    "growth_consolidate":    (None,             "hold",      "keep",   1.00, "low"),
+    "growth_reset":          (None,             "hold",      "drop",   1.00, "high"),
+    "growth_hold":           (None,             "authorize", "keep",   1.00, "medium"),
 
     # --- Latent family ---
-    "latent_explore":        ("latent",         "soften", 1.00, "medium"),
-    "latent_push":           ("latent",         "drop",   1.00, "high"),
+    "latent_explore":        ("latent",         "hold",      "soften", 1.00, "medium"),
+    "latent_push":           ("latent",         "hold",      "drop",   1.10, "high"),
 
     # --- Growth-latent family ---
-    "growth_latent_engage":       ("growth-latent", "soften", 1.00, "high"),
-    "growth_latent_consolidate":  ("growth-latent", "keep",   1.00, "low"),
+    "growth_latent_engage":       ("latent",        "authorize", "soften", 1.15, "high"),
+    "growth_latent_consolidate":  ("latent",        "hold",      "keep",   1.00, "low"),
 }
 
 # Which policies are available given the current mode.
-# Growth modes get their own family so the engine can never step *back*
-# from growth-visible to plain visible (which would destroy accumulated growth).
 _MODE_FAMILY: Dict[str, str] = {
     "visible":        "visible",
     "self-selected":  "visible",
-    "growth-visible": "growth-visible",
+    "growth-visible": "visible",
     "latent":         "latent",
-    "growth-latent":  "growth-latent",
+    "growth-latent":  "latent",
 }
 
 _POLICIES_BY_FAMILY: Dict[str, List[str]] = {
@@ -104,22 +97,10 @@ _POLICIES_BY_FAMILY: Dict[str, List[str]] = {
         "growth_reset",
         "growth_hold",
     ],
-    # Once in growth-visible: only growth policies — no stepping back.
-    "growth-visible": [
-        "growth_engage",
-        "growth_consolidate",
-        "growth_reset",
-        "growth_hold",
-    ],
     # From latent: can stay or upgrade to growth-latent.
     "latent": [
         "latent_explore",
         "latent_push",
-        "growth_latent_engage",
-        "growth_latent_consolidate",
-    ],
-    # Once in growth-latent: only growth-latent policies.
-    "growth-latent": [
         "growth_latent_engage",
         "growth_latent_consolidate",
     ],
@@ -134,6 +115,45 @@ def _min_ctx_acc(summary: SliceSummary) -> float:
     if summary.context_accuracy:
         return min(summary.context_accuracy.values())
     return float(summary.metadata.get("mean_bit_accuracy", 0.0))
+
+
+def _final_accuracy(summary: SliceSummary) -> float:
+    return float(
+        summary.metadata.get(
+            "final_accuracy",
+            summary.metadata.get("mean_bit_accuracy", 0.0),
+        )
+    )
+
+
+def _floor_accuracy(summary: SliceSummary) -> float:
+    if summary.context_accuracy:
+        return min(float(value) for value in summary.context_accuracy.values())
+    return float(
+        summary.metadata.get(
+            "worst_context_accuracy",
+            summary.metadata.get(
+                "floor_accuracy",
+                _final_accuracy(summary),
+            ),
+        )
+    )
+
+
+def _intervention_status(observed_delta: float, *, epsilon: float = 0.01) -> str:
+    if observed_delta > epsilon:
+        return "improved"
+    if observed_delta < -epsilon:
+        return "worsened"
+    return "flat"
+
+
+def _carryover_rank(mode: str) -> int:
+    return {"keep": 0, "soften": 1, "drop": 2}.get(str(mode), 0)
+
+
+def _pressure_rank(mode: str) -> int:
+    return {"low": 0, "medium": 1, "high": 2}.get(str(mode), 0)
 
 
 # ---------------------------------------------------------------------------
@@ -151,27 +171,87 @@ class SliceSummaryObservationAdapter:
     def __init__(self) -> None:
         self._current: Dict[str, float] = {
             "min_ctx_acc": 0.0,
+            "best_ctx_acc": 0.0,
+            "worst_ctx_acc": 0.0,
+            "context_accuracy_spread": 0.0,
+            "asymmetric_context_collapse": 0.0,
             "delta_min_ctx_acc": 0.0,
             "conflict": 0.5,
             "ambiguity": 0.5,
             "coherence_delta": 0.0,
             "mean_uncertainty": 1.0,
+            "floor_accuracy": 0.0,
+            "max_context_debt": 0.0,
+            "total_context_debt": 0.0,
+            "open_context_count": 0.0,
+            "max_context_credit": 0.0,
             "mode_is_growth": 0.0,
+            "growth_request_pressure": 0.0,
+            "growth_request_readiness": 0.0,
+            "pending_growth_proposals": 0.0,
+            "active_growth_nodes": 0.0,
+            "growth_authorized": 0.0,
         }
 
-    def update(self, summary: SliceSummary, *, prev_min_ctx_acc: float | None = None) -> None:
+    def update(
+        self,
+        summary: SliceSummary,
+        *,
+        prev_min_ctx_acc: float | None = None,
+        context_debt_summary: Dict[str, float | str | None] | None = None,
+    ) -> None:
         cur = _min_ctx_acc(summary)
         mean_acc = float(summary.metadata.get("mean_bit_accuracy", 0.0))
+        final_acc = _final_accuracy(summary)
+        floor_acc = _floor_accuracy(summary)
+        context_debt_summary = context_debt_summary or {}
         delta = (cur - prev_min_ctx_acc) if prev_min_ctx_acc is not None else 0.0
+        growth_request = dict(summary.metadata.get("growth_request", {}))
+        if summary.context_accuracy:
+            context_values = [float(value) for value in summary.context_accuracy.values()]
+            best_ctx_acc = max(context_values)
+            worst_ctx_acc = min(context_values)
+        else:
+            best_ctx_acc = mean_acc
+            worst_ctx_acc = mean_acc
+        context_accuracy_spread = max(0.0, best_ctx_acc - worst_ctx_acc)
+        asymmetric_context_collapse = 1.0 if (
+            best_ctx_acc >= 0.75
+            and worst_ctx_acc <= 0.25
+            and context_accuracy_spread >= 0.45
+        ) else 0.0
         self._current = {
             "min_ctx_acc": round(cur, 4),
+            "best_ctx_acc": round(best_ctx_acc, 4),
+            "worst_ctx_acc": round(worst_ctx_acc, 4),
+            "context_accuracy_spread": round(context_accuracy_spread, 4),
+            "asymmetric_context_collapse": asymmetric_context_collapse,
             "mean_bit_accuracy": round(mean_acc, 4),
+            "final_accuracy": round(final_acc, 4),
+            "floor_accuracy": round(floor_acc, 4),
+            "max_context_debt": round(float(context_debt_summary.get("max_context_debt", 0.0)), 4),
+            "total_context_debt": round(float(context_debt_summary.get("total_context_debt", 0.0)), 4),
+            "open_context_count": round(float(context_debt_summary.get("open_context_count", 0.0)), 4),
+            "max_context_credit": round(float(context_debt_summary.get("max_context_credit", 0.0)), 4),
             "delta_min_ctx_acc": round(delta, 4),
             "conflict": round(summary.conflict_level, 4),
             "ambiguity": round(summary.ambiguity_level, 4),
             "coherence_delta": round(summary.coherence_delta, 4),
             "mean_uncertainty": round(summary.mean_uncertainty, 4),
             "mode_is_growth": 1.0 if summary.mode_used.startswith("growth-") else 0.0,
+            "growth_request_pressure": round(float(growth_request.get("max_pressure", 0.0)), 4),
+            "growth_request_readiness": round(float(growth_request.get("max_readiness", 0.0)), 4),
+            "pending_growth_proposals": round(
+                min(1.0, float(growth_request.get("pending_proposals", 0.0)) / 3.0),
+                4,
+            ),
+            "active_growth_nodes": round(
+                min(1.0, float(growth_request.get("active_growth_nodes", 0.0)) / 3.0),
+                4,
+            ),
+            "growth_authorized": 1.0
+            if str(growth_request.get("authorization", "auto")) in {"authorize", "initiate"}
+            else 0.0,
         }
 
     def observe(self, cycle: int) -> Dict[str, float]:  # noqa: ARG002
@@ -227,9 +307,10 @@ class PolicySelectionActionBackend:
             result={
                 "policy": name,
                 "capability_mode": policy[0],
-                "carryover_filter": policy[1],
-                "budget_multiplier": policy[2],
-                "context_pressure": policy[3],
+                "growth_authorization": policy[1],
+                "carryover_filter": policy[2],
+                "budget_multiplier": policy[3],
+                "context_pressure": policy[4],
             },
             cost_secs=0.001,
         )
@@ -281,16 +362,35 @@ class SliceAccuracyCoherenceModel:
         delta = float(state_after.get("delta_min_ctx_acc", 0.0))
         conflict = float(state_after.get("conflict", 0.5))
         ambiguity = float(state_after.get("ambiguity", 0.5))
-        mode_is_growth = float(state_after.get("mode_is_growth", 0.0))
+        context_accuracy_spread = float(state_after.get("context_accuracy_spread", 0.0))
+        asymmetric_context_collapse = float(state_after.get("asymmetric_context_collapse", 0.0))
+        max_context_debt = float(state_after.get("max_context_debt", 0.0))
+        growth_authorized = float(state_after.get("growth_authorized", 0.0))
+        growth_request_pressure = float(state_after.get("growth_request_pressure", 0.0))
+        growth_request_readiness = float(state_after.get("growth_request_readiness", 0.0))
+        pending_growth_proposals = float(state_after.get("pending_growth_proposals", 0.0))
+        active_growth_nodes = float(state_after.get("active_growth_nodes", 0.0))
 
         target = self.accuracy_threshold if self.accuracy_threshold > 0.0 else 1.0
         accuracy_level = min(1.0, min_acc / max(target, 1e-6))
         accuracy_progress = min(1.0, max(0.0, 0.5 + delta * 5.0))
 
-        # growth mode costs more; reflect that in efficiency dimension
-        policy_efficiency = 0.7 if mode_is_growth > 0.5 else 1.0
+        growth_load = min(
+            1.0,
+            max(
+                growth_request_pressure,
+                growth_request_readiness,
+                pending_growth_proposals,
+                active_growth_nodes,
+            ),
+        )
+        policy_efficiency = 1.0 - (0.18 * growth_load if growth_authorized > 0.5 else 0.0)
+        policy_efficiency = max(0.75, policy_efficiency)
 
-        context_balance = max(0.0, 1.0 - conflict)
+        context_imbalance = max(conflict, context_accuracy_spread, min(1.0, max_context_debt))
+        if asymmetric_context_collapse > 0.5:
+            context_imbalance = min(1.0, context_imbalance + 0.2)
+        context_balance = max(0.0, 1.0 - context_imbalance)
         convergence = max(0.0, 1.0 - ambiguity)
 
         if history:
@@ -316,10 +416,32 @@ class SliceAccuracyCoherenceModel:
         )
 
     def gco_status(self, dimensions: DimensionScores, coherence: float, *, state_after: Dict[str, float] | None = None) -> GCOStatus:
-        # STABLE = mean accuracy meets threshold (the actual task criterion).
-        mean_acc = float((state_after or {}).get("mean_bit_accuracy", 0.0))
-        if self.accuracy_threshold > 0.0 and mean_acc >= self.accuracy_threshold:
+        # STABLE requires floor-first success: no collapsed context plus
+        # aggregate success.
+        final_acc = float(
+            (state_after or {}).get(
+                "final_accuracy",
+                (state_after or {}).get("mean_bit_accuracy", 0.0),
+            )
+        )
+        floor_acc = float(
+            (state_after or {}).get(
+                "floor_accuracy",
+                (state_after or {}).get("min_ctx_acc", final_acc),
+            )
+        )
+        if (
+            self.accuracy_threshold > 0.0
+            and floor_acc >= self.accuracy_threshold
+            and final_acc >= self.accuracy_threshold
+        ):
             return GCOStatus.STABLE
+        if self.accuracy_threshold > 0.0:
+            if coherence >= 0.65:
+                return GCOStatus.PARTIAL
+            if coherence >= 0.35:
+                return GCOStatus.DEGRADED
+            return GCOStatus.CRITICAL
         if dimensions.get("accuracy_level", 0.0) >= 0.95:
             return GCOStatus.STABLE
         if coherence >= 0.65:
@@ -346,8 +468,9 @@ class REALSliceRegulator:
     pairs that produce good outcomes — the same mechanism the fast layer uses
     for routing, applied one level up.
 
-    Settle/escalate/GCO decisions and bias updates are still delegated to
-    HeuristicSliceRegulator.
+    Settle/escalate/GCO decisions and compact compatibility outputs are
+    delegated to GradientSliceRegulator, which is the primary ordinary
+    control path for budget, hygiene, pressure, growth, and portfolio drive.
     """
 
     def __init__(
@@ -356,7 +479,7 @@ class REALSliceRegulator:
         accuracy_threshold: float = 0.0,
         **heuristic_kwargs,
     ) -> None:
-        self._heuristic = HeuristicSliceRegulator(
+        self._heuristic = GradientSliceRegulator(
             accuracy_threshold=accuracy_threshold,
             **heuristic_kwargs,
         )
@@ -378,13 +501,11 @@ class REALSliceRegulator:
         self._prev_min_ctx_acc: float | None = None
         self._current_budget: int = 0
         self._cycle: int = 0
-        # Growth-mode hysteresis: consecutive DEGRADED/CRITICAL cycles while in growth mode.
-        # Reversion to non-growth is only allowed after _GROWTH_LOCK_THRESHOLD bad cycles.
-        self._growth_degraded_streak: int = 0
-        self._GROWTH_LOCK_THRESHOLD: int = 2
         # GCO-driven settlement: consecutive STABLE cycles before settle.
         # No escalation — if criteria aren't met, the system keeps working.
         self._gco_settle_window: int = 2
+        self._last_policy_name: str | None = None
+        self._last_intervention_summary: dict[str, float | str | None] = {}
 
     @property
     def engine(self) -> RealCoreEngine:
@@ -410,10 +531,29 @@ class REALSliceRegulator:
             return RegulatorySignal()
 
         current = history[-1]
+        current_min = _min_ctx_acc(current)
+        debt_summary = _context_debt_summary(
+            history,
+            accuracy_threshold=self.accuracy_threshold,
+        )
+        if self._last_policy_name is not None and self._prev_min_ctx_acc is not None:
+            observed_delta = current_min - self._prev_min_ctx_acc
+            self._last_intervention_summary = {
+                "intervention_target_metric": "min_ctx_acc",
+                "intervention_status": _intervention_status(observed_delta),
+                "intervention_signed_delta": round(float(observed_delta), 4),
+                "intervention_payoff": round(float(observed_delta), 4),
+                "intervention_observed_delta": round(float(observed_delta), 4),
+                "intervention_policy": self._last_policy_name,
+            }
 
         # Update observation with latest slice data (includes delta from previous)
-        self._obs_adapter.update(current, prev_min_ctx_acc=self._prev_min_ctx_acc)
-        self._prev_min_ctx_acc = _min_ctx_acc(current)
+        self._obs_adapter.update(
+            current,
+            prev_min_ctx_acc=self._prev_min_ctx_acc,
+            context_debt_summary=debt_summary,
+        )
+        self._prev_min_ctx_acc = current_min
 
         # Sync action backend to current mode so it filters to the right family
         self._action_backend.set_current_mode(current.mode_used)
@@ -426,27 +566,11 @@ class REALSliceRegulator:
         # Extract chosen policy dimensions
         policy_name = entry.action.removeprefix("policy:")
         policy = NAMED_POLICIES.get(policy_name, NAMED_POLICIES["visible_explore"])
-        chosen_mode, chosen_carryover, budget_mult, chosen_pressure = policy
+        chosen_mode, growth_authorization, chosen_carryover, budget_mult, chosen_pressure = policy
 
-        # Growth-mode hysteresis: once in a growth mode, don't revert to a non-growth mode
-        # unless the engine has reported DEGRADED or CRITICAL for enough consecutive cycles.
-        in_growth = current.mode_used.startswith("growth-")
-        if in_growth:
-            if entry.gco.value in ("DEGRADED", "CRITICAL"):
-                self._growth_degraded_streak += 1
-            else:
-                self._growth_degraded_streak = 0
-
-            if not chosen_mode.startswith("growth-") and self._growth_degraded_streak < self._GROWTH_LOCK_THRESHOLD:
-                # Lock: override to growth_hold (keep carryover, neutral budget)
-                lock_policy = NAMED_POLICIES["growth_hold"]
-                policy_name = "growth_hold"
-                chosen_mode, chosen_carryover, budget_mult, chosen_pressure = lock_policy
-        else:
-            self._growth_degraded_streak = 0
-
-        # Consult heuristic only for tilt-style bias and gating signals.
-        # Settlement decisions come from the engine's own GCO trajectory.
+        # Consult the gradient controller for the primary continuous control
+        # vector. Settlement decisions still come from the engine's own GCO
+        # trajectory so criteria remain terminal rather than policy-like.
         signal = self._heuristic.regulate(history)
 
         # --- GCO-driven settlement from the engine's own coherence ---
@@ -456,11 +580,39 @@ class REALSliceRegulator:
         if gco_decision is not None:
             decision_hint, stop_reason = gco_decision
 
-        # Compute next budget from multiplier
-        next_budget = max(1, round(self._current_budget * budget_mult))
+        # Use the gradient controller's budget target when available.
+        next_budget = (
+            max(1, round(float(signal.budget_target)))
+            if signal.budget_target is not None
+            else max(1, round(self._current_budget * budget_mult))
+        )
+        if float(signal.bias_updates.get("max_context_debt", 0.0)) >= 1.0:
+            chosen_carryover = signal.carryover_filter_mode
+            chosen_pressure = signal.context_pressure
+            if signal.growth_authorization == "initiate":
+                growth_authorization = "initiate"
+            if signal.growth_authorization == "hold":
+                growth_authorization = "hold"
+            if not stop_reason:
+                stop_reason = signal.stop_reason
+        else:
+            chosen_carryover = signal.carryover_filter_mode
+            chosen_pressure = signal.context_pressure
+            if signal.growth_authorization is not None:
+                growth_authorization = signal.growth_authorization
+            if signal.next_slice_budget is not None:
+                next_budget = int(signal.next_slice_budget)
+        if float(signal.reframe_flags.get("context_differentiation", 0.0)) > 0.0:
+            chosen_carryover = "drop"
+            chosen_pressure = "high"
+            growth_authorization = "hold"
+            next_budget = min(next_budget, current.slice_budget)
+            if not stop_reason:
+                stop_reason = signal.stop_reason
 
         # Only emit capability_mode if it differs from what's currently running
         new_mode: str | None = chosen_mode if chosen_mode != current.mode_used else None
+        self._last_policy_name = policy_name
 
         return RegulatorySignal(
             next_slice_budget=next_budget,
@@ -468,8 +620,18 @@ class REALSliceRegulator:
             context_pressure=chosen_pressure,
             decision_hint=decision_hint,
             capability_mode=new_mode,
+            growth_authorization=growth_authorization,
+            budget_target=signal.budget_target,
+            pressure_level=signal.pressure_level,
+            hygiene_level=signal.hygiene_level,
+            growth_drive=signal.growth_drive,
+            portfolio_drive=signal.portfolio_drive,
+            settlement_confidence=signal.settlement_confidence,
+            execution_plan=signal.execution_plan,
             gating_updates=signal.gating_updates,
             bias_updates=signal.bias_updates,
+            reset_flags=signal.reset_flags,
+            reframe_flags=signal.reframe_flags,
             stop_reason=stop_reason,
             metadata={
                 "engine_coherence": round(entry.coherence, 4),
@@ -477,9 +639,20 @@ class REALSliceRegulator:
                 "engine_gco": entry.gco.value,
                 "chosen_policy": policy_name,
                 "chosen_mode": chosen_mode,
+                "growth_authorization": growth_authorization,
                 "chosen_carryover": chosen_carryover,
                 "budget_multiplier": budget_mult,
-                "growth_degraded_streak": self._growth_degraded_streak,
+                "budget_target": signal.budget_target,
+                "pressure_level": signal.pressure_level,
+                "hygiene_level": signal.hygiene_level,
+                "growth_drive": signal.growth_drive,
+                "portfolio_drive": signal.portfolio_drive,
+                "settlement_confidence": signal.settlement_confidence,
+                "max_context_debt": float(debt_summary.get("max_context_debt", 0.0)),
+                "total_context_debt": float(debt_summary.get("total_context_debt", 0.0)),
+                "open_context_count": float(debt_summary.get("open_context_count", 0.0)),
+                "best_debt_context": debt_summary.get("best_debt_context"),
+                **self._last_intervention_summary,
             },
         )
 

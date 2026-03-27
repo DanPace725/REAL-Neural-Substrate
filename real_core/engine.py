@@ -12,6 +12,7 @@ from .interfaces import (
     ContextualSelector,
     DomainMemoryBinding,
     ExpectationModel,
+    ForecastReadout,
     MemorySubstrateProtocol,
     ObservationAdapter,
     RecognitionModel,
@@ -27,6 +28,8 @@ from .types import (
     ActionOutcome,
     CycleEntry,
     DimensionScores,
+    ForecastError,
+    ForecastOutput,
     LocalPrediction,
     MemoryActionSpec,
     PredictionError,
@@ -61,6 +64,7 @@ class RealCoreEngine:
         memory_binding: Optional[DomainMemoryBinding] = None,
         recognition_model: Optional[RecognitionModel] = None,
         expectation_model: Optional[ExpectationModel] = None,
+        forecast_model: Optional[ForecastReadout] = None,
         domain_name: str = "unknown",
         session_history: Optional[SessionHistory] = None,
         session_state_store: Optional[SessionStateStore] = None,
@@ -77,6 +81,7 @@ class RealCoreEngine:
         self.memory_binding = memory_binding
         self.recognition_model = recognition_model
         self.expectation_model = expectation_model
+        self.forecast_model = forecast_model
         self.domain_name = domain_name
         self.session_history = session_history
         self.session_state_store = session_state_store
@@ -147,6 +152,33 @@ class RealCoreEngine:
             ],
         }
 
+    def _forecast_state(
+        self,
+        state_before: Dict[str, float],
+        available: list[str],
+        recognition: RecognitionState | None,
+        predictions: Dict[str, LocalPrediction],
+    ) -> ForecastOutput | None:
+        if self.forecast_model is None:
+            return None
+        forecast = self.forecast_model.forecast(
+            state_before,
+            available,
+            self.memory.entries,
+            recognition=recognition,
+            predictions=predictions,
+            prior_coherence=self._prior_coherence,
+            substrate=self.substrate,
+        )
+        if forecast is None:
+            return None
+        if forecast.candidates and forecast.target_label not in forecast.candidates:
+            forecast.candidates = {
+                **dict(forecast.candidates),
+                str(forecast.target_label): float(forecast.confidence),
+            }
+        return forecast
+
     def _prediction_summary(
         self,
         predictions: Dict[str, LocalPrediction],
@@ -163,11 +195,29 @@ class RealCoreEngine:
             for action, prediction in predictions.items()
         }
 
+    def _forecast_summary(
+        self,
+        forecast: ForecastOutput | None,
+    ) -> Dict[str, Any] | None:
+        if forecast is None:
+            return None
+        return {
+            "target_label": forecast.target_label,
+            "confidence": forecast.confidence,
+            "domain": forecast.domain,
+            "horizon": forecast.horizon,
+            "candidates": {
+                str(label): float(score)
+                for label, score in forecast.candidates.items()
+            },
+        }
+
     def _recordable_before_state(
         self,
         before: Dict[str, float],
         recognition: RecognitionState | None,
         predictions: Dict[str, LocalPrediction],
+        forecast: ForecastOutput | None,
     ) -> Dict[str, Any]:
         recordable: Dict[str, Any] = dict(before)
         recognition_summary = self._recognition_summary(recognition)
@@ -176,6 +226,9 @@ class RealCoreEngine:
         summary = self._prediction_summary(predictions)
         if summary is not None:
             recordable["anticipation"] = {"predictions": summary}
+        forecast_summary = self._forecast_summary(forecast)
+        if forecast_summary is not None:
+            recordable["forecast"] = forecast_summary
         return recordable
 
     def _prediction_error(
@@ -192,6 +245,25 @@ class RealCoreEngine:
         return self.expectation_model.compare(
             action,
             prediction,
+            state_after,
+            dimensions,
+            coherence,
+            delta,
+            self.memory.entries,
+        )
+
+    def _forecast_error(
+        self,
+        forecast: ForecastOutput | None,
+        state_after: Dict[str, float],
+        dimensions: DimensionScores,
+        coherence: float,
+        delta: float,
+    ) -> ForecastError | None:
+        if self.forecast_model is None:
+            return None
+        return self.forecast_model.compare(
+            forecast,
             state_after,
             dimensions,
             coherence,
@@ -390,10 +462,12 @@ class RealCoreEngine:
         available = self._available_actions()
         available = self._affordable_actions(available)
         predictions = self._predict_actions(before, available, recognition)
+        forecast = self._forecast_state(before, available, recognition, predictions)
         recordable_before = self._recordable_before_state(
             before,
             recognition,
             predictions,
+            forecast,
         )
         selection_context = self._selection_context(
             cycle,
@@ -431,6 +505,13 @@ class RealCoreEngine:
             coherence,
             delta,
         )
+        forecast_error = self._forecast_error(
+            forecast,
+            after,
+            dimensions,
+            coherence,
+            delta,
+        )
 
         entry = CycleEntry(
             cycle=cycle,
@@ -446,6 +527,8 @@ class RealCoreEngine:
             recognition=recognition,
             prediction=prediction,
             prediction_error=prediction_error,
+            forecast=forecast,
+            forecast_error=forecast_error,
         )
         self.memory.record(entry)
 

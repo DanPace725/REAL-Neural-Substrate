@@ -100,6 +100,34 @@ class TestLatentGrowthGate(unittest.TestCase):
         self.assertFalse(any(action["action"].startswith("bud_") for action in blocked))
         self.assertTrue(any(action["action"].startswith("bud_") for action in allowed))
 
+    def test_initiate_authorization_opens_growth_without_high_request_pressure(self) -> None:
+        system = self._growth_system()
+        capability = system.environment.capability_states["n0"]
+        capability.growth_enabled = False
+        capability.growth_support = 0.12
+        capability.growth_recruitment_pressure = 0.04
+        capability.growth_stabilization_readiness = 0.52
+        system.environment.slow_growth_authorization = "initiate"
+
+        observation = {
+            "atp_ratio": 1.0,
+            "contradiction_pressure": 0.8,
+            "queue_pressure": 0.0,
+            "oldest_packet_age": 0.0,
+            "ingress_backlog": 0.0,
+            "energy_surplus": 0.3,
+            "head_has_task": 1.0,
+            "head_has_context": 1.0,
+            "effective_context_confidence": 0.9,
+            "context_promotion_ready": 1.0,
+            "context_growth_ready": 1.0,
+        }
+
+        system.environment.observe_local = lambda node_id: dict(observation)
+        actions = system.environment.growth_action_specs("n0")
+
+        self.assertTrue(any(action["action"].startswith("bud_") for action in actions))
+
 
 if __name__ == "__main__":
     unittest.main()

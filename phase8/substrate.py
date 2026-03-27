@@ -552,6 +552,38 @@ class ConnectionSubstrate:
             current = self._inner.slow.get(key, 0.0)
             self._inner.seed_support((key,), value=max(current, value))
 
+    def scrub_contextual_support(
+        self,
+        *,
+        context_bit: int | None = None,
+        scale: float = 0.35,
+    ) -> None:
+        """Dampen context-bound support so stale priors become challengeable."""
+        scale = max(0.0, min(1.0, float(scale)))
+        target_context = None if context_bit is None else int(context_bit)
+        for (_, _, action_context), key in self._context_action_keys.items():
+            if target_context is not None and int(action_context) != target_context:
+                continue
+            scaled = self._inner.slow.get(key, 0.0) * scale
+            if scaled < 1e-4:
+                self._inner.slow[key] = 0.0
+                self._inner.slow_velocity[key] = 0.0
+                self._inner.slow_age[key] = max(self._inner.slow_age.get(key, 0), 1)
+            else:
+                self._inner.slow[key] = scaled
+                self._inner.slow_velocity[key] = self._inner.slow_velocity.get(key, 0.0) * scale
+
+        suffix = None if target_context is None else f":context_{target_context}"
+        to_delete: list[str] = []
+        for key in self._context_credit_accumulator:
+            if suffix is not None and not key.endswith(suffix):
+                continue
+            self._context_credit_accumulator[key] *= scale
+            if self._context_credit_accumulator[key] < 1e-4:
+                to_delete.append(key)
+        for key in to_delete:
+            del self._context_credit_accumulator[key]
+
     def record_context_feedback(
         self,
         neighbor_id: str,
