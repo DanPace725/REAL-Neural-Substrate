@@ -8,6 +8,9 @@ from real_core import (
     HeuristicSliceRegulator,
     LaminatedController,
     LearningSliceRegulator,
+    RegulatoryObservation,
+    RegulatoryPrimitive,
+    RegulatorySubstrate,
     RegulatorySignal,
     SliceAccuracyCoherenceModel,
     SliceExecutionPlan,
@@ -1149,7 +1152,155 @@ class TestLaminationContracts(unittest.TestCase):
         self.assertGreaterEqual(signal.portfolio_drive, 0.0)
         self.assertLessEqual(signal.portfolio_drive, 1.0)
         self.assertIsNotNone(signal.execution_plan)
+        self.assertLessEqual(signal.execution_plan.hard_cap, 32)
         self.assertEqual(signal.metadata.get("regulator_mode"), "gradient")
+        substrate_meta = signal.metadata.get("regulatory_substrate", {})
+        self.assertIn("primitive_drives", substrate_meta)
+        self.assertIn("differentiate", substrate_meta.get("primitive_drives", {}))
+        self.assertIn("latent_states", substrate_meta)
+
+    def test_gradient_regulator_only_authorizes_growth_from_bottom_up_request(self) -> None:
+        regulator = GradientSliceRegulator(accuracy_threshold=0.8)
+        requested = [
+            SliceSummary(
+                slice_id=1,
+                slice_budget=6,
+                cycles_used=6,
+                examples_seen=4,
+                conflict_level=0.35,
+                ambiguity_level=0.25,
+                coherence_delta=0.0,
+                mean_uncertainty=0.42,
+                context_accuracy={"context_0": 0.36, "context_1": 0.72},
+                metadata={
+                    "final_accuracy": 0.54,
+                    "floor_accuracy": 0.36,
+                    "mean_provisional_context_ambiguity": 0.05,
+                    "mean_transform_commitment_margin": 0.68,
+                    "growth_request": {
+                        "authorization": "auto",
+                        "requesting_nodes": 1,
+                        "active_growth_nodes": 0,
+                        "pending_proposals": 0,
+                        "max_pressure": 0.46,
+                        "max_readiness": 0.20,
+                    },
+                    "applied_carryover_filter_mode": "soften",
+                },
+            )
+        ]
+        no_request = [
+            replace(
+                requested[0],
+                metadata={
+                    **requested[0].metadata,
+                    "growth_request": {
+                        "authorization": "auto",
+                        "requesting_nodes": 0,
+                        "active_growth_nodes": 0,
+                        "pending_proposals": 0,
+                        "max_pressure": 0.46,
+                        "max_readiness": 0.20,
+                    },
+                },
+            )
+        ]
+
+        requested_signal = regulator.regulate(requested)
+        no_request_signal = regulator.regulate(no_request)
+
+        self.assertEqual(requested_signal.growth_authorization, "authorize")
+        self.assertNotEqual(no_request_signal.growth_authorization, "authorize")
+
+    def test_gradient_regulator_can_initiate_growth_from_chronic_structural_need(self) -> None:
+        regulator = GradientSliceRegulator(accuracy_threshold=0.8)
+        self.assertTrue(
+            regulator._should_initiate_growth_from_structural_need(
+                structural_need=0.59,
+                expand_drive=0.25,
+                explore_drive=0.35,
+                pressure_level=0.63,
+                settlement_confidence=0.45,
+                floor_gap=0.45,
+                growth_readiness=0.64,
+            )
+        )
+        self.assertFalse(
+            regulator._should_initiate_growth_from_structural_need(
+                structural_need=0.45,
+                expand_drive=0.18,
+                explore_drive=0.20,
+                pressure_level=0.34,
+                settlement_confidence=0.65,
+                floor_gap=0.12,
+                growth_readiness=0.18,
+            )
+        )
+
+    def test_regulatory_substrate_accumulates_primitive_credit_and_support(self) -> None:
+        substrate = RegulatorySubstrate()
+        first = RegulatoryObservation(
+            floor_accuracy=0.20,
+            final_accuracy=0.45,
+            floor_gap=0.75,
+            final_gap=0.4375,
+            debt_mass=0.80,
+            debt_total=0.85,
+            open_context_mass=1.0,
+            spread=0.60,
+            uncertainty=0.50,
+            conflict=0.42,
+            ambiguity=0.28,
+            provisional_ambiguity=0.04,
+            hidden_ambiguity=0.05,
+            commitment_hardness=0.72,
+            progress_velocity=0.20,
+            stall=0.80,
+            failed_hygiene_persistence=0.66,
+            slice_efficiency=0.32,
+            growth_pressure=0.08,
+            growth_readiness=0.35,
+            active_growth=0.0,
+            pending_growth=0.0,
+            budget_saturation=0.55,
+        )
+        second = RegulatoryObservation(
+            floor_accuracy=0.42,
+            final_accuracy=0.64,
+            floor_gap=0.475,
+            final_gap=0.20,
+            debt_mass=0.38,
+            debt_total=0.50,
+            open_context_mass=0.50,
+            spread=0.24,
+            uncertainty=0.35,
+            conflict=0.18,
+            ambiguity=0.20,
+            provisional_ambiguity=0.12,
+            hidden_ambiguity=0.18,
+            commitment_hardness=0.44,
+            progress_velocity=0.72,
+            stall=0.28,
+            failed_hygiene_persistence=0.20,
+            slice_efficiency=0.70,
+            growth_pressure=0.10,
+            growth_readiness=0.42,
+            active_growth=0.0,
+            pending_growth=0.0,
+            budget_saturation=0.40,
+        )
+
+        first_comp = substrate.step(first, current_budget=6)
+        second_comp = substrate.step(second, current_budget=6)
+
+        diff_state = substrate.states[RegulatoryPrimitive.DIFFERENTIATE]
+        self.assertGreater(first_comp.primitive_drives["differentiate"], 0.0)
+        self.assertGreater(diff_state.credit, 0.0)
+        self.assertGreater(diff_state.provisional_support, 0.0)
+        self.assertGreater(second_comp.settlement_confidence, first_comp.settlement_confidence)
+        self.assertIn("recoverable_branch", second_comp.latent_states)
+        self.assertGreater(second_comp.latent_states["recoverable_branch"], 0.0)
+        self.assertGreater(second_comp.latent_states["confidently_wrong"], 0.0)
 
     def test_controller_portfolio_prefers_floor_recovery_and_commits_winner_state(self) -> None:
         runner = AdaptiveScriptedRunner()

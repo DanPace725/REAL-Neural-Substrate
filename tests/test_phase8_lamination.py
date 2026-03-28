@@ -186,6 +186,30 @@ class TestPhase8Lamination(unittest.TestCase):
             [],
         )
 
+    def test_gradient_signal_honors_explicit_growth_authorization(self) -> None:
+        case = b_scale_suite_by_id()["B2S1"]
+        scenario = case.tasks["task_a"].visible_scenario
+        runner = Phase8SliceRunner(
+            build_system_for_scenario(
+                scenario,
+                seed=13,
+                capability_policy="self-selected",
+            ),
+            scenario,
+            benchmark_family="B",
+            task_key="task_a",
+        )
+
+        runner._apply_regulatory_signal(
+            RegulatorySignal(
+                growth_authorization="hold",
+                growth_drive=0.9,
+                metadata={"regulator_mode": "gradient"},
+            ),
+        )
+
+        self.assertEqual(runner.system.environment.slow_growth_authorization, "hold")
+
     def test_slice_summary_records_applied_reset_and_reframe_flags(self) -> None:
         case = b_scale_suite_by_id()["B2S1"]
         scenario = case.tasks["task_a"].visible_scenario
@@ -372,9 +396,12 @@ class TestPhase8Lamination(unittest.TestCase):
             ),
             0.9,
         )
-        self.assertEqual(len(runner.system.environment.pending_growth_proposals), 0)
+        self.assertEqual(len(runner.system.environment.pending_growth_proposals), 1)
         self.assertLess(capability.latent_support, 0.9)
-        self.assertLess(capability.growth_support, 0.85)
+        self.assertAlmostEqual(capability.growth_recruitment_pressure, 0.75)
+        self.assertAlmostEqual(capability.growth_stabilization_readiness, 0.8)
+        self.assertAlmostEqual(capability.growth_support, 0.85)
+        self.assertTrue(capability.growth_enabled)
         self.assertGreaterEqual(capability.visible_context_trust, 0.55)
 
     def test_run_slice_plan_records_adaptive_execution_metadata(self) -> None:

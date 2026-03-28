@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Dict, List
 
 from .interfaces import SliceRegulator, SliceRunner
+from .regulatory_substrate import RegulatoryObservation, RegulatorySubstrate
 from .types import (
     ModeExperience,
     RegulatorySignal,
@@ -19,6 +20,12 @@ def _clamp_budget(value: int, *, minimum: int = 1, maximum: int = 4096) -> int:
 
 def _clamp01(value: float) -> float:
     return max(0.0, min(1.0, float(value)))
+
+
+_MAX_GRADIENT_SLICE_BUDGET = 32
+_REGULATORY_BLEND_DEFAULT = 0.35
+_REGULATORY_PORTFOLIO_BLEND = 0.25
+_REGULATORY_BUDGET_BLEND = 0.30
 
 
 def _intervention_status(observed_delta: float, *, epsilon: float = 0.01) -> str:
@@ -647,6 +654,7 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
     ) -> None:
         super().__init__(**kwargs)
         self.portfolio_trigger = float(portfolio_trigger)
+        self._regulatory_substrate = RegulatorySubstrate()
 
     def regulate(self, history: List[SliceSummary]) -> RegulatorySignal:
         if not history:
@@ -681,6 +689,7 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
             float(current.metadata.get("hidden_packet_mean_provisional_context_ambiguity", provisional_ambiguity)),
         )
         growth_request = dict(current.metadata.get("growth_request", {}))
+        requesting_growth = _clamp01(float(growth_request.get("requesting_nodes", 0.0)) / 3.0)
         growth_pressure = _clamp01(float(growth_request.get("max_pressure", 0.0)))
         growth_readiness = _clamp01(float(growth_request.get("max_readiness", 0.0)))
         active_growth = _clamp01(float(growth_request.get("active_growth_nodes", 0.0)) / 3.0)
@@ -717,7 +726,7 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
             )
         )
 
-        pressure_level = _clamp01(
+        formula_pressure_level = _clamp01(
             0.38 * debt_mass
             + 0.18 * debt_total
             + 0.16 * spread
@@ -725,37 +734,156 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
             + 0.08 * uncertainty
             + 0.06 * conflict
         )
-        hygiene_level = _clamp01(
+        formula_hygiene_level = _clamp01(
             0.40 * conflict
             + 0.22 * failed_hygiene_persistence
             + 0.18 * spread
             + 0.12 * debt_mass
             + 0.08 * hardened_commitment
         )
-        growth_drive = _clamp01(
+        formula_growth_drive = _clamp01(
             0.34 * growth_pressure
             + 0.20 * growth_readiness
             + 0.20 * growth_struggle
             + 0.14 * failed_hygiene_persistence
             + 0.12 * open_context_mass
         )
-        portfolio_drive = _clamp01(
-            0.28 * debt_mass
-            + 0.22 * failed_hygiene_persistence
-            + 0.18 * stall
-            + 0.16 * spread
-            + 0.16 * hardened_commitment
+        budget_saturation = _clamp01(current.slice_budget / max(_MAX_GRADIENT_SLICE_BUDGET, 1))
+        formula_portfolio_drive = _clamp01(
+            0.24 * debt_mass
+            + 0.18 * failed_hygiene_persistence
+            + 0.14 * stall
+            + 0.12 * spread
+            + 0.12 * hardened_commitment
+            + 0.10 * floor_gap
+            + 0.10 * budget_saturation
         )
-        settlement_confidence = _clamp01(
+        formula_settlement_confidence = _clamp01(
             0.50 * min(floor_accuracy / max(threshold, 1e-6), 1.0)
             + 0.35 * min(final_accuracy / max(threshold, 1e-6), 1.0)
             + 0.10 * (1.0 - conflict)
             + 0.05 * (1.0 - ambiguity)
         )
+        regulatory_observation = RegulatoryObservation(
+            floor_accuracy=floor_accuracy,
+            final_accuracy=final_accuracy,
+            floor_gap=floor_gap,
+            final_gap=final_gap,
+            debt_mass=debt_mass,
+            debt_total=debt_total,
+            open_context_mass=open_context_mass,
+            spread=spread,
+            uncertainty=uncertainty,
+            conflict=conflict,
+            ambiguity=ambiguity,
+            provisional_ambiguity=provisional_ambiguity,
+            hidden_ambiguity=hidden_ambiguity,
+            commitment_hardness=commitment_hardness,
+            progress_velocity=progress_velocity,
+            stall=stall,
+            failed_hygiene_persistence=failed_hygiene_persistence,
+            slice_efficiency=slice_efficiency,
+            growth_pressure=growth_pressure,
+            growth_readiness=growth_readiness,
+            active_growth=active_growth,
+            pending_growth=pending_growth,
+            budget_saturation=budget_saturation,
+        )
+        regulatory_composition = self._regulatory_substrate.step(
+            regulatory_observation,
+            current_budget=current.slice_budget,
+        )
+        regulatory_substrate_meta = {
+            "primitive_drives": dict(regulatory_composition.primitive_drives),
+            "primitive_states": dict(regulatory_composition.primitive_states),
+            "latent_states": dict(regulatory_composition.latent_states),
+        }
+        latent_states = {
+            str(key): float(value)
+            for key, value in dict(regulatory_composition.latent_states).items()
+        }
+        primitive_drives = {
+            str(key): float(value)
+            for key, value in dict(regulatory_composition.primitive_drives).items()
+        }
+        structural_need = latent_states.get("structural_need", 0.0)
+        poisoned = latent_states.get("poisoned", 0.0)
+        confidently_wrong = latent_states.get("confidently_wrong", 0.0)
+        differentiate_drive = primitive_drives.get("differentiate", 0.0)
+        explore_drive = primitive_drives.get("explore", 0.0)
+        expand_drive = primitive_drives.get("expand", 0.0)
+        hygiene_drive = primitive_drives.get("hygiene", 0.0)
+        pressure_level = _clamp01(
+            _REGULATORY_BLEND_DEFAULT * regulatory_composition.pressure_level
+            + (1.0 - _REGULATORY_BLEND_DEFAULT) * formula_pressure_level
+        )
+        if (
+            structural_need >= 0.55
+            and differentiate_drive >= 0.40
+            and explore_drive >= 0.30
+        ):
+            pressure_level = max(
+                pressure_level,
+                _clamp01(0.62 + 0.12 * (structural_need - 0.55) + 0.10 * max(0.0, explore_drive - 0.30)),
+            )
+        if (
+            structural_need >= 0.62
+            and differentiate_drive >= 0.44
+            and explore_drive >= 0.34
+            and formula_settlement_confidence <= 0.22
+        ):
+            pressure_level = max(pressure_level, 0.74)
+        if debt_mass >= 0.25 and open_context_mass >= 0.5:
+            pressure_level = max(pressure_level, 0.38)
+        hygiene_level = _clamp01(
+            _REGULATORY_BLEND_DEFAULT * regulatory_composition.hygiene_level
+            + (1.0 - _REGULATORY_BLEND_DEFAULT) * formula_hygiene_level
+        )
+        if poisoned >= 0.26 and hygiene_drive >= 0.16:
+            hygiene_level = max(
+                hygiene_level,
+                _clamp01(0.31 + 0.22 * (poisoned - 0.26) + 0.10 * max(0.0, hygiene_drive - 0.16)),
+            )
+        if (
+            poisoned >= 0.32
+            and confidently_wrong >= 0.22
+            and failed_hygiene_persistence >= 0.25
+        ):
+            hygiene_level = max(hygiene_level, 0.74)
+        growth_drive = _clamp01(
+            _REGULATORY_BLEND_DEFAULT * regulatory_composition.growth_drive
+            + (1.0 - _REGULATORY_BLEND_DEFAULT) * formula_growth_drive
+        )
+        if structural_need >= 0.55 and expand_drive >= 0.22:
+            growth_drive = max(
+                growth_drive,
+                _clamp01(0.42 + 0.28 * (structural_need - 0.55) + 0.10 * max(0.0, expand_drive - 0.22)),
+            )
+        if (
+            structural_need >= 0.62
+            and expand_drive >= 0.24
+            and explore_drive >= 0.28
+        ):
+            growth_drive = max(growth_drive, 0.50)
+        portfolio_drive = _clamp01(
+            _REGULATORY_PORTFOLIO_BLEND * regulatory_composition.portfolio_drive
+            + (1.0 - _REGULATORY_PORTFOLIO_BLEND) * formula_portfolio_drive
+        )
+        settlement_confidence = _clamp01(
+            _REGULATORY_BLEND_DEFAULT * regulatory_composition.settlement_confidence
+            + (1.0 - _REGULATORY_BLEND_DEFAULT) * formula_settlement_confidence
+        )
 
         budget_scale = 0.80 + 0.65 * stall + 0.35 * pressure_level + 0.30 * portfolio_drive - 0.40 * settlement_confidence
-        requested_budget = max(1.0, current.slice_budget * budget_scale)
-        max_growth_budget = max(12, current.slice_budget + max(2, current.slice_budget // 2))
+        requested_budget = max(
+            1.0,
+            (1.0 - _REGULATORY_BUDGET_BLEND) * current.slice_budget * budget_scale
+            + _REGULATORY_BUDGET_BLEND * float(regulatory_composition.budget_target),
+        )
+        max_growth_budget = min(
+            _MAX_GRADIENT_SLICE_BUDGET,
+            max(12, current.slice_budget + max(2, current.slice_budget // 2)),
+        )
         budget_target = float(
             _clamp_budget(
                 round(min(requested_budget, max_growth_budget)),
@@ -768,12 +896,23 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
         context_pressure = self._compat_pressure_mode(pressure_level)
         growth_authorization = self._compat_growth_authorization(
             growth_drive=growth_drive,
+            requesting_growth=requesting_growth,
             growth_pressure=growth_pressure,
             growth_readiness=growth_readiness,
             active_growth=active_growth,
             pending_growth=pending_growth,
             settlement_confidence=settlement_confidence,
         )
+        if growth_authorization is None and self._should_initiate_growth_from_structural_need(
+            structural_need=structural_need,
+            expand_drive=expand_drive,
+            explore_drive=explore_drive,
+            pressure_level=pressure_level,
+            settlement_confidence=settlement_confidence,
+            floor_gap=floor_gap,
+            growth_readiness=growth_readiness,
+        ):
+            growth_authorization = "initiate"
 
         decision_hint = SettlementDecision.CONTINUE
         stop_reason = ""
@@ -798,6 +937,11 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
             "progress_velocity": round(progress_velocity, 4),
             "failed_hygiene_persistence": round(failed_hygiene_persistence, 4),
             "slice_efficiency": round(slice_efficiency, 4),
+            "regulatory_pressure_drive": round(regulatory_composition.pressure_level, 4),
+            "regulatory_hygiene_drive": round(regulatory_composition.hygiene_level, 4),
+            "regulatory_growth_drive": round(regulatory_composition.growth_drive, 4),
+            "regulatory_portfolio_drive": round(regulatory_composition.portfolio_drive, 4),
+            "regulatory_settlement_drive": round(regulatory_composition.settlement_confidence, 4),
         }
 
         best_debt_context = debt_summary.get("best_debt_context")
@@ -867,6 +1011,8 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
             "commitment_hardness": round(commitment_hardness, 4),
             "provisional_ambiguity": round(provisional_ambiguity, 4),
             "hidden_provisional_ambiguity": round(hidden_ambiguity, 4),
+            "budget_saturation": round(budget_saturation, 4),
+            "regulatory_substrate": regulatory_substrate_meta,
         }
 
         return RegulatorySignal(
@@ -895,16 +1041,16 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
         )
 
     def _compat_hygiene_mode(self, hygiene_level: float) -> str:
-        if hygiene_level >= 0.72:
+        if hygiene_level >= 0.68:
             return "drop"
-        if hygiene_level >= 0.30:
+        if hygiene_level >= 0.28:
             return "soften"
         return "keep"
 
     def _compat_pressure_mode(self, pressure_level: float) -> str:
-        if pressure_level >= 0.72:
+        if pressure_level >= 0.66:
             return "high"
-        if pressure_level >= 0.38:
+        if pressure_level >= 0.36:
             return "medium"
         return "low"
 
@@ -912,6 +1058,7 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
         self,
         *,
         growth_drive: float,
+        requesting_growth: float,
         growth_pressure: float,
         growth_readiness: float,
         active_growth: float,
@@ -924,11 +1071,34 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
             if growth_drive <= 0.18:
                 return "hold"
             return "authorize"
-        if growth_drive >= 0.70 and growth_pressure <= 0.25:
-            return "initiate"
-        if growth_drive >= 0.48 and (growth_pressure >= 0.12 or growth_readiness >= 0.35):
+        if requesting_growth > 0.0:
+            if growth_drive <= 0.12:
+                return "hold"
             return "authorize"
+        if growth_drive >= 0.64 and growth_pressure <= 0.25:
+            return "initiate"
         return None
+
+    def _should_initiate_growth_from_structural_need(
+        self,
+        *,
+        structural_need: float,
+        expand_drive: float,
+        explore_drive: float,
+        pressure_level: float,
+        settlement_confidence: float,
+        floor_gap: float,
+        growth_readiness: float,
+    ) -> bool:
+        return bool(
+            structural_need >= 0.55
+            and expand_drive >= 0.22
+            and explore_drive >= 0.28
+            and pressure_level >= 0.50
+            and settlement_confidence <= 0.55
+            and floor_gap >= 0.25
+            and growth_readiness >= 0.30
+        )
 
     def _build_execution_plan(
         self,
@@ -945,18 +1115,31 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
         # Keep adaptive slices bounded so a hard case does not silently turn
         # back into a monolithic long run. Rescue should happen through more
         # slices or a short portfolio, not by letting one slice balloon.
-        target = min(target, max(12, current_budget * 2))
+        target = min(
+            _MAX_GRADIENT_SLICE_BUDGET,
+            target,
+            max(12, current_budget * 2),
+        )
         initial_budget = _clamp_budget(
             max(1, round(target * (0.45 + 0.20 * (1.0 - hygiene_level)))),
-            maximum=max(target, current_budget * 2, 1),
+            maximum=min(
+                _MAX_GRADIENT_SLICE_BUDGET,
+                max(target, current_budget * 2, 1),
+            ),
         )
         extend_step = _clamp_budget(
             max(1, round(target * (0.20 + 0.15 * pressure_level))),
-            maximum=max(4, target // 2, current_budget, 1),
+            maximum=min(
+                _MAX_GRADIENT_SLICE_BUDGET,
+                max(4, target // 2, current_budget, 1),
+            ),
         )
         soft_cap = _clamp_budget(
             max(initial_budget, round(target * (1.0 + 0.15 * portfolio_drive))),
-            maximum=max(initial_budget, target + extend_step * 2, 1),
+            maximum=min(
+                _MAX_GRADIENT_SLICE_BUDGET,
+                max(initial_budget, target + extend_step * 2, 1),
+            ),
         )
         hard_cap = _clamp_budget(
             max(
@@ -964,11 +1147,17 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
                 round(
                     min(
                         target * (1.25 + 0.35 * max(0.0, commitment_hardness - provisional_ambiguity)),
-                        max(target + extend_step * 3, current_budget * 3, 12),
+                        min(
+                            _MAX_GRADIENT_SLICE_BUDGET,
+                            max(target + extend_step * 3, current_budget * 3, 12),
+                        ),
                     )
                 ),
             ),
-            maximum=max(soft_cap, target + extend_step * 3, current_budget * 3, 12),
+            maximum=min(
+                _MAX_GRADIENT_SLICE_BUDGET,
+                max(soft_cap, target + extend_step * 3, current_budget * 3, 12),
+            ),
         )
         patience = 1 + int(max(0.0, provisional_ambiguity - commitment_hardness) >= 0.10)
         return SliceExecutionPlan(
@@ -1271,7 +1460,7 @@ class LaminatedController:
         *,
         initial_cycle_budget: int = 8,
         safety_limit: int = 200,
-        portfolio_threshold: float = 0.68,
+        portfolio_threshold: float = 0.45,
     ) -> None:
         self.runner = runner
         self.regulator = regulator or HeuristicSliceRegulator()
@@ -1306,11 +1495,14 @@ class LaminatedController:
                     final_decision=decision,
                     final_cycle_budget=cycle_budget,
                 )
-            cycle_budget = _clamp_budget(
+            next_budget = (
                 round(signal.budget_target)
                 if signal is not None and signal.budget_target is not None
-                else (signal.next_slice_budget or cycle_budget),
+                else (signal.next_slice_budget or cycle_budget)
             )
+            if signal is not None and str(signal.metadata.get("regulator_mode", "")) == "gradient":
+                next_budget = min(int(next_budget), _MAX_GRADIENT_SLICE_BUDGET)
+            cycle_budget = _clamp_budget(next_budget)
 
             if slice_id >= self.safety_limit:
                 return LaminatedRunResult(
@@ -1346,6 +1538,7 @@ class LaminatedController:
     ) -> SliceExecutionPlan:
         if signal is not None and signal.execution_plan is not None:
             return signal.execution_plan
+        cycle_budget = min(cycle_budget, _MAX_GRADIENT_SLICE_BUDGET)
         return SliceExecutionPlan(
             initial_budget=max(1, min(4, cycle_budget)),
             extend_step=max(1, max(2, cycle_budget // 4)),
@@ -1407,15 +1600,15 @@ class LaminatedController:
     ) -> SliceSummary:
         base_snapshot = self.runner.snapshot_fast_state()
         candidates: list[PortfolioCandidateResult] = []
-        for label, plan in self._candidate_plans(execution_plan):
+        for label, plan, candidate_signal in self._candidate_plans(execution_plan, signal):
             self.runner.restore_fast_state(base_snapshot)
             summary = self.runner.run_slice_plan(
                 slice_id=slice_id,
                 execution_plan=plan,
-                regulatory_signal=signal,
+                regulatory_signal=candidate_signal,
             )
             snapshot = self.runner.snapshot_fast_state()
-            score = self._score_candidate(history, summary)
+            score = self._score_candidate(history, summary, candidate_signal)
             candidates.append(
                 PortfolioCandidateResult(
                     label=label,
@@ -1435,20 +1628,26 @@ class LaminatedController:
         winner.summary.metadata["portfolio_candidate_budgets"] = {
             item.label: int(item.summary.cycles_used) for item in candidates
         }
+        winner.summary.metadata["portfolio_candidate_profiles"] = {
+            item.label: candidates[index].summary.metadata.get("portfolio_candidate_profile", {})
+            for index, item in enumerate(candidates)
+        }
         return winner.summary
 
     def _candidate_plans(
         self,
         execution_plan: SliceExecutionPlan,
-    ) -> list[tuple[str, SliceExecutionPlan]]:
+        signal: RegulatorySignal,
+    ) -> list[tuple[str, SliceExecutionPlan, RegulatorySignal]]:
         target = int(execution_plan.metadata.get("target_budget", execution_plan.soft_cap))
         budgets = [
             ("short", max(1, round(target * 0.75))),
             ("base", max(1, round(target * 1.0))),
             ("long", max(1, round(target * 1.5))),
         ]
-        candidates: list[tuple[str, SliceExecutionPlan]] = []
+        candidates: list[tuple[str, SliceExecutionPlan, RegulatorySignal]] = []
         for label, budget in budgets:
+            candidate_signal = self._shape_portfolio_signal(signal, label)
             candidates.append(
                 (
                     label,
@@ -1464,6 +1663,7 @@ class LaminatedController:
                             "target_budget": budget,
                         },
                     ),
+                    candidate_signal,
                 )
             )
         return candidates
@@ -1472,6 +1672,7 @@ class LaminatedController:
         self,
         history: List[SliceSummary],
         summary: SliceSummary,
+        signal: RegulatorySignal | None = None,
     ) -> float:
         previous = history[-1] if history else None
         floor_accuracy = _floor_accuracy(summary)
@@ -1484,12 +1685,115 @@ class LaminatedController:
         commitment_hardness = _clamp01(float(summary.metadata.get("mean_transform_commitment_margin", 1.0)))
         challengeability = max(0.0, ambiguity_retained - 0.35 * commitment_hardness)
         efficiency = _clamp01(float(summary.cost_summary.get("bit_accuracy_per_cost", 0.0)))
+        pressure_level = 0.0 if signal is None else float(signal.pressure_level)
+        hygiene_level = 0.0 if signal is None else float(signal.hygiene_level)
+        growth_drive = 0.0 if signal is None else float(signal.growth_drive)
+        floor_weight = 4.0 + 0.8 * pressure_level
+        challenge_weight = 0.50 + 0.35 * max(pressure_level, growth_drive)
+        spread_weight = 1.75 + 0.35 * pressure_level
+        hygiene_bonus = 0.20 * hygiene_level * spread_reduction
         return (
-            4.0 * floor_accuracy
+            floor_weight * floor_accuracy
             + 2.5 * max(0.0, floor_delta)
-            + 1.75 * spread_reduction
+            + spread_weight * spread_reduction
             + 1.25 * final_accuracy
-            + 0.50 * challengeability
+            + challenge_weight * challengeability
             + 0.15 * efficiency
             + 0.10 * max(0.0, final_delta)
+            + hygiene_bonus
+        )
+
+    def _shape_portfolio_signal(
+        self,
+        signal: RegulatorySignal,
+        label: str,
+    ) -> RegulatorySignal:
+        substrate = dict(signal.metadata.get("regulatory_substrate", {}))
+        primitive_drives = {
+            str(key): float(value)
+            for key, value in dict(substrate.get("primitive_drives", {})).items()
+        }
+        latent_states = {
+            str(key): float(value)
+            for key, value in dict(substrate.get("latent_states", {})).items()
+        }
+        differentiate = primitive_drives.get("differentiate", 0.0)
+        hygiene = primitive_drives.get("hygiene", 0.0)
+        explore = primitive_drives.get("explore", 0.0)
+        expand = primitive_drives.get("expand", 0.0)
+        poisoned = latent_states.get("poisoned", 0.0)
+        confidently_wrong = latent_states.get("confidently_wrong", 0.0)
+
+        pressure = float(signal.pressure_level)
+        hygiene_level = float(signal.hygiene_level)
+        growth_drive = float(signal.growth_drive)
+        settlement_confidence = float(signal.settlement_confidence)
+        carryover = signal.carryover_filter_mode
+        context_pressure = signal.context_pressure
+        growth_authorization = signal.growth_authorization
+        execution_plan = signal.execution_plan
+        if label == "short":
+            pressure = _clamp01(pressure + 0.10 * differentiate + 0.06 * explore)
+            hygiene_level = _clamp01(hygiene_level + 0.08 * hygiene + 0.06 * poisoned)
+            settlement_confidence = _clamp01(settlement_confidence - 0.10 * confidently_wrong)
+        elif label == "long":
+            pressure = _clamp01(pressure + 0.12 * differentiate)
+            hygiene_level = _clamp01(max(0.0, hygiene_level - 0.05 * max(0.0, 1.0 - poisoned)))
+            growth_drive = _clamp01(growth_drive + 0.12 * expand + 0.06 * explore)
+            settlement_confidence = _clamp01(settlement_confidence - 0.08 * explore)
+        else:
+            pressure = _clamp01(pressure + 0.04 * differentiate)
+            hygiene_level = _clamp01(hygiene_level + 0.04 * hygiene)
+
+        if hygiene_level >= 0.68:
+            carryover = "drop"
+        elif hygiene_level >= 0.28:
+            carryover = "soften"
+        else:
+            carryover = "keep"
+        if pressure >= 0.66:
+            context_pressure = "high"
+        elif pressure >= 0.36:
+            context_pressure = "medium"
+        else:
+            context_pressure = "low"
+        if settlement_confidence >= 0.98:
+            growth_authorization = "hold"
+        elif growth_authorization == "authorize":
+            growth_authorization = "authorize"
+        elif growth_authorization == "initiate" or growth_drive >= 0.64:
+            growth_authorization = "initiate"
+
+        candidate_metadata = dict(signal.metadata)
+        candidate_metadata["portfolio_candidate_profile"] = {
+            "label": label,
+            "pressure_level": round(pressure, 4),
+            "hygiene_level": round(hygiene_level, 4),
+            "growth_drive": round(growth_drive, 4),
+            "settlement_confidence": round(settlement_confidence, 4),
+            "carryover_filter_mode": carryover,
+            "context_pressure": context_pressure,
+            "growth_authorization": growth_authorization,
+        }
+        if execution_plan is not None:
+            execution_plan = replace(
+                execution_plan,
+                metadata={
+                    **dict(execution_plan.metadata),
+                    "candidate_pressure_level": round(pressure, 4),
+                    "candidate_hygiene_level": round(hygiene_level, 4),
+                    "candidate_growth_drive": round(growth_drive, 4),
+                },
+            )
+        return replace(
+            signal,
+            pressure_level=pressure,
+            hygiene_level=hygiene_level,
+            growth_drive=growth_drive,
+            settlement_confidence=settlement_confidence,
+            carryover_filter_mode=carryover,
+            context_pressure=context_pressure,
+            growth_authorization=growth_authorization,
+            execution_plan=execution_plan,
+            metadata=candidate_metadata,
         )

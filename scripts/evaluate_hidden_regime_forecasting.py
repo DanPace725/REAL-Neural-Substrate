@@ -221,7 +221,7 @@ def main() -> None:
         "--reg",
         "--regulator-type",
         dest="regulator_type",
-        choices=("heuristic", "learning", "real"),
+        choices=("heuristic", "learning", "real", "gradient"),
         default="real",
         help="Slow-layer regulator type.",
     )

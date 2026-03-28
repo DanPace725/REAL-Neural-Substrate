@@ -40,6 +40,14 @@ from .consolidation import BasicConsolidationPipeline
 from .session import SessionHistory, SessionRecord
 from .session_state import SessionStateStore
 from .substrate import MemorySubstrate, SubstrateConfig
+from .regulatory_substrate import (
+    RegulatoryComposition,
+    RegulatoryLatentState,
+    RegulatoryObservation,
+    RegulatoryPrimitive,
+    RegulatoryPrimitiveState,
+    RegulatorySubstrate,
+)
 from .lamination import (
     GradientSliceRegulator,
     HeuristicSliceRegulator,
@@ -76,6 +84,12 @@ __all__ = [
     "BasicConsolidationPipeline",
     "MemorySubstrate",
     "SubstrateConfig",
+    "RegulatoryPrimitive",
+    "RegulatoryPrimitiveState",
+    "RegulatoryObservation",
+    "RegulatoryComposition",
+    "RegulatoryLatentState",
+    "RegulatorySubstrate",
     "MemorySubstrateProtocol",
     "ConsolidationPipeline",
     "ContextualSelector",
