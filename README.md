@@ -59,6 +59,7 @@ After `pip install -e .`, the same runners are also available as console scripts
 
 ## Where To Start
 
+- If you want to understand how the code actually runs, start with `docs/CODE_TOUR.md`.
 - If you want the architecture overview, start with `docs/summaries/architecture_notes.md`.
 - If you want the repo/package map, read `docs/summaries/project_overview_cross_phase.md`.
 - If you want the broad current state in prose, read `docs/reports/SYNTHESIS.md`.

@@ -1,6 +1,6 @@
 # Trace Index
 
-Generated: `2026-03-27T12:30:26-07:00`
+Generated: `2026-03-28T13:43:56-07:00`
 
 - trace root: `docs/traces`
 - entry count: `101`
