@@ -1,0 +1,150 @@
+{
+  "light_config": {
+    "csv_path": "occupancy_baseline/data/occupancy_synth_v1.csv",
+    "window_size": 5,
+    "normalize": true,
+    "selector_seed": 13,
+    "warmup_sessions": 3,
+    "prediction_sessions": 3,
+    "feedback_amount": 0.18,
+    "prediction_feedback_fraction": 0.35,
+    "packet_ttl": 8,
+    "forward_drain_cycles": 16,
+    "feedback_drain_cycles": 4,
+    "topology_mode": "multihop_routing",
+    "context_mode": "online_running_context",
+    "ingress_mode": "admission_source",
+    "summary_only": true,
+    "rolling_window": 3
+  },
+  "dataset_rows": 1344,
+  "total_episodes": 1340,
+  "total_sessions": 89,
+  "warmup_session_count": 3,
+  "prediction_session_count": 3,
+  "co2_training_median": -0.160829,
+  "light_training_median": 0.692685,
+  "warmup_inventory": {
+    "session_count": 3,
+    "by_label": {
+      "0": 2,
+      "1": 1
+    },
+    "by_context_code": {
+      "0": 2,
+      "3": 1
+    },
+    "episode_lengths": {
+      "min": 1,
+      "mean": 12.67,
+      "max": 28
+    },
+    "context_codes_by_label": {
+      "0": [
+        0,
+        3
+      ],
+      "1": [
+        0
+      ]
+    }
+  },
+  "prediction_inventory": {
+    "session_count": 3,
+    "by_label": {
+      "1": 2,
+      "0": 1
+    },
+    "by_context_code": {
+      "3": 3
+    },
+    "episode_lengths": {
+      "min": 4,
+      "mean": 7.33,
+      "max": 12
+    },
+    "context_codes_by_label": {
+      "1": [
+        3
+      ],
+      "0": [
+        3
+      ]
+    }
+  },
+  "warmup_summary": {
+    "episode_count": 38,
+    "metrics": {
+      "accuracy": 0.8947368421052632,
+      "precision": 0.7777777777777778,
+      "recall": 0.7777777777777778,
+      "f1": 0.7777777777777778,
+      "tp": 7.0,
+      "tn": 27.0,
+      "fp": 2.0,
+      "fn": 2.0
+    },
+    "mean_delivered_packets": 24.5263,
+    "mean_dropped_packets": 0.4737,
+    "mean_feedback_events": 21.6316,
+    "mean_feedback_total": 3.8937,
+    "occupied_prediction_rate": 0.2368,
+    "mean_delivery_ratio": 0.9811,
+    "mean_prediction_confidence": 0.867
+  },
+  "prediction_summary": {
+    "episode_count": 22,
+    "metrics": {
+      "accuracy": 0.8181818181818182,
+      "precision": 0.9375,
+      "recall": 0.8333333333333334,
+      "f1": 0.8823529411764706,
+      "tp": 15.0,
+      "tn": 3.0,
+      "fp": 1.0,
+      "fn": 3.0
+    },
+    "mean_delivered_packets": 23.3182,
+    "mean_dropped_packets": 1.6818,
+    "mean_feedback_events": 17.0909,
+    "mean_feedback_total": 1.0767,
+    "occupied_prediction_rate": 0.7273,
+    "mean_delivery_ratio": 0.9327,
+    "mean_prediction_confidence": 0.7244
+  },
+  "recent_prediction_window": {
+    "rolling_window": 3,
+    "recent_session_accuracy": 0.8055,
+    "recent_session_delivery_ratio": 0.9255,
+    "recent_first_episode_accuracy": 0.0
+  },
+  "final_system_summary": {
+    "capability_policy": "fixed-visible",
+    "cycles": 2104,
+    "injected_packets": 1500,
+    "admitted_packets": 1500,
+    "delivered_packets": 1445,
+    "delivery_ratio": 0.9633,
+    "dropped_packets": 55,
+    "drop_ratio": 0.0367,
+    "source_buffer": 0,
+    "mean_latency": 3.4464,
+    "mean_hops": 4.0,
+    "node_atp_total": 7.2733,
+    "mean_route_cost": 0.03277,
+    "mean_feedback_award": 0.1188,
+    "mean_source_admission": 0.7129,
+    "last_source_admission": 0,
+    "source_admission_support": 0.5,
+    "source_admission_velocity": 0.0,
+    "mean_source_efficiency": 0.0,
+    "exact_matches": 1198,
+    "mean_bit_accuracy": 0.8291
+  },
+  "manifest": {
+    "run_id": "v3light_seed13_20260330T004846",
+    "run_at": "2026-03-30T00:48:46+00:00",
+    "git_sha": "fe61410",
+    "elapsed_seconds": 65.0
+  }
+}
