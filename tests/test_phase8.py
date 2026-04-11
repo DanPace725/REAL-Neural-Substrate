@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 from phase8 import (
     ConnectionSubstrate,
+    LocalNodeCoherenceModel,
     MorphogenesisConfig,
     NativeSubstrateSystem,
     RoutingEnvironment,
@@ -41,6 +42,26 @@ from scripts.neural_baseline import (
 from scripts.compare_task_transfer import aggregate_transfer, transfer_metrics
 from phase8.consolidation import Phase8ConsolidationPipeline
 from real_core.types import CycleEntry, GCOStatus
+
+
+class TestLocalNodeCoherenceModel(unittest.TestCase):
+    def test_homeostatic_composite_preserves_balanced_score(self) -> None:
+        model = LocalNodeCoherenceModel()
+        dimensions = {name: 0.72 for name in model.dimension_names}
+
+        self.assertAlmostEqual(model.composite(dimensions), 0.72)
+
+    def test_homeostatic_composite_penalizes_collapsed_dimension(self) -> None:
+        model = LocalNodeCoherenceModel()
+        dimensions = {name: 0.90 for name in model.dimension_names}
+        dimensions["vitality"] = 0.10
+        arithmetic_mean = sum(dimensions.values()) / len(dimensions)
+
+        coherence = model.composite(dimensions)
+
+        self.assertLess(coherence, arithmetic_mean)
+        self.assertLess(coherence, 0.70)
+        self.assertEqual(model.gco_status(dimensions, coherence), GCOStatus.PARTIAL)
 
 
 class TestSignalPacket(unittest.TestCase):

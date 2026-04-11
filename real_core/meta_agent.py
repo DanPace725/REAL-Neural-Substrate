@@ -112,21 +112,30 @@ _POLICIES_BY_FAMILY: Dict[str, List[str]] = {
 # ---------------------------------------------------------------------------
 
 def _min_ctx_acc(summary: SliceSummary) -> float:
+    context_exact = summary.metadata.get("context_exact_accuracy")
+    if isinstance(context_exact, dict) and context_exact:
+        return min(float(value) for value in context_exact.values())
     if summary.context_accuracy:
         return min(summary.context_accuracy.values())
-    return float(summary.metadata.get("mean_bit_accuracy", 0.0))
+    return _final_accuracy(summary)
 
 
 def _final_accuracy(summary: SliceSummary) -> float:
     return float(
         summary.metadata.get(
-            "final_accuracy",
-            summary.metadata.get("mean_bit_accuracy", 0.0),
+            "exact_match_rate",
+            summary.metadata.get(
+                "final_accuracy",
+                summary.metadata.get("mean_bit_accuracy", 0.0),
+            ),
         )
     )
 
 
 def _floor_accuracy(summary: SliceSummary) -> float:
+    context_exact = summary.metadata.get("context_exact_accuracy")
+    if isinstance(context_exact, dict) and context_exact:
+        return min(float(value) for value in context_exact.values())
     if summary.context_accuracy:
         return min(float(value) for value in summary.context_accuracy.values())
     return float(
@@ -207,7 +216,12 @@ class SliceSummaryObservationAdapter:
         context_debt_summary = context_debt_summary or {}
         delta = (cur - prev_min_ctx_acc) if prev_min_ctx_acc is not None else 0.0
         growth_request = dict(summary.metadata.get("growth_request", {}))
-        if summary.context_accuracy:
+        context_exact = summary.metadata.get("context_exact_accuracy")
+        if isinstance(context_exact, dict) and context_exact:
+            context_values = [float(value) for value in context_exact.values()]
+            best_ctx_acc = max(context_values)
+            worst_ctx_acc = min(context_values)
+        elif summary.context_accuracy:
             context_values = [float(value) for value in summary.context_accuracy.values()]
             best_ctx_acc = max(context_values)
             worst_ctx_acc = min(context_values)
@@ -420,8 +434,11 @@ class SliceAccuracyCoherenceModel:
         # aggregate success.
         final_acc = float(
             (state_after or {}).get(
-                "final_accuracy",
-                (state_after or {}).get("mean_bit_accuracy", 0.0),
+                "exact_match_rate",
+                (state_after or {}).get(
+                    "final_accuracy",
+                    (state_after or {}).get("mean_bit_accuracy", 0.0),
+                ),
             )
         )
         floor_acc = float(

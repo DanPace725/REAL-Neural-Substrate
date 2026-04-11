@@ -4936,6 +4936,10 @@ class RoutingEnvironment:
             "source_admission_velocity": round(self.admission_substrate.velocity, 4),
             "last_source_efficiency": round(self.last_source_efficiency, 4),
             "exact_matches": exact_matches,
+            "exact_match_rate": round(
+                exact_matches / max(len(scored_packets), 1),
+                4,
+            ),
             "partial_matches": partial_matches,
             "mean_bit_accuracy": round(
                 sum(packet.bit_match_ratio for packet in scored_packets)
@@ -5613,6 +5617,10 @@ class NativeSubstrateSystem:
                 transform_key = packet.transform_trace[-1]
                 transform_counts[transform_key] = transform_counts.get(transform_key, 0) + 1
         for stats in context_breakdown.values():
+            stats["exact_match_rate"] = round(
+                stats["exact_matches"] / max(stats["count"], 1),
+                4,
+            )
             stats["mean_bit_accuracy"] = round(
                 stats["bit_accuracy_total"] / max(stats["count"], 1),
                 4,
@@ -5716,6 +5724,10 @@ class NativeSubstrateSystem:
             ),
             "last_source_efficiency": round(self.environment.last_source_efficiency, 4),
             "exact_matches": exact_matches,
+            "exact_match_rate": round(
+                exact_matches / max(len(scored_packets), 1),
+                4,
+            ),
             "partial_matches": partial_matches,
             "forced_choice_count": int(task_diagnostics["overall"].get("forced_choice_count", 0)),
             "forced_choice_rescued_count": int(

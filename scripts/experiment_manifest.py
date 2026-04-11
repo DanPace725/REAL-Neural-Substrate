@@ -30,11 +30,17 @@ def _extract_run_summary(result: dict[str, object]) -> dict[str, object]:
             metadata = last.get("metadata", {})
             if isinstance(metadata, dict):
                 final_accuracy = metadata.get(
-                    "final_accuracy",
-                    metadata.get("mean_bit_accuracy"),
+                    "exact_match_rate",
+                    metadata.get(
+                        "final_accuracy",
+                        metadata.get("mean_bit_accuracy"),
+                    ),
                 )
                 if isinstance(final_accuracy, (int, float)):
                     summary["final_accuracy"] = round(float(final_accuracy), 4)
+                bit_accuracy = metadata.get("mean_bit_accuracy")
+                if isinstance(bit_accuracy, (int, float)):
+                    summary["mean_bit_accuracy"] = round(float(bit_accuracy), 4)
     return summary
 
 

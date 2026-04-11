@@ -1,8 +1,50 @@
 {
-  "generated_at": "2026-04-08T13:41:12-07:00",
+  "generated_at": "2026-04-11T11:15:57-07:00",
   "trace_root": "docs/traces",
-  "entry_count": 113,
+  "entry_count": 114,
   "entries": [
+    {
+      "path": "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md",
+      "filename": "2026-04-11 0751 - Homeostatic Coherence Composite.md",
+      "title": "2026-04-11 0751 - Homeostatic Coherence Composite",
+      "timestamp": "2026-04-11T07:51",
+      "date": "2026-04-11",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "experiment_outputs",
+        "mean",
+        "coherence",
+        "composite",
+        "homeostatic",
+        "exact",
+        "phase8",
+        "laminated_b2s1_task_a_visible_b6_t08_gradient_seed13",
+        "accuracy",
+        "adapters",
+        "arithmetic",
+        "b2s1"
+      ],
+      "referenced_files": [
+        "docs/experiment_outputs/20260326_laminated_b2s1_task_a_visible_b6_t08_real_seed13.json",
+        "docs/experiment_outputs/20260327_laminated_b2s1_task_a_visible_b6_t08_gradient_seed13.json",
+        "docs/experiment_outputs/20260331_laminated_b2s1_task_a_visible_b6_t08_gradient_seed13.json",
+        "docs/experiment_outputs/20260411_083409_c3s4_homeostatic_fuller_seed13.json",
+        "docs/experiment_outputs/20260411_085649_laminated_b2s1_task_a_visible_b6_s5_homeostatic_seed13.json",
+        "docs/experiment_outputs/20260411_090424_laminated_b2s1_task_a_visible_b6_t08_gradient_homeostatic_seed13.json",
+        "docs/experiment_outputs/20260411_090424_laminated_b2s1_task_a_visible_b6_t08_real_homeostatic_seed13.json",
+        "docs/experiment_outputs/20260411_100453_laminated_b2s1_task_a_visible_b6_s5_exact_threshold_semantics_seed13.json",
+        "docs/experiment_outputs/20260411_100749_laminated_b2s1_task_a_visible_b6_t08_gradient_exact_threshold_seed13.json",
+        "docs/experiment_outputs/20260411_100749_laminated_b2s1_task_a_visible_b6_t08_real_exact_threshold_seed13.json",
+        "docs/experiment_outputs/20260411_102921_laminated_b2s1_task_a_visible_b6_t08_gradient_exact_threshold_s80_seed13.json",
+        "docs/experiment_outputs/20260411_102921_laminated_b2s1_task_a_visible_b6_t08_real_exact_threshold_s120_seed13.json",
+        "docs/experiment_outputs/20260411_111334_b2s1_task_a_fixed_visible_singlepass_homeostatic_seed13.json",
+        "phase8/adapters.py",
+        "phase8/lamination.py",
+        "tests/test_phase8.py"
+      ]
+    },
     {
       "path": "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md",
       "filename": "2026-04-08 2135 - Occupancy Paper Alignment Clarification.md",
@@ -3302,7 +3344,8 @@
     "accuracy": [
       "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md",
       "docs/traces/2026-03-19 1141 - C3 Self Selected vs Fixed Latent Comparison.md",
-      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
     ],
     "across": [
       "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
@@ -3344,7 +3387,8 @@
       "docs/traces/2026-03-18 1702 - Identity Selector Revert.md",
       "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
       "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
-      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md"
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
     ],
     "adaptive": [
       "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md"
@@ -3464,6 +3508,9 @@
       "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md",
       "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md"
     ],
+    "arithmetic": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
+    ],
     "around": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
     ],
@@ -3506,7 +3553,8 @@
     ],
     "b2s1": [
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md",
-      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md"
+      "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
     ],
     "b2s5": [
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
@@ -3857,6 +3905,9 @@
       "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
       "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
     ],
+    "coherence": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
+    ],
     "cold": [
       "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
       "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md",
@@ -3903,6 +3954,9 @@
     ],
     "compatibility": [
       "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md"
+    ],
+    "composite": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
     ],
     "condition": [
       "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md"
@@ -4289,6 +4343,7 @@
       "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
       "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md",
       "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md",
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md",
       "docs/traces/20260317_1005_cyclic_transfer_trace.md",
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
       "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
@@ -4337,6 +4392,7 @@
       "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
       "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
       "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md",
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md",
       "docs/traces/20260317_1005_cyclic_transfer_trace.md",
       "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
@@ -4592,6 +4648,9 @@
     "hint": [
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
     ],
+    "homeostatic": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
+    ],
     "hookup": [
       "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md"
     ],
@@ -4673,6 +4732,9 @@
       "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
       "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
       "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
+    ],
+    "laminated_b2s1_task_a_visible_b6_t08_gradient_seed13": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
     ],
     "lamination": [
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
@@ -4783,6 +4845,9 @@
     ],
     "may": [
       "docs/traces/2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md"
+    ],
+    "mean": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
     ],
     "memory": [
       "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md"
@@ -5002,7 +5067,8 @@
       "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md",
       "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md",
       "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
-      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md",
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
     ],
     "phase8_session_synthesis": [
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
@@ -5845,8 +5911,47 @@
     "docs/experiment_outputs/20260326_hidden_regime_suite_hr1_hr2_hr4_task_c_hidden_self_selected_b4_seed13.json": [
       "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
+    "docs/experiment_outputs/20260326_laminated_b2s1_task_a_visible_b6_t08_real_seed13.json": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
+    ],
     "docs/experiment_outputs/20260326_laminated_b2s2_task_c_visible_b6_t08_real_seed13.json": [
       "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md"
+    ],
+    "docs/experiment_outputs/20260327_laminated_b2s1_task_a_visible_b6_t08_gradient_seed13.json": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
+    ],
+    "docs/experiment_outputs/20260331_laminated_b2s1_task_a_visible_b6_t08_gradient_seed13.json": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
+    ],
+    "docs/experiment_outputs/20260411_083409_c3s4_homeostatic_fuller_seed13.json": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
+    ],
+    "docs/experiment_outputs/20260411_085649_laminated_b2s1_task_a_visible_b6_s5_homeostatic_seed13.json": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
+    ],
+    "docs/experiment_outputs/20260411_090424_laminated_b2s1_task_a_visible_b6_t08_gradient_homeostatic_seed13.json": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
+    ],
+    "docs/experiment_outputs/20260411_090424_laminated_b2s1_task_a_visible_b6_t08_real_homeostatic_seed13.json": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
+    ],
+    "docs/experiment_outputs/20260411_100453_laminated_b2s1_task_a_visible_b6_s5_exact_threshold_semantics_seed13.json": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
+    ],
+    "docs/experiment_outputs/20260411_100749_laminated_b2s1_task_a_visible_b6_t08_gradient_exact_threshold_seed13.json": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
+    ],
+    "docs/experiment_outputs/20260411_100749_laminated_b2s1_task_a_visible_b6_t08_real_exact_threshold_seed13.json": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
+    ],
+    "docs/experiment_outputs/20260411_102921_laminated_b2s1_task_a_visible_b6_t08_gradient_exact_threshold_s80_seed13.json": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
+    ],
+    "docs/experiment_outputs/20260411_102921_laminated_b2s1_task_a_visible_b6_t08_real_exact_threshold_s120_seed13.json": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
+    ],
+    "docs/experiment_outputs/20260411_111334_b2s1_task_a_fixed_visible_singlepass_homeostatic_seed13.json": [
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
     ],
     "docs/experiment_outputs/b2_scale_b2s5_seed13_initial_20260324.json": [
       "docs/traces/2026-03-24 1310 - B Scale Suite Start.md"
@@ -5956,7 +6061,8 @@
       "docs/traces/2026-03-18 1702 - Identity Selector Revert.md",
       "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
       "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
-      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md"
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
     ],
     "phase8/environment.py": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
@@ -6011,7 +6117,8 @@
       "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md",
       "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md",
       "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
-      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md",
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md"
     ],
     "phase8/models.py": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
@@ -6331,6 +6438,7 @@
       "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
       "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
       "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
+      "docs/traces/2026-04-11 0751 - Homeostatic Coherence Composite.md",
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
     ],
     "tests/test_phase8_capability_prediction.py": [

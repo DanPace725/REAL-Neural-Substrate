@@ -216,6 +216,7 @@ def evaluate_laminated_benchmark(
                 "world_model_assistance_confidence_threshold": world_model_assistance_confidence_threshold,
                 "initial_cycle_budget": initial_cycle_budget,
                 "accuracy_threshold": accuracy_threshold,
+                "accuracy_threshold_metric": "final_accuracy_exact_match_rate",
                 "regulator_type": regulator_type,
                 "safety_limit": safety_limit,
             },
@@ -238,6 +239,7 @@ def _compact_row(benchmark_id: str, task_key: str, result: dict) -> str:
 
     final_acc = 0.0
     floor_acc = 0.0
+    bit_acc = 0.0
     ctx_str = ""
     forecast_str = ""
     if slices_data:
@@ -248,6 +250,7 @@ def _compact_row(benchmark_id: str, task_key: str, result: dict) -> str:
             metadata.get("mean_bit_accuracy", 0.0),
         )
         floor_acc = metadata.get("floor_accuracy", 0.0)
+        bit_acc = metadata.get("mean_bit_accuracy", 0.0)
         forecast_metrics = last.get("metadata", {}).get("forecast_metrics", {})
         forecast_acc = forecast_metrics.get("forecast_accuracy")
         if isinstance(forecast_acc, (int, float)):
@@ -258,7 +261,7 @@ def _compact_row(benchmark_id: str, task_key: str, result: dict) -> str:
 
     return (
         f"  {benchmark_id:6s} {task_key:6s}  "
-        f"final={final_acc:.3f} floor={floor_acc:.3f}  "
+        f"final_exact={final_acc:.3f} floor_exact={floor_acc:.3f} bit={bit_acc:.3f}  "
         f"slices={slices} [{decision}]{forecast_str}{ctx_str}"
     )
 

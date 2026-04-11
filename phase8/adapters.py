@@ -378,6 +378,7 @@ class LocalNodeCoherenceModel:
         "accountability",
         "reflexivity",
     )
+    homeostatic_weight: float = 0.35
 
     def score(self, state_after: Dict[str, float], history: List[object]) -> Dict[str, float]:
         atp_ratio = state_after.get("atp_ratio", 0.0)
@@ -463,7 +464,21 @@ class LocalNodeCoherenceModel:
         }
 
     def composite(self, dimensions: Dict[str, float]) -> float:
-        return sum(dimensions.values()) / max(1, len(dimensions))
+        values = [max(0.0, min(1.0, float(value))) for value in dimensions.values()]
+        if not values:
+            return 0.0
+
+        arithmetic_mean = sum(values) / len(values)
+        if min(values) <= 0.0:
+            harmonic_mean = 0.0
+        else:
+            harmonic_mean = len(values) / sum(1.0 / value for value in values)
+
+        # Homeostatic coherence is partly bottleneck-limited: a collapsed
+        # primitive should hurt more than a plain arithmetic mean would allow.
+        weight = max(0.0, min(1.0, self.homeostatic_weight))
+        coherence = (1.0 - weight) * arithmetic_mean + weight * harmonic_mean
+        return max(0.0, min(1.0, coherence))
 
     def gco_status(self, dimensions: Dict[str, float], coherence: float, *, state_after: Dict[str, float] | None = None):
         from real_core.types import GCOStatus

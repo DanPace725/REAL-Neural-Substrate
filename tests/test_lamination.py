@@ -858,6 +858,62 @@ class TestLaminationContracts(unittest.TestCase):
 
         self.assertEqual(result.final_decision, SettlementDecision.SETTLE)
 
+    def test_threshold_settlement_prefers_exact_accuracy_over_bit_accuracy(self) -> None:
+        runner = ScriptedRunner(
+            [
+                SliceSummary(
+                    slice_id=1,
+                    slice_budget=6,
+                    cycles_used=6,
+                    examples_seen=4,
+                    mean_coherence=0.7,
+                    final_coherence=0.72,
+                    coherence_delta=0.01,
+                    mean_uncertainty=0.3,
+                    ambiguity_level=0.18,
+                    conflict_level=0.18,
+                    context_accuracy={"context_0": 0.9, "context_1": 0.9},
+                    metadata={
+                        "accuracy_metric": "exact_match_rate",
+                        "exact_match_rate": 0.5,
+                        "final_accuracy": 0.9,
+                        "mean_bit_accuracy": 0.9,
+                        "context_exact_accuracy": {"context_0": 0.5, "context_1": 0.5},
+                    },
+                ),
+                SliceSummary(
+                    slice_id=2,
+                    slice_budget=6,
+                    cycles_used=6,
+                    examples_seen=4,
+                    mean_coherence=0.72,
+                    final_coherence=0.74,
+                    coherence_delta=0.01,
+                    mean_uncertainty=0.28,
+                    ambiguity_level=0.16,
+                    conflict_level=0.16,
+                    context_accuracy={"context_0": 0.92, "context_1": 0.92},
+                    metadata={
+                        "accuracy_metric": "exact_match_rate",
+                        "exact_match_rate": 0.5,
+                        "final_accuracy": 0.92,
+                        "mean_bit_accuracy": 0.92,
+                        "context_exact_accuracy": {"context_0": 0.5, "context_1": 0.5},
+                    },
+                ),
+            ]
+        )
+        controller = LaminatedController(
+            runner,
+            regulator=HeuristicSliceRegulator(accuracy_threshold=0.8),
+            initial_cycle_budget=6,
+            safety_limit=2,
+        )
+
+        result = controller.run()
+
+        self.assertEqual(result.final_decision, SettlementDecision.CONTINUE)
+
     def test_heuristic_regulator_triggers_differentiation_reframe_on_persistent_asymmetry(self) -> None:
         regulator = HeuristicSliceRegulator(accuracy_threshold=0.8)
         first = SliceSummary(

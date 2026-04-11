@@ -1,0 +1,63 @@
+# 2026-04-11 0751 - Homeostatic Coherence Composite
+
+## Context
+
+The ALife paper describes Phase 8 coherence as a simple aggregate across six relational primitives. In the current implementation, `LocalNodeCoherenceModel.composite()` used a plain arithmetic mean, which allowed high dimensions to compensate too easily for a collapsed primitive.
+
+## Change
+
+`phase8/adapters.py` now keeps the existing six local primitive scores unchanged, but computes scalar coherence as a conservative blend of:
+
+- arithmetic mean, preserving continuity with prior behavior when dimensions are balanced
+- harmonic mean, adding homeostatic pressure so low dimensions reduce the composite more strongly
+
+The blend is controlled by `homeostatic_weight`, defaulting to `0.35`. This keeps the score scalar and local while making the result more bottleneck-aware.
+
+## Rationale
+
+The biological analogy is homeostatic co-limitation: a node should not look fully healthy if one essential dimension, such as vitality or accountability, is collapsing. The harmonic term is a simple non-compensatory pressure that still preserves inspectable per-dimension scores and avoids introducing a learned global objective.
+
+## Validation
+
+- `python -m unittest tests.test_phase8.TestLocalNodeCoherenceModel`
+- `python -m scripts.run_phase8_demo --mode comparison --seed 13 --scenario branch_pressure`
+- A same-process A/B monkeypatch compared the new homeostatic composite against the old arithmetic mean on seeds `13`, `23`, and `37` for `branch_pressure`, `sustained_pressure`, and `detour_resilience`.
+
+Both were run with `tests_tmp/pydeps` on `PYTHONPATH` so the local NumPy dependency was visible. The branch-pressure smoke still routed all 12 packets in train, cold eval, full carryover eval, and substrate-only eval; warm carryover continued to reduce mean route cost relative to cold start.
+
+The A/B result showed no change in delivered packets, dropped packets, latency, exact matches, or bit accuracy across the small scenario set. It did reduce internal mean entry coherence by about `0.025` on `branch_pressure`, `0.027` on `detour_resilience`, and `0.034` on `sustained_pressure`, with a few additional `CRITICAL`/`DEGRADED` GCO classifications. Route-cost and ATP shifts were tiny and seed-local.
+
+A second small A/B check used the benchmark-family anchors `A1` and `B2S1`, with `task_a`, `fixed-visible`, and seeds `13`, `23`, and `37`. `A1` was behavior-identical under old and new coherence: mean exact rate `0.1482`, mean bit accuracy `0.4537`, best rolling exact `0.2917`, and route cost `0.0472`. `B2S1` showed a small dip under the homeostatic composite: mean exact rate moved from `0.1667` to `0.1482`, mean bit accuracy from `0.4352` to `0.4259`, and mean pattern count from `16.3333` to `14.6667`. Per-seed inspection localized the B2S1 behavioral dip to seed `37`; seeds `13` and `23` kept the same exact and bit-accuracy metrics.
+
+A third small A/B check used the smallest C-family anchor `C3S1`, with `task_a`, `fixed-visible`, seeds `13`, `23`, and `37`, and transfer disabled. `C3S1` was behavior-identical under old and new coherence: mean exact rate `0.1667`, mean bit accuracy `0.5093`, best rolling exact `0.3333`, best rolling bit accuracy `0.6458`, route cost `0.0446`, source efficiency `0.5125`, branch context credit `0.511`, and branch context debt `0.6702`. The only aggregate movement was mean pattern count from `16.3333` to `16.6667`, localized to seed `37`.
+
+A fourth check used `C3S4`, `task_c`, `fixed-visible`, seed `13`, and transfer disabled. This produced a noticeable deterministic improvement under the homeostatic composite, confirmed by rerunning with the new/old order reversed. Exact match rate moved from `0.2731` to `0.3472`, mean bit accuracy from `0.5556` to `0.6088`, best rolling exact from `0.75` to `0.875`, best rolling bit accuracy from `0.8125` to `0.9375`, and criterion status from not reached to reached. Mean route cost moved from `0.037` to `0.0364` and source efficiency from `0.4152` to `0.4459`. The new run used fewer memory entries (`1909` to `1862`) and fewer patterns (`177` to `139`) while carrying lower branch context credit (`1.0023` to `0.6427`) and higher branch context debt (`0.2045` to `0.4811`), suggesting stricter coherence pressure pruned or avoided some less useful pattern retention.
+
+A saved fuller C3S4 run on current homeostatic coherence was written to `docs/experiment_outputs/20260411_083409_c3s4_homeostatic_fuller_seed13.json`. It covered `C3S4`, all three tasks (`task_a`, `task_b`, `task_c`), all four C-scale REAL methods (`fixed-visible`, `fixed-latent`, `growth-visible`, `growth-latent`), seed `13`, and no transfer slice. The run produced 12 aggregates in `350.5244` seconds. Method-level means across the three tasks were: `fixed-visible` exact `0.3411`, bit accuracy `0.5949`; `fixed-latent` exact `0.2593`, bit accuracy `0.5008`; `growth-visible` exact `0.2716`, bit accuracy `0.5463`; `growth-latent` exact `0.3426`, bit accuracy `0.5579`. The first attempt included the transfer slice as well, but it exceeded a 10-minute timeout before writing a complete manifest, so the saved run is intentionally the non-transfer fuller slice.
+
+A short laminated smoke benchmark was then run with current homeostatic coherence using `B2S1`, `task_a`, `visible` mode, seed `13`, initial cycle budget `6`, and safety limit `5`. The saved manifest is `docs/experiment_outputs/20260411_085649_laminated_b2s1_task_a_visible_b6_s5_homeostatic_seed13.json`. It completed 5 slices and stopped at the deliberate safety cap with final decision `continue`, final slice accuracy `0.4333`, floor accuracy `0.4`, final slice mean bit accuracy `0.4333`, forecast accuracy `0.6667`, and final slice mean coherence `0.6446`. Across the laminated summary, delivery ratio was `0.9825`, exact rate was `0.1786`, mean bit accuracy was `0.4732`, and mean route cost was `0.0436`. The lamination unit suite also passed with `python -m unittest tests.test_phase8_lamination`.
+
+Two matched laminated reruns were then saved with the same visible `B2S1/task_a/seed13` parameters as prior real and gradient regulator controls: budget `6`, accuracy threshold `0.8`, safety limit `100` for real and `40` for gradient. The current homeostatic real-regulator run was written to `docs/experiment_outputs/20260411_090424_laminated_b2s1_task_a_visible_b6_t08_real_homeostatic_seed13.json`. Compared with the prior `docs/experiment_outputs/20260326_laminated_b2s1_task_a_visible_b6_t08_real_seed13.json`, it settled later (`30` slices instead of `7`) and had slightly lower final-slice accuracy (`0.9808` vs `1.0`), but higher aggregate exact rate (`0.6642` vs `0.5385`), higher aggregate bit accuracy (`0.815` vs `0.7308`), and lower mean route cost (`0.033` vs `0.0449`). The current homeostatic gradient-regulator run was written to `docs/experiment_outputs/20260411_090424_laminated_b2s1_task_a_visible_b6_t08_gradient_homeostatic_seed13.json`. Compared with the later prior gradient control `docs/experiment_outputs/20260331_laminated_b2s1_task_a_visible_b6_t08_gradient_seed13.json`, both hit the `40`-slice safety limit with final decision `continue`; the new run had lower final-slice accuracy (`0.8281` vs `0.875`) but higher aggregate exact rate (`0.6459` vs `0.6143`) and higher aggregate bit accuracy (`0.8036` vs `0.756`), with mean route cost increasing modestly (`0.0359` vs `0.0333`). Compared with the earlier prior gradient control `docs/experiment_outputs/20260327_laminated_b2s1_task_a_visible_b6_t08_gradient_seed13.json`, the new run did not settle within the cap, but aggregate exact and bit accuracy were still higher (`0.6459` vs `0.5833`, `0.8036` vs `0.725`).
+
+The laminated accuracy semantics were then clarified because the slice path had drifted: `final_accuracy` was being populated from `mean_bit_accuracy`, so an explicit `--thresh 0.8` meant recent bit accuracy plus context bit floor, not exact task success. `phase8/lamination.py` now writes `final_accuracy` and `exact_match_rate` as the exact-match rate for the slice. `context_accuracy`, `floor_accuracy`, `worst_context_accuracy`, and `best_context_accuracy` now use per-context exact-match rates. Bit-level partial-credit telemetry remains available as `mean_bit_accuracy` and `context_bit_accuracy`, and manifests include `accuracy_threshold_metric: final_accuracy_exact_match_rate`. A post-fix B2S1 short smoke manifest was written to `docs/experiment_outputs/20260411_100453_laminated_b2s1_task_a_visible_b6_s5_exact_threshold_semantics_seed13.json`; the same style of short run that previously printed `final=0.433` now reports `final_exact=0.133`, `floor_exact=0.0`, and `bit=0.433`, exposing the distinction directly.
+
+After the semantics fix, the matched `B2S1/task_a/visible/seed13/budget6/thresh0.8` laminated controls were rerun. The real-regulator exact-threshold manifest is `docs/experiment_outputs/20260411_100749_laminated_b2s1_task_a_visible_b6_t08_real_exact_threshold_seed13.json`. It used all `100` safety slices and correctly remained `continue`: final exact `0.6667`, floor exact `0.4286`, final bit `0.7917`, run-level exact rate `0.5353`, and run-level bit accuracy `0.726`. The gradient-regulator exact-threshold manifest is `docs/experiment_outputs/20260411_100749_laminated_b2s1_task_a_visible_b6_t08_gradient_exact_threshold_seed13.json`. It used all `40` safety slices and remained `continue`: final exact `0.3333`, floor exact `0.3333`, final bit `0.5758`, run-level exact rate `0.287`, and run-level bit accuracy `0.571`. These reruns show that bit-level improvement alone no longer satisfies the laminated solved-state criterion.
+
+Higher safety-limit probes were then run without further code changes. The gradient probe at safety `80` was saved to `docs/experiment_outputs/20260411_102921_laminated_b2s1_task_a_visible_b6_t08_gradient_exact_threshold_s80_seed13.json`; compared with safety `40`, it still remained `continue`, but final exact improved from `0.3333` to `0.4375`, final bit from `0.5758` to `0.7083`, run-level exact from `0.287` to `0.428`, and run-level bit from `0.571` to `0.6634`. The real probe at safety `120` was saved to `docs/experiment_outputs/20260411_102921_laminated_b2s1_task_a_visible_b6_t08_real_exact_threshold_s120_seed13.json`; compared with safety `100`, it remained `continue` and regressed by the final slice, with final exact moving from `0.6667` to `0.5`, floor exact from `0.4286` to `0.1667`, final bit from `0.7917` to `0.7083`, run-level exact from `0.5353` to `0.3816`, and run-level bit from `0.726` to `0.6316`. This suggests extra slices alone are not a monotonic solve mechanism under the current real regulator, while the gradient regulator benefited from a larger cap but still did not meet the exact-match settle criterion.
+
+A current single-pass anchor was saved to `docs/experiment_outputs/20260411_111334_b2s1_task_a_fixed_visible_singlepass_homeostatic_seed13.json` with `B2S1/task_a/fixed-visible/seed13`. It reached exact-match rate `0.2222`, mean bit accuracy `0.5`, best rolling exact `0.25`, and best rolling bit accuracy `0.5625`. Against this current one-shot anchor, corrected lamination still appears to improve final/run exact accuracy, especially `real` safety `100` (`0.6667` final exact, `0.5353` run exact) and `gradient` safety `80` (`0.4375` final exact, `0.428` run exact), but neither meets the stricter `0.8` exact-match solve criterion.
+
+## Referenced Files
+
+- `phase8/adapters.py`
+- `tests/test_phase8.py`
+- `docs/experiment_outputs/20260411_083409_c3s4_homeostatic_fuller_seed13.json`
+- `docs/experiment_outputs/20260411_085649_laminated_b2s1_task_a_visible_b6_s5_homeostatic_seed13.json`
+- `docs/experiment_outputs/20260411_090424_laminated_b2s1_task_a_visible_b6_t08_real_homeostatic_seed13.json`
+- `docs/experiment_outputs/20260411_090424_laminated_b2s1_task_a_visible_b6_t08_gradient_homeostatic_seed13.json`
+- `docs/experiment_outputs/20260411_100453_laminated_b2s1_task_a_visible_b6_s5_exact_threshold_semantics_seed13.json`
+- `docs/experiment_outputs/20260411_100749_laminated_b2s1_task_a_visible_b6_t08_real_exact_threshold_seed13.json`
+- `docs/experiment_outputs/20260411_100749_laminated_b2s1_task_a_visible_b6_t08_gradient_exact_threshold_seed13.json`
+- `docs/experiment_outputs/20260411_102921_laminated_b2s1_task_a_visible_b6_t08_real_exact_threshold_s120_seed13.json`
+- `docs/experiment_outputs/20260411_102921_laminated_b2s1_task_a_visible_b6_t08_gradient_exact_threshold_s80_seed13.json`
+- `docs/experiment_outputs/20260411_111334_b2s1_task_a_fixed_visible_singlepass_homeostatic_seed13.json`

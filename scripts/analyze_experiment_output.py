@@ -707,6 +707,7 @@ def write_summary_laminated_phase8(data: dict, out_path) -> None:
         "mean_route_cost",
         "total_action_cost",
         "exact_matches",
+        "exact_match_rate",
         "partial_matches",
         "mean_bit_accuracy",
         "mean_feedback_award",
@@ -724,13 +725,13 @@ def write_summary_laminated_phase8(data: dict, out_path) -> None:
     if isinstance(ctx_breakdown, dict) and ctx_breakdown:
         lines.append("### Context breakdown (baseline)")
         lines.append("")
-        lines.append("| context | count | exact_matches | mean_bit_accuracy |")
-        lines.append("|---|---:|---:|---:|")
+        lines.append("| context | count | exact_matches | exact_match_rate | mean_bit_accuracy |")
+        lines.append("|---|---:|---:|---:|---:|")
         for ctx, payload in sorted(ctx_breakdown.items()):
             if not isinstance(payload, dict):
                 continue
             lines.append(
-                f"| {ctx} | {payload.get('count')} | {payload.get('exact_matches')} | {_laminated_fmt_num(payload.get('mean_bit_accuracy'))} |"
+                f"| {ctx} | {payload.get('count')} | {payload.get('exact_matches')} | {_laminated_fmt_num(payload.get('exact_match_rate'))} | {_laminated_fmt_num(payload.get('mean_bit_accuracy'))} |"
             )
         lines.append("")
 
@@ -765,9 +766,9 @@ def write_summary_laminated_phase8(data: dict, out_path) -> None:
         lines.append("## Slice summaries")
         lines.append("")
         lines.append(
-            "| slice | budget | cycles | mode_used | min_ctx_acc | mean_bit_acc | conflict | ambiguity | uncertainty | cost | exact | partial | hint |"
+            "| slice | budget | cycles | mode_used | min_ctx_exact | final_exact | mean_bit_acc | conflict | ambiguity | uncertainty | cost | exact | partial | hint |"
         )
-        lines.append("|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---|")
+        lines.append("|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|")
         for s in slice_summaries:
             if not isinstance(s, dict):
                 continue
@@ -788,6 +789,7 @@ def write_summary_laminated_phase8(data: dict, out_path) -> None:
                 f"| {s.get('cycles_used')} "
                 f"| `{s.get('mode_used', '—')}` "
                 f"| {_laminated_fmt_num(min_ctx)} "
+                f"| {_laminated_fmt_num(_laminated_get(s, ('metadata', 'final_accuracy')))} "
                 f"| {_laminated_fmt_num(_laminated_get(s, ('metadata', 'mean_bit_accuracy')))} "
                 f"| {_laminated_fmt_num(s.get('conflict_level'))} "
                 f"| {_laminated_fmt_num(s.get('ambiguity_level'))} "

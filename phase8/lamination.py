@@ -845,6 +845,11 @@ class Phase8SliceRunner:
             )
             for packet in delivered_packets
         )
+        exact_match_rate = (
+            exact_matches / packets_evaluated
+            if packets_evaluated
+            else 0.0
+        )
         mean_bit_accuracy = (
             mean(float(packet.bit_match_ratio or 0.0) for packet in delivered_packets)
             if delivered_packets
@@ -947,15 +952,20 @@ class Phase8SliceRunner:
             else {}
         )
 
-        # Per-context accuracy
+        # Per-context task accuracy is exact-match based. Bit accuracy remains
+        # separate diagnostic telemetry for partial payload similarity.
         context_accuracy: dict[str, float] = {}
+        context_bit_accuracy: dict[str, float] = {}
         ctx_packets: dict[str | None, list[object]] = {}
         for packet in delivered_packets:
             key = str(packet.context_bit) if packet.context_bit is not None else "none"
             ctx_packets.setdefault(key, []).append(packet)
         for ctx_key, pkts in ctx_packets.items():
-            ctx_acc = mean(float(p.bit_match_ratio or 0.0) for p in pkts)
-            context_accuracy[f"context_{ctx_key}"] = round(ctx_acc, 4)
+            key = f"context_{ctx_key}"
+            ctx_exact_acc = mean(1.0 if p.matched_target else 0.0 for p in pkts)
+            ctx_bit_acc = mean(float(p.bit_match_ratio or 0.0) for p in pkts)
+            context_accuracy[key] = round(ctx_exact_acc, 4)
+            context_bit_accuracy[key] = round(ctx_bit_acc, 4)
         c_task_preserve_pressures = [
             float(getattr(packet, "c_task_preserve_pressure", 0.0))
             for packet in delivered_packets
@@ -979,12 +989,12 @@ class Phase8SliceRunner:
         worst_context_accuracy = (
             min(context_accuracy.values())
             if context_accuracy
-            else round(mean_bit_accuracy, 4)
+            else round(exact_match_rate, 4)
         )
         best_context_accuracy = (
             max(context_accuracy.values())
             if context_accuracy
-            else round(mean_bit_accuracy, 4)
+            else round(exact_match_rate, 4)
         )
 
         ambiguity_level, conflict_level = self._slice_diagnostics(delivered_packets)
@@ -1085,6 +1095,7 @@ class Phase8SliceRunner:
                     5,
                 ),
                 "exact_matches": float(exact_matches),
+                "exact_match_rate": round(exact_match_rate, 4),
                 "partial_matches": float(partial_matches),
             },
             settlement_hint=settlement_hint,
@@ -1093,11 +1104,15 @@ class Phase8SliceRunner:
             metadata={
                 **self._applied_signal_meta,
                 "packets_evaluated": packets_evaluated,
-                "final_accuracy": round(mean_bit_accuracy, 4),
+                "accuracy_metric": "exact_match_rate",
+                "final_accuracy": round(exact_match_rate, 4),
+                "exact_match_rate": round(exact_match_rate, 4),
                 "mean_bit_accuracy": round(mean_bit_accuracy, 4),
                 "floor_accuracy": round(float(worst_context_accuracy), 4),
                 "worst_context_accuracy": round(float(worst_context_accuracy), 4),
                 "best_context_accuracy": round(float(best_context_accuracy), 4),
+                "context_exact_accuracy": dict(context_accuracy),
+                "context_bit_accuracy": dict(context_bit_accuracy),
                 "route_entry_count": len(route_entries),
                 "mean_provisional_context_ambiguity": round(float(mean_provisional_ambiguity), 4),
                 "max_provisional_context_ambiguity": round(float(max_provisional_ambiguity), 4),

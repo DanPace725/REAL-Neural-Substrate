@@ -1,0 +1,149 @@
+{
+  "title": "2026-04-11 1115 - b scale suite",
+  "timestamp": "2026-04-11T18:15:31.797432Z",
+  "harness": "b_scale_suite",
+  "seeds": [
+    13
+  ],
+  "scenarios": [
+    "B2S1"
+  ],
+  "result": {
+    "memory_window": 2,
+    "benchmark_ids": [
+      "B2S1"
+    ],
+    "task_keys": [
+      "task_a"
+    ],
+    "method_ids": [
+      "fixed-visible"
+    ],
+    "seeds": [
+      13
+    ],
+    "suite": [
+      {
+        "benchmark_id": "B2S1",
+        "label": "B2S1",
+        "family_id": "B",
+        "difficulty_index": 1,
+        "description": "6-node, 18-example branch-pressure hidden-memory scale anchor.",
+        "source": "registered_topology",
+        "memory_window": 2,
+        "node_count": 6,
+        "expected_examples": 18,
+        "topology_depth": 3,
+        "task_keys": [
+          "task_a",
+          "task_b",
+          "task_c"
+        ]
+      }
+    ],
+    "runs": [
+      {
+        "benchmark_id": "B2S1",
+        "family_id": "B",
+        "difficulty_index": 1,
+        "label": "B2S1",
+        "description": "6-node, 18-example branch-pressure hidden-memory scale anchor.",
+        "source": "registered_topology",
+        "memory_window": 2,
+        "task_key": "task_a",
+        "method_id": "fixed-visible",
+        "seed": 13,
+        "node_count": 6,
+        "expected_examples": 18,
+        "topology_depth": 3,
+        "cycles": 24,
+        "packet_ttl": 10,
+        "elapsed_seconds": 0.368,
+        "examples_per_second": 48.9133,
+        "cycles_per_second": 65.2177,
+        "exact_matches": 4,
+        "exact_match_rate": 0.2222,
+        "mean_bit_accuracy": 0.5,
+        "criterion_reached": false,
+        "examples_to_criterion": null,
+        "best_rolling_exact_rate": 0.25,
+        "best_rolling_bit_accuracy": 0.5625,
+        "mean_route_cost": 0.04466,
+        "mean_source_efficiency": 0.4083,
+        "max_inbox_depth": 1,
+        "max_source_backlog": 0,
+        "dynamic_node_count": 0,
+        "node_count_runtime": 7,
+        "edge_count_runtime": 9,
+        "commitment": {
+          "memory_entry_count": 144,
+          "pattern_count": 15,
+          "active_edge_count": 6,
+          "supported_context_count": 12,
+          "branch_context_credit_total": 1.458,
+          "branch_context_debt_total": 0.5386,
+          "context_branch_transform_credit_total": 1.8997,
+          "context_branch_transform_debt_total": 0.5827
+        }
+      }
+    ],
+    "aggregates": [
+      {
+        "benchmark_id": "B2S1",
+        "family_id": "B",
+        "difficulty_index": 1,
+        "label": "B2S1",
+        "description": "6-node, 18-example branch-pressure hidden-memory scale anchor.",
+        "source": "registered_topology",
+        "memory_window": 2,
+        "task_key": "task_a",
+        "method_id": "fixed-visible",
+        "node_count": 6,
+        "expected_examples": 18,
+        "topology_depth": 3,
+        "seed_count": 1,
+        "mean_elapsed_seconds": 0.368,
+        "mean_examples_per_second": 48.9133,
+        "mean_cycles_per_second": 65.2177,
+        "mean_exact_match_rate": 0.2222,
+        "mean_bit_accuracy": 0.5,
+        "criterion_rate": 0.0,
+        "mean_best_rolling_exact_rate": 0.25,
+        "mean_best_rolling_bit_accuracy": 0.5625,
+        "mean_mean_route_cost": 0.0447,
+        "mean_mean_source_efficiency": 0.4083,
+        "mean_max_inbox_depth": 1.0,
+        "mean_max_source_backlog": 0.0,
+        "mean_dynamic_node_count": 0.0,
+        "mean_memory_entry_count": 144.0,
+        "mean_pattern_count": 15.0,
+        "mean_active_edge_count": 6.0,
+        "mean_supported_context_count": 12.0,
+        "mean_branch_context_credit_total": 1.458,
+        "mean_branch_context_debt_total": 0.5386,
+        "elapsed_ratio_vs_s1": 1.0,
+        "examples_per_second_ratio_vs_s1": 1.0,
+        "exact_match_rate_delta_vs_s1": 0.0,
+        "bit_accuracy_delta_vs_s1": 0.0
+      }
+    ],
+    "method_summary": {
+      "fixed-visible": {
+        "mean_elapsed_seconds": 0.368,
+        "mean_examples_per_second": 48.9133,
+        "mean_exact_match_rate": 0.2222,
+        "mean_bit_accuracy": 0.5
+      }
+    },
+    "elapsed_seconds": 0.3714
+  },
+  "metadata": {
+    "task_keys": [
+      "task_a"
+    ],
+    "method_ids": [
+      "fixed-visible"
+    ],
+    "memory_window": 2
+  }
+}

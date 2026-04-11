@@ -79,15 +79,28 @@ def _intervention_summary(
 def _final_accuracy(summary: SliceSummary) -> float:
     return float(
         summary.metadata.get(
-            "final_accuracy",
-            summary.metadata.get("mean_bit_accuracy", 0.0),
+            "exact_match_rate",
+            summary.metadata.get(
+                "final_accuracy",
+                summary.metadata.get("mean_bit_accuracy", 0.0),
+            ),
         )
     )
 
 
-def _floor_accuracy(summary: SliceSummary) -> float:
+def _context_task_accuracy(summary: SliceSummary) -> dict[str, float]:
+    context_exact = summary.metadata.get("context_exact_accuracy")
+    if isinstance(context_exact, dict) and context_exact:
+        return {str(key): float(value) for key, value in context_exact.items()}
     if summary.context_accuracy:
-        return min(float(value) for value in summary.context_accuracy.values())
+        return {str(key): float(value) for key, value in summary.context_accuracy.items()}
+    return {}
+
+
+def _floor_accuracy(summary: SliceSummary) -> float:
+    context_accuracy = _context_task_accuracy(summary)
+    if context_accuracy:
+        return min(float(value) for value in context_accuracy.values())
     return float(
         summary.metadata.get(
             "worst_context_accuracy",
@@ -100,8 +113,9 @@ def _floor_accuracy(summary: SliceSummary) -> float:
 
 
 def _context_asymmetry(summary: SliceSummary) -> dict[str, float]:
-    if summary.context_accuracy:
-        values = [float(value) for value in summary.context_accuracy.values()]
+    context_accuracy = _context_task_accuracy(summary)
+    if context_accuracy:
+        values = [float(value) for value in context_accuracy.values()]
     else:
         final_acc = _final_accuracy(summary)
         values = [final_acc]
@@ -145,7 +159,7 @@ def _context_debt_summary(
 
     context_keys: list[str] = []
     for summary in history:
-        for key in summary.context_accuracy:
+        for key in _context_task_accuracy(summary):
             if key not in context_keys:
                 context_keys.append(str(key))
     if not context_keys:
@@ -155,7 +169,7 @@ def _context_debt_summary(
     credit: dict[str, float] = {key: 0.0 for key in context_keys}
 
     for summary in history:
-        observed = dict(summary.context_accuracy)
+        observed = _context_task_accuracy(summary)
         for key in context_keys:
             if observed:
                 if key not in observed:
@@ -182,12 +196,13 @@ def _context_debt_summary(
     open_context_count = float(sum(1 for value in debt.values() if value > 0.05))
     best_debt_gap = 0.0
     current = history[-1]
+    current_context = _context_task_accuracy(current)
     if best_debt_context == "aggregate":
         best_debt_gap = max(0.0, accuracy_threshold - _final_accuracy(current))
-    elif best_debt_context in current.context_accuracy:
+    elif best_debt_context in current_context:
         best_debt_gap = max(
             0.0,
-            accuracy_threshold - float(current.context_accuracy[best_debt_context]),
+            accuracy_threshold - float(current_context[best_debt_context]),
         )
 
     return {
@@ -347,7 +362,7 @@ class HeuristicSliceRegulator:
 
         slice_context_accuracy = {
             str(key): _clamp01(float(value))
-            for key, value in current.context_accuracy.items()
+            for key, value in _context_task_accuracy(current).items()
             if isinstance(value, (int, float))
         }
         if slice_context_accuracy:
@@ -488,12 +503,13 @@ class HeuristicSliceRegulator:
         previous = history[-2]
         previous_contexts = {
             str(key): _clamp01(float(value))
-            for key, value in previous.context_accuracy.items()
+            for key, value in _context_task_accuracy(previous).items()
             if isinstance(value, (int, float))
         }
         if weak_context not in previous_contexts:
             return {}
-        weak_accuracy = _clamp01(float(current.context_accuracy.get(weak_context, 0.0)))
+        current_contexts = _context_task_accuracy(current)
+        weak_accuracy = _clamp01(float(current_contexts.get(weak_context, 0.0)))
         previous_weak_accuracy = previous_contexts[weak_context]
         if weak_accuracy > previous_weak_accuracy + 0.04:
             return {}
@@ -937,9 +953,10 @@ class HeuristicSliceRegulator:
             return None
 
         def _min_ctx_acc(s: SliceSummary) -> float:
-            if s.context_accuracy:
-                return min(s.context_accuracy.values())
-            return float(s.metadata.get("mean_bit_accuracy", 0.0))
+            context_accuracy = _context_task_accuracy(s)
+            if context_accuracy:
+                return min(context_accuracy.values())
+            return _final_accuracy(s)
 
         accs = [_min_ctx_acc(s) for s in window]
         if any(acc >= self.accuracy_threshold for acc in accs):
@@ -1865,8 +1882,9 @@ class LearningSliceRegulator:
     ) -> Dict[str, float]:
         growth_request = dict(summary.metadata.get("growth_request", {}))
         debt_summary = debt_summary or {}
-        if summary.context_accuracy:
-            context_values = [float(value) for value in summary.context_accuracy.values()]
+        context_accuracy = _context_task_accuracy(summary)
+        if context_accuracy:
+            context_values = [float(value) for value in context_accuracy.values()]
             best_ctx_acc = max(context_values)
             worst_ctx_acc = min(context_values)
         else:
@@ -1890,9 +1908,10 @@ class LearningSliceRegulator:
         }
 
     def _min_ctx_acc(self, summary: SliceSummary) -> float:
-        if summary.context_accuracy:
-            return min(summary.context_accuracy.values())
-        return float(summary.metadata.get("mean_bit_accuracy", 0.0))
+        context_accuracy = _context_task_accuracy(summary)
+        if context_accuracy:
+            return min(context_accuracy.values())
+        return _final_accuracy(summary)
 
 
 class LaminatedController:

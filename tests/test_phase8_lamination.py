@@ -98,8 +98,12 @@ class TestPhase8Lamination(unittest.TestCase):
         self.assertIn("total_action_cost", summary.cost_summary)
         self.assertNotIn("episodic_entries", summary.metadata)
         self.assertIn("final_accuracy", summary.metadata)
+        self.assertIn("exact_match_rate", summary.metadata)
+        self.assertIn("mean_bit_accuracy", summary.metadata)
         self.assertIn("floor_accuracy", summary.metadata)
         self.assertIn("worst_context_accuracy", summary.metadata)
+        self.assertIn("context_exact_accuracy", summary.metadata)
+        self.assertIn("context_bit_accuracy", summary.metadata)
         self.assertIn("mean_provisional_context_ambiguity", summary.metadata)
         self.assertIn("max_provisional_context_ambiguity", summary.metadata)
         self.assertIn("mean_transform_commitment_margin", summary.metadata)
@@ -120,6 +124,13 @@ class TestPhase8Lamination(unittest.TestCase):
         self.assertNotIn("capability_states", summary.metadata["growth_request"])
         self.assertIn("blocked_reason_counts", summary.metadata["growth_request"])
         self.assertIn("authorized_stall_slices", summary.metadata["growth_request"])
+        expected_exact_rate = (
+            float(summary.cost_summary["exact_matches"])
+            / max(int(summary.metadata["packets_evaluated"]), 1)
+        )
+        self.assertAlmostEqual(summary.metadata["final_accuracy"], expected_exact_rate, places=4)
+        self.assertAlmostEqual(summary.metadata["exact_match_rate"], expected_exact_rate, places=4)
+        self.assertEqual(summary.context_accuracy, summary.metadata["context_exact_accuracy"])
 
     def test_carryover_filter_drop_clears_prior_episodic_entries_before_next_slice(self) -> None:
         case = b_scale_suite_by_id()["B2S1"]
