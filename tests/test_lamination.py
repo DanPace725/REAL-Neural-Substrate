@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import unittest
 from dataclasses import replace
+from unittest.mock import patch
 
+import real_core.lamination as lamination_module
 from real_core import (
     GradientSliceRegulator,
     HeuristicSliceRegulator,
@@ -273,6 +275,145 @@ class TestLaminationContracts(unittest.TestCase):
         self.assertEqual(result.final_decision, SettlementDecision.SETTLE)
         self.assertEqual(len(result.summaries), 2)
 
+    def test_heuristic_regulator_settles_on_communicative_preserve_window(self) -> None:
+        regulator = HeuristicSliceRegulator()
+        history = [
+            SliceSummary(
+                slice_id=1,
+                slice_budget=8,
+                cycles_used=8,
+                examples_seen=8,
+                mean_coherence=0.62,
+                final_coherence=0.64,
+                coherence_delta=0.06,
+                mean_uncertainty=0.48,
+                ambiguity_level=0.42,
+                conflict_level=0.30,
+                context_accuracy={"context_0": 0.56, "context_1": 0.80},
+                metadata={
+                    "final_accuracy": 0.76,
+                    "floor_accuracy": 0.56,
+                    "c_task_layer1_mode": "communicative",
+                    "c_task_mean_preserve_pressure": 0.74,
+                    "c_task_mean_reopen_pressure": 0.12,
+                    "c_task_mean_resolution_confidence": 0.60,
+                    "c_task_preserve_mode_packet_ratio": 0.52,
+                },
+            )
+        ]
+
+        signal = regulator.regulate(history)
+
+        self.assertEqual(signal.decision_hint, SettlementDecision.SETTLE)
+
+    def test_heuristic_regulator_emits_c_task_regulatory_profile(self) -> None:
+        regulator = HeuristicSliceRegulator(accuracy_threshold=0.8)
+        history = [
+            SliceSummary(
+                slice_id=1,
+                slice_budget=8,
+                cycles_used=8,
+                examples_seen=8,
+                benchmark_family="C",
+                task_key="task_a",
+                mean_coherence=0.58,
+                final_coherence=0.6,
+                coherence_delta=0.01,
+                mean_uncertainty=0.55,
+                ambiguity_level=0.42,
+                conflict_level=0.32,
+                context_accuracy={"context_0": 0.54, "context_1": 0.84},
+                metadata={
+                    "final_accuracy": 0.69,
+                    "floor_accuracy": 0.54,
+                    "c_task_layer1_mode": "communicative",
+                    "c_task_regime_summary": {
+                        "packets_evaluated": 12,
+                        "context_gap": 0.30,
+                        "weak_context_key": "context_0",
+                        "weak_context_accuracy": 0.54,
+                        "strong_context_key": "context_1",
+                        "strong_context_accuracy": 0.84,
+                        "context_coverage_ratio": 0.58,
+                        "source_context_balance": 0.42,
+                        "source_self_hardening_ready_ratio": 0.36,
+                        "preserve_hardening_ready_ratio": 0.18,
+                        "preserve_identity_action_ratio": 0.61,
+                        "low_atp_route_ratio": 0.24,
+                        "mean_preserve_pressure": 0.66,
+                        "mean_reopen_pressure": 0.03,
+                        "mean_resolution_confidence": 0.52,
+                        "preserve_mode_packet_ratio": 0.31,
+                        "mean_hypothesis_confidence": 0.34,
+                        "mean_node_hypothesis_confidence": 0.38,
+                        "mean_hypothesis_margin": 0.22,
+                        "hypothesis_alignment_ratio": 0.46,
+                    },
+                },
+            )
+        ]
+
+        signal = regulator.regulate(history)
+
+        profile = signal.metadata.get("c_task_regulatory_profile", {})
+        self.assertIsInstance(profile, dict)
+        self.assertGreater(float(profile.get("weak_context_boost", 0.0)), 0.0)
+        self.assertLess(float(profile.get("source_hardening_shift", 0.0)), 0.0)
+        self.assertGreater(float(profile.get("preserve_hardening_shift", 0.0)), 0.0)
+        self.assertLessEqual(float(profile.get("route_cost_scale", 1.0)), 1.0)
+        self.assertGreaterEqual(float(profile.get("recovery_scale", 1.0)), 1.0)
+
+    def test_heuristic_regulator_uses_slice_context_accuracy_when_regime_summary_is_misleading(self) -> None:
+        regulator = HeuristicSliceRegulator(accuracy_threshold=0.8)
+        history = [
+            SliceSummary(
+                slice_id=1,
+                slice_budget=20,
+                cycles_used=20,
+                examples_seen=20,
+                benchmark_family="C",
+                task_key="task_a",
+                mean_coherence=0.6,
+                final_coherence=0.61,
+                coherence_delta=0.0,
+                mean_uncertainty=0.72,
+                ambiguity_level=0.55,
+                conflict_level=0.4,
+                context_accuracy={"context_0": 0.60, "context_1": 0.90},
+                metadata={
+                    "packets_evaluated": 10,
+                    "final_accuracy": 0.75,
+                    "floor_accuracy": 0.60,
+                    "c_task_layer1_mode": "communicative",
+                    "c_task_regime_summary": {
+                        "packets_evaluated": 3,
+                        "context_gap": 0.0,
+                        "weak_context_key": "context_1",
+                        "weak_context_accuracy": 1.0,
+                        "strong_context_key": "context_1",
+                        "strong_context_accuracy": 1.0,
+                        "context_coverage_ratio": 0.5,
+                        "source_context_balance": 0.78,
+                        "source_self_hardening_ready_ratio": 1.0,
+                        "preserve_hardening_ready_ratio": 1.0,
+                        "preserve_identity_action_ratio": 1.0,
+                        "low_atp_route_ratio": 0.0,
+                        "mean_preserve_pressure": 0.97,
+                        "mean_reopen_pressure": 0.0,
+                        "mean_resolution_confidence": 0.7,
+                        "preserve_mode_packet_ratio": 0.0,
+                    },
+                },
+            )
+        ]
+
+        signal = regulator.regulate(history)
+
+        profile = signal.metadata.get("c_task_regulatory_profile", {})
+        self.assertGreater(float(profile.get("weak_context_boost", 0.0)), 0.0)
+        self.assertLess(float(profile.get("source_hardening_shift", 0.0)), 0.0)
+        self.assertGreaterEqual(float(profile.get("budget_scale", 1.0)), 1.0)
+
     def test_learning_regulator_reports_positive_intervention_payoff(self) -> None:
         regulator = LearningSliceRegulator(accuracy_threshold=0.8)
         first = SliceSummary(
@@ -308,6 +449,153 @@ class TestLaminationContracts(unittest.TestCase):
         self.assertEqual(signal.metadata.get("intervention_status"), "improved")
         self.assertGreater(float(signal.metadata.get("intervention_payoff", 0.0)), 0.0)
         self.assertEqual(signal.metadata.get("intervention_target_metric"), "min_ctx_acc")
+
+    def test_learning_regulator_preserves_c_task_regulatory_profile_metadata(self) -> None:
+        regulator = LearningSliceRegulator(accuracy_threshold=0.8)
+        summary = SliceSummary(
+            slice_id=1,
+            slice_budget=8,
+            cycles_used=8,
+            examples_seen=8,
+            benchmark_family="C",
+            task_key="task_a",
+            mean_coherence=0.58,
+            final_coherence=0.6,
+            coherence_delta=0.01,
+            mean_uncertainty=0.55,
+            ambiguity_level=0.42,
+            conflict_level=0.32,
+            context_accuracy={"context_0": 0.54, "context_1": 0.84},
+            mode_used="visible",
+            metadata={
+                "final_accuracy": 0.69,
+                "floor_accuracy": 0.54,
+                "c_task_layer1_mode": "communicative",
+                "c_task_regime_summary": {
+                    "packets_evaluated": 12,
+                    "context_gap": 0.30,
+                    "weak_context_key": "context_0",
+                    "weak_context_accuracy": 0.54,
+                    "strong_context_key": "context_1",
+                    "strong_context_accuracy": 0.84,
+                    "context_coverage_ratio": 0.58,
+                    "source_context_balance": 0.42,
+                    "source_self_hardening_ready_ratio": 0.36,
+                    "preserve_hardening_ready_ratio": 0.18,
+                    "preserve_identity_action_ratio": 0.61,
+                    "low_atp_route_ratio": 0.24,
+                    "mean_preserve_pressure": 0.66,
+                    "mean_reopen_pressure": 0.03,
+                    "mean_resolution_confidence": 0.52,
+                    "preserve_mode_packet_ratio": 0.31,
+                },
+            },
+        )
+
+        signal = regulator.regulate([summary])
+
+        self.assertIn("c_task_regulatory_profile", signal.metadata)
+
+    def test_heuristic_regulator_emits_c_task_node_support_profile_after_persistent_debt(self) -> None:
+        regulator = HeuristicSliceRegulator(accuracy_threshold=0.8)
+        previous = SliceSummary(
+            slice_id=1,
+            slice_budget=8,
+            cycles_used=8,
+            examples_seen=8,
+            benchmark_family="C",
+            task_key="task_a",
+            mean_uncertainty=0.6,
+            ambiguity_level=0.5,
+            conflict_level=0.35,
+            context_accuracy={"context_0": 0.62, "context_1": 0.86},
+            metadata={
+                "final_accuracy": 0.74,
+                "floor_accuracy": 0.62,
+                "c_task_layer1_mode": "communicative",
+                "c_task_regime_summary": {
+                    "node_evidence": {
+                        "n0": {
+                            "c_task_routes": 4.0,
+                            "low_atp_routes": 1.0,
+                            "low_atp_ratio": 0.25,
+                            "preserve_violation_routes": 0.0,
+                            "preserve_violation_ratio": 0.0,
+                        },
+                        "n2": {
+                            "c_task_routes": 4.0,
+                            "low_atp_routes": 1.0,
+                            "low_atp_ratio": 0.25,
+                            "preserve_violation_routes": 1.0,
+                            "preserve_violation_ratio": 0.25,
+                        },
+                    },
+                },
+            },
+        )
+        current = SliceSummary(
+            slice_id=2,
+            slice_budget=8,
+            cycles_used=8,
+            examples_seen=8,
+            benchmark_family="C",
+            task_key="task_a",
+            mean_uncertainty=0.62,
+            ambiguity_level=0.52,
+            conflict_level=0.36,
+            context_accuracy={"context_0": 0.60, "context_1": 0.88},
+            metadata={
+                "final_accuracy": 0.74,
+                "floor_accuracy": 0.60,
+                "c_task_layer1_mode": "communicative",
+                "growth_request": {"top_requesting_nodes": ["n2", "n3"]},
+                "source_route_breakdown": {
+                    "context_0": {"routes": {"n2": 5, "n1": 3}},
+                    "context_1": {"routes": {"n3": 6, "n1": 2}},
+                },
+                "c_task_regime_summary": {
+                    "packets_evaluated": 12,
+                    "context_gap": 0.28,
+                    "weak_context_key": "context_0",
+                    "weak_context_accuracy": 0.60,
+                    "strong_context_key": "context_1",
+                    "strong_context_accuracy": 0.88,
+                    "context_coverage_ratio": 0.7,
+                    "source_context_balance": 0.55,
+                    "source_self_hardening_ready_ratio": 0.45,
+                    "preserve_hardening_ready_ratio": 0.3,
+                    "preserve_identity_action_ratio": 0.7,
+                    "low_atp_route_ratio": 0.22,
+                    "mean_preserve_pressure": 0.58,
+                    "mean_reopen_pressure": 0.03,
+                    "mean_resolution_confidence": 0.52,
+                    "preserve_mode_packet_ratio": 0.24,
+                    "node_evidence": {
+                        "n0": {
+                            "c_task_routes": 4.0,
+                            "low_atp_routes": 1.0,
+                            "low_atp_ratio": 0.25,
+                            "preserve_violation_routes": 0.0,
+                            "preserve_violation_ratio": 0.0,
+                        },
+                        "n2": {
+                            "c_task_routes": 5.0,
+                            "low_atp_routes": 2.0,
+                            "low_atp_ratio": 0.4,
+                            "preserve_violation_routes": 1.0,
+                            "preserve_violation_ratio": 0.2,
+                        },
+                    },
+                },
+            },
+        )
+
+        signal = regulator.regulate([previous, current])
+
+        node_profile = signal.metadata.get("c_task_node_support_profile", {})
+        self.assertIn("n0", node_profile)
+        self.assertIn("n2", node_profile)
+        self.assertGreater(float(node_profile["n0"].get("atp_credit", 0.0)), 0.0)
 
     def test_heuristic_regulator_authorizes_growth_from_compact_request_summary(self) -> None:
         regulator = HeuristicSliceRegulator(accuracy_threshold=0.8)
@@ -1085,6 +1373,197 @@ class TestLaminationContracts(unittest.TestCase):
         self.assertIsNone(signal.capability_mode)
         self.assertIn(signal.growth_authorization, {"authorize", "hold", "initiate", None})
 
+    def test_learning_regulator_preserves_control_fields_when_growth_initiates(self) -> None:
+        regulator = LearningSliceRegulator(accuracy_threshold=0.8)
+        summary = SliceSummary(
+            slice_id=1,
+            slice_budget=6,
+            cycles_used=6,
+            examples_seen=4,
+            conflict_level=0.2,
+            ambiguity_level=0.25,
+            coherence_delta=0.02,
+            mean_uncertainty=0.4,
+            context_accuracy={"context_0": 0.48, "context_1": 0.5},
+            mode_used="visible",
+            metadata={"mean_bit_accuracy": 0.49},
+        )
+        base_signal = RegulatorySignal(
+            next_slice_budget=7,
+            budget_target=9.0,
+            pressure_level=0.73,
+            hygiene_level=0.41,
+            growth_drive=0.35,
+            portfolio_drive=0.22,
+            settlement_confidence=0.18,
+            carryover_filter_mode="soften",
+            context_pressure="high",
+            decision_hint=SettlementDecision.CONTINUE,
+            capability_mode="visible",
+            growth_authorization="initiate",
+            execution_plan=SliceExecutionPlan(
+                initial_budget=6,
+                extend_step=2,
+                soft_cap=8,
+                hard_cap=10,
+                early_stop_patience=1,
+                metadata={"target_budget": 9},
+            ),
+            bias_updates={"preserve": 0.2},
+            gating_updates={"grow": 0.8},
+            reset_flags={"reseed": 0.0},
+            reframe_flags={"drop": 0.0},
+            stop_reason="",
+            metadata={"regulator_mode": "heuristic"},
+        )
+
+        class _StubHeuristic:
+            accuracy_threshold = 0.8
+
+            def regulate(self, history: list[SliceSummary]) -> RegulatorySignal:
+                return base_signal
+
+        regulator._heuristic = _StubHeuristic()
+        regulator._extract_features = lambda current, debt_summary: {"floor": 0.48}  # type: ignore[assignment]
+        regulator._current_authorization = lambda current, signal: "authorize"  # type: ignore[assignment]
+        regulator._candidate_authorizations = lambda current, signal: ["authorize", "initiate"]  # type: ignore[assignment]
+        regulator._predict_delta = lambda authorization, features: (  # type: ignore[assignment]
+            0.11 if authorization == "authorize" else 0.17
+        )
+
+        signal = regulator.regulate([summary])
+
+        self.assertEqual(signal.growth_authorization, "initiate")
+        self.assertEqual(signal.carryover_filter_mode, "soften")
+        self.assertAlmostEqual(signal.budget_target or 0.0, 9.0, places=4)
+        self.assertAlmostEqual(signal.pressure_level, 0.73, places=4)
+        self.assertAlmostEqual(signal.hygiene_level, 0.41, places=4)
+        self.assertAlmostEqual(signal.growth_drive, 0.35, places=4)
+        self.assertAlmostEqual(signal.portfolio_drive, 0.22, places=4)
+        self.assertAlmostEqual(signal.settlement_confidence, 0.18, places=4)
+        self.assertIsNotNone(signal.execution_plan)
+        self.assertEqual(signal.execution_plan.hard_cap, 10)
+        self.assertEqual(signal.metadata["regulator_mode"], "heuristic")
+        self.assertIn("predicted_delta_initiate", signal.metadata)
+
+    def test_heuristic_regulator_threshold_requires_two_slices_to_settle(self) -> None:
+        regulator = HeuristicSliceRegulator(accuracy_threshold=0.8)
+        summary = SliceSummary(
+            slice_id=1,
+            slice_budget=12,
+            cycles_used=12,
+            examples_seen=16,
+            conflict_level=0.5,
+            ambiguity_level=1.0,
+            coherence_delta=0.0139,
+            mean_uncertainty=0.7553,
+            context_accuracy={"context_0": 1.0, "context_1": 1.0},
+            mode_used="visible",
+            metadata={
+                "final_accuracy": 1.0,
+                "mean_bit_accuracy": 1.0,
+                "c_task_layer1_mode": "communicative",
+                "c_task_mean_preserve_pressure": 0.972,
+                "c_task_mean_reopen_pressure": 0.0,
+                "c_task_mean_resolution_confidence": 0.7,
+                "c_task_preserve_mode_packet_ratio": 0.0,
+            },
+        )
+
+        signal = regulator.regulate([summary])
+
+        self.assertEqual(signal.decision_hint, SettlementDecision.CONTINUE)
+
+    def test_learning_regulator_threshold_requires_two_slices_to_settle(self) -> None:
+        regulator = LearningSliceRegulator(accuracy_threshold=0.8)
+        summary = SliceSummary(
+            slice_id=1,
+            slice_budget=12,
+            cycles_used=12,
+            examples_seen=16,
+            conflict_level=0.5,
+            ambiguity_level=1.0,
+            coherence_delta=0.0139,
+            mean_uncertainty=0.7553,
+            context_accuracy={"context_0": 1.0, "context_1": 1.0},
+            mode_used="visible",
+            metadata={
+                "final_accuracy": 1.0,
+                "mean_bit_accuracy": 1.0,
+                "c_task_layer1_mode": "communicative",
+                "c_task_mean_preserve_pressure": 0.972,
+                "c_task_mean_reopen_pressure": 0.0,
+                "c_task_mean_resolution_confidence": 0.7,
+                "c_task_preserve_mode_packet_ratio": 0.0,
+            },
+        )
+
+        signal = regulator.regulate([summary])
+
+        self.assertEqual(signal.decision_hint, SettlementDecision.CONTINUE)
+
+    def test_heuristic_regulator_caches_context_debt_summary_per_history(self) -> None:
+        regulator = HeuristicSliceRegulator(accuracy_threshold=0.8)
+        history = [
+            SliceSummary(
+                slice_id=1,
+                slice_budget=8,
+                cycles_used=8,
+                examples_seen=6,
+                conflict_level=0.52,
+                ambiguity_level=0.38,
+                coherence_delta=0.01,
+                mean_uncertainty=0.48,
+                context_accuracy={"context_0": 0.42, "context_1": 0.81},
+                mode_used="visible",
+                metadata={
+                    "final_accuracy": 0.61,
+                    "floor_accuracy": 0.42,
+                    "growth_request": {
+                        "authorization": "auto",
+                        "requesting_nodes": 1,
+                        "active_growth_nodes": 0,
+                        "pending_proposals": 0,
+                        "max_pressure": 0.20,
+                        "max_readiness": 0.18,
+                    },
+                },
+            ),
+            SliceSummary(
+                slice_id=2,
+                slice_budget=8,
+                cycles_used=8,
+                examples_seen=6,
+                conflict_level=0.56,
+                ambiguity_level=0.42,
+                coherence_delta=0.0,
+                mean_uncertainty=0.52,
+                context_accuracy={"context_0": 0.40, "context_1": 0.80},
+                mode_used="visible",
+                metadata={
+                    "final_accuracy": 0.60,
+                    "floor_accuracy": 0.40,
+                    "growth_request": {
+                        "authorization": "auto",
+                        "requesting_nodes": 1,
+                        "active_growth_nodes": 0,
+                        "pending_proposals": 0,
+                        "max_pressure": 0.18,
+                        "max_readiness": 0.16,
+                    },
+                },
+            ),
+        ]
+
+        with patch.object(
+            lamination_module,
+            "_context_debt_summary",
+            wraps=lamination_module._context_debt_summary,
+        ) as mocked:
+            regulator.regulate(history)
+
+        self.assertEqual(mocked.call_count, 1)
+
     def test_gradient_regulator_emits_continuous_control_vector(self) -> None:
         regulator = GradientSliceRegulator(accuracy_threshold=0.8)
         history = [
@@ -1236,6 +1715,38 @@ class TestLaminationContracts(unittest.TestCase):
                 growth_readiness=0.18,
             )
         )
+
+    def test_heuristic_regulator_escalates_authorized_growth_stall_to_initiate(self) -> None:
+        regulator = HeuristicSliceRegulator(accuracy_threshold=0.8)
+        summary = SliceSummary(
+            slice_id=4,
+            slice_budget=6,
+            cycles_used=6,
+            examples_seen=4,
+            conflict_level=0.28,
+            ambiguity_level=0.24,
+            coherence_delta=0.0,
+            mean_uncertainty=0.44,
+            context_accuracy={"context_0": 0.40, "context_1": 0.58},
+            metadata={
+                "final_accuracy": 0.56,
+                "mean_bit_accuracy": 0.56,
+                "growth_request": {
+                    "authorization": "authorize",
+                    "requesting_nodes": 2,
+                    "active_growth_nodes": 0,
+                    "pending_proposals": 0,
+                    "max_pressure": 0.52,
+                    "max_readiness": 0.50,
+                    "authorized_stall_slices": 3,
+                    "authorized_without_proposal_count": 1,
+                },
+            },
+        )
+
+        signal = regulator.regulate([summary])
+
+        self.assertEqual(signal.growth_authorization, "initiate")
 
     def test_regulatory_substrate_accumulates_primitive_credit_and_support(self) -> None:
         substrate = RegulatorySubstrate()

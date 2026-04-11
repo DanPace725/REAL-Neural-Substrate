@@ -1,0 +1,324 @@
+{
+  "title": "2026-03-19 2007 - occupancy baseline comparison",
+  "timestamp": "2026-03-19T20:07:24.512057Z",
+  "harness": "occupancy_baseline_comparison",
+  "seeds": [
+    13
+  ],
+  "scenarios": [
+    "synth_v1_default"
+  ],
+  "result": {
+    "baseline": {
+      "config": {
+        "csv_path": "/workspace/REAL-Neural-Substrate/occupancy_baseline/data/occupancy_synth_v1.csv",
+        "window_size": 5,
+        "hidden_size": 12,
+        "learning_rate": 0.05,
+        "epochs": 60,
+        "seed": 0,
+        "train_fraction": 0.8,
+        "normalize": true
+      },
+      "dataset_rows": 1344,
+      "windowed_examples": 1340,
+      "input_dim": 25,
+      "train_examples": 1072,
+      "test_examples": 268,
+      "final_train_loss": 0.00413152489640192,
+      "metrics": {
+        "accuracy": 0.9888059701492538,
+        "precision": 0.9464285714285714,
+        "recall": 1.0,
+        "f1": 0.9724770642201834,
+        "tp": 53.0,
+        "tn": 212.0,
+        "fp": 3.0,
+        "fn": 0.0
+      }
+    },
+    "baseline_eval_selection": "per_label_preview",
+    "selector_seeds": [
+      13
+    ],
+    "runs": [
+      {
+        "selector_seed": 13,
+        "real": {
+          "config": {
+            "csv_path": "/workspace/REAL-Neural-Substrate/occupancy_baseline/data/occupancy_synth_v1.csv",
+            "window_size": 5,
+            "train_fraction": 0.8,
+            "normalize": true,
+            "selector_seed": 13,
+            "feedback_amount": 0.18,
+            "packet_ttl": 8,
+            "forward_drain_cycles": 16,
+            "feedback_drain_cycles": 4,
+            "max_train_episodes": 3,
+            "max_eval_episodes": null,
+            "eval_preview_per_label": 1
+          },
+          "dataset_rows": 1344,
+          "windowed_examples": 1340,
+          "input_dim": 25,
+          "train_episode_count": 3,
+          "eval_episode_count": 2,
+          "eval_selection": "per_label_preview",
+          "full_eval_label_counts": {
+            "0": 215,
+            "1": 53
+          },
+          "selected_eval_label_counts": {
+            "0": 1,
+            "1": 1
+          },
+          "eval_episode_indices": [
+            1072,
+            1084
+          ],
+          "topology": {
+            "adjacency": {
+              "sensor_hub": [],
+              "sensor_temperature": [
+                "decision_empty",
+                "decision_occupied"
+              ],
+              "sensor_humidity": [
+                "decision_empty",
+                "decision_occupied"
+              ],
+              "sensor_light": [
+                "decision_empty",
+                "decision_occupied"
+              ],
+              "sensor_co2": [
+                "decision_empty",
+                "decision_occupied"
+              ],
+              "sensor_humidity_ratio": [
+                "decision_empty",
+                "decision_occupied"
+              ],
+              "decision_empty": [
+                "sink"
+              ],
+              "decision_occupied": [
+                "sink"
+              ],
+              "sink": []
+            },
+            "positions": {
+              "sensor_hub": 0,
+              "sensor_temperature": 0,
+              "sensor_humidity": 0,
+              "sensor_light": 0,
+              "sensor_co2": 0,
+              "sensor_humidity_ratio": 0,
+              "decision_empty": 1,
+              "decision_occupied": 1,
+              "sink": 2
+            },
+            "source_id": "sensor_hub",
+            "sink_id": "sink"
+          },
+          "train_summary": {
+            "episode_count": 3,
+            "metrics": {
+              "accuracy": 0.6666666666666666,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "tp": 0.0,
+              "tn": 2.0,
+              "fp": 1.0,
+              "fn": 0.0
+            },
+            "mean_delivered_packets": 20.6667,
+            "mean_dropped_packets": 4.3333,
+            "mean_feedback_events": 14.0,
+            "mean_feedback_total": 2.52,
+            "occupied_prediction_rate": 0.3333
+          },
+          "eval_summary": {
+            "episode_count": 2,
+            "metrics": {
+              "accuracy": 0.5,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "tp": 0.0,
+              "tn": 1.0,
+              "fp": 0.0,
+              "fn": 1.0
+            },
+            "mean_delivered_packets": 18.5,
+            "mean_dropped_packets": 6.5,
+            "mean_feedback_events": 0.0,
+            "mean_feedback_total": 0.0,
+            "occupied_prediction_rate": 0.0
+          },
+          "train_results": [
+            {
+              "episode_index": 0,
+              "label": 0,
+              "prediction": 1,
+              "correct": false,
+              "packet_count": 25,
+              "delivered_packets": 25,
+              "dropped_packets": 0,
+              "decision_counts": {
+                "decision_empty": 12,
+                "decision_occupied": 13
+              },
+              "decision_margin": 1,
+              "prediction_confidence": 0.04,
+              "target_decision": "decision_empty",
+              "correct_packet_count": 12,
+              "feedback_event_count": 12,
+              "feedback_total": 2.16
+            },
+            {
+              "episode_index": 1,
+              "label": 0,
+              "prediction": 0,
+              "correct": true,
+              "packet_count": 25,
+              "delivered_packets": 18,
+              "dropped_packets": 7,
+              "decision_counts": {
+                "decision_empty": 15,
+                "decision_occupied": 3
+              },
+              "decision_margin": 12,
+              "prediction_confidence": 0.6667,
+              "target_decision": "decision_empty",
+              "correct_packet_count": 15,
+              "feedback_event_count": 15,
+              "feedback_total": 2.7
+            },
+            {
+              "episode_index": 2,
+              "label": 0,
+              "prediction": 0,
+              "correct": true,
+              "packet_count": 25,
+              "delivered_packets": 19,
+              "dropped_packets": 6,
+              "decision_counts": {
+                "decision_empty": 15,
+                "decision_occupied": 4
+              },
+              "decision_margin": 11,
+              "prediction_confidence": 0.5789,
+              "target_decision": "decision_empty",
+              "correct_packet_count": 15,
+              "feedback_event_count": 15,
+              "feedback_total": 2.7
+            }
+          ],
+          "eval_results": [
+            {
+              "episode_index": 1072,
+              "label": 0,
+              "prediction": 0,
+              "correct": true,
+              "packet_count": 25,
+              "delivered_packets": 19,
+              "dropped_packets": 6,
+              "decision_counts": {
+                "decision_empty": 16,
+                "decision_occupied": 3
+              },
+              "decision_margin": 13,
+              "prediction_confidence": 0.6842,
+              "target_decision": "decision_empty",
+              "correct_packet_count": 16,
+              "feedback_event_count": 0,
+              "feedback_total": 0.0
+            },
+            {
+              "episode_index": 1084,
+              "label": 1,
+              "prediction": 0,
+              "correct": false,
+              "packet_count": 25,
+              "delivered_packets": 18,
+              "dropped_packets": 7,
+              "decision_counts": {
+                "decision_empty": 15,
+                "decision_occupied": 3
+              },
+              "decision_margin": 12,
+              "prediction_confidence": 0.6667,
+              "target_decision": "decision_occupied",
+              "correct_packet_count": 3,
+              "feedback_event_count": 0,
+              "feedback_total": 0.0
+            }
+          ],
+          "system_summary": {
+            "cycles": 174,
+            "injected_packets": 125,
+            "delivered_packets": 99,
+            "delivery_ratio": 0.792,
+            "dropped_packets": 26,
+            "drop_ratio": 0.208,
+            "mean_latency": 2.3535,
+            "mean_route_cost": 0.03489,
+            "mean_feedback_award": 0.0764,
+            "node_atp_total": 1.4775,
+            "exact_matches": 61,
+            "mean_bit_accuracy": 0.6162
+          }
+        },
+        "baseline_metrics": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 1.0,
+          "tn": 1.0,
+          "fp": 0.0,
+          "fn": 0.0
+        },
+        "eval_minus_baseline": {
+          "accuracy": -0.5,
+          "precision": -1.0,
+          "recall": -1.0,
+          "f1": -1.0
+        }
+      }
+    ],
+    "aggregate": {
+      "selector_seed_count": 1,
+      "selector_seeds": [
+        13
+      ],
+      "mean_real_eval_metrics": {
+        "accuracy": 0.5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "mean_eval_minus_baseline": {
+        "accuracy": -0.5,
+        "precision": -1.0,
+        "recall": -1.0,
+        "f1": -1.0
+      },
+      "mean_real_train_accuracy": 0.6667,
+      "mean_real_eval_delivered_packets": 18.5,
+      "mean_real_train_feedback_events": 14.0
+    }
+  },
+  "metadata": {
+    "csv_path": "/workspace/REAL-Neural-Substrate/occupancy_baseline/data/occupancy_synth_v1.csv",
+    "window_size": 5,
+    "train_fraction": 0.8,
+    "normalize": true,
+    "max_train_episodes": 3,
+    "max_eval_episodes": null,
+    "eval_preview_per_label": 1
+  }
+}

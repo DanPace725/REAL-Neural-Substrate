@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from .interfaces import SliceRegulator, SliceRunner
 from .regulatory_substrate import RegulatoryObservation, RegulatorySubstrate
@@ -12,6 +12,7 @@ from .types import (
     SliceExecutionPlan,
     SliceSummary,
 )
+from .world_model import REALWorldModel
 
 
 def _clamp_budget(value: int, *, minimum: int = 1, maximum: int = 4096) -> int:
@@ -22,10 +23,25 @@ def _clamp01(value: float) -> float:
     return max(0.0, min(1.0, float(value)))
 
 
+def _carryover_rank(mode: str) -> int:
+    return {"keep": 0, "soften": 1, "drop": 2}.get(str(mode), 0)
+
+
+def _pressure_rank(mode: str) -> int:
+    return {"low": 0, "medium": 1, "high": 2}.get(str(mode), 0)
+
+
 _MAX_GRADIENT_SLICE_BUDGET = 32
 _REGULATORY_BLEND_DEFAULT = 0.35
 _REGULATORY_PORTFOLIO_BLEND = 0.25
 _REGULATORY_BUDGET_BLEND = 0.30
+
+
+def _world_model_summary(summary: SliceSummary) -> dict[str, Any]:
+    if not summary.metadata:
+        return {}
+    payload = summary.metadata.get("world_model_summary", {})
+    return dict(payload) if isinstance(payload, dict) else {}
 
 
 def _intervention_status(observed_delta: float, *, epsilon: float = 0.01) -> str:
@@ -103,6 +119,13 @@ def _context_asymmetry(summary: SliceSummary) -> dict[str, float]:
         "spread": spread,
         "collapsed": collapsed,
     }
+
+
+def _c_task_regime_summary(summary: SliceSummary) -> dict[str, Any]:
+    if not summary.metadata:
+        return {}
+    payload = summary.metadata.get("c_task_regime_summary", {})
+    return dict(payload) if isinstance(payload, dict) else {}
 
 
 def _context_debt_summary(
@@ -213,6 +236,339 @@ class HeuristicSliceRegulator:
         self.accuracy_threshold = float(accuracy_threshold)
         self.stall_slices_before_growth = max(1, int(stall_slices_before_growth))
         self.failed_hygiene_window = 3
+        self._debt_summary_cache_key: tuple[object, ...] | None = None
+        self._debt_summary_cache_value: dict[str, float | str | None] | None = None
+
+    def _cached_context_debt_summary(
+        self,
+        history: List[SliceSummary],
+    ) -> dict[str, float | str | None]:
+        if not history:
+            return _context_debt_summary(
+                history,
+                accuracy_threshold=self.accuracy_threshold,
+            )
+        first_slice = int(history[0].slice_id)
+        last_slice = int(history[-1].slice_id)
+        key = (
+            id(history),
+            len(history),
+            first_slice,
+            last_slice,
+            round(float(self.accuracy_threshold), 8),
+        )
+        if key != self._debt_summary_cache_key or self._debt_summary_cache_value is None:
+            self._debt_summary_cache_key = key
+            self._debt_summary_cache_value = _context_debt_summary(
+                history,
+                accuracy_threshold=self.accuracy_threshold,
+            )
+        return dict(self._debt_summary_cache_value)
+
+    def _apply_world_model_guidance(
+        self,
+        current: SliceSummary,
+        *,
+        carryover_filter_mode: str,
+        context_pressure: str,
+        growth_authorization: str | None,
+        capability_mode: str | None,
+        bias_updates: dict[str, float],
+        metadata: dict[str, Any],
+    ) -> tuple[str, str, str | None, str | None]:
+        world_model_summary = _world_model_summary(current)
+        if not world_model_summary:
+            return (
+                carryover_filter_mode,
+                context_pressure,
+                growth_authorization,
+                capability_mode,
+            )
+
+        unresolved_mass = _clamp01(float(world_model_summary.get("unresolved_mass", 0.0)))
+        top_margin = _clamp01(float(world_model_summary.get("top_margin", 0.0)))
+        contradiction_load = _clamp01(
+            float(world_model_summary.get("contradiction_load", 0.0))
+        )
+        top_hypothesis = str(world_model_summary.get("top_hypothesis", "unknown"))
+        last_action = str(world_model_summary.get("last_action", "hold_open"))
+        top_payload = dict(world_model_summary.get("hypotheses", {}).get(top_hypothesis, {}))
+        dead_end_penalty = _clamp01(float(top_payload.get("dead_end_penalty", 0.0)))
+        metadata["world_model_summary"] = world_model_summary
+        metadata["world_model_action"] = last_action
+        bias_updates["world_model_unresolved_mass"] = round(unresolved_mass, 4)
+        bias_updates["world_model_top_margin"] = round(top_margin, 4)
+        bias_updates["world_model_contradiction_load"] = round(contradiction_load, 4)
+
+        if unresolved_mass >= 0.48:
+            carryover_filter_mode = "keep"
+            context_pressure = "high"
+            growth_authorization = "hold"
+            bias_updates["world_model_hold_open"] = 1.0
+        if dead_end_penalty >= 0.18 or last_action == "mark_dead_end":
+            carryover_filter_mode = "keep"
+            context_pressure = "high"
+            growth_authorization = "hold"
+            bias_updates["world_model_reopen_bias"] = 1.0
+        if (
+            str(current.benchmark_family).upper().startswith("C")
+            and top_margin >= 0.24
+            and unresolved_mass <= 0.30
+        ):
+            if current.mode_used == "growth-visible":
+                capability_mode = "growth-latent"
+            elif current.mode_used in {"visible", "self-selected"}:
+                capability_mode = "latent"
+            metadata["world_model_handoff_ready"] = True
+        if unresolved_mass >= 0.35 and _carryover_rank(carryover_filter_mode) > _carryover_rank("soften"):
+            carryover_filter_mode = "soften"
+        if unresolved_mass >= 0.42 and _pressure_rank(context_pressure) < _pressure_rank("high"):
+            context_pressure = "high"
+        return (
+            carryover_filter_mode,
+            context_pressure,
+            growth_authorization,
+            capability_mode,
+        )
+
+    def _c_task_regulatory_profile(
+        self,
+        current: SliceSummary,
+        *,
+        debt_summary: dict[str, float | str | None],
+    ) -> dict[str, float]:
+        if str(current.benchmark_family).upper().startswith("C") is False:
+            return {}
+        if str(current.metadata.get("c_task_layer1_mode", "")) != "communicative":
+            return {}
+        regime = _c_task_regime_summary(current)
+        if not regime:
+            return {}
+
+        slice_context_accuracy = {
+            str(key): _clamp01(float(value))
+            for key, value in current.context_accuracy.items()
+            if isinstance(value, (int, float))
+        }
+        if slice_context_accuracy:
+            weak_accuracy = min(slice_context_accuracy.values())
+            strong_accuracy = max(slice_context_accuracy.values())
+            observed_contexts = len(slice_context_accuracy)
+        else:
+            weak_accuracy = _clamp01(float(regime.get("weak_context_accuracy", 0.0)))
+            strong_accuracy = _clamp01(float(regime.get("strong_context_accuracy", weak_accuracy)))
+            observed_contexts = 0
+        context_gap = _clamp01(max(0.0, strong_accuracy - weak_accuracy))
+        coverage_ratio = max(
+            _clamp01(float(regime.get("context_coverage_ratio", 0.0))),
+            1.0 if observed_contexts >= 2 else 0.5 if observed_contexts == 1 else 0.0,
+        )
+        source_balance = _clamp01(float(regime.get("source_context_balance", 0.0)))
+        source_ready = _clamp01(float(regime.get("source_self_hardening_ready_ratio", 0.0)))
+        preserve_ready = _clamp01(float(regime.get("preserve_hardening_ready_ratio", 0.0)))
+        preserve_identity_ratio = _clamp01(
+            float(regime.get("preserve_identity_action_ratio", 0.0))
+        )
+        low_atp_ratio = _clamp01(float(regime.get("low_atp_route_ratio", 0.0)))
+        preserve_pressure = _clamp01(float(regime.get("mean_preserve_pressure", 0.0)))
+        reopen_pressure = _clamp01(float(regime.get("mean_reopen_pressure", 0.0)))
+        packets_evaluated = max(
+            0.0,
+            float(current.metadata.get("packets_evaluated", regime.get("packets_evaluated", 0.0))),
+        )
+        weak_context_gap = max(0.0, float(debt_summary.get("best_debt_gap", 0.0)))
+
+        weak_need = _clamp01(
+            0.60 * max(0.0, 0.78 - weak_accuracy)
+            + 0.70 * context_gap
+            + 0.30 * max(0.0, 0.70 - coverage_ratio)
+            + 0.25 * max(0.0, 0.62 - source_balance)
+            + 0.20 * max(0.0, weak_context_gap)
+        )
+        sample_confidence = _clamp01(min(1.0, packets_evaluated / 8.0))
+        weak_need *= 0.55 + 0.45 * sample_confidence
+
+        source_hardening_shift = 0.0
+        preserve_hardening_shift = 0.0
+        preserve_bonus_scale = 1.0
+        reopen_penalty_scale = 1.0
+        weak_context_boost = 0.0
+        atp_conservation_bias = 0.0
+        route_cost_scale = 1.0
+        recovery_scale = 1.0
+        budget_scale = 1.0
+
+        if weak_need >= 0.08:
+            weak_context_boost = min(0.32, 0.12 + 0.42 * weak_need)
+            source_hardening_shift -= min(
+                0.12,
+                0.02 + 0.10 * weak_need + 0.05 * max(0.0, 0.55 - source_ready),
+            )
+        if (
+            weak_need >= 0.12
+            and preserve_pressure >= 0.45
+            and preserve_ready < 0.72
+            and preserve_identity_ratio < 0.88
+        ):
+            preserve_hardening_shift += min(
+                0.12,
+                0.02 + 0.12 * weak_need + 0.05 * max(0.0, 0.45 - preserve_ready),
+            )
+        elif weak_need <= 0.05 and preserve_ready <= 0.18 and preserve_pressure <= 0.62:
+            preserve_hardening_shift -= 0.03
+        if weak_need >= 0.08 and preserve_pressure >= 0.50 and preserve_identity_ratio >= 0.82:
+            preserve_bonus_scale += min(
+                0.22,
+                0.06 + 0.24 * weak_need + 0.10 * max(0.0, preserve_pressure - 0.60),
+            )
+
+        if preserve_identity_ratio < 0.72 and preserve_pressure >= 0.40:
+            preserve_bonus_scale += min(
+                0.35,
+                0.12 + 0.55 * (0.72 - preserve_identity_ratio),
+            )
+        if reopen_pressure > 0.03 or low_atp_ratio > 0.18 or weak_need >= 0.08:
+            reopen_penalty_scale += min(
+                0.45,
+                0.10 + 0.55 * reopen_pressure + 0.35 * low_atp_ratio + 0.20 * weak_need,
+            )
+        if low_atp_ratio > 0.12:
+            atp_conservation_bias = min(
+                0.35,
+                0.08 + 0.55 * low_atp_ratio + 0.10 * max(0.0, preserve_pressure - 0.55),
+            )
+        if low_atp_ratio > 0.16:
+            route_cost_scale = max(
+                0.86,
+                1.0 - min(0.14, 0.03 + 0.20 * low_atp_ratio + 0.04 * weak_need),
+            )
+            recovery_scale = min(
+                1.18,
+                1.0 + min(0.18, 0.03 + 0.22 * low_atp_ratio + 0.03 * weak_need),
+            )
+        if low_atp_ratio > 0.20 and weak_need >= 0.08:
+            budget_scale = min(
+                1.22,
+                1.0 + min(0.22, 0.05 + 0.20 * low_atp_ratio + 0.08 * weak_need),
+            )
+
+        return {
+            "source_hardening_shift": round(source_hardening_shift, 4),
+            "preserve_hardening_shift": round(preserve_hardening_shift, 4),
+            "preserve_bonus_scale": round(preserve_bonus_scale, 4),
+            "reopen_penalty_scale": round(reopen_penalty_scale, 4),
+            "weak_context_boost": round(weak_context_boost, 4),
+            "atp_conservation_bias": round(atp_conservation_bias, 4),
+            "route_cost_scale": round(route_cost_scale, 4),
+            "recovery_scale": round(recovery_scale, 4),
+            "budget_scale": round(budget_scale, 4),
+        }
+
+    def _c_task_node_support_profile(
+        self,
+        history: List[SliceSummary],
+        current: SliceSummary,
+        *,
+        debt_summary: dict[str, float | str | None],
+        c_task_regulatory_profile: dict[str, float],
+    ) -> dict[str, dict[str, float]]:
+        if len(history) < 2:
+            return {}
+        if str(current.benchmark_family).upper().startswith("C") is False:
+            return {}
+        if str(current.metadata.get("c_task_layer1_mode", "")) != "communicative":
+            return {}
+
+        weak_context = debt_summary.get("best_debt_context")
+        if not isinstance(weak_context, str) or not weak_context.startswith("context_"):
+            return {}
+        weak_gap = max(0.0, float(debt_summary.get("best_debt_gap", 0.0)))
+        if weak_gap <= 0.0:
+            return {}
+        previous = history[-2]
+        previous_contexts = {
+            str(key): _clamp01(float(value))
+            for key, value in previous.context_accuracy.items()
+            if isinstance(value, (int, float))
+        }
+        if weak_context not in previous_contexts:
+            return {}
+        weak_accuracy = _clamp01(float(current.context_accuracy.get(weak_context, 0.0)))
+        previous_weak_accuracy = previous_contexts[weak_context]
+        if weak_accuracy > previous_weak_accuracy + 0.04:
+            return {}
+
+        growth_request = dict(current.metadata.get("growth_request", {}))
+        source_route_breakdown = dict(current.metadata.get("source_route_breakdown", {}))
+        current_regime = _c_task_regime_summary(current)
+        previous_regime = _c_task_regime_summary(previous)
+        current_node_evidence = dict(current_regime.get("node_evidence", {}))
+        previous_node_evidence = dict(previous_regime.get("node_evidence", {}))
+        target_nodes: list[str] = []
+        weak_routes = dict(source_route_breakdown.get(weak_context, {}))
+        weak_route_counts = weak_routes.get("routes", {}) if isinstance(weak_routes, dict) else {}
+        if isinstance(weak_route_counts, dict):
+            ranked_routes = sorted(
+                (
+                    (str(node_id), int(count))
+                    for node_id, count in weak_route_counts.items()
+                ),
+                key=lambda item: (-item[1], item[0]),
+            )
+            for node_id, _ in ranked_routes[:2]:
+                if node_id not in target_nodes:
+                    target_nodes.append(node_id)
+        top_requesting_nodes = growth_request.get("top_requesting_nodes", [])
+        if isinstance(top_requesting_nodes, list):
+            for node_id in top_requesting_nodes[:2]:
+                node_id = str(node_id)
+                if node_id not in target_nodes:
+                    target_nodes.append(node_id)
+        if (
+            weak_gap >= 0.18
+            or "n0" in target_nodes
+            or (isinstance(top_requesting_nodes, list) and "n0" in [str(node) for node in top_requesting_nodes])
+        ) and "n0" not in target_nodes:
+            target_nodes.insert(0, "n0")
+
+        filtered_targets: list[str] = []
+        for node_id in target_nodes:
+            current_local = current_node_evidence.get(node_id, {})
+            previous_local = previous_node_evidence.get(node_id, {})
+            current_low_atp = float(current_local.get("low_atp_routes", 0.0))
+            previous_low_atp = float(previous_local.get("low_atp_routes", 0.0))
+            current_preserve_violations = float(current_local.get("preserve_violation_routes", 0.0))
+            previous_preserve_violations = float(previous_local.get("preserve_violation_routes", 0.0))
+            if (
+                (current_low_atp > 0.0 and previous_low_atp > 0.0)
+                or (
+                    current_preserve_violations > 0.0
+                    and previous_preserve_violations > 0.0
+                )
+            ):
+                filtered_targets.append(node_id)
+
+        if not filtered_targets:
+            return {}
+
+        route_cost_scale = float(c_task_regulatory_profile.get("route_cost_scale", 1.0))
+        recovery_scale = float(c_task_regulatory_profile.get("recovery_scale", 1.0))
+        weak_context_boost = float(c_task_regulatory_profile.get("weak_context_boost", 0.0))
+        source_shift = float(c_task_regulatory_profile.get("source_hardening_shift", 0.0))
+        atp_credit = min(0.10, 0.03 + 0.24 * weak_gap)
+
+        support: dict[str, dict[str, float]] = {}
+        for node_id in filtered_targets:
+            profile: dict[str, float] = {
+                "atp_credit": round(atp_credit * (1.0 if node_id == "n0" else 0.7), 4),
+                "recovery_scale": round(max(1.0, recovery_scale), 4),
+                "route_cost_scale": round(min(1.0, route_cost_scale), 4),
+                "weak_context_boost": round(max(0.0, weak_context_boost * 0.7), 4),
+            }
+            if node_id == "n0":
+                profile["source_hardening_shift"] = round(source_shift * 0.75, 4)
+            support[node_id] = profile
+        return support
 
     def regulate(self, history: List[SliceSummary]) -> RegulatorySignal:
         if not history:
@@ -220,10 +576,7 @@ class HeuristicSliceRegulator:
 
         current = history[-1]
         previous = history[-2] if len(history) >= 2 else None
-        debt_summary = _context_debt_summary(
-            history,
-            accuracy_threshold=self.accuracy_threshold,
-        )
+        debt_summary = self._cached_context_debt_summary(history)
 
         improving = current.coherence_delta > self.flat_delta_epsilon
         uncertainty_dropping = (
@@ -318,8 +671,13 @@ class HeuristicSliceRegulator:
             bias_updates["weak_context_gap"] = round(weak_context_gap, 4)
 
         growth_authorization = self._select_growth_authorization(history)
+        capability_mode = self._select_capability_mode(history)
         reset_flags: dict[str, float] = {}
         reframe_flags: dict[str, float] = {}
+        metadata: dict[str, Any] = {}
+        c_task_regime = _c_task_regime_summary(current)
+        if c_task_regime:
+            metadata["c_task_regime_summary"] = c_task_regime
         asymmetry = _context_asymmetry(current)
         if float(debt_summary.get("max_context_debt", 0.0)) >= 1.0:
             context_pressure = "high"
@@ -343,12 +701,52 @@ class HeuristicSliceRegulator:
             bias_updates["context_debt_reframe"] = 1.0
             bias_updates["failed_hygiene_reframe"] = 1.0
             stop_reason = "failed_hygiene_recovery"
+        (
+            carryover_filter_mode,
+            context_pressure,
+            growth_authorization,
+            capability_mode,
+        ) = self._apply_world_model_guidance(
+            current,
+            carryover_filter_mode=carryover_filter_mode,
+            context_pressure=context_pressure,
+            growth_authorization=growth_authorization,
+            capability_mode=capability_mode,
+            bias_updates=bias_updates,
+            metadata=metadata,
+        )
+        c_task_regulatory_profile = self._c_task_regulatory_profile(
+            current,
+            debt_summary=debt_summary,
+        )
+        if c_task_regulatory_profile:
+            metadata["c_task_regulatory_profile"] = c_task_regulatory_profile
+            weak_boost = float(c_task_regulatory_profile.get("weak_context_boost", 0.0))
+            budget_scale = max(0.75, float(c_task_regulatory_profile.get("budget_scale", 1.0)))
+            if weak_boost > 0.0:
+                bias_updates["c_task_weak_context_boost"] = round(weak_boost, 4)
+            if weak_boost >= 0.12 and _pressure_rank(context_pressure) < _pressure_rank("high"):
+                context_pressure = "high"
+                if _carryover_rank(carryover_filter_mode) > _carryover_rank("soften"):
+                    carryover_filter_mode = "soften"
+            if abs(budget_scale - 1.0) >= 1e-6:
+                next_slice_budget = _clamp_budget(round(next_slice_budget * budget_scale))
+                bias_updates["c_task_budget_scale"] = round(budget_scale, 4)
+            c_task_node_support_profile = self._c_task_node_support_profile(
+                history,
+                current,
+                debt_summary=debt_summary,
+                c_task_regulatory_profile=c_task_regulatory_profile,
+            )
+            if c_task_node_support_profile:
+                metadata["c_task_node_support_profile"] = c_task_node_support_profile
 
         return RegulatorySignal(
             next_slice_budget=next_slice_budget,
             carryover_filter_mode=carryover_filter_mode,
             context_pressure=context_pressure,
             decision_hint=decision_hint,
+            capability_mode=capability_mode,
             growth_authorization=growth_authorization,
             gating_updates={
                 "conflict_penalty": round(current.conflict_level, 4),
@@ -362,13 +760,17 @@ class HeuristicSliceRegulator:
             reset_flags=reset_flags,
             reframe_flags=reframe_flags,
             stop_reason=stop_reason,
+            metadata=metadata,
         )
 
     def _should_settle(self, history: List[SliceSummary]) -> bool:
         if self.accuracy_threshold > 0.0 and history:
             # Explicit accuracy target: aggregate-only success can mask dead
             # contexts, so the floor must pass before the aggregate can settle.
-            window = history[-2:] if len(history) >= 2 else history[-1:]
+            # Require two slices so a tiny lucky first slice cannot stop the run.
+            if len(history) < 2:
+                return False
+            window = history[-2:]
 
             def _meets_threshold(s: SliceSummary) -> bool:
                 return (
@@ -377,6 +779,9 @@ class HeuristicSliceRegulator:
                 )
 
             return all(_meets_threshold(s) for s in window)
+
+        if history and self._communicative_preserve_settle_ready(history):
+            return True
 
         # No accuracy target: fall back to coherence-flatness heuristics.
         if len(history) < 2:
@@ -398,6 +803,33 @@ class HeuristicSliceRegulator:
             and latest.conflict_level <= self.high_conflict_threshold + 0.05
         )
 
+    def _communicative_preserve_settle_ready(self, history: List[SliceSummary]) -> bool:
+        latest = history[-1]
+        metadata = dict(latest.metadata)
+        if str(metadata.get("c_task_layer1_mode", "")) != "communicative":
+            return False
+        preserve_pressure = float(metadata.get("c_task_mean_preserve_pressure", 0.0))
+        reopen_pressure = float(metadata.get("c_task_mean_reopen_pressure", 0.0))
+        resolution_confidence = float(
+            metadata.get("c_task_mean_resolution_confidence", 0.0)
+        )
+        preserve_ratio = float(metadata.get("c_task_preserve_mode_packet_ratio", 0.0))
+        final_accuracy = _final_accuracy(latest)
+        floor_accuracy = _floor_accuracy(latest)
+        if len(history) >= 2:
+            previous_accuracy = _final_accuracy(history[-2])
+        else:
+            previous_accuracy = final_accuracy
+        return bool(
+            final_accuracy >= 0.74
+            and floor_accuracy >= 0.55
+            and preserve_pressure >= 0.72
+            and reopen_pressure <= 0.16
+            and resolution_confidence >= 0.52
+            and preserve_ratio >= 0.45
+            and final_accuracy >= previous_accuracy - 0.02
+        )
+
     def _should_escalate(self, history: List[SliceSummary]) -> bool:
         if len(history) < 2:
             return False
@@ -415,10 +847,7 @@ class HeuristicSliceRegulator:
     def _should_reframe_for_persistent_asymmetry(self, history: List[SliceSummary]) -> bool:
         if len(history) < 2:
             return False
-        debt_summary = _context_debt_summary(
-            history,
-            accuracy_threshold=self.accuracy_threshold,
-        )
+        debt_summary = self._cached_context_debt_summary(history)
         if float(debt_summary.get("max_context_debt", 0.0)) < 1.0:
             return False
         recent = history[-2:]
@@ -436,10 +865,7 @@ class HeuristicSliceRegulator:
     def _should_reframe_for_failed_hygiene(self, history: List[SliceSummary]) -> bool:
         if len(history) < self.failed_hygiene_window:
             return False
-        debt_summary = _context_debt_summary(
-            history,
-            accuracy_threshold=self.accuracy_threshold,
-        )
+        debt_summary = self._cached_context_debt_summary(history)
         if float(debt_summary.get("max_context_debt", 0.0)) < 1.5:
             return False
         recent = history[-self.failed_hygiene_window :]
@@ -540,6 +966,10 @@ class HeuristicSliceRegulator:
         requesting_nodes = float(growth_request.get("requesting_nodes", 0.0))
         active_growth_nodes = float(growth_request.get("active_growth_nodes", 0.0))
         pending_proposals = float(growth_request.get("pending_proposals", 0.0))
+        authorized_stall_slices = float(growth_request.get("authorized_stall_slices", 0.0))
+        authorized_without_proposal_count = float(
+            growth_request.get("authorized_without_proposal_count", 0.0)
+        )
 
         current_acc = _floor_accuracy(current)
         if self._should_initiate_growth(history):
@@ -549,11 +979,24 @@ class HeuristicSliceRegulator:
             ):
                 return "initiate"
 
+        if (
+            requesting_nodes > 0.0
+            and active_growth_nodes <= 0.0
+            and pending_proposals <= 0.0
+            and authorized_stall_slices >= 2.0
+            and authorized_without_proposal_count > 0.0
+            and (
+                self.accuracy_threshold <= 0.0
+                or current_acc < self.accuracy_threshold
+            )
+        ):
+            return "initiate"
+
         if requesting_nodes <= 0.0 and active_growth_nodes <= 0.0 and pending_proposals <= 0.0:
             return None
         if (
-            pressure >= 0.55
-            and readiness >= 0.45
+            pressure >= 0.45
+            and readiness >= 0.35
             and (
                 self.accuracy_threshold <= 0.0
                 or current_acc < self.accuracy_threshold
@@ -570,7 +1013,7 @@ class HeuristicSliceRegulator:
             return "hold"
         if current.conflict_level >= self.high_conflict_threshold and current.mean_uncertainty >= self.high_uncertainty_threshold:
             return "hold"
-        if pressure >= 0.45 and readiness >= 0.40:
+        if pressure >= 0.35 and readiness >= 0.30:
             return "authorize"
         return None
 
@@ -599,10 +1042,7 @@ class HeuristicSliceRegulator:
         if floors[-1] > floors[0] + 0.05:
             return False
 
-        debt_summary = _context_debt_summary(
-            history,
-            accuracy_threshold=self.accuracy_threshold,
-        )
+        debt_summary = self._cached_context_debt_summary(history)
         if (
             float(debt_summary.get("max_context_debt", 0.0)) < 1.0
             and (
@@ -614,7 +1054,7 @@ class HeuristicSliceRegulator:
 
         pressure = float(growth_request.get("max_pressure", 0.0))
         readiness = float(growth_request.get("max_readiness", 0.0))
-        if pressure >= 0.45 and readiness >= 0.40:
+        if pressure >= 0.35 and readiness >= 0.30:
             return False
 
         if self._should_reframe_for_failed_hygiene(history):
@@ -662,10 +1102,7 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
 
         current = history[-1]
         previous = history[-2] if len(history) >= 2 else None
-        debt_summary = _context_debt_summary(
-            history,
-            accuracy_threshold=self.accuracy_threshold,
-        )
+        debt_summary = self._cached_context_debt_summary(history)
         asymmetry = _context_asymmetry(current)
         floor_accuracy = _floor_accuracy(current)
         final_accuracy = _final_accuracy(current)
@@ -694,6 +1131,12 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
         growth_readiness = _clamp01(float(growth_request.get("max_readiness", 0.0)))
         active_growth = _clamp01(float(growth_request.get("active_growth_nodes", 0.0)) / 3.0)
         pending_growth = _clamp01(float(growth_request.get("pending_proposals", 0.0)) / 3.0)
+        authorized_stall_slices = _clamp01(
+            float(growth_request.get("authorized_stall_slices", 0.0)) / 4.0
+        )
+        authorized_without_proposal = _clamp01(
+            float(growth_request.get("authorized_without_proposal_count", 0.0)) / 3.0
+        )
         exact_matches = float(current.cost_summary.get("exact_matches", 0.0))
         bit_accuracy_per_cost = _clamp01(float(current.cost_summary.get("bit_accuracy_per_cost", 0.0)))
 
@@ -902,6 +1345,8 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
             active_growth=active_growth,
             pending_growth=pending_growth,
             settlement_confidence=settlement_confidence,
+            authorized_stall_slices=authorized_stall_slices,
+            authorized_without_proposal=authorized_without_proposal,
         )
         if growth_authorization is None and self._should_initiate_growth_from_structural_need(
             structural_need=structural_need,
@@ -1014,6 +1459,21 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
             "budget_saturation": round(budget_saturation, 4),
             "regulatory_substrate": regulatory_substrate_meta,
         }
+        capability_mode = None
+        (
+            carryover_filter_mode,
+            context_pressure,
+            growth_authorization,
+            capability_mode,
+        ) = self._apply_world_model_guidance(
+            current,
+            carryover_filter_mode=carryover_filter_mode,
+            context_pressure=context_pressure,
+            growth_authorization=growth_authorization,
+            capability_mode=capability_mode,
+            bias_updates=bias_updates,
+            metadata=metadata,
+        )
 
         return RegulatorySignal(
             next_slice_budget=next_slice_budget,
@@ -1026,6 +1486,7 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
             carryover_filter_mode=carryover_filter_mode,
             context_pressure=context_pressure,
             decision_hint=decision_hint,
+            capability_mode=capability_mode,
             growth_authorization=growth_authorization,
             execution_plan=execution_plan,
             gating_updates={
@@ -1064,6 +1525,8 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
         active_growth: float,
         pending_growth: float,
         settlement_confidence: float,
+        authorized_stall_slices: float = 0.0,
+        authorized_without_proposal: float = 0.0,
     ) -> str | None:
         if settlement_confidence >= 0.98:
             return "hold"
@@ -1072,6 +1535,8 @@ class GradientSliceRegulator(HeuristicSliceRegulator):
                 return "hold"
             return "authorize"
         if requesting_growth > 0.0:
+            if authorized_stall_slices >= 0.5 and authorized_without_proposal > 0.0:
+                return "initiate"
             if growth_drive <= 0.12:
                 return "hold"
             return "authorize"
@@ -1269,10 +1734,14 @@ class LearningSliceRegulator:
             return signal
 
         # --- Predict: estimate delta for each candidate authorization ---
-        debt_summary = _context_debt_summary(
-            history,
-            accuracy_threshold=self._heuristic.accuracy_threshold,
-        )
+        debt_summary_getter = getattr(self._heuristic, "_cached_context_debt_summary", None)
+        if debt_summary_getter is not None:
+            debt_summary = debt_summary_getter(history)
+        else:
+            debt_summary = _context_debt_summary(
+                history,
+                accuracy_threshold=self._heuristic.accuracy_threshold,
+            )
         current_features = self._extract_features(current, debt_summary=debt_summary)
         current_authorization = self._current_authorization(current, signal)
         candidates = self._candidate_authorizations(current, signal)
@@ -1299,18 +1768,10 @@ class LearningSliceRegulator:
             for key, value in self._last_intervention_summary.items():
                 if value is not None:
                     prediction_meta[key] = value
-            return RegulatorySignal(
-                next_slice_budget=signal.next_slice_budget,
-                context_pressure=signal.context_pressure,
-                decision_hint=signal.decision_hint,
-                capability_mode=signal.capability_mode,
+            return replace(
+                signal,
                 growth_authorization=growth_authorization,
-                gating_updates=signal.gating_updates,
-                bias_updates=signal.bias_updates,
-                reset_flags=signal.reset_flags,
-                reframe_flags=signal.reframe_flags,
-                stop_reason=signal.stop_reason,
-                metadata=prediction_meta,
+                metadata={**dict(signal.metadata), **prediction_meta},
             )
         current_pred = predictions.get(
             current_authorization,
@@ -1331,19 +1792,10 @@ class LearningSliceRegulator:
             if value is not None:
                 prediction_meta[key] = value
 
-        return RegulatorySignal(
-            next_slice_budget=signal.next_slice_budget,
-            carryover_filter_mode=signal.carryover_filter_mode,
-            context_pressure=signal.context_pressure,
-            decision_hint=signal.decision_hint,
-            capability_mode=signal.capability_mode,
+        return replace(
+            signal,
             growth_authorization=growth_authorization,
-            gating_updates=signal.gating_updates,
-            bias_updates=signal.bias_updates,
-            reset_flags=signal.reset_flags,
-            reframe_flags=signal.reframe_flags,
-            stop_reason=signal.stop_reason,
-            metadata=prediction_meta,
+            metadata={**dict(signal.metadata), **prediction_meta},
         )
 
     # ------------------------------------------------------------------
@@ -1461,12 +1913,17 @@ class LaminatedController:
         initial_cycle_budget: int = 8,
         safety_limit: int = 200,
         portfolio_threshold: float = 0.45,
+        world_model: REALWorldModel | None = None,
+        world_model_enabled: bool = True,
     ) -> None:
         self.runner = runner
         self.regulator = regulator or HeuristicSliceRegulator()
         self.initial_cycle_budget = _clamp_budget(initial_cycle_budget)
         self.safety_limit = max(1, int(safety_limit))
         self.portfolio_threshold = float(portfolio_threshold)
+        self.world_model_enabled = bool(world_model_enabled)
+        self.world_model = world_model or REALWorldModel()
+        self._load_world_model_from_runner()
 
     def run(self) -> LaminatedRunResult:
         history: List[SliceSummary] = []
@@ -1485,8 +1942,10 @@ class LaminatedController:
                 execution_plan=execution_plan,
                 signal=signal,
             )
+            self._annotate_summary_with_world_model(history, summary)
             history.append(summary)
             signal = self.regulator.regulate(history)
+            signal = self._attach_world_model_to_signal(signal, summary)
             decision = self._resolve_decision(history, signal)
             if decision != SettlementDecision.CONTINUE:
                 return LaminatedRunResult(
@@ -1599,15 +2058,21 @@ class LaminatedController:
         signal: RegulatorySignal,
     ) -> SliceSummary:
         base_snapshot = self.runner.snapshot_fast_state()
+        base_world_model = self._export_world_model_state()
         candidates: list[PortfolioCandidateResult] = []
         for label, plan, candidate_signal in self._candidate_plans(execution_plan, signal):
             self.runner.restore_fast_state(base_snapshot)
+            self._load_world_model_state(base_world_model)
             summary = self.runner.run_slice_plan(
                 slice_id=slice_id,
                 execution_plan=plan,
                 regulatory_signal=candidate_signal,
             )
-            snapshot = self.runner.snapshot_fast_state()
+            self._annotate_summary_with_world_model(history, summary)
+            snapshot = {
+                "fast_state": self.runner.snapshot_fast_state(),
+                "world_model_state": self._export_world_model_state(),
+            }
             score = self._score_candidate(history, summary, candidate_signal)
             candidates.append(
                 PortfolioCandidateResult(
@@ -1618,7 +2083,8 @@ class LaminatedController:
                 )
             )
         winner = max(candidates, key=lambda item: item.score)
-        self.runner.restore_fast_state(winner.snapshot)
+        self.runner.restore_fast_state(dict(winner.snapshot.get("fast_state", {})))
+        self._load_world_model_state(dict(winner.snapshot.get("world_model_state", {})))
         winner.summary.metadata["portfolio_active"] = True
         winner.summary.metadata["portfolio_drive"] = round(float(signal.portfolio_drive), 4)
         winner.summary.metadata["portfolio_candidate_scores"] = {
@@ -1632,7 +2098,70 @@ class LaminatedController:
             item.label: candidates[index].summary.metadata.get("portfolio_candidate_profile", {})
             for index, item in enumerate(candidates)
         }
+        winner.summary.metadata["portfolio_candidate_world_models"] = {
+            item.label: dict(candidates[index].summary.metadata.get("world_model_summary", {}))
+            for index, item in enumerate(candidates)
+        }
         return winner.summary
+
+    def _load_world_model_from_runner(self) -> None:
+        if not self.world_model_enabled:
+            return
+        state: dict[str, Any] | None = None
+        if hasattr(self.runner, "system"):
+            state = dict(getattr(self.runner.system, "world_model_state", {}) or {})
+        if not state and hasattr(self.runner, "world_model_state"):
+            state = dict(getattr(self.runner, "world_model_state", {}) or {})
+        if state:
+            self.world_model.load_state(state)
+            self._sync_world_model_to_runner()
+
+    def _export_world_model_state(self) -> dict[str, Any]:
+        if not self.world_model_enabled:
+            return {}
+        return dict(self.world_model.export_state())
+
+    def _load_world_model_state(self, payload: dict[str, Any] | None) -> None:
+        if not self.world_model_enabled:
+            return
+        self.world_model.load_state(payload)
+        self._sync_world_model_to_runner()
+
+    def _sync_world_model_to_runner(self) -> None:
+        if not self.world_model_enabled:
+            return
+        state = self._export_world_model_state()
+        if hasattr(self.runner, "world_model_state"):
+            setattr(self.runner, "world_model_state", state)
+        if hasattr(self.runner, "system"):
+            setattr(self.runner.system, "world_model_state", state)
+
+    def _annotate_summary_with_world_model(
+        self,
+        history: List[SliceSummary],
+        summary: SliceSummary,
+    ) -> None:
+        if not self.world_model_enabled:
+            return
+        result = self.world_model.process([*history, summary])
+        if result is None:
+            return
+        summary.metadata["world_model_summary"] = dict(result.summary)
+        self._sync_world_model_to_runner()
+
+    def _attach_world_model_to_signal(
+        self,
+        signal: RegulatorySignal | None,
+        summary: SliceSummary,
+    ) -> RegulatorySignal | None:
+        if signal is None:
+            return None
+        world_model_summary = _world_model_summary(summary)
+        if not world_model_summary:
+            return signal
+        signal.metadata = dict(signal.metadata)
+        signal.metadata["world_model_summary"] = dict(world_model_summary)
+        return signal
 
     def _candidate_plans(
         self,

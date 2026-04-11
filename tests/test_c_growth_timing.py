@@ -17,6 +17,7 @@ class TestCGrowthTiming(unittest.TestCase):
                 "context_promotion_ready": 0.0,
                 "context_growth_ready": 0.0,
                 "source_sequence_context_confidence": 0.70,
+                "source_sequence_channel_context_confidence": 0.35,
                 "source_route_context_confidence": 0.20,
                 "source_feedback_context_confidence": 0.10,
                 "downstream_mean_route_context_confidence": 0.10,
@@ -43,6 +44,7 @@ class TestCGrowthTiming(unittest.TestCase):
                 "context_promotion_ready": 1.0,
                 "context_growth_ready": 0.0,
                 "source_sequence_context_confidence": 0.80,
+                "source_sequence_channel_context_confidence": 0.60,
                 "source_route_context_confidence": 0.30,
                 "source_feedback_context_confidence": 0.20,
                 "downstream_mean_route_context_confidence": 0.20,
@@ -69,6 +71,7 @@ class TestCGrowthTiming(unittest.TestCase):
                 "context_promotion_ready": 1.0,
                 "context_growth_ready": 1.0,
                 "source_sequence_context_confidence": 0.90,
+                "source_sequence_channel_context_confidence": 0.75,
                 "source_route_context_confidence": 0.40,
                 "source_feedback_context_confidence": 0.30,
                 "downstream_mean_route_context_confidence": 0.25,
@@ -96,6 +99,7 @@ class TestCGrowthTiming(unittest.TestCase):
         self.assertEqual(summary["first_bud_success_cycle"], 3)
         self.assertEqual(summary["first_dynamic_node_cycle"], 3)
         self.assertEqual(summary["promotion_before_growth_cycle_count"], 1)
+        self.assertAlmostEqual(summary["avg_source_sequence_channel_context_confidence"], 0.56667, places=4)
 
     def test_growth_timing_probe_runs_single_method_single_task(self) -> None:
         result = evaluate_c_growth_timing(
@@ -110,6 +114,7 @@ class TestCGrowthTiming(unittest.TestCase):
         self.assertEqual(result["method_id"], "growth-latent")
         self.assertTrue(result["timeline"])
         self.assertIn("first_context_growth_ready_cycle", result["summary"])
+        self.assertIn("source_sequence_channel_context_confidence", result["timeline"][0])
 
 
 if __name__ == "__main__":

@@ -416,6 +416,15 @@ def _source_cycle_snapshot(system, *, task_id_hint: str | None = None) -> dict[s
             float(latent_snapshot.get("sequence_context_confidence", 0.0)),
             5,
         ),
+        "source_sequence_channel_context_confidence": round(
+            float(channel_confidence.get("source_sequence", 0.0)),
+            5,
+        ),
+        "source_sequence_channel_context_estimate": (
+            float(channel_estimate.get("source_sequence"))
+            if channel_estimate.get("source_sequence") is not None
+            else 0.0
+        ),
         "source_sequence_prev_parity": (
             float(latent_snapshot.get("sequence_prev_parity"))
             if latent_snapshot.get("sequence_prev_parity") is not None
@@ -471,6 +480,22 @@ def _source_cycle_snapshot(system, *, task_id_hint: str | None = None) -> dict[s
             if channel_estimate.get("source_feedback") is not None
             else 0.0
         ),
+        "source_sequence_context0_evidence": round(
+            float(dict(channel_context_evidence.get("source_sequence", {})).get(0, 0.0)),
+            5,
+        ),
+        "source_sequence_context1_evidence": round(
+            float(dict(channel_context_evidence.get("source_sequence", {})).get(1, 0.0)),
+            5,
+        ),
+        "source_sequence_context2_evidence": round(
+            float(dict(channel_context_evidence.get("source_sequence", {})).get(2, 0.0)),
+            5,
+        ),
+        "source_sequence_context3_evidence": round(
+            float(dict(channel_context_evidence.get("source_sequence", {})).get(3, 0.0)),
+            5,
+        ),
         "source_route_context0_evidence": round(
             float(dict(channel_context_evidence.get("source_route", {})).get(0, 0.0)),
             5,
@@ -479,12 +504,28 @@ def _source_cycle_snapshot(system, *, task_id_hint: str | None = None) -> dict[s
             float(dict(channel_context_evidence.get("source_route", {})).get(1, 0.0)),
             5,
         ),
+        "source_route_context2_evidence": round(
+            float(dict(channel_context_evidence.get("source_route", {})).get(2, 0.0)),
+            5,
+        ),
+        "source_route_context3_evidence": round(
+            float(dict(channel_context_evidence.get("source_route", {})).get(3, 0.0)),
+            5,
+        ),
         "source_feedback_context0_evidence": round(
             float(dict(channel_context_evidence.get("source_feedback", {})).get(0, 0.0)),
             5,
         ),
         "source_feedback_context1_evidence": round(
             float(dict(channel_context_evidence.get("source_feedback", {})).get(1, 0.0)),
+            5,
+        ),
+        "source_feedback_context2_evidence": round(
+            float(dict(channel_context_evidence.get("source_feedback", {})).get(2, 0.0)),
+            5,
+        ),
+        "source_feedback_context3_evidence": round(
+            float(dict(channel_context_evidence.get("source_feedback", {})).get(3, 0.0)),
             5,
         ),
         "source_route_transform_evidence_rotate_left_1": round(
@@ -563,6 +604,9 @@ def _latent_timeline_summary(records: list[dict[str, object]]) -> dict[str, floa
     source_sequence_confidences = [
         float(record.get("source_sequence_context_confidence", 0.0)) for record in records
     ]
+    source_sequence_channel_confidences = [
+        float(record.get("source_sequence_channel_context_confidence", 0.0)) for record in records
+    ]
     source_route_confidences = [
         float(record.get("source_route_context_confidence", 0.0)) for record in records
     ]
@@ -617,6 +661,11 @@ def _latent_timeline_summary(records: list[dict[str, object]]) -> dict[str, floa
         "avg_source_sequence_context_confidence": (
             round(mean(source_sequence_confidences), 5) if source_sequence_confidences else 0.0
         ),
+        "avg_source_sequence_channel_context_confidence": (
+            round(mean(source_sequence_channel_confidences), 5)
+            if source_sequence_channel_confidences
+            else 0.0
+        ),
         "avg_source_route_context_confidence": (
             round(mean(source_route_confidences), 5) if source_route_confidences else 0.0
         ),
@@ -663,6 +712,10 @@ def _latent_timeline_summary(records: list[dict[str, object]]) -> dict[str, floa
         "final_effective_context_confidence": round(float(final.get("effective_context_confidence", 0.0)), 5),
         "final_source_sequence_context_confidence": round(
             float(final.get("source_sequence_context_confidence", 0.0)),
+            5,
+        ),
+        "final_source_sequence_channel_context_confidence": round(
+            float(final.get("source_sequence_channel_context_confidence", 0.0)),
             5,
         ),
         "final_source_route_context_confidence": round(

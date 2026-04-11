@@ -1,0 +1,97 @@
+{
+  "title": "2026-03-17 1401 - neural baseline extended",
+  "timestamp": "2026-03-17T21:01:47.175763Z",
+  "harness": "neural_baseline_extended",
+  "seeds": [
+    0
+  ],
+  "scenarios": [
+    "cvt1_task_a_stage1",
+    "cvt1_task_a_stage1"
+  ],
+  "result": {
+    "neural_variants": {
+      "mlp-explicit": [
+        {
+          "seed": 0,
+          "exact_matches": 0,
+          "mean_bit_accuracy": 0.0,
+          "examples_to_criterion": null,
+          "criterion_reached": false
+        }
+      ],
+      "mlp-latent": [
+        {
+          "seed": 0,
+          "exact_matches": 0,
+          "mean_bit_accuracy": 0.0,
+          "examples_to_criterion": null,
+          "criterion_reached": false
+        }
+      ],
+      "rnn-latent": [
+        {
+          "seed": 0,
+          "exact_matches": 0,
+          "mean_bit_accuracy": 0.0,
+          "examples_to_criterion": 144,
+          "criterion_reached": true
+        }
+      ]
+    },
+    "neural_aggregates": {
+      "mlp-explicit": {
+        "variant": "mlp-explicit",
+        "task_id": "task_a",
+        "n_seeds": 1,
+        "mean_exact_matches": 0,
+        "mean_bit_accuracy": 0.0,
+        "criterion_rate": 0.0,
+        "mean_examples_to_criterion": null,
+        "min_examples_to_criterion": null
+      },
+      "mlp-latent": {
+        "variant": "mlp-latent",
+        "task_id": "task_a",
+        "n_seeds": 1,
+        "mean_exact_matches": 0,
+        "mean_bit_accuracy": 0.0,
+        "criterion_rate": 0.0,
+        "mean_examples_to_criterion": null,
+        "min_examples_to_criterion": null
+      },
+      "rnn-latent": {
+        "variant": "rnn-latent",
+        "task_id": "task_a",
+        "n_seeds": 1,
+        "mean_exact_matches": 0,
+        "mean_bit_accuracy": 0.0,
+        "criterion_rate": 1.0,
+        "mean_examples_to_criterion": 144,
+        "min_examples_to_criterion": 144
+      }
+    },
+    "real_results": [
+      {
+        "exact_matches": 8,
+        "mean_bit_accuracy": 0.6667,
+        "examples_to_criterion": null,
+        "criterion_reached": false,
+        "best_rolling_exact_rate": 0.625
+      }
+    ],
+    "real_aggregate": {
+      "mean_exact_matches": 8.0,
+      "mean_bit_accuracy": 0.6667,
+      "criterion_rate": 0.0,
+      "mean_examples_to_criterion": null
+    }
+  },
+  "metadata": {
+    "transfer": true,
+    "morphogenesis": false,
+    "scale": false,
+    "epoch_scan": true,
+    "max_epochs": 20
+  }
+}

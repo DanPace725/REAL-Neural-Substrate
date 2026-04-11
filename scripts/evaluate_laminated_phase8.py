@@ -30,7 +30,13 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from phase8 import evaluate_laminated_scenario
+from phase8 import (
+    DEFAULT_LOCAL_UNIT_PRESET,
+    evaluate_laminated_scenario,
+    pulse_local_unit_preset_names,
+    scenario_with_topology_mode,
+)
+from real_core import WORLD_MODEL_ASSISTANCE_MODES
 from scripts.compare_a_scale_suite import a_scale_suite_by_id
 from scripts.compare_b_scale_suite import b_scale_suite_by_id
 from scripts.compare_c_scale_suite import c_scale_suite_by_id
@@ -64,14 +70,24 @@ def _auto_output_path(
     initial_cycle_budget: int,
     accuracy_threshold: float,
     regulator_type: str,
+    local_unit_mode: str,
+    local_unit_preset: str,
+    topology_mode: str,
+    max_atp: float,
+    world_model_assistance_mode: str,
 ) -> Path:
     date_str = datetime.now().strftime("%Y%m%d")
     mode_slug = mode.replace("-", "_")
+    local_unit_slug = "" if local_unit_mode == "legacy" else f"_{local_unit_mode}"
+    local_unit_preset_slug = "" if local_unit_preset == DEFAULT_LOCAL_UNIT_PRESET else f"_{local_unit_preset}"
+    topology_slug = "" if topology_mode == "legacy" else f"_{topology_mode}"
+    atp_slug = "" if abs(float(max_atp) - 1.0) < 1e-9 else f"_atp{str(float(max_atp)).replace('.', 'p')}"
     thresh_slug = f"_t{str(accuracy_threshold).replace('.', '')}" if accuracy_threshold > 0.0 else ""
     reg_slug = f"_{regulator_type}" if regulator_type != "heuristic" else ""
+    assist_slug = "" if world_model_assistance_mode == "off" else f"_wm{world_model_assistance_mode}"
     filename = (
         f"{date_str}_laminated_{benchmark_id.lower()}_{task_key}_{mode_slug}"
-        f"_b{initial_cycle_budget}{thresh_slug}{reg_slug}_seed{seed}.json"
+        f"{local_unit_slug}{local_unit_preset_slug}{topology_slug}{atp_slug}{assist_slug}_b{initial_cycle_budget}{thresh_slug}{reg_slug}_seed{seed}.json"
     )
     return EXPERIMENT_OUTPUTS_DIR / filename
 
@@ -92,11 +108,27 @@ def evaluate_laminated_benchmark(
     regulator_type: str = "heuristic",
     safety_limit: int = 200,
     output_path: Path | None = None,
+    local_unit_mode: str = "legacy",
+    local_unit_preset: str = DEFAULT_LOCAL_UNIT_PRESET,
+    topology_mode: str = "legacy",
+    max_atp: float = 1.0,
+    force_expected_transform_at_sink: bool = False,
+    teacher_trace_mode: str = "off",
+    teacher_transform_policy: str = "source_then_identity",
+    teacher_force_nodes: list[str] | None = None,
+    c_task_layer1_mode: str = "legacy",
+    world_model_enabled: bool = True,
+    world_model_assistance_mode: str = "off",
+    world_model_assistance_confidence_threshold: float = 0.45,
 ) -> dict[str, object]:
     if benchmark_id.startswith("A"):
+        if topology_mode != "legacy":
+            raise ValueError("Topology mode overrides are currently limited to C-family benchmarks.")
         case = a_scale_suite_by_id()[benchmark_id]
         benchmark_family = "A"
     elif benchmark_id.startswith("B"):
+        if topology_mode != "legacy":
+            raise ValueError("Topology mode overrides are currently limited to C-family benchmarks.")
         case = b_scale_suite_by_id()[benchmark_id]
         benchmark_family = "B"
     elif benchmark_id.startswith("C"):
@@ -112,6 +144,8 @@ def evaluate_laminated_benchmark(
         scenario = task.latent_scenario
     else:
         raise ValueError(f"Unsupported mode: {mode}")
+    if benchmark_family == "C":
+        scenario = scenario_with_topology_mode(scenario, topology_mode)
 
     resolved_capability_policy = mode if mode.startswith("growth-") else capability_policy
 
@@ -121,16 +155,41 @@ def evaluate_laminated_benchmark(
         task_key=task_key,
         seed=seed,
         capability_policy=resolved_capability_policy,
+        local_unit_mode=local_unit_mode,
+        local_unit_preset=local_unit_preset,
+        max_atp=max_atp,
+        force_expected_transform_at_sink=force_expected_transform_at_sink,
+        teacher_trace_mode=teacher_trace_mode,
+        teacher_transform_policy=teacher_transform_policy,
+        teacher_force_nodes=teacher_force_nodes,
+        c_task_layer1_mode=c_task_layer1_mode,
         initial_cycle_budget=initial_cycle_budget,
         accuracy_threshold=accuracy_threshold,
         regulator_type=regulator_type,
         safety_limit=safety_limit,
+        world_model_enabled=world_model_enabled,
+        world_model_assistance_mode=world_model_assistance_mode,
+        world_model_assistance_confidence_threshold=world_model_assistance_confidence_threshold,
     )
     result.update({
         "benchmark_id": benchmark_id,
         "task_key": task_key,
         "mode": mode,
         "capability_policy": resolved_capability_policy,
+        "local_unit_mode": local_unit_mode,
+        "local_unit_preset": local_unit_preset,
+        "topology_mode": topology_mode,
+        "max_atp": max_atp,
+        "force_expected_transform_at_sink": bool(force_expected_transform_at_sink),
+        "teacher_trace_mode": teacher_trace_mode,
+        "teacher_transform_policy": teacher_transform_policy,
+        "teacher_force_nodes": list(teacher_force_nodes or []),
+        "c_task_layer1_mode": c_task_layer1_mode,
+        "world_model_enabled": bool(world_model_enabled),
+        "world_model_assistance_mode": world_model_assistance_mode,
+        "world_model_assistance_confidence_threshold": world_model_assistance_confidence_threshold,
+        "topology_node_count": len(scenario.positions),
+        "topology_depth": max(int(position) for position in scenario.positions.values()),
         "seed": seed,
     })
 
@@ -143,6 +202,18 @@ def evaluate_laminated_benchmark(
                 "task_key": task_key,
                 "mode": mode,
                 "capability_policy": resolved_capability_policy,
+                "local_unit_mode": local_unit_mode,
+                "local_unit_preset": local_unit_preset,
+                "topology_mode": topology_mode,
+                "max_atp": max_atp,
+                "force_expected_transform_at_sink": force_expected_transform_at_sink,
+                "teacher_trace_mode": teacher_trace_mode,
+                "teacher_transform_policy": teacher_transform_policy,
+                "teacher_force_nodes": list(teacher_force_nodes or []),
+                "c_task_layer1_mode": c_task_layer1_mode,
+                "world_model_enabled": world_model_enabled,
+                "world_model_assistance_mode": world_model_assistance_mode,
+                "world_model_assistance_confidence_threshold": world_model_assistance_confidence_threshold,
                 "initial_cycle_budget": initial_cycle_budget,
                 "accuracy_threshold": accuracy_threshold,
                 "regulator_type": regulator_type,
@@ -165,16 +236,18 @@ def _compact_row(benchmark_id: str, task_key: str, result: dict) -> str:
     slices = len(slices_data)
     decision = lam.get("final_decision", "?")
 
-    # Final accuracy = last slice's aggregate overall accuracy.
     final_acc = 0.0
+    floor_acc = 0.0
     ctx_str = ""
     forecast_str = ""
     if slices_data:
         last = slices_data[-1]
-        final_acc = last.get("metadata", {}).get(
+        metadata = last.get("metadata", {})
+        final_acc = metadata.get(
             "final_accuracy",
-            last.get("metadata", {}).get("mean_bit_accuracy", 0.0),
+            metadata.get("mean_bit_accuracy", 0.0),
         )
+        floor_acc = metadata.get("floor_accuracy", 0.0)
         forecast_metrics = last.get("metadata", {}).get("forecast_metrics", {})
         forecast_acc = forecast_metrics.get("forecast_accuracy")
         if isinstance(forecast_acc, (int, float)):
@@ -185,7 +258,7 @@ def _compact_row(benchmark_id: str, task_key: str, result: dict) -> str:
 
     return (
         f"  {benchmark_id:6s} {task_key:6s}  "
-        f"final={final_acc:.3f}  "
+        f"final={final_acc:.3f} floor={floor_acc:.3f}  "
         f"slices={slices} [{decision}]{forecast_str}{ctx_str}"
     )
 
@@ -226,6 +299,79 @@ def main() -> None:
     p.add_argument("--reg", "--regulator-type", dest="regulator_type",
                    choices=("heuristic", "learning", "real", "gradient"), default="heuristic",
                    help="Regulator type: heuristic / learning / real / gradient.")
+    p.add_argument(
+        "--local-unit-mode",
+        choices=("legacy", "pulse_local_unit"),
+        default="legacy",
+        help="Opt-in Phase 8 local-unit runtime mode. Use pulse_local_unit for the C/HR pilot.",
+    )
+    p.add_argument(
+        "--local-unit-preset",
+        choices=pulse_local_unit_preset_names(),
+        default=DEFAULT_LOCAL_UNIT_PRESET,
+        help="Named pulse-local-unit preset. Only affects pulse_local_unit mode.",
+    )
+    p.add_argument(
+        "--topology-mode",
+        choices=("legacy", "bounded_overlap_13715"),
+        default="legacy",
+        help="Opt-in topology override. Currently applied only to C-family laminated runs.",
+    )
+    p.add_argument(
+        "--max-atp",
+        dest="max_atp",
+        type=float,
+        default=1.0,
+        help="Per-node ATP capacity for this run. Values above 1.0 give nodes more energy headroom.",
+    )
+    p.add_argument(
+        "--force-expected-transform-at-sink",
+        action="store_true",
+        help="Diagnostic mode: override the last-hop transform with the task-correct transform at sink delivery.",
+    )
+    p.add_argument(
+        "--teacher-trace-mode",
+        choices=("off", "observe", "force"),
+        default="off",
+        help="Packet-level teacher trace mode. 'force' can override transforms on selected nodes.",
+    )
+    p.add_argument(
+        "--teacher-transform-policy",
+        choices=("source_then_identity", "source_only", "sink_only"),
+        default="source_then_identity",
+        help="Canonical answer-key transform policy used by teacher trace.",
+    )
+    p.add_argument(
+        "--teacher-force-nodes",
+        default="",
+        help="Comma-separated node ids to force under teacher-trace force mode. Empty means force all nodes.",
+    )
+    p.add_argument(
+        "--c-task-layer1-mode",
+        choices=("legacy", "stabilized", "communicative"),
+        default="legacy",
+        help="Dedicated C-family Layer 1 mode. 'stabilized' is hard-guided; 'communicative' uses packet-level preserve/reopen signals without hard pruning.",
+    )
+    p.add_argument(
+        "--world-model",
+        dest="world_model_enabled",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Enable or disable the Layer 3 world model.",
+    )
+    p.add_argument(
+        "--wm-assist",
+        choices=WORLD_MODEL_ASSISTANCE_MODES,
+        default="off",
+        help="Assisted Layer 3 mode: off, hinted, guided, or teacher.",
+    )
+    p.add_argument(
+        "--wm-assist-threshold",
+        dest="world_model_assistance_confidence_threshold",
+        type=float,
+        default=0.45,
+        help="Minimum assistance confidence required before the assist activates.",
+    )
 
     # Run parameters
     p.add_argument("-s", "--seed", type=int, default=13)
@@ -269,6 +415,11 @@ def main() -> None:
 
     # Run all combinations
     results: list[tuple[str, str, dict]] = []
+    teacher_force_nodes = [
+        node_id.strip()
+        for node_id in str(args.teacher_force_nodes or "").split(",")
+        if node_id.strip()
+    ]
     for benchmark_id in benchmark_ids:
         for task_key in task_keys:
             budget = args.budget
@@ -287,6 +438,11 @@ def main() -> None:
                     initial_cycle_budget=budget,
                     accuracy_threshold=args.accuracy_threshold,
                     regulator_type=args.regulator_type,
+                    local_unit_mode=args.local_unit_mode,
+                    local_unit_preset=args.local_unit_preset,
+                    topology_mode=args.topology_mode,
+                    max_atp=args.max_atp,
+                    world_model_assistance_mode=args.wm_assist,
                 )
 
             if args.sweep or args.all_tasks:
@@ -307,6 +463,18 @@ def main() -> None:
                 regulator_type=args.regulator_type,
                 safety_limit=args.safety_limit,
                 output_path=output_path,
+                local_unit_mode=args.local_unit_mode,
+                local_unit_preset=args.local_unit_preset,
+                topology_mode=args.topology_mode,
+                max_atp=args.max_atp,
+                force_expected_transform_at_sink=args.force_expected_transform_at_sink,
+                teacher_trace_mode=args.teacher_trace_mode,
+                teacher_transform_policy=args.teacher_transform_policy,
+                teacher_force_nodes=teacher_force_nodes,
+                c_task_layer1_mode=args.c_task_layer1_mode,
+                world_model_enabled=args.world_model_enabled,
+                world_model_assistance_mode=args.wm_assist,
+                world_model_assistance_confidence_threshold=args.world_model_assistance_confidence_threshold,
             )
             results.append((benchmark_id, task_key, payload))
 

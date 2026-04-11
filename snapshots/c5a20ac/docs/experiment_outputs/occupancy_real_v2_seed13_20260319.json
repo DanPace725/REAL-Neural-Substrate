@@ -1,0 +1,567 @@
+{
+  "title": "REAL Occupancy v2 \u2014 seed 13",
+  "timestamp": "2026-03-19T23:12:52Z",
+  "preset": "synth_v1_default",
+  "selector_seed": 13,
+  "elapsed_seconds": 723.8,
+  "conditions": [
+    {
+      "name": "v2_live",
+      "description": "Eval feedback on, continuous, no context",
+      "result": {
+        "v2_config": {
+          "csv_path": "C:\\Users\\nscha\\Coding\\Relationally Embedded Allostatic Learning\\REAL-Neural-Substrate\\occupancy_baseline\\data\\occupancy_synth_v1.csv",
+          "window_size": 5,
+          "train_fraction": 0.8,
+          "normalize": true,
+          "selector_seed": 13,
+          "feedback_amount": 0.18,
+          "eval_feedback_fraction": 1.0,
+          "packet_ttl": 8,
+          "forward_drain_cycles": 16,
+          "feedback_drain_cycles": 4,
+          "carryover_mode": "continuous",
+          "context_bit_source": "none",
+          "max_train_episodes": 500,
+          "max_eval_episodes": 250,
+          "summary_only": true
+        },
+        "dataset_rows": 1344,
+        "windowed_examples": 1340,
+        "input_dim": 25,
+        "train_episode_count": 500,
+        "eval_episode_count": 250,
+        "topology": {
+          "adjacency": {
+            "sensor_hub": [],
+            "sensor_temperature": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_humidity": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_light": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_co2": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_humidity_ratio": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "decision_empty": [
+              "sink"
+            ],
+            "decision_occupied": [
+              "sink"
+            ],
+            "sink": []
+          },
+          "positions": {
+            "sensor_hub": 0,
+            "sensor_temperature": 0,
+            "sensor_humidity": 0,
+            "sensor_light": 0,
+            "sensor_co2": 0,
+            "sensor_humidity_ratio": 0,
+            "decision_empty": 1,
+            "decision_occupied": 1,
+            "sink": 2
+          },
+          "source_id": "sensor_hub",
+          "sink_id": "sink"
+        },
+        "co2_training_median": -0.260971,
+        "train_summary": {
+          "episode_count": 500,
+          "metrics": {
+            "accuracy": 0.874,
+            "precision": 0.8356164383561644,
+            "recall": 0.7577639751552795,
+            "f1": 0.7947882736156352,
+            "tp": 122.0,
+            "tn": 315.0,
+            "fp": 24.0,
+            "fn": 39.0
+          },
+          "mean_delivered_packets": 21.318,
+          "mean_dropped_packets": 3.682,
+          "mean_feedback_events": 14.66,
+          "mean_feedback_total": 2.6388,
+          "occupied_prediction_rate": 0.292
+        },
+        "eval_summary": {
+          "episode_count": 250,
+          "metrics": {
+            "accuracy": 0.892,
+            "precision": 0.7407407407407407,
+            "recall": 0.7547169811320755,
+            "f1": 0.7476635514018692,
+            "tp": 40.0,
+            "tn": 183.0,
+            "fp": 14.0,
+            "fn": 13.0
+          },
+          "mean_delivered_packets": 20.792,
+          "mean_dropped_packets": 4.208,
+          "mean_feedback_events": 13.916,
+          "mean_feedback_total": 2.5049,
+          "occupied_prediction_rate": 0.216
+        },
+        "system_summary": {
+          "cycles": 30249,
+          "injected_packets": 18750,
+          "delivered_packets": 15857,
+          "delivery_ratio": 0.8457,
+          "dropped_packets": 2893,
+          "drop_ratio": 0.1543,
+          "mean_latency": 2.9224,
+          "mean_route_cost": 0.03031,
+          "mean_feedback_award": 0.1227,
+          "node_atp_total": 4.687,
+          "exact_matches": 10809,
+          "mean_bit_accuracy": 0.6817
+        }
+      }
+    },
+    {
+      "name": "v2_carryover",
+      "description": "Eval feedback on, fresh substrate carryover, no context",
+      "result": {
+        "v2_config": {
+          "csv_path": "C:\\Users\\nscha\\Coding\\Relationally Embedded Allostatic Learning\\REAL-Neural-Substrate\\occupancy_baseline\\data\\occupancy_synth_v1.csv",
+          "window_size": 5,
+          "train_fraction": 0.8,
+          "normalize": true,
+          "selector_seed": 13,
+          "feedback_amount": 0.18,
+          "eval_feedback_fraction": 1.0,
+          "packet_ttl": 8,
+          "forward_drain_cycles": 16,
+          "feedback_drain_cycles": 4,
+          "carryover_mode": "fresh_eval",
+          "context_bit_source": "none",
+          "max_train_episodes": 500,
+          "max_eval_episodes": 250,
+          "summary_only": true
+        },
+        "dataset_rows": 1344,
+        "windowed_examples": 1340,
+        "input_dim": 25,
+        "train_episode_count": 500,
+        "eval_episode_count": 250,
+        "topology": {
+          "adjacency": {
+            "sensor_hub": [],
+            "sensor_temperature": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_humidity": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_light": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_co2": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_humidity_ratio": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "decision_empty": [
+              "sink"
+            ],
+            "decision_occupied": [
+              "sink"
+            ],
+            "sink": []
+          },
+          "positions": {
+            "sensor_hub": 0,
+            "sensor_temperature": 0,
+            "sensor_humidity": 0,
+            "sensor_light": 0,
+            "sensor_co2": 0,
+            "sensor_humidity_ratio": 0,
+            "decision_empty": 1,
+            "decision_occupied": 1,
+            "sink": 2
+          },
+          "source_id": "sensor_hub",
+          "sink_id": "sink"
+        },
+        "co2_training_median": -0.260971,
+        "train_summary": {
+          "episode_count": 500,
+          "metrics": {
+            "accuracy": 0.874,
+            "precision": 0.8356164383561644,
+            "recall": 0.7577639751552795,
+            "f1": 0.7947882736156352,
+            "tp": 122.0,
+            "tn": 315.0,
+            "fp": 24.0,
+            "fn": 39.0
+          },
+          "mean_delivered_packets": 21.318,
+          "mean_dropped_packets": 3.682,
+          "mean_feedback_events": 14.66,
+          "mean_feedback_total": 2.6388,
+          "occupied_prediction_rate": 0.292
+        },
+        "eval_summary": {
+          "episode_count": 250,
+          "metrics": {
+            "accuracy": 0.9,
+            "precision": 0.78,
+            "recall": 0.7358490566037735,
+            "f1": 0.7572815533980584,
+            "tp": 39.0,
+            "tn": 186.0,
+            "fp": 11.0,
+            "fn": 14.0
+          },
+          "mean_delivered_packets": 20.772,
+          "mean_dropped_packets": 4.228,
+          "mean_feedback_events": 14.18,
+          "mean_feedback_total": 2.5524,
+          "occupied_prediction_rate": 0.2
+        },
+        "system_summary": {
+          "cycles": 30243,
+          "injected_packets": 6250,
+          "delivered_packets": 5193,
+          "delivery_ratio": 0.8309,
+          "dropped_packets": 1057,
+          "drop_ratio": 0.1691,
+          "mean_latency": 2.8448,
+          "mean_route_cost": 0.02957,
+          "mean_feedback_award": 0.1229,
+          "node_atp_total": 5.3208,
+          "exact_matches": 3545,
+          "mean_bit_accuracy": 0.6826
+        }
+      }
+    },
+    {
+      "name": "v2_live_ctx_co2_high",
+      "description": "Eval feedback on, continuous, context=co2_high",
+      "result": {
+        "v2_config": {
+          "csv_path": "C:\\Users\\nscha\\Coding\\Relationally Embedded Allostatic Learning\\REAL-Neural-Substrate\\occupancy_baseline\\data\\occupancy_synth_v1.csv",
+          "window_size": 5,
+          "train_fraction": 0.8,
+          "normalize": true,
+          "selector_seed": 13,
+          "feedback_amount": 0.18,
+          "eval_feedback_fraction": 1.0,
+          "packet_ttl": 8,
+          "forward_drain_cycles": 16,
+          "feedback_drain_cycles": 4,
+          "carryover_mode": "continuous",
+          "context_bit_source": "co2_high",
+          "max_train_episodes": 500,
+          "max_eval_episodes": 250,
+          "summary_only": true
+        },
+        "dataset_rows": 1344,
+        "windowed_examples": 1340,
+        "input_dim": 25,
+        "train_episode_count": 500,
+        "eval_episode_count": 250,
+        "topology": {
+          "adjacency": {
+            "sensor_hub": [],
+            "sensor_temperature": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_humidity": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_light": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_co2": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_humidity_ratio": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "decision_empty": [
+              "sink"
+            ],
+            "decision_occupied": [
+              "sink"
+            ],
+            "sink": []
+          },
+          "positions": {
+            "sensor_hub": 0,
+            "sensor_temperature": 0,
+            "sensor_humidity": 0,
+            "sensor_light": 0,
+            "sensor_co2": 0,
+            "sensor_humidity_ratio": 0,
+            "decision_empty": 1,
+            "decision_occupied": 1,
+            "sink": 2
+          },
+          "source_id": "sensor_hub",
+          "sink_id": "sink"
+        },
+        "co2_training_median": -0.260971,
+        "train_summary": {
+          "episode_count": 500,
+          "metrics": {
+            "accuracy": 0.89,
+            "precision": 0.8192771084337349,
+            "recall": 0.84472049689441,
+            "f1": 0.8318042813455657,
+            "tp": 136.0,
+            "tn": 309.0,
+            "fp": 30.0,
+            "fn": 25.0
+          },
+          "mean_delivered_packets": 24.518,
+          "mean_dropped_packets": 0.482,
+          "mean_feedback_events": 18.026,
+          "mean_feedback_total": 3.2447,
+          "occupied_prediction_rate": 0.332
+        },
+        "eval_summary": {
+          "episode_count": 250,
+          "metrics": {
+            "accuracy": 0.9,
+            "precision": 0.7592592592592593,
+            "recall": 0.7735849056603774,
+            "f1": 0.7663551401869159,
+            "tp": 41.0,
+            "tn": 184.0,
+            "fp": 13.0,
+            "fn": 12.0
+          },
+          "mean_delivered_packets": 24.276,
+          "mean_dropped_packets": 0.724,
+          "mean_feedback_events": 18.048,
+          "mean_feedback_total": 3.2486,
+          "occupied_prediction_rate": 0.216
+        },
+        "system_summary": {
+          "cycles": 28064,
+          "injected_packets": 18750,
+          "delivered_packets": 18328,
+          "delivery_ratio": 0.9775,
+          "dropped_packets": 422,
+          "drop_ratio": 0.0225,
+          "mean_latency": 3.3774,
+          "mean_route_cost": 0.02774,
+          "mean_feedback_award": 0.1328,
+          "node_atp_total": 6.0647,
+          "exact_matches": 13525,
+          "mean_bit_accuracy": 0.7379
+        }
+      }
+    },
+    {
+      "name": "v2_carry_ctx_co2_high",
+      "description": "Eval feedback on, fresh carryover, context=co2_high",
+      "result": {
+        "v2_config": {
+          "csv_path": "C:\\Users\\nscha\\Coding\\Relationally Embedded Allostatic Learning\\REAL-Neural-Substrate\\occupancy_baseline\\data\\occupancy_synth_v1.csv",
+          "window_size": 5,
+          "train_fraction": 0.8,
+          "normalize": true,
+          "selector_seed": 13,
+          "feedback_amount": 0.18,
+          "eval_feedback_fraction": 1.0,
+          "packet_ttl": 8,
+          "forward_drain_cycles": 16,
+          "feedback_drain_cycles": 4,
+          "carryover_mode": "fresh_eval",
+          "context_bit_source": "co2_high",
+          "max_train_episodes": 500,
+          "max_eval_episodes": 250,
+          "summary_only": true
+        },
+        "dataset_rows": 1344,
+        "windowed_examples": 1340,
+        "input_dim": 25,
+        "train_episode_count": 500,
+        "eval_episode_count": 250,
+        "topology": {
+          "adjacency": {
+            "sensor_hub": [],
+            "sensor_temperature": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_humidity": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_light": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_co2": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "sensor_humidity_ratio": [
+              "decision_empty",
+              "decision_occupied"
+            ],
+            "decision_empty": [
+              "sink"
+            ],
+            "decision_occupied": [
+              "sink"
+            ],
+            "sink": []
+          },
+          "positions": {
+            "sensor_hub": 0,
+            "sensor_temperature": 0,
+            "sensor_humidity": 0,
+            "sensor_light": 0,
+            "sensor_co2": 0,
+            "sensor_humidity_ratio": 0,
+            "decision_empty": 1,
+            "decision_occupied": 1,
+            "sink": 2
+          },
+          "source_id": "sensor_hub",
+          "sink_id": "sink"
+        },
+        "co2_training_median": -0.260971,
+        "train_summary": {
+          "episode_count": 500,
+          "metrics": {
+            "accuracy": 0.89,
+            "precision": 0.8192771084337349,
+            "recall": 0.84472049689441,
+            "f1": 0.8318042813455657,
+            "tp": 136.0,
+            "tn": 309.0,
+            "fp": 30.0,
+            "fn": 25.0
+          },
+          "mean_delivered_packets": 24.518,
+          "mean_dropped_packets": 0.482,
+          "mean_feedback_events": 18.026,
+          "mean_feedback_total": 3.2447,
+          "occupied_prediction_rate": 0.332
+        },
+        "eval_summary": {
+          "episode_count": 250,
+          "metrics": {
+            "accuracy": 0.896,
+            "precision": 0.7368421052631579,
+            "recall": 0.7924528301886793,
+            "f1": 0.7636363636363637,
+            "tp": 42.0,
+            "tn": 182.0,
+            "fp": 15.0,
+            "fn": 11.0
+          },
+          "mean_delivered_packets": 24.24,
+          "mean_dropped_packets": 0.76,
+          "mean_feedback_events": 18.1,
+          "mean_feedback_total": 3.258,
+          "occupied_prediction_rate": 0.228
+        },
+        "system_summary": {
+          "cycles": 27970,
+          "injected_packets": 6250,
+          "delivered_packets": 6060,
+          "delivery_ratio": 0.9696,
+          "dropped_packets": 190,
+          "drop_ratio": 0.0304,
+          "mean_latency": 3.3012,
+          "mean_route_cost": 0.02783,
+          "mean_feedback_award": 0.1344,
+          "node_atp_total": 6.0422,
+          "exact_matches": 4525,
+          "mean_bit_accuracy": 0.7467
+        }
+      }
+    }
+  ],
+  "aggregate": {
+    "v2_live": {
+      "train_accuracy": 0.874,
+      "eval_accuracy": 0.892,
+      "train_precision": 0.8356164383561644,
+      "eval_precision": 0.7407407407407407,
+      "train_recall": 0.7577639751552795,
+      "eval_recall": 0.7547169811320755,
+      "train_f1": 0.7947882736156352,
+      "eval_f1": 0.7476635514018692,
+      "train_mean_delivered": 21.318,
+      "eval_mean_delivered": 20.792,
+      "train_mean_dropped": 3.682,
+      "eval_mean_dropped": 4.208,
+      "eval_mean_feedback_events": 13.916
+    },
+    "v2_carryover": {
+      "train_accuracy": 0.874,
+      "eval_accuracy": 0.9,
+      "train_precision": 0.8356164383561644,
+      "eval_precision": 0.78,
+      "train_recall": 0.7577639751552795,
+      "eval_recall": 0.7358490566037735,
+      "train_f1": 0.7947882736156352,
+      "eval_f1": 0.7572815533980584,
+      "train_mean_delivered": 21.318,
+      "eval_mean_delivered": 20.772,
+      "train_mean_dropped": 3.682,
+      "eval_mean_dropped": 4.228,
+      "eval_mean_feedback_events": 14.18
+    },
+    "v2_live_ctx_co2_high": {
+      "train_accuracy": 0.89,
+      "eval_accuracy": 0.9,
+      "train_precision": 0.8192771084337349,
+      "eval_precision": 0.7592592592592593,
+      "train_recall": 0.84472049689441,
+      "eval_recall": 0.7735849056603774,
+      "train_f1": 0.8318042813455657,
+      "eval_f1": 0.7663551401869159,
+      "train_mean_delivered": 24.518,
+      "eval_mean_delivered": 24.276,
+      "train_mean_dropped": 0.482,
+      "eval_mean_dropped": 0.724,
+      "eval_mean_feedback_events": 18.048
+    },
+    "v2_carry_ctx_co2_high": {
+      "train_accuracy": 0.89,
+      "eval_accuracy": 0.896,
+      "train_precision": 0.8192771084337349,
+      "eval_precision": 0.7368421052631579,
+      "train_recall": 0.84472049689441,
+      "eval_recall": 0.7924528301886793,
+      "train_f1": 0.8318042813455657,
+      "eval_f1": 0.7636363636363637,
+      "train_mean_delivered": 24.518,
+      "eval_mean_delivered": 24.24,
+      "train_mean_dropped": 0.482,
+      "eval_mean_dropped": 0.76,
+      "eval_mean_feedback_events": 18.1
+    }
+  }
+}

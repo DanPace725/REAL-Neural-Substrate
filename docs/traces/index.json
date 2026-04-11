@@ -1,8 +1,372 @@
 {
-  "generated_at": "2026-03-28T13:43:56-07:00",
+  "generated_at": "2026-04-08T13:41:12-07:00",
   "trace_root": "docs/traces",
-  "entry_count": 101,
+  "entry_count": 113,
   "entries": [
+    {
+      "path": "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md",
+      "filename": "2026-04-08 2135 - Occupancy Paper Alignment Clarification.md",
+      "title": "2026-04-08 2135 - Occupancy Paper Alignment Clarification",
+      "timestamp": "2026-04-08T21:35",
+      "date": "2026-04-08",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "occupancy",
+        "current",
+        "experiment_outputs",
+        "paper",
+        "result",
+        "main",
+        "saved",
+        "snapshot",
+        "readme",
+        "artifact",
+        "code",
+        "march"
+      ],
+      "referenced_files": [
+        "README.md",
+        "docs/experiment_outputs/v3_best_real_seed13.json",
+        "docs/experiment_outputs/v3_best_real_seed13_summary.md",
+        "docs/running_occupancy_v3.md",
+        "scripts/run_occupancy_real_v3.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-04-01 - Trace Organizer Frontier Sense and Slow Layer.md",
+      "filename": "2026-04-01 - Trace Organizer Frontier Sense and Slow Layer.md",
+      "title": "2026-04-01 - Trace Organizer Frontier Sense and Slow Layer",
+      "timestamp": "2026-04-01",
+      "date": "2026-04-01",
+      "trace_type": "Development trace",
+      "author": "Claude Opus 4",
+      "model": "Claude Opus 4",
+      "keywords": [
+        "claude",
+        "development",
+        "lexicon",
+        "opus",
+        "organizer",
+        "frontier",
+        "sense",
+        "system",
+        "traces",
+        "allostatic",
+        "layer",
+        "model"
+      ],
+      "referenced_files": [
+        "scripts/run_trace_organizer.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md",
+      "filename": "2026-03-31 0135 - REAL Stock Take After C Task Retuning.md",
+      "title": "2026-03-31 0135 - REAL Stock Take After C Task Retuning",
+      "timestamp": "2026-03-31T01:35",
+      "date": "2026-03-31",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "phase8",
+        "lamination",
+        "can",
+        "settle",
+        "environment",
+        "fixed",
+        "keep",
+        "models",
+        "real_core",
+        "retuning",
+        "selector",
+        "stock"
+      ],
+      "referenced_files": [
+        "phase8/environment.py",
+        "phase8/lamination.py",
+        "phase8/models.py",
+        "phase8/selector.py",
+        "real_core/lamination.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
+      "filename": "2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
+      "title": "2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard",
+      "timestamp": "2026-03-31T00:05",
+      "date": "2026-03-31",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "phase8",
+        "layer",
+        "real_core",
+        "lamination",
+        "pilot",
+        "system",
+        "world-model",
+        "world_model",
+        "adapters",
+        "communication",
+        "environment",
+        "evaluate_laminated_phase8"
+      ],
+      "referenced_files": [
+        "phase8/adapters.py",
+        "phase8/environment.py",
+        "phase8/lamination.py",
+        "phase8/models.py",
+        "phase8/selector.py",
+        "real_core/lamination.py",
+        "real_core/world_model.py",
+        "scripts/evaluate_laminated_phase8.py",
+        "tests/test_lamination.py",
+        "tests/test_phase8_lamination.py",
+        "tests/test_phase8_world_model_carryover.py",
+        "tests/test_world_model.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md",
+      "filename": "2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md",
+      "title": "2026-03-30 1454 - ATP Budget Headroom for C HR Pilot",
+      "timestamp": "2026-03-30T14:54",
+      "date": "2026-03-30",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "phase8",
+        "max_atp",
+        "environment",
+        "added",
+        "atp",
+        "evaluate_hidden_regime_forecasting",
+        "evaluate_laminated_phase8",
+        "lamination",
+        "pilot",
+        "budget",
+        "but",
+        "had"
+      ],
+      "referenced_files": [
+        "phase8/environment.py",
+        "phase8/lamination.py",
+        "scripts/evaluate_hidden_regime_forecasting.py",
+        "scripts/evaluate_laminated_phase8.py",
+        "tests/test_phase8_lamination.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md",
+      "filename": "2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md",
+      "title": "2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning",
+      "timestamp": "2026-03-30T13:48",
+      "date": "2026-03-30",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "phase8",
+        "growth",
+        "lamination",
+        "persistence",
+        "environment",
+        "general",
+        "request",
+        "topology",
+        "could",
+        "even",
+        "failure",
+        "instead"
+      ],
+      "referenced_files": [
+        "phase8/environment.py",
+        "phase8/lamination.py",
+        "phase8/topology.py",
+        "real_core/lamination.py",
+        "tests/test_latent_growth_gate.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-30 1209 - Growth Intent Latching and Authorized Stall Escalation.md",
+      "filename": "2026-03-30 1209 - Growth Intent Latching and Authorized Stall Escalation.md",
+      "title": "2026-03-30 1209 - Growth Intent Latching and Authorized Stall Escalation",
+      "timestamp": "2026-03-30T12:09",
+      "date": "2026-03-30",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "growth",
+        "authorization",
+        "authorized",
+        "blocked",
+        "nodes",
+        "stall",
+        "state",
+        "was",
+        "context",
+        "cycle",
+        "escalation",
+        "intent"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/2026-03-30 1112 - Pulse Delay Not Hard Suppression.md",
+      "filename": "2026-03-30 1112 - Pulse Delay Not Hard Suppression.md",
+      "title": "2026-03-30 1112 - Pulse Delay Not Hard Suppression",
+      "timestamp": "2026-03-30T11:12",
+      "date": "2026-03-30",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "pulse",
+        "delay",
+        "routing",
+        "hard",
+        "route",
+        "should",
+        "behavior",
+        "bounded",
+        "commitment",
+        "cooldown",
+        "suppression",
+        "thresholding"
+      ],
+      "referenced_files": []
+    },
+    {
+      "path": "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md",
+      "filename": "2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md",
+      "title": "2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection",
+      "timestamp": "2026-03-30T10:15",
+      "date": "2026-03-30",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "phase8",
+        "preset",
+        "added",
+        "overlap",
+        "c3s1",
+        "environment",
+        "evaluate_hidden_regime_forecasting",
+        "evaluate_laminated_phase8",
+        "lamination",
+        "models",
+        "named",
+        "pulse"
+      ],
+      "referenced_files": [
+        "phase8/__init__.py",
+        "phase8/environment.py",
+        "phase8/lamination.py",
+        "phase8/models.py",
+        "scripts/evaluate_hidden_regime_forecasting.py",
+        "scripts/evaluate_laminated_phase8.py",
+        "tests/test_phase8_pulse_local_unit.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
+      "filename": "2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
+      "title": "2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold",
+      "timestamp": "2026-03-30T09:47",
+      "date": "2026-03-30",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "topology",
+        "bounded",
+        "layer",
+        "overlap",
+        "phase8",
+        "added",
+        "evaluate_hidden_regime_forecasting",
+        "evaluate_laminated_phase8",
+        "scenarios",
+        "behavior",
+        "evaluation",
+        "geometry"
+      ],
+      "referenced_files": [
+        "phase8/__init__.py",
+        "phase8/scenarios.py",
+        "scripts/evaluate_hidden_regime_forecasting.py",
+        "scripts/evaluate_laminated_phase8.py",
+        "tests/test_c_hr_overlap_topology.py"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md",
+      "filename": "2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md",
+      "title": "2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification",
+      "timestamp": "2026-03-30T09:41",
+      "date": "2026-03-30",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "bounded",
+        "current",
+        "graph",
+        "overlap",
+        "redesign",
+        "clarification",
+        "may",
+        "topology",
+        "children",
+        "explicitly",
+        "full",
+        "hypothesis"
+      ],
+      "referenced_files": [
+        "docs/20260330 Redesign.md"
+      ]
+    },
+    {
+      "path": "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "filename": "2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "title": "2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR",
+      "timestamp": "2026-03-30T09:28",
+      "date": "2026-03-30",
+      "trace_type": null,
+      "author": null,
+      "model": null,
+      "keywords": [
+        "phase8",
+        "pulse",
+        "can",
+        "pilot",
+        "added",
+        "local",
+        "models",
+        "redesign",
+        "route",
+        "state",
+        "adapters",
+        "environment"
+      ],
+      "referenced_files": [
+        "docs/20260330 Redesign.md",
+        "phase8/adapters.py",
+        "phase8/environment.py",
+        "phase8/lamination.py",
+        "phase8/models.py",
+        "scripts/evaluate_hidden_regime_forecasting.py",
+        "scripts/evaluate_laminated_phase8.py",
+        "tests/test_phase8_pulse_local_unit.py"
+      ]
+    },
     {
       "path": "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md",
       "filename": "2026-03-27 1700 - Laminated Trace Sequence Summary.md",
@@ -2978,7 +3342,9 @@
     "adapters": [
       "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
       "docs/traces/2026-03-18 1702 - Identity Selector Revert.md",
-      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md"
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md"
     ],
     "adaptive": [
       "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md"
@@ -2999,7 +3365,11 @@
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md",
       "docs/traces/2026-03-24 1033 - B to C Carryover Bridge.md",
       "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md",
-      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md",
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md"
     ],
     "agents": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
@@ -3026,7 +3396,8 @@
       "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md",
       "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
       "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
-      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
+      "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md",
+      "docs/traces/2026-04-01 - Trace Organizer Frontier Sense and Slow Layer.md"
     ],
     "already": [
       "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
@@ -3096,16 +3467,28 @@
     "around": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
     ],
+    "artifact": [
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md"
+    ],
     "assumption": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
+    ],
+    "atp": [
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md"
     ],
     "audit": [
       "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md",
       "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
       "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
     ],
+    "authorization": [
+      "docs/traces/2026-03-30 1209 - Growth Intent Latching and Authorized Stall Escalation.md"
+    ],
     "authorize": [
       "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+    ],
+    "authorized": [
+      "docs/traces/2026-03-30 1209 - Growth Intent Latching and Authorized Stall Escalation.md"
     ],
     "available": [
       "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md"
@@ -3168,7 +3551,9 @@
     ],
     "behavior": [
       "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
-      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
+      "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md",
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
+      "docs/traces/2026-03-30 1112 - Pulse Delay Not Hard Suppression.md"
     ],
     "benchmark": [
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
@@ -3225,13 +3610,19 @@
     "bit_acc": [
       "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md"
     ],
+    "blocked": [
+      "docs/traces/2026-03-30 1209 - Growth Intent Latching and Authorized Stall Escalation.md"
+    ],
     "both": [
       "docs/traces/2026-03-18 1640 - C Node Probe.md",
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md",
       "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
     ],
     "bounded": [
-      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "docs/traces/2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md",
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
+      "docs/traces/2026-03-30 1112 - Pulse Delay Not Hard Suppression.md"
     ],
     "branch": [
       "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
@@ -3254,7 +3645,8 @@
     ],
     "budget": [
       "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
-      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
+      "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md",
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md"
     ],
     "bundle": [
       "docs/traces/2026-03-24 1041 - B to C Carryover Split Ablations.md"
@@ -3266,7 +3658,8 @@
       "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
       "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md",
       "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
-      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md",
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md"
     ],
     "c-family": [
       "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
@@ -3280,7 +3673,8 @@
       "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md"
     ],
     "c3s1": [
-      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md"
     ],
     "c_family_real_diagnostic_20260318_seed13": [
       "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md"
@@ -3310,7 +3704,9 @@
       "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
       "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
       "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md",
-      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "candidate": [
       "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md"
@@ -3398,23 +3794,33 @@
     "check": [
       "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md"
     ],
+    "children": [
+      "docs/traces/2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md"
+    ],
     "chosen": [
       "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
     ],
     "claim": [
       "docs/traces/20260317_phase8_neural_baseline_trace.md"
     ],
+    "clarification": [
+      "docs/traces/2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md"
+    ],
     "classification": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
     ],
     "claude": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
+      "docs/traces/2026-04-01 - Trace Organizer Frontier Sense and Slow Layer.md",
       "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md",
       "docs/traces/20260317_phase8_morphogenesis_large_trace.md",
       "docs/traces/20260317_phase8_neural_baseline_trace.md"
     ],
     "claude-sonnet-4-6": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
+    ],
+    "code": [
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md"
     ],
     "code-level": [
       "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md"
@@ -3465,10 +3871,14 @@
       "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md"
     ],
     "commitment": [
-      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md"
+      "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md",
+      "docs/traces/2026-03-30 1112 - Pulse Delay Not Hard Suppression.md"
     ],
     "commits": [
       "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md"
+    ],
+    "communication": [
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md"
     ],
     "compare_a_scale_suite": [
       "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
@@ -3529,7 +3939,8 @@
       "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
       "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
-      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md"
+      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
+      "docs/traces/2026-03-30 1209 - Growth Intent Latching and Authorized Stall Escalation.md"
     ],
     "context-action": [
       "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
@@ -3569,6 +3980,9 @@
       "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
       "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
+    "cooldown": [
+      "docs/traces/2026-03-30 1112 - Pulse Delay Not Hard Suppression.md"
+    ],
     "coordination": [
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
     ],
@@ -3578,6 +3992,9 @@
       "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
       "docs/traces/2026-03-18 2138 - Real Core Recognition Phase 3.md",
       "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md"
+    ],
+    "could": [
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md"
     ],
     "coupled": [
       "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md"
@@ -3600,6 +4017,8 @@
       "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md",
       "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
       "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md",
+      "docs/traces/2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md",
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md",
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
     ],
     "current-cycle": [
@@ -3624,7 +4043,8 @@
     "cycle": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
       "docs/traces/2026-03-19 1058 - C3 Latent Activation Window Diagnosis.md",
-      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
+      "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md",
+      "docs/traces/2026-03-30 1209 - Growth Intent Latching and Authorized Stall Escalation.md"
     ],
     "cycles": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
@@ -3656,6 +4076,9 @@
     "dedicated": [
       "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
     ],
+    "delay": [
+      "docs/traces/2026-03-30 1112 - Pulse Delay Not Hard Suppression.md"
+    ],
     "delta": [
       "docs/traces/20260317_1005_cyclic_transfer_trace.md",
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
@@ -3667,6 +4090,9 @@
     ],
     "deterministic": [
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md"
+    ],
+    "development": [
+      "docs/traces/2026-04-01 - Trace Organizer Frontier Sense and Slow Layer.md"
     ],
     "diagnose_b_to_c_carryover": [
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
@@ -3787,7 +4213,13 @@
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
       "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md",
       "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
-      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md",
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md",
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "episodes": [
       "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
@@ -3801,6 +4233,9 @@
     ],
     "escalate": [
       "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
+    ],
+    "escalation": [
+      "docs/traces/2026-03-30 1209 - Growth Intent Latching and Authorized Stall Escalation.md"
     ],
     "estimate": [
       "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md"
@@ -3816,21 +4251,30 @@
     "evaluate_hidden_regime_forecasting": [
       "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
       "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
-      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
+      "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md",
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md"
     ],
     "evaluate_laminated_phase8": [
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
-      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md"
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md",
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md"
     ],
     "evaluate_runtime_slack": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
       "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
     ],
     "evaluation": [
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
       "docs/traces/20260317_phase8_latent_transfer_morphogenesis_robustness_trace.md"
     ],
     "even": [
-      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md"
+      "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md",
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md"
     ],
     "evidence": [
       "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
@@ -3892,6 +4336,7 @@
       "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md",
       "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
       "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md",
       "docs/traces/20260317_1005_cyclic_transfer_trace.md",
       "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md",
@@ -3905,6 +4350,9 @@
       "docs/traces/2026-03-18 2231 - Source Transform Recognition Transfer Probe.md",
       "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
+    "explicitly": [
+      "docs/traces/2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md"
+    ],
     "exploration": [
       "docs/traces/20260317_1005_cyclic_transfer_trace.md"
     ],
@@ -3917,7 +4365,8 @@
       "docs/traces/2026-03-19 0942 - Transfer Adaptation Metrics and Recognition Probe.md"
     ],
     "failure": [
-      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md"
+      "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md"
     ],
     "families": [
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md"
@@ -3964,7 +4413,8 @@
       "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md"
     ],
     "fixed": [
-      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
+      "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "fixed-latent": [
       "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
@@ -3985,14 +4435,16 @@
       "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
     "frontier": [
-      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md"
+      "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
+      "docs/traces/2026-04-01 - Trace Organizer Frontier Sense and Slow Layer.md"
     ],
     "full": [
       "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
       "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
       "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
       "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md",
-      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+      "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md",
+      "docs/traces/2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md"
     ],
     "gap": [
       "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md"
@@ -4002,6 +4454,9 @@
       "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
       "docs/traces/2026-03-18 1650 - C4 Post Route Gate Spot Check.md",
       "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md"
+    ],
+    "general": [
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md"
     ],
     "generalization": [
       "docs/traces/2026-03-18 2145 - Latent Context Generalization.md",
@@ -4015,6 +4470,9 @@
     "generated": [
       "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md",
       "docs/traces/2026-03-18 2145 - Latent Context Generalization.md"
+    ],
+    "geometry": [
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md"
     ],
     "gpt-5": [
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md",
@@ -4036,6 +4494,9 @@
       "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
       "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
     ],
+    "graph": [
+      "docs/traces/2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md"
+    ],
     "groundwork": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
     ],
@@ -4046,6 +4507,8 @@
       "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
       "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
       "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md",
+      "docs/traces/2026-03-30 1209 - Growth Intent Latching and Authorized Stall Escalation.md",
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md",
       "docs/traces/20260317_1005_latent_morphogenesis_large_trace.md",
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md"
     ],
@@ -4067,7 +4530,11 @@
     "had": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
       "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
-      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md"
+      "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md"
+    ],
+    "hard": [
+      "docs/traces/2026-03-30 1112 - Pulse Delay Not Hard Suppression.md"
     ],
     "harness": [
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
@@ -4131,6 +4598,9 @@
     "hygiene": [
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md"
     ],
+    "hypothesis": [
+      "docs/traces/2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md"
+    ],
     "identity": [
       "docs/traces/2026-03-18 1702 - Identity Selector Revert.md"
     ],
@@ -4164,6 +4634,12 @@
     "inspectable": [
       "docs/traces/2026-03-18 2128 - Real Core Anticipation Phase 1.md"
     ],
+    "instead": [
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md"
+    ],
+    "intent": [
+      "docs/traces/2026-03-30 1209 - Growth Intent Latching and Authorized Stall Escalation.md"
+    ],
     "interaction": [
       "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md",
       "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md"
@@ -4179,6 +4655,9 @@
     ],
     "item": [
       "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md"
+    ],
+    "keep": [
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "ladder": [
       "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md"
@@ -4203,7 +4682,12 @@
       "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
       "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
       "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
-      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md",
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md",
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "large": [
       "docs/traces/20260317_1046_morphogenesis_large_mode_switched_trace.md",
@@ -4250,7 +4734,10 @@
       "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md",
       "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
       "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
-      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md",
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
+      "docs/traces/2026-04-01 - Trace Organizer Frontier Sense and Slow Layer.md"
     ],
     "learning": [
       "docs/traces/2026-03-18 2027 - B2 Benchmark Node Probe.md",
@@ -4259,16 +4746,26 @@
       "docs/traces/2026-03-19 1036 - Distinct Prediction Stale Family Pass.md",
       "docs/traces/2026-03-19 1106 - Family Time Exposure Prediction Probe.md"
     ],
+    "lexicon": [
+      "docs/traces/2026-04-01 - Trace Organizer Frontier Sense and Slow Layer.md"
+    ],
     "local": [
       "docs/traces/2026-03-18 2254 - Evidence Confirmed Transform Recognition.md",
       "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md",
-      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md"
+      "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md"
+    ],
+    "main": [
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md"
     ],
     "mappings": [
       "docs/traces/2026-03-18 2145 - Latent Context Generalization.md"
     ],
     "maps": [
       "docs/traces/2026-03-18 2145 - Latent Context Generalization.md"
+    ],
+    "march": [
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md"
     ],
     "master": [
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
@@ -4280,6 +4777,12 @@
     ],
     "matrix": [
       "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md"
+    ],
+    "max_atp": [
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md"
+    ],
+    "may": [
+      "docs/traces/2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md"
     ],
     "memory": [
       "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md"
@@ -4295,9 +4798,15 @@
       "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
       "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
     ],
+    "model": [
+      "docs/traces/2026-04-01 - Trace Organizer Frontier Sense and Slow Layer.md"
+    ],
     "models": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
-      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md"
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md",
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "modes": [
       "docs/traces/2026-03-19 1150 - Transfer Exposure Comparison A to C and B to C Carryover Modes.md"
@@ -4327,6 +4836,9 @@
       "docs/traces/2026-03-19 1113 - Uncertainty Weighted Effective Context Pass.md",
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md"
     ],
+    "named": [
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md"
+    ],
     "narrow": [
       "docs/traces/2026-03-18 2200 - Phase8 Recognition Route Bias.md"
     ],
@@ -4353,7 +4865,8 @@
     ],
     "nodes": [
       "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md",
-      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md"
+      "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
+      "docs/traces/2026-03-30 1209 - Growth Intent Latching and Authorized Stall Escalation.md"
     ],
     "non-growth": [
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
@@ -4373,7 +4886,8 @@
       "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md",
       "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md",
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
-      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md"
     ],
     "one": [
       "docs/traces/2026-03-18 2204 - Phase8 Recognition Bias Probe.md"
@@ -4385,10 +4899,21 @@
     "optionally": [
       "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md"
     ],
+    "opus": [
+      "docs/traces/2026-04-01 - Trace Organizer Frontier Sense and Slow Layer.md"
+    ],
+    "organizer": [
+      "docs/traces/2026-04-01 - Trace Organizer Frontier Sense and Slow Layer.md"
+    ],
     "original": [
       "docs/traces/2026-03-18 2145 - Latent Context Generalization.md",
       "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md",
       "docs/traces/2026-03-19 1028 - Self Selected Rebaseline After Anticipation and Carryover.md"
+    ],
+    "overlap": [
+      "docs/traces/2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md",
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md"
     ],
     "packet": [
       "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
@@ -4399,6 +4924,9 @@
     ],
     "paired": [
       "docs/traces/20260317_1021_morphogenesis_large_paired_trace.md"
+    ],
+    "paper": [
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md"
     ],
     "parallel": [
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
@@ -4427,7 +4955,8 @@
       "docs/traces/2026-03-24 2230 - B2S5 48-Cycle Slices.md"
     ],
     "persistence": [
-      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md"
+      "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md"
     ],
     "phase8": [
       "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
@@ -4466,14 +4995,24 @@
       "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
       "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
       "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
-      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md",
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md",
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "phase8_session_synthesis": [
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
     ],
     "pilot": [
       "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
-      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md"
+      "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md"
     ],
     "point": [
       "docs/traces/2026-03-18 1200 - Ceiling Benchmark Harness.md",
@@ -4499,6 +5038,9 @@
       "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
       "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md",
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
+    ],
+    "preset": [
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md"
     ],
     "pressure": [
       "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md"
@@ -4540,6 +5082,11 @@
     "proposal": [
       "docs/traces/2026-03-18 2122 - Real Core Anticipation Proposal.md"
     ],
+    "pulse": [
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md",
+      "docs/traces/2026-03-30 1112 - Pulse Delay Not Hard Suppression.md"
+    ],
     "pyproject": [
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
     ],
@@ -4559,6 +5106,7 @@
       "docs/traces/2026-03-19 1103 - C3 Selector Interaction Reading.md"
     ],
     "readme": [
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md",
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
     ],
     "real-neural-substrate": [
@@ -4580,7 +5128,9 @@
       "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
       "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
       "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
-      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "recent": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
@@ -4613,6 +5163,10 @@
     "recruitment": [
       "docs/traces/2026-03-18 2015 - Self Selected Capability Tuning Pass.md",
       "docs/traces/2026-03-19 1034 - Prediction Aware Benchmark Node Probe.md"
+    ],
+    "redesign": [
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md"
     ],
     "reframe": [
       "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md"
@@ -4648,6 +5202,9 @@
     "repeated_signal_scenarios": [
       "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
     ],
+    "request": [
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md"
+    ],
     "rerun": [
       "docs/traces/2026-03-18 2330 - Post Multicontext C Family Rerun.md"
     ],
@@ -4659,10 +5216,14 @@
     ],
     "result": [
       "docs/traces/2026-03-19 1142 - C Transfer Exposure Prediction Probe.md",
-      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md"
+      "docs/traces/2026-03-19 1405 - Occupancy Bridge Port.md",
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md"
     ],
     "retention": [
       "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
+    ],
+    "retuning": [
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "reusable": [
       "docs/traces/2026-03-18 2145 - Real Core Pattern Recognition.md"
@@ -4681,10 +5242,15 @@
       "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
       "docs/traces/2026-03-18 2216 - Transfer Recognition Timing Probe.md",
       "docs/traces/2026-03-18 2222 - Earlier Transfer Recognition via Relative Shape.md",
-      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md"
+      "docs/traces/2026-03-19 0920 - C to A Seed 51 Exception Diagnosis.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 1112 - Pulse Delay Not Hard Suppression.md"
     ],
     "route_transform": [
       "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md"
+    ],
+    "routing": [
+      "docs/traces/2026-03-30 1112 - Pulse Delay Not Hard Suppression.md"
     ],
     "runtime": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md"
@@ -4693,7 +5259,8 @@
       "docs/traces/2026-03-26 1338 - Hidden Regime Budget 4 Safety 100 Sweep.md"
     ],
     "saved": [
-      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
+      "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md"
     ],
     "scale": [
       "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
@@ -4701,6 +5268,9 @@
       "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
       "docs/traces/2026-03-24 1705 - C Scale Transfer Slice.md",
       "docs/traces/baseline_scale_comparisons.md"
+    ],
+    "scenarios": [
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md"
     ],
     "seed": [
       "docs/traces/2026-03-18 1248 - Ceiling Benchmark 3-Seed Pilot.md",
@@ -4733,7 +5303,8 @@
       "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
       "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md",
       "docs/traces/2026-03-24 1120 - B to C Downstream Selector Read.md",
-      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md"
+      "docs/traces/2026-03-24 1133 - Downstream Exact Transform Challenge Probe.md",
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "self-selected": [
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md",
@@ -4747,6 +5318,9 @@
     "semantics": [
       "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
     ],
+    "sense": [
+      "docs/traces/2026-04-01 - Trace Organizer Frontier Sense and Slow Layer.md"
+    ],
     "sequence": [
       "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md",
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
@@ -4754,6 +5328,9 @@
     ],
     "sessions": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
+    ],
+    "settle": [
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "settlement": [
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
@@ -4763,6 +5340,9 @@
     ],
     "shift": [
       "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md"
+    ],
+    "should": [
+      "docs/traces/2026-03-30 1112 - Pulse Delay Not Hard Suppression.md"
     ],
     "signal": [
       "docs/traces/baseline_scale_comparisons.md"
@@ -4791,6 +5371,9 @@
     "slow-layer": [
       "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md"
     ],
+    "snapshot": [
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md"
+    ],
     "sonnet": [
       "docs/traces/20260317_phase8_morphogenesis_large_trace.md"
     ],
@@ -4818,12 +5401,20 @@
     "stage-1": [
       "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md"
     ],
+    "stall": [
+      "docs/traces/2026-03-30 1209 - Growth Intent Latching and Authorized Stall Escalation.md"
+    ],
     "started": [
       "docs/traces/2026-03-19 1213 - B to C Carryover Diagnosis.md"
     ],
     "state": [
       "docs/traces/2026-03-18 2133 - Real Core Anticipation Phase 2.md",
-      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md"
+      "docs/traces/2026-03-26 1430 - Laminated Growth Continuity Audit.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 1209 - Growth Intent Latching and Authorized Stall Escalation.md"
+    ],
+    "stock": [
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "stream": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
@@ -4856,6 +5447,9 @@
       "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md",
       "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md"
     ],
+    "suppression": [
+      "docs/traces/2026-03-30 1112 - Pulse Delay Not Hard Suppression.md"
+    ],
     "sweep": [
       "docs/traces/2026-03-19 0905 - Evidence Confirmation Generalization Sweep.md",
       "docs/traces/2026-03-19 0914 - Widened Recognition Generalization Sweep.md",
@@ -4867,6 +5461,10 @@
     ],
     "synthesis": [
       "docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md"
+    ],
+    "system": [
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
+      "docs/traces/2026-04-01 - Trace Organizer Frontier Sense and Slow Layer.md"
     ],
     "tail": [
       "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
@@ -4956,6 +5554,9 @@
       "docs/traces/2026-03-18 2359 - Split Latent Growth Gate.md",
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md"
     ],
+    "thresholding": [
+      "docs/traces/2026-03-30 1112 - Pulse Delay Not Hard Suppression.md"
+    ],
     "thresholds": [
       "docs/traces/2026-03-18 2355 - Cardinality Aware Thresholds.md"
     ],
@@ -4970,13 +5571,17 @@
     ],
     "topology": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
+      "docs/traces/2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md",
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md",
       "docs/traces/20260317_phase8_morphogenesis_large_trace.md",
       "docs/traces/baseline_scale_comparisons.md"
     ],
     "traces": [
       "docs/traces/2026-03-18 1535 - C Family Diagnostic.md",
       "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
-      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md"
+      "docs/traces/2026-03-27 1700 - Laminated Trace Sequence Summary.md",
+      "docs/traces/2026-04-01 - Trace Organizer Frontier Sense and Slow Layer.md"
     ],
     "transfer": [
       "docs/traces/2026-03-18 2207 - Phase8 Transfer Recognition Probe.md",
@@ -5066,7 +5671,8 @@
       "docs/traces/2026-03-24 1130 - A Scale Suite Start.md",
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
       "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
-      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md"
+      "docs/traces/2026-03-26 2210 - Fast Layer Ambiguity Retention and Weak Branch Stabilization.md",
+      "docs/traces/2026-03-30 1209 - Growth Intent Latching and Authorized Stall Escalation.md"
     ],
     "weak_context_bit": [
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md"
@@ -5090,6 +5696,12 @@
     ],
     "without": [
       "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md"
+    ],
+    "world-model": [
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md"
+    ],
+    "world_model": [
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md"
     ]
   },
   "by_file": {
@@ -5099,6 +5711,7 @@
     ],
     "README.md": [
       "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md",
       "docs/traces/20260317_0935_parallel_subagent_coordination_trace.md"
     ],
     "docs/20260317_phase8_session_synthesis.md": [
@@ -5106,6 +5719,10 @@
     ],
     "docs/20260319_phase8_occupancy_v2_synthesis.md": [
       "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "docs/20260330 Redesign.md": [
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 0941 - Bounded Ternary Overlap Graph Clarification.md"
     ],
     "docs/architecture_notes.md": [
       "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
@@ -5276,8 +5893,15 @@
     "docs/experiment_outputs/occupancy_comparison_preview_20260319.json": [
       "docs/traces/2026-03-19 1430 - Occupancy Eval Preview Path.md"
     ],
+    "docs/experiment_outputs/v3_best_real_seed13.json": [
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md"
+    ],
+    "docs/experiment_outputs/v3_best_real_seed13_summary.md": [
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md"
+    ],
     "docs/running_occupancy_v3.md": [
-      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md"
     ],
     "docs/summaries/20260324_laminated_real_summary.md": [
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md"
@@ -5323,12 +5947,16 @@
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md"
     ],
     "phase8/__init__.py": [
-      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
+      "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md"
     ],
     "phase8/adapters.py": [
       "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md",
       "docs/traces/2026-03-18 1702 - Identity Selector Revert.md",
-      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md"
+      "docs/traces/2026-03-18 2212 - Transfer Recognition Diagnosis.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md"
     ],
     "phase8/environment.py": [
       "docs/traces/2026-03-18 1632 - Idle Latent Growth Gate.md",
@@ -5349,7 +5977,13 @@
       "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
       "docs/traces/2026-03-26 1318 - Hidden Regime Forecasting Family.md",
       "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
-      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md",
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md",
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "phase8/expectation.py": [
       "docs/traces/2026-03-19 1008 - Phase8 Expectation Binding Probe.md",
@@ -5371,11 +6005,21 @@
       "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
       "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
       "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
-      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md",
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md",
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "phase8/models.py": [
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
-      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md"
+      "docs/traces/2026-03-19 1054 - Prediction Coupled Capability Pressure Pass.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "phase8/node_agent.py": [
       "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
@@ -5384,6 +6028,7 @@
       "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md"
     ],
     "phase8/scenarios.py": [
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
       "docs/traces/baseline_scale_comparisons.md"
     ],
     "phase8/selector.py": [
@@ -5398,7 +6043,9 @@
       "docs/traces/2026-03-19 1131 - Partial Context Sequence Persistence Pass.md",
       "docs/traces/2026-03-19 1238 - B to C Carryover Hygiene Pass.md",
       "docs/traces/2026-03-19 1303 - Visible Task Compatibility Carryover Pass.md",
-      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md"
+      "docs/traces/2026-03-24 1049 - Selector Time Carryover Challenge Probe.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "phase8/substrate.py": [
       "docs/traces/2026-03-18 1815 - C Family Credit Debt Evaluation.md",
@@ -5406,7 +6053,8 @@
       "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
     ],
     "phase8/topology.py": [
-      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md"
+      "docs/traces/2026-03-18 2045 - Context Cardinality Groundwork.md",
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md"
     ],
     "pyproject.toml": [
       "docs/traces/2026-03-18 1941 - Self Selected Smoke Harness.md"
@@ -5439,7 +6087,10 @@
       "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
       "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
       "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
-      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md",
+      "docs/traces/2026-03-31 0135 - REAL Stock Take After C Task Retuning.md"
     ],
     "real_core/meta_agent.py": [
       "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
@@ -5470,6 +6121,9 @@
       "docs/traces/2026-03-24 2215 - B2S5 Per-Context Bias.md",
       "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
       "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md"
+    ],
+    "real_core/world_model.py": [
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md"
     ],
     "scripts/analyze_b_to_c_visible_timecourse.py": [
       "docs/traces/2026-03-24 1101 - B to C Visible Timecourse Diagnostic.md",
@@ -5537,14 +6191,23 @@
       "docs/traces/2026-03-26 1323 - Hidden Regime Shift Case and Saved Sweep Outputs.md",
       "docs/traces/2026-03-26 1334 - Hidden Regime Unique Outputs and Budget 8 Sweep.md",
       "docs/traces/2026-03-26 1356 - Hidden Regime Forecasting Summary So Far.md",
-      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md",
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md"
     ],
     "scripts/evaluate_laminated_phase8.py": [
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
       "docs/traces/2026-03-25 1200 - B2S5 Growth-Visible Lamination and Threshold Settlement.md",
       "docs/traces/2026-03-25 1600 - REAL Slow Layer Regulator Debugging and B Family Sweep.md",
       "docs/traces/2026-03-26 1303 - Laminated Forecast Readout and Intervention Summary.md",
-      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md"
+      "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md",
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md"
     ],
     "scripts/evaluate_runtime_slack.py": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md",
@@ -5579,10 +6242,14 @@
     ],
     "scripts/run_occupancy_real_v3.py": [
       "docs/traces/2026-03-19 1700 - V3 Occupancy Experiment Design.md",
-      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+      "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md",
+      "docs/traces/2026-04-08 2135 - Occupancy Paper Alignment Clarification.md"
     ],
     "scripts/run_occupancy_tests_parallel.py": [
       "docs/traces/2026-03-20 1018 - Occupancy V3 Harness and Sweep Follow Through.md"
+    ],
+    "scripts/run_trace_organizer.py": [
+      "docs/traces/2026-04-01 - Trace Organizer Frontier Sense and Slow Layer.md"
     ],
     "tests/test_a_scale_suite.py": [
       "docs/traces/2026-03-24 1130 - A Scale Suite Start.md"
@@ -5609,6 +6276,9 @@
     "tests/test_c_family_real_diagnostic.py": [
       "docs/traces/2026-03-18 1725 - C Family Full Capability Run.md",
       "docs/traces/2026-03-18 1915 - C Family Architecture Diagnosis.md"
+    ],
+    "tests/test_c_hr_overlap_topology.py": [
+      "docs/traces/2026-03-30 0947 - C HR Bounded Overlap Topology Pilot Scaffold.md"
     ],
     "tests/test_c_scale_suite.py": [
       "docs/traces/2026-03-24 1450 - C Scale Suite Start.md",
@@ -5638,13 +6308,15 @@
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
       "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
       "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
-      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md"
     ],
     "tests/test_latent_context_tracker.py": [
       "docs/traces/2026-03-18 2041 - B2 Use Path Analysis.md"
     ],
     "tests/test_latent_growth_gate.py": [
-      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "docs/traces/2026-03-30 1348 - General Growth Threshold Relaxation and Persistence Tuning.md"
     ],
     "tests/test_latent_route_transform_gate.py": [
       "docs/traces/2026-03-18 1646 - Downstream Latent Route Gate.md"
@@ -5675,7 +6347,13 @@
       "docs/traces/2026-03-24 1930 - B2S5 Laminated First Benchmark.md",
       "docs/traces/2026-03-26 1645 - Laminated Context Collapse and Differentiation Reframe.md",
       "docs/traces/2026-03-27 1030 - Gradient Controller Bounded Slices and Rescue Portfolio.md",
-      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md"
+      "docs/traces/2026-03-27 1600 - Layer 2 Growth Semantics and Structural Need Initiation.md",
+      "docs/traces/2026-03-30 1454 - ATP Budget Headroom for C HR Pilot.md",
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md"
+    ],
+    "tests/test_phase8_pulse_local_unit.py": [
+      "docs/traces/2026-03-30 0928 - Phase8 Pulse Local Unit Pilot for C and HR.md",
+      "docs/traces/2026-03-30 1015 - Pulse Preset and C3S1 Overlap Inspection.md"
     ],
     "tests/test_phase8_recognition.py": [
       "docs/traces/2026-03-18 2153 - Phase8 Pattern Recognition Hookup.md",
@@ -5701,6 +6379,9 @@
     "tests/test_phase8_transfer_selector_interaction.py": [
       "docs/traces/2026-03-18 2243 - Transfer Selector Interaction Diagnosis.md"
     ],
+    "tests/test_phase8_world_model_carryover.py": [
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md"
+    ],
     "tests/test_runtime_slack.py": [
       "docs/traces/2026-03-18 2054 - Runtime Slack Probe.md"
     ],
@@ -5710,6 +6391,9 @@
     ],
     "tests/test_transfer_exposure_prediction.py": [
       "docs/traces/2026-03-19 1134 - Transfer Exposure Prediction Probe.md"
+    ],
+    "tests/test_world_model.py": [
+      "docs/traces/2026-03-31 0005 - C Layer 1 Communication Scaffold and Threshold Guard.md"
     ]
   }
 }

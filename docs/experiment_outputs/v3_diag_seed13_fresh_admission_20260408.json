@@ -1,0 +1,638 @@
+{
+  "v3_config": {
+    "csv_path": "occupancy_baseline/data/occupancy_synth_v1.csv",
+    "window_size": 5,
+    "normalize": true,
+    "selector_seed": 13,
+    "feedback_amount": 0.18,
+    "eval_feedback_fraction": 1.0,
+    "packet_ttl": 8,
+    "forward_drain_cycles": 16,
+    "feedback_drain_cycles": 4,
+    "train_session_fraction": 0.7,
+    "eval_mode": "fresh_session_eval",
+    "topology_mode": "multihop_routing",
+    "context_mode": "online_running_context",
+    "ingress_mode": "admission_source",
+    "max_train_sessions": 8,
+    "max_eval_sessions": 5,
+    "summary_only": true
+  },
+  "worker_policy": {
+    "requested_workers": 8,
+    "auto_cpu_target_fraction": 0.75,
+    "eval_workers_by_protocol": {
+      "fresh_session_eval": 8
+    }
+  },
+  "dataset_rows": 1344,
+  "total_episodes": 1340,
+  "total_sessions": 89,
+  "train_session_count": 8,
+  "eval_session_count": 5,
+  "co2_training_median": 0.974881,
+  "light_training_median": 1.045862,
+  "training_context_codes": [
+    0,
+    1,
+    3
+  ],
+  "train_inventory": {
+    "session_count": 8,
+    "by_label": {
+      "0": 4,
+      "1": 4
+    },
+    "by_context_code": {
+      "0": 2,
+      "1": 1,
+      "3": 5
+    },
+    "episode_lengths": {
+      "min": 1,
+      "mean": 8.25,
+      "max": 28
+    },
+    "context_codes_by_label": {
+      "0": [
+        0,
+        1,
+        3
+      ],
+      "1": [
+        0,
+        3
+      ]
+    }
+  },
+  "eval_inventory": {
+    "session_count": 5,
+    "by_label": {
+      "0": 3,
+      "1": 2
+    },
+    "by_context_code": {
+      "3": 1,
+      "2": 1,
+      "0": 3
+    },
+    "episode_lengths": {
+      "min": 1,
+      "mean": 13.2,
+      "max": 59
+    },
+    "context_codes_by_label": {
+      "0": [
+        0,
+        3
+      ],
+      "1": [
+        0,
+        2
+      ]
+    }
+  },
+  "train_summary": {
+    "episode_count": 66,
+    "metrics": {
+      "accuracy": 0.8636363636363636,
+      "precision": 0.8484848484848485,
+      "recall": 0.875,
+      "f1": 0.8615384615384615,
+      "tp": 28.0,
+      "tn": 29.0,
+      "fp": 5.0,
+      "fn": 4.0
+    },
+    "mean_delivered_packets": 24.3333,
+    "mean_dropped_packets": 0.6667,
+    "mean_feedback_events": 20.5152,
+    "mean_feedback_total": 3.6927,
+    "occupied_prediction_rate": 0.5,
+    "mean_delivery_ratio": 0.9733,
+    "mean_prediction_confidence": 0.8379
+  },
+  "train_system_summary": {
+    "capability_policy": "fixed-visible",
+    "cycles": 2275,
+    "injected_packets": 1650,
+    "admitted_packets": 1650,
+    "delivered_packets": 1606,
+    "delivery_ratio": 0.9733,
+    "dropped_packets": 44,
+    "drop_ratio": 0.0267,
+    "source_buffer": 0,
+    "mean_latency": 3.4178,
+    "mean_hops": 4.0,
+    "node_atp_total": 11.6303,
+    "mean_route_cost": 0.03318,
+    "mean_feedback_award": 0.1518,
+    "mean_source_admission": 0.7253,
+    "last_source_admission": 0,
+    "source_admission_support": 0.5,
+    "source_admission_velocity": 0.0,
+    "mean_source_efficiency": 0.0,
+    "exact_matches": 1354,
+    "mean_bit_accuracy": 0.8431
+  },
+  "primary_eval_mode": "fresh_session_eval",
+  "primary_eval": {
+    "eval_protocol": "fresh_session_eval",
+    "warm_summary": {
+      "episode_count": 66,
+      "metrics": {
+        "accuracy": 0.9545454545454546,
+        "precision": 0.75,
+        "recall": 0.6,
+        "f1": 0.6666666666666665,
+        "tp": 3.0,
+        "tn": 60.0,
+        "fp": 1.0,
+        "fn": 2.0
+      },
+      "mean_delivered_packets": 24.3788,
+      "mean_dropped_packets": 0.6212,
+      "mean_feedback_events": 22.3182,
+      "mean_feedback_total": 4.0173,
+      "occupied_prediction_rate": 0.0606,
+      "mean_delivery_ratio": 0.9752,
+      "mean_prediction_confidence": 0.8369
+    },
+    "cold_summary": {
+      "episode_count": 66,
+      "metrics": {
+        "accuracy": 0.9545454545454546,
+        "precision": 0.625,
+        "recall": 1.0,
+        "f1": 0.7692307692307693,
+        "tp": 5.0,
+        "tn": 58.0,
+        "fp": 3.0,
+        "fn": 0.0
+      },
+      "mean_delivered_packets": 24.3788,
+      "mean_dropped_packets": 0.6212,
+      "mean_feedback_events": 22.3333,
+      "mean_feedback_total": 4.02,
+      "occupied_prediction_rate": 0.1212,
+      "mean_delivery_ratio": 0.9752,
+      "mean_prediction_confidence": 0.8449
+    },
+    "efficiency": {
+      "warm_delivery_curve": [
+        1.0,
+        1.0,
+        0.9749,
+        0.9467,
+        1.0
+      ],
+      "cold_delivery_curve": [
+        1.0,
+        1.0,
+        0.9729,
+        0.9867,
+        1.0
+      ],
+      "efficiency_ratio_curve": [
+        1.0,
+        1.0,
+        1.0021,
+        0.9595,
+        1.0
+      ],
+      "mean_efficiency_ratio": 0.9923,
+      "warm_sessions_to_80pct": 0,
+      "cold_sessions_to_80pct": 0,
+      "session_1_delivery_delta": 0.0,
+      "session_1_efficiency_ratio": 1.0,
+      "mean_first_episode_delivery_delta": 0.0,
+      "mean_first_three_episode_delivery_delta": -0.008,
+      "warm_first_episode_delivery_mean": 1.0,
+      "cold_first_episode_delivery_mean": 1.0,
+      "warm_first_three_episode_delivery_mean": 0.9867,
+      "cold_first_three_episode_delivery_mean": 0.9947,
+      "warm_delivery_at": {
+        "session_1": 1.0,
+        "session_5": 1.0,
+        "session_10": null,
+        "session_20": null
+      },
+      "cold_delivery_at": {
+        "session_1": 1.0,
+        "session_5": 1.0,
+        "session_10": null,
+        "session_20": null
+      }
+    },
+    "context_transfer_probe": {
+      "context_mode": "online_running_context",
+      "training_context_codes": [
+        0,
+        1,
+        3
+      ],
+      "eval_context_codes": [
+        0,
+        2,
+        3
+      ],
+      "comparison_applicable": true,
+      "status": "ok",
+      "warm_seen_mean_delivery": 0.9804,
+      "warm_unseen_mean_delivery": 1.0,
+      "cold_seen_mean_delivery": 0.9899,
+      "cold_unseen_mean_delivery": 1.0,
+      "warm_seen_session_count": 4,
+      "warm_unseen_session_count": 1
+    },
+    "warm_system_summary": {
+      "capability_policy": "fixed-visible",
+      "cycles": 13568,
+      "injected_packets": 1650,
+      "admitted_packets": 1650,
+      "delivered_packets": 1609,
+      "delivery_ratio": 0.9752,
+      "dropped_packets": 41,
+      "drop_ratio": 0.0248,
+      "source_buffer": 0,
+      "mean_latency": 3.1784,
+      "mean_hops": 4.0,
+      "node_atp_total": 11.4296,
+      "mean_route_cost": 0.0331,
+      "mean_feedback_award": 0.1648,
+      "mean_source_admission": 0.1216,
+      "last_source_admission": 0,
+      "source_admission_support": 0.5,
+      "source_admission_velocity": 0.0,
+      "mean_source_efficiency": 0.0,
+      "exact_matches": 1473,
+      "mean_bit_accuracy": 0.9155
+    },
+    "cold_system_summary": {
+      "capability_policy": "fixed-visible",
+      "cycles": 2225,
+      "injected_packets": 1650,
+      "admitted_packets": 1650,
+      "delivered_packets": 1609,
+      "delivery_ratio": 0.9752,
+      "dropped_packets": 41,
+      "drop_ratio": 0.0248,
+      "source_buffer": 0,
+      "mean_latency": 3.2524,
+      "mean_hops": 4.0,
+      "node_atp_total": 11.0995,
+      "mean_route_cost": 0.0332,
+      "mean_feedback_award": 0.1649,
+      "mean_source_admission": 0.7416,
+      "last_source_admission": 0,
+      "source_admission_support": 0.5,
+      "source_admission_velocity": 0.0,
+      "mean_source_efficiency": 0.0,
+      "exact_matches": 1474,
+      "mean_bit_accuracy": 0.9161
+    },
+    "warm_reset_count": 5,
+    "cold_reset_count": 5,
+    "workers_used": 8,
+    "parallelism_status": "process_pool:8"
+  },
+  "eval_protocols": {
+    "fresh_session_eval": {
+      "eval_protocol": "fresh_session_eval",
+      "warm_summary": {
+        "episode_count": 66,
+        "metrics": {
+          "accuracy": 0.9545454545454546,
+          "precision": 0.75,
+          "recall": 0.6,
+          "f1": 0.6666666666666665,
+          "tp": 3.0,
+          "tn": 60.0,
+          "fp": 1.0,
+          "fn": 2.0
+        },
+        "mean_delivered_packets": 24.3788,
+        "mean_dropped_packets": 0.6212,
+        "mean_feedback_events": 22.3182,
+        "mean_feedback_total": 4.0173,
+        "occupied_prediction_rate": 0.0606,
+        "mean_delivery_ratio": 0.9752,
+        "mean_prediction_confidence": 0.8369
+      },
+      "cold_summary": {
+        "episode_count": 66,
+        "metrics": {
+          "accuracy": 0.9545454545454546,
+          "precision": 0.625,
+          "recall": 1.0,
+          "f1": 0.7692307692307693,
+          "tp": 5.0,
+          "tn": 58.0,
+          "fp": 3.0,
+          "fn": 0.0
+        },
+        "mean_delivered_packets": 24.3788,
+        "mean_dropped_packets": 0.6212,
+        "mean_feedback_events": 22.3333,
+        "mean_feedback_total": 4.02,
+        "occupied_prediction_rate": 0.1212,
+        "mean_delivery_ratio": 0.9752,
+        "mean_prediction_confidence": 0.8449
+      },
+      "efficiency": {
+        "warm_delivery_curve": [
+          1.0,
+          1.0,
+          0.9749,
+          0.9467,
+          1.0
+        ],
+        "cold_delivery_curve": [
+          1.0,
+          1.0,
+          0.9729,
+          0.9867,
+          1.0
+        ],
+        "efficiency_ratio_curve": [
+          1.0,
+          1.0,
+          1.0021,
+          0.9595,
+          1.0
+        ],
+        "mean_efficiency_ratio": 0.9923,
+        "warm_sessions_to_80pct": 0,
+        "cold_sessions_to_80pct": 0,
+        "session_1_delivery_delta": 0.0,
+        "session_1_efficiency_ratio": 1.0,
+        "mean_first_episode_delivery_delta": 0.0,
+        "mean_first_three_episode_delivery_delta": -0.008,
+        "warm_first_episode_delivery_mean": 1.0,
+        "cold_first_episode_delivery_mean": 1.0,
+        "warm_first_three_episode_delivery_mean": 0.9867,
+        "cold_first_three_episode_delivery_mean": 0.9947,
+        "warm_delivery_at": {
+          "session_1": 1.0,
+          "session_5": 1.0,
+          "session_10": null,
+          "session_20": null
+        },
+        "cold_delivery_at": {
+          "session_1": 1.0,
+          "session_5": 1.0,
+          "session_10": null,
+          "session_20": null
+        }
+      },
+      "context_transfer_probe": {
+        "context_mode": "online_running_context",
+        "training_context_codes": [
+          0,
+          1,
+          3
+        ],
+        "eval_context_codes": [
+          0,
+          2,
+          3
+        ],
+        "comparison_applicable": true,
+        "status": "ok",
+        "warm_seen_mean_delivery": 0.9804,
+        "warm_unseen_mean_delivery": 1.0,
+        "cold_seen_mean_delivery": 0.9899,
+        "cold_unseen_mean_delivery": 1.0,
+        "warm_seen_session_count": 4,
+        "warm_unseen_session_count": 1
+      },
+      "warm_system_summary": {
+        "capability_policy": "fixed-visible",
+        "cycles": 13568,
+        "injected_packets": 1650,
+        "admitted_packets": 1650,
+        "delivered_packets": 1609,
+        "delivery_ratio": 0.9752,
+        "dropped_packets": 41,
+        "drop_ratio": 0.0248,
+        "source_buffer": 0,
+        "mean_latency": 3.1784,
+        "mean_hops": 4.0,
+        "node_atp_total": 11.4296,
+        "mean_route_cost": 0.0331,
+        "mean_feedback_award": 0.1648,
+        "mean_source_admission": 0.1216,
+        "last_source_admission": 0,
+        "source_admission_support": 0.5,
+        "source_admission_velocity": 0.0,
+        "mean_source_efficiency": 0.0,
+        "exact_matches": 1473,
+        "mean_bit_accuracy": 0.9155
+      },
+      "cold_system_summary": {
+        "capability_policy": "fixed-visible",
+        "cycles": 2225,
+        "injected_packets": 1650,
+        "admitted_packets": 1650,
+        "delivered_packets": 1609,
+        "delivery_ratio": 0.9752,
+        "dropped_packets": 41,
+        "drop_ratio": 0.0248,
+        "source_buffer": 0,
+        "mean_latency": 3.2524,
+        "mean_hops": 4.0,
+        "node_atp_total": 11.0995,
+        "mean_route_cost": 0.0332,
+        "mean_feedback_award": 0.1649,
+        "mean_source_admission": 0.7416,
+        "last_source_admission": 0,
+        "source_admission_support": 0.5,
+        "source_admission_velocity": 0.0,
+        "mean_source_efficiency": 0.0,
+        "exact_matches": 1474,
+        "mean_bit_accuracy": 0.9161
+      },
+      "warm_reset_count": 5,
+      "cold_reset_count": 5,
+      "workers_used": 8,
+      "parallelism_status": "process_pool:8"
+    }
+  },
+  "warm_eval_summary": {
+    "episode_count": 66,
+    "metrics": {
+      "accuracy": 0.9545454545454546,
+      "precision": 0.75,
+      "recall": 0.6,
+      "f1": 0.6666666666666665,
+      "tp": 3.0,
+      "tn": 60.0,
+      "fp": 1.0,
+      "fn": 2.0
+    },
+    "mean_delivered_packets": 24.3788,
+    "mean_dropped_packets": 0.6212,
+    "mean_feedback_events": 22.3182,
+    "mean_feedback_total": 4.0173,
+    "occupied_prediction_rate": 0.0606,
+    "mean_delivery_ratio": 0.9752,
+    "mean_prediction_confidence": 0.8369
+  },
+  "cold_eval_summary": {
+    "episode_count": 66,
+    "metrics": {
+      "accuracy": 0.9545454545454546,
+      "precision": 0.625,
+      "recall": 1.0,
+      "f1": 0.7692307692307693,
+      "tp": 5.0,
+      "tn": 58.0,
+      "fp": 3.0,
+      "fn": 0.0
+    },
+    "mean_delivered_packets": 24.3788,
+    "mean_dropped_packets": 0.6212,
+    "mean_feedback_events": 22.3333,
+    "mean_feedback_total": 4.02,
+    "occupied_prediction_rate": 0.1212,
+    "mean_delivery_ratio": 0.9752,
+    "mean_prediction_confidence": 0.8449
+  },
+  "carryover_efficiency": {
+    "warm_delivery_curve": [
+      1.0,
+      1.0,
+      0.9749,
+      0.9467,
+      1.0
+    ],
+    "cold_delivery_curve": [
+      1.0,
+      1.0,
+      0.9729,
+      0.9867,
+      1.0
+    ],
+    "efficiency_ratio_curve": [
+      1.0,
+      1.0,
+      1.0021,
+      0.9595,
+      1.0
+    ],
+    "mean_efficiency_ratio": 0.9923,
+    "warm_sessions_to_80pct": 0,
+    "cold_sessions_to_80pct": 0,
+    "session_1_delivery_delta": 0.0,
+    "session_1_efficiency_ratio": 1.0,
+    "mean_first_episode_delivery_delta": 0.0,
+    "mean_first_three_episode_delivery_delta": -0.008,
+    "warm_first_episode_delivery_mean": 1.0,
+    "cold_first_episode_delivery_mean": 1.0,
+    "warm_first_three_episode_delivery_mean": 0.9867,
+    "cold_first_three_episode_delivery_mean": 0.9947,
+    "warm_delivery_at": {
+      "session_1": 1.0,
+      "session_5": 1.0,
+      "session_10": null,
+      "session_20": null
+    },
+    "cold_delivery_at": {
+      "session_1": 1.0,
+      "session_5": 1.0,
+      "session_10": null,
+      "session_20": null
+    }
+  },
+  "context_transfer_probe": {
+    "context_mode": "online_running_context",
+    "training_context_codes": [
+      0,
+      1,
+      3
+    ],
+    "eval_context_codes": [
+      0,
+      2,
+      3
+    ],
+    "comparison_applicable": true,
+    "status": "ok",
+    "warm_seen_mean_delivery": 0.9804,
+    "warm_unseen_mean_delivery": 1.0,
+    "cold_seen_mean_delivery": 0.9899,
+    "cold_unseen_mean_delivery": 1.0,
+    "warm_seen_session_count": 4,
+    "warm_unseen_session_count": 1
+  },
+  "warm_system_summary": {
+    "capability_policy": "fixed-visible",
+    "cycles": 13568,
+    "injected_packets": 1650,
+    "admitted_packets": 1650,
+    "delivered_packets": 1609,
+    "delivery_ratio": 0.9752,
+    "dropped_packets": 41,
+    "drop_ratio": 0.0248,
+    "source_buffer": 0,
+    "mean_latency": 3.1784,
+    "mean_hops": 4.0,
+    "node_atp_total": 11.4296,
+    "mean_route_cost": 0.0331,
+    "mean_feedback_award": 0.1648,
+    "mean_source_admission": 0.1216,
+    "last_source_admission": 0,
+    "source_admission_support": 0.5,
+    "source_admission_velocity": 0.0,
+    "mean_source_efficiency": 0.0,
+    "exact_matches": 1473,
+    "mean_bit_accuracy": 0.9155
+  },
+  "cold_system_summary": {
+    "capability_policy": "fixed-visible",
+    "cycles": 2225,
+    "injected_packets": 1650,
+    "admitted_packets": 1650,
+    "delivered_packets": 1609,
+    "delivery_ratio": 0.9752,
+    "dropped_packets": 41,
+    "drop_ratio": 0.0248,
+    "source_buffer": 0,
+    "mean_latency": 3.2524,
+    "mean_hops": 4.0,
+    "node_atp_total": 11.0995,
+    "mean_route_cost": 0.0332,
+    "mean_feedback_award": 0.1649,
+    "mean_source_admission": 0.7416,
+    "last_source_admission": 0,
+    "source_admission_support": 0.5,
+    "source_admission_velocity": 0.0,
+    "mean_source_efficiency": 0.0,
+    "exact_matches": 1474,
+    "mean_bit_accuracy": 0.9161
+  },
+  "manifest": {
+    "run_id": "v3_seed13_20260408T185224",
+    "run_at": "2026-04-08T18:52:24+00:00",
+    "git_sha": "c8d58f2",
+    "csv": "occupancy_baseline/data/occupancy_synth_v1.csv",
+    "selector_seeds": [
+      13
+    ],
+    "window_size": 5,
+    "train_session_fraction": 0.7,
+    "eval_mode": "fresh_session_eval",
+    "topology_mode": "multihop_routing",
+    "context_mode": "online_running_context",
+    "ingress_mode": "admission_source",
+    "max_train_sessions": 8,
+    "max_eval_sessions": 5,
+    "workers": 8,
+    "feedback_amount": 0.18,
+    "eval_feedback_fraction": 1.0,
+    "packet_ttl": 8,
+    "summary_only": true,
+    "output_json": "docs/experiment_outputs/v3_diag_seed13_fresh_admission_20260408.json",
+    "elapsed_seconds": 108.71465259999968
+  }
+}

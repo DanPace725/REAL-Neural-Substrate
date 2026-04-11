@@ -468,9 +468,9 @@ class REALSliceRegulator:
     pairs that produce good outcomes — the same mechanism the fast layer uses
     for routing, applied one level up.
 
-    Settle/escalate/GCO decisions and compact compatibility outputs are
-    delegated to GradientSliceRegulator, which is the primary ordinary
-    control path for budget, hygiene, pressure, growth, and portfolio drive.
+    Budget, hygiene, pressure, growth, and portfolio drive come from
+    GradientSliceRegulator, while terminal settle/escalate decisions are
+    gated by this regulator's own engine-level GCO trajectory.
     """
 
     def __init__(

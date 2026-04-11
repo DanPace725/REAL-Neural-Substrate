@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 import shutil
 import unittest
 import uuid
@@ -472,6 +473,29 @@ class TestRealCoreEngine(unittest.TestCase):
 
         self.assertEqual(action, "nudge")
         self.assertEqual(mode, "anticipatory")
+
+    def test_cfar_selector_rng_is_reproducible_when_injected(self) -> None:
+        history = [
+            CycleEntry(
+                cycle=1,
+                action="rest",
+                mode="constraint",
+                state_before={"signal": 0.1},
+                state_after={"signal": 0.2},
+                dimensions={"signal": 0.2},
+                coherence=0.2,
+                delta=0.0,
+                gco=GCOStatus.DEGRADED,
+                cost_secs=0.1,
+            )
+        ]
+        selector_a = CFARSelector(exploration_rate=1.0, rng=random.Random(17))
+        selector_b = CFARSelector(exploration_rate=1.0, rng=random.Random(17))
+
+        action_a, mode_a = selector_a.select(["rest", "nudge", "wait"], history)
+        action_b, mode_b = selector_b.select(["rest", "nudge", "wait"], history)
+
+        self.assertEqual((action_a, mode_a), (action_b, mode_b))
 
     def test_pattern_recognition_model_matches_substrate_patterns(self) -> None:
         substrate = MemorySubstrate(SubstrateConfig(keys=("signal", "energy")))

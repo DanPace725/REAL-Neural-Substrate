@@ -1,0 +1,362 @@
+{
+  "config": {
+    "input_path": "..\\model_inputs\\chunks",
+    "train_fraction": 0.7,
+    "selector_seed": 13,
+    "feedback_amount": 0.18,
+    "eval_feedback_fraction": 1.0,
+    "packet_ttl": 8,
+    "forward_drain_cycles": 16,
+    "feedback_drain_cycles": 4,
+    "normalize_features": true,
+    "positive_delta_threshold": 0.0,
+    "max_train_scenarios": 2,
+    "max_eval_scenarios": 1,
+    "max_train_episodes_per_scenario": 10,
+    "max_eval_episodes_per_scenario": 10,
+    "topology_mode": "bounded_overlap_13715",
+    "local_unit_mode": "pulse_local_unit",
+    "local_unit_preset": "c_hr_overlap_tuned_v1",
+    "eval_mode": "both",
+    "summary_only": true
+  },
+  "scenario_inventory": {
+    "total_scenarios": 1000,
+    "train_scenarios": [
+      0,
+      1
+    ],
+    "eval_scenarios": [
+      700
+    ]
+  },
+  "feature_names": [
+    "gadf_abs_mean",
+    "gadf_diag_mean",
+    "gadf_mean",
+    "gadf_std",
+    "gasf_abs_mean",
+    "gasf_diag_mean",
+    "gasf_mean",
+    "gasf_std",
+    "prev_result_delta",
+    "result_value"
+  ],
+  "feature_stats": {
+    "result_value": {
+      "count": 1978,
+      "mean": -0.045257,
+      "std": 0.534666
+    },
+    "prev_result_delta": {
+      "count": 1978,
+      "mean": 0.000162,
+      "std": 0.747705
+    },
+    "gasf_mean": {
+      "count": 1978,
+      "mean": -0.649094,
+      "std": 0.101494
+    },
+    "gasf_std": {
+      "count": 1978,
+      "mean": 0.363268,
+      "std": 0.076973
+    },
+    "gasf_abs_mean": {
+      "count": 1978,
+      "mean": 0.695098,
+      "std": 0.071505
+    },
+    "gasf_diag_mean": {
+      "count": 1978,
+      "mean": -0.423417,
+      "std": 0.147632
+    },
+    "gadf_mean": {
+      "count": 1978,
+      "mean": 0.0,
+      "std": 0.0001
+    },
+    "gadf_std": {
+      "count": 1978,
+      "mean": 0.604054,
+      "std": 0.059613
+    },
+    "gadf_abs_mean": {
+      "count": 1978,
+      "mean": 0.502857,
+      "std": 0.059079
+    },
+    "gadf_diag_mean": {
+      "count": 1978,
+      "mean": 0.0,
+      "std": 0.0001
+    }
+  },
+  "majority_label": 0,
+  "train_episode_count": 20,
+  "eval_episode_count": 10,
+  "train_summary": {
+    "episode_count": 20,
+    "metrics": {
+      "accuracy": 0.5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0.0,
+      "tn": 10.0,
+      "fp": 0.0,
+      "fn": 10.0
+    },
+    "positive_label_rate": 0.5,
+    "positive_prediction_rate": 0.0,
+    "scenario_count": 2,
+    "mean_scenario_accuracy": 0.0,
+    "mean_prediction_confidence": 0.0,
+    "mean_delivered_packets": 0.0,
+    "mean_dropped_packets": 0.0,
+    "mean_feedback_events": 0.0
+  },
+  "primary_eval_mode": "fresh_session_eval",
+  "eval_summary": {
+    "episode_count": 10,
+    "metrics": {
+      "accuracy": 0.4,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0.0,
+      "tn": 4.0,
+      "fp": 0.0,
+      "fn": 6.0
+    },
+    "positive_label_rate": 0.6,
+    "positive_prediction_rate": 0.0,
+    "scenario_count": 1,
+    "mean_scenario_accuracy": 0.0,
+    "mean_prediction_confidence": 0.0,
+    "mean_delivered_packets": 0.0,
+    "mean_dropped_packets": 0.0,
+    "mean_feedback_events": 0.0
+  },
+  "eval_baselines": {
+    "majority_label": {
+      "episode_count": 10,
+      "metrics": {
+        "accuracy": 0.4,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0.0,
+        "tn": 4.0,
+        "fp": 0.0,
+        "fn": 6.0
+      },
+      "positive_label_rate": 0.6,
+      "positive_prediction_rate": 0.0
+    },
+    "repeat_last_delta_direction": {
+      "episode_count": 10,
+      "metrics": {
+        "accuracy": 0.4,
+        "precision": 0.5,
+        "recall": 0.5,
+        "f1": 0.5,
+        "tp": 3.0,
+        "tn": 1.0,
+        "fp": 3.0,
+        "fn": 3.0
+      },
+      "positive_label_rate": 0.6,
+      "positive_prediction_rate": 0.6
+    }
+  },
+  "eval_accuracy_deltas": {
+    "vs_majority_label": 0.0,
+    "vs_repeat_last_delta_direction": 0.0
+  },
+  "eval_protocols": {
+    "fresh_session_eval": {
+      "protocol_name": "fresh_session_eval",
+      "eval_episode_count": 10,
+      "eval_summary": {
+        "episode_count": 10,
+        "metrics": {
+          "accuracy": 0.4,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0.0,
+          "tn": 4.0,
+          "fp": 0.0,
+          "fn": 6.0
+        },
+        "positive_label_rate": 0.6,
+        "positive_prediction_rate": 0.0,
+        "scenario_count": 1,
+        "mean_scenario_accuracy": 0.0,
+        "mean_prediction_confidence": 0.0,
+        "mean_delivered_packets": 0.0,
+        "mean_dropped_packets": 0.0,
+        "mean_feedback_events": 0.0
+      },
+      "eval_baselines": {
+        "majority_label": {
+          "episode_count": 10,
+          "metrics": {
+            "accuracy": 0.4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0.0,
+            "tn": 4.0,
+            "fp": 0.0,
+            "fn": 6.0
+          },
+          "positive_label_rate": 0.6,
+          "positive_prediction_rate": 0.0
+        },
+        "repeat_last_delta_direction": {
+          "episode_count": 10,
+          "metrics": {
+            "accuracy": 0.4,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "tp": 3.0,
+            "tn": 1.0,
+            "fp": 3.0,
+            "fn": 3.0
+          },
+          "positive_label_rate": 0.6,
+          "positive_prediction_rate": 0.6
+        }
+      },
+      "eval_accuracy_deltas": {
+        "vs_majority_label": 0.0,
+        "vs_repeat_last_delta_direction": 0.0
+      },
+      "system_summary": {
+        "cycles": 480,
+        "injected_packets": 300,
+        "delivered_packets": 97,
+        "delivery_ratio": 0.3233,
+        "dropped_packets": 183,
+        "drop_ratio": 0.61,
+        "mean_latency": 48.2474,
+        "mean_route_cost": 0.00308,
+        "mean_feedback_award": 0.0,
+        "node_atp_total": 3.5085,
+        "exact_matches": 0,
+        "mean_bit_accuracy": 0.0
+      }
+    },
+    "persistent_eval": {
+      "protocol_name": "persistent_eval",
+      "eval_episode_count": 10,
+      "eval_summary": {
+        "episode_count": 10,
+        "metrics": {
+          "accuracy": 0.4,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0.0,
+          "tn": 4.0,
+          "fp": 0.0,
+          "fn": 6.0
+        },
+        "positive_label_rate": 0.6,
+        "positive_prediction_rate": 0.0,
+        "scenario_count": 1,
+        "mean_scenario_accuracy": 0.0,
+        "mean_prediction_confidence": 0.0,
+        "mean_delivered_packets": 0.0,
+        "mean_dropped_packets": 0.0,
+        "mean_feedback_events": 0.0
+      },
+      "eval_baselines": {
+        "majority_label": {
+          "episode_count": 10,
+          "metrics": {
+            "accuracy": 0.4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0.0,
+            "tn": 4.0,
+            "fp": 0.0,
+            "fn": 6.0
+          },
+          "positive_label_rate": 0.6,
+          "positive_prediction_rate": 0.0
+        },
+        "repeat_last_delta_direction": {
+          "episode_count": 10,
+          "metrics": {
+            "accuracy": 0.4,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "tp": 3.0,
+            "tn": 1.0,
+            "fp": 3.0,
+            "fn": 3.0
+          },
+          "positive_label_rate": 0.6,
+          "positive_prediction_rate": 0.6
+        }
+      },
+      "eval_accuracy_deltas": {
+        "vs_majority_label": 0.0,
+        "vs_repeat_last_delta_direction": 0.0
+      },
+      "system_summary": {
+        "cycles": 480,
+        "injected_packets": 300,
+        "delivered_packets": 97,
+        "delivery_ratio": 0.3233,
+        "dropped_packets": 183,
+        "drop_ratio": 0.61,
+        "mean_latency": 48.2474,
+        "mean_route_cost": 0.00308,
+        "mean_feedback_award": 0.0,
+        "node_atp_total": 3.5085,
+        "exact_matches": 0,
+        "mean_bit_accuracy": 0.0
+      }
+    }
+  },
+  "trained_system_summary": {
+    "cycles": 320,
+    "injected_packets": 200,
+    "delivered_packets": 69,
+    "delivery_ratio": 0.345,
+    "dropped_packets": 114,
+    "drop_ratio": 0.57,
+    "mean_latency": 47.6377,
+    "mean_route_cost": 0.00342,
+    "mean_feedback_award": 0.0,
+    "node_atp_total": 4.027,
+    "exact_matches": 0,
+    "mean_bit_accuracy": 0.0
+  },
+  "topology_mode": "bounded_overlap_13715",
+  "local_unit_mode": "pulse_local_unit",
+  "local_unit_preset": "c_hr_overlap_tuned_v1",
+  "eval_system_summary": {
+    "cycles": 480,
+    "injected_packets": 300,
+    "delivered_packets": 97,
+    "delivery_ratio": 0.3233,
+    "dropped_packets": 183,
+    "drop_ratio": 0.61,
+    "mean_latency": 48.2474,
+    "mean_route_cost": 0.00308,
+    "mean_feedback_award": 0.0,
+    "node_atp_total": 3.5085,
+    "exact_matches": 0,
+    "mean_bit_accuracy": 0.0
+  }
+}

@@ -56,6 +56,12 @@ from .lamination import (
     LearningSliceRegulator,
 )
 from .meta_agent import REALSliceRegulator, SliceSummaryObservationAdapter, PolicySelectionActionBackend, SliceAccuracyCoherenceModel, NAMED_POLICIES
+from .world_model import (
+    REALWorldModel,
+    WORLD_MODEL_ASSISTANCE_MODES,
+    WORLD_MODEL_HYPOTHESES,
+    WorldModelObservationAdapter,
+)
 from .interfaces import AdaptiveSliceRunner, CarryoverFilter, SliceRegulator, SliceRunner
 
 __all__ = [
@@ -119,4 +125,8 @@ __all__ = [
     "PolicySelectionActionBackend",
     "SliceAccuracyCoherenceModel",
     "NAMED_POLICIES",
+    "REALWorldModel",
+    "WORLD_MODEL_ASSISTANCE_MODES",
+    "WorldModelObservationAdapter",
+    "WORLD_MODEL_HYPOTHESES",
 ]

@@ -1,0 +1,15 @@
+{
+  "families": {
+    "C": {
+      "ceiling_band": null,
+      "last_pre_collapse": null,
+      "best_nn_by_band": {
+        "C1": "causal-transformer",
+        "C2": "elman",
+        "C3": "elman",
+        "C4": "mlp-latent"
+      }
+    }
+  },
+  "earliest_global_ceiling": null
+}

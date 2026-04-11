@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="420" viewBox="0 0 1100 420">
+<rect width="100%" height="100%" fill="#f7f4eb"/>
+<style>text{font-family:Georgia,serif;fill:#1f1d1a}.small{font-size:12px}.label{font-size:15px;font-weight:bold}</style>
+<text x="28" y="30" class="label">Ceiling Curves by Family (Mean Bit Accuracy)</text>
+<rect x="40" y="60" width="1030" height="320" fill="none" stroke="#c9c2b3"/>
+<text x="40" y="52" class="label">Family A</text>
+<line x1="40" y1="380.0" x2="1070" y2="380.0" stroke="#e3ddcf"/>
+<text x="14" y="384.0" class="small">0.0</text>
+<line x1="40" y1="316.0" x2="1070" y2="316.0" stroke="#e3ddcf"/>
+<text x="14" y="320.0" class="small">0.2</text>
+<line x1="40" y1="252.0" x2="1070" y2="252.0" stroke="#e3ddcf"/>
+<text x="14" y="256.0" class="small">0.4</text>
+<line x1="40" y1="188.0" x2="1070" y2="188.0" stroke="#e3ddcf"/>
+<text x="14" y="192.0" class="small">0.6</text>
+<line x1="40" y1="124.0" x2="1070" y2="124.0" stroke="#e3ddcf"/>
+<text x="14" y="128.0" class="small">0.8</text>
+<line x1="40" y1="60.0" x2="1070" y2="60.0" stroke="#e3ddcf"/>
+<text x="14" y="64.0" class="small">1.0</text>
+<text x="158.8" y="398" class="small">A1</text>
+<text x="416.2" y="398" class="small">A2</text>
+<text x="673.8" y="398" class="small">A3</text>
+<text x="931.2" y="398" class="small">A4</text>
+<polyline fill="none" stroke="#115f5f" stroke-width="3" points="168.8,206.2 426.2,194.3 683.8,175.7 941.2,168.3"/>
+<text x="158.8" y="398" class="small">A1</text>
+<text x="416.2" y="398" class="small">A2</text>
+<text x="673.8" y="398" class="small">A3</text>
+<text x="931.2" y="398" class="small">A4</text>
+<polyline fill="none" stroke="#c65d2e" stroke-width="3" points="168.8,212.1 426.2,220.0 683.8,210.0 941.2,207.0"/>
+<text x="158.8" y="398" class="small">A1</text>
+<text x="416.2" y="398" class="small">A2</text>
+<text x="673.8" y="398" class="small">A3</text>
+<text x="931.2" y="398" class="small">A4</text>
+<polyline fill="none" stroke="#7c2732" stroke-width="3" points="168.8,208.2 426.2,184.9 683.8,182.1 941.2,190.8"/>
+<polyline fill="none" stroke="#272343" stroke-width="3" stroke-dasharray="6 4" points="168.8,201.7 426.2,198.8 683.8,187.6 941.2,177.4"/>
+<line x1="840" y1="34" x2="864" y2="34" stroke="#115f5f" stroke-width="3"/>
+<text x="872" y="38" class="small">fixed-visible</text>
+<line x1="840" y1="52" x2="864" y2="52" stroke="#c65d2e" stroke-width="3"/>
+<text x="872" y="56" class="small">fixed-latent</text>
+<line x1="840" y1="70" x2="864" y2="70" stroke="#7c2732" stroke-width="3"/>
+<text x="872" y="74" class="small">growth-visible</text>
+<line x1="840" y1="88" x2="864" y2="88" stroke="#272343" stroke-width="3" stroke-dasharray="6 4"/>
+<text x="872" y="92" class="small">best NN</text>
+</svg>

@@ -133,7 +133,7 @@ class TestLatentGrowthGate(unittest.TestCase):
         capability = system.environment.capability_states["n0"]
         capability.growth_enabled = False
         capability.growth_support = 0.12
-        capability.growth_recruitment_pressure = 0.46
+        capability.growth_recruitment_pressure = 0.38
         capability.growth_stabilization_readiness = 0.20
         system.environment.slow_growth_authorization = "authorize"
 
@@ -152,6 +152,71 @@ class TestLatentGrowthGate(unittest.TestCase):
         }
 
         system.environment.observe_local = lambda node_id: dict(observation)
+        actions = system.environment.growth_action_specs("n0")
+
+        self.assertTrue(any(action["action"].startswith("bud_") for action in actions))
+
+    def test_growth_intent_pressure_persists_across_short_dips(self) -> None:
+        system = self._growth_system()
+        capability = system.environment.capability_states["n0"]
+        capability.growth_enabled = False
+        capability.growth_support = 0.12
+        capability.growth_recruitment_pressure = 0.40
+        capability.growth_stabilization_readiness = 0.36
+
+        observation = {
+            "atp_ratio": 1.0,
+            "contradiction_pressure": 0.55,
+            "queue_pressure": 0.15,
+            "oldest_packet_age": 0.0,
+            "ingress_backlog": 0.0,
+            "energy_surplus": 0.2,
+            "head_has_task": 1.0,
+            "head_has_context": 1.0,
+            "effective_context_confidence": 0.8,
+            "context_promotion_ready": 1.0,
+            "context_growth_ready": 1.0,
+        }
+
+        system.environment.observe_local = lambda node_id: dict(observation)
+        first = system.environment._refresh_growth_intent("n0")
+        self.assertTrue(first.requested)
+        first_cycle = first.request_cycle
+
+        capability.growth_recruitment_pressure = 0.18
+        capability.growth_stabilization_readiness = 0.18
+        system.environment.current_cycle += 3
+        second = system.environment._refresh_growth_intent("n0")
+
+        self.assertTrue(second.requested)
+        self.assertGreaterEqual(second.request_cycle, first_cycle)
+        self.assertGreaterEqual(second.request_pressure, 0.35)
+
+    def test_authorize_latches_request_and_bypasses_context_gate_for_requesting_node(self) -> None:
+        system = self._growth_system()
+        capability = system.environment.capability_states["n0"]
+        capability.growth_enabled = False
+        capability.growth_support = 0.12
+        capability.growth_recruitment_pressure = 0.52
+        capability.growth_stabilization_readiness = 0.42
+        system.environment.slow_growth_authorization = "authorize"
+
+        blocked_observation = {
+            "atp_ratio": 1.0,
+            "contradiction_pressure": 0.8,
+            "queue_pressure": 0.0,
+            "oldest_packet_age": 0.0,
+            "ingress_backlog": 0.0,
+            "energy_surplus": 0.3,
+            "head_has_task": 1.0,
+            "head_has_context": 0.0,
+            "effective_context_confidence": 0.0,
+            "context_promotion_ready": 0.0,
+            "context_growth_ready": 0.0,
+        }
+
+        system.environment.observe_local = lambda node_id: dict(blocked_observation)
+        system.environment._apply_growth_authorization_to_intents("authorize")
         actions = system.environment.growth_action_specs("n0")
 
         self.assertTrue(any(action["action"].startswith("bud_") for action in actions))

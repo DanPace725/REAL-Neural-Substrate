@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "real-neural-substrate"
+version = "0.1.0"
+description = "REAL native substrate research prototype built from the generalized allostatic core and Phase 8 neural substrate experiments."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26", "torch>=2.6"]
+
+[tool.setuptools]
+packages = ["real_core", "phase8", "scripts", "occupancy_baseline"]
+
+[tool.setuptools.package-data]
+occupancy_baseline = ["data/*.csv", "data/*.md"]
+
+[project.scripts]
+real-occupancy-baseline = "occupancy_baseline.run_baseline:main"
+real-occupancy-compare = "scripts.compare_occupancy_baseline:main"
+real-phase8-demo = "scripts.run_phase8_demo:main"
+real-cold-warm = "scripts.compare_cold_warm:main"
+real-task-transfer = "scripts.compare_task_transfer:main"
+real-transfer-matrix = "scripts.compare_transfer_matrix:main"
+real-transfer-timecourse = "scripts.analyze_transfer_timecourse:main"
+real-transfer-asymmetry = "scripts.evaluate_transfer_asymmetry:main"
+real-latent-context = "scripts.compare_latent_context:main"
+real-latent-ablations = "scripts.compare_latent_ablations:main"
+real-large-topology = "scripts.compare_large_topology:main"
+real-morphogenesis = "scripts.compare_morphogenesis:main"
+real-morphogenesis-large = "scripts.compare_morphogenesis_large:main"
+real-morphogenesis-large-paired = "scripts.compare_morphogenesis_large_paired:main"
+real-morphogenesis-large-mode-switched = "scripts.compare_morphogenesis_large_mode_switched:main"
+real-morphogenesis-large-carryover-bridge = "scripts.compare_morphogenesis_large_carryover_bridge:main"
+real-morphogenesis-large-carryover-bridge = "compare_morphogenesis_large_carryover_bridge:main"
+real-morphogenesis-large-mode-switched = "compare_morphogenesis_large_mode_switched:main"
+real-sequential-transfer = "scripts.compare_sequential_transfer:main"
+real-cyclic-transfer = "scripts.compare_cyclic_transfer:main"
+real-neural-baseline = "scripts.neural_baseline:main"
+real-ceiling-benchmarks = "scripts.compare_ceiling_benchmarks:main"
+real-self-selected-smoke = "scripts.compare_self_selected_smoke:main"
+real-ceiling-report = "scripts.render_ceiling_report:main"
+real-ceiling-merge = "scripts.merge_ceiling_benchmarks:main"

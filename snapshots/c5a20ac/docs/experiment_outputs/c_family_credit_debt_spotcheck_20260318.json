@@ -1,0 +1,316 @@
+{
+  "timestamp": "2026-03-18 1745",
+  "seed": 13,
+  "benchmarks": [
+    "C3",
+    "C4"
+  ],
+  "methods": [
+    "fixed-latent",
+    "growth-latent"
+  ],
+  "summary": {
+    "C3:fixed-latent": {
+      "exact_match_rate": 0.3704,
+      "mean_bit_accuracy": 0.6235,
+      "tasks": {
+        "task_a": {
+          "exact_match_rate": 0.6019,
+          "mean_bit_accuracy": 0.75,
+          "exact_matches": 65
+        },
+        "task_b": {
+          "exact_match_rate": 0.25,
+          "mean_bit_accuracy": 0.5648,
+          "exact_matches": 27
+        },
+        "task_c": {
+          "exact_match_rate": 0.2593,
+          "mean_bit_accuracy": 0.5556,
+          "exact_matches": 28
+        }
+      }
+    },
+    "C3:growth-latent": {
+      "exact_match_rate": 0.3426,
+      "mean_bit_accuracy": 0.591,
+      "tasks": {
+        "task_a": {
+          "exact_match_rate": 0.4907,
+          "mean_bit_accuracy": 0.6435,
+          "exact_matches": 53
+        },
+        "task_b": {
+          "exact_match_rate": 0.2037,
+          "mean_bit_accuracy": 0.537,
+          "exact_matches": 22
+        },
+        "task_c": {
+          "exact_match_rate": 0.3333,
+          "mean_bit_accuracy": 0.5926,
+          "exact_matches": 36
+        }
+      }
+    },
+    "C4:fixed-latent": {
+      "exact_match_rate": 0.3179,
+      "mean_bit_accuracy": 0.5887,
+      "tasks": {
+        "task_a": {
+          "exact_match_rate": 0.3981,
+          "mean_bit_accuracy": 0.5787,
+          "exact_matches": 86
+        },
+        "task_b": {
+          "exact_match_rate": 0.2037,
+          "mean_bit_accuracy": 0.544,
+          "exact_matches": 44
+        },
+        "task_c": {
+          "exact_match_rate": 0.3519,
+          "mean_bit_accuracy": 0.6435,
+          "exact_matches": 76
+        }
+      }
+    },
+    "C4:growth-latent": {
+      "exact_match_rate": 0.3102,
+      "mean_bit_accuracy": 0.5749,
+      "tasks": {
+        "task_a": {
+          "exact_match_rate": 0.3935,
+          "mean_bit_accuracy": 0.5718,
+          "exact_matches": 85
+        },
+        "task_b": {
+          "exact_match_rate": 0.1806,
+          "mean_bit_accuracy": 0.5301,
+          "exact_matches": 39
+        },
+        "task_c": {
+          "exact_match_rate": 0.3565,
+          "mean_bit_accuracy": 0.6227,
+          "exact_matches": 77
+        }
+      }
+    }
+  },
+  "runs": [
+    {
+      "benchmark_id": "C3",
+      "family_id": "C",
+      "family_order": 2,
+      "difficulty_index": 3,
+      "task_key": "task_a",
+      "method_id": "fixed-latent",
+      "seed": 13,
+      "expected_examples": 108,
+      "exact_matches": 65,
+      "exact_match_rate": 0.6019,
+      "mean_bit_accuracy": 0.75,
+      "criterion_reached": true,
+      "examples_to_criterion": 9,
+      "model_family": "real",
+      "latent_context": true,
+      "morphogenesis_enabled": false
+    },
+    {
+      "benchmark_id": "C3",
+      "family_id": "C",
+      "family_order": 2,
+      "difficulty_index": 3,
+      "task_key": "task_b",
+      "method_id": "fixed-latent",
+      "seed": 13,
+      "expected_examples": 108,
+      "exact_matches": 27,
+      "exact_match_rate": 0.25,
+      "mean_bit_accuracy": 0.5648,
+      "criterion_reached": false,
+      "examples_to_criterion": null,
+      "model_family": "real",
+      "latent_context": true,
+      "morphogenesis_enabled": false
+    },
+    {
+      "benchmark_id": "C3",
+      "family_id": "C",
+      "family_order": 2,
+      "difficulty_index": 3,
+      "task_key": "task_c",
+      "method_id": "fixed-latent",
+      "seed": 13,
+      "expected_examples": 108,
+      "exact_matches": 28,
+      "exact_match_rate": 0.2593,
+      "mean_bit_accuracy": 0.5556,
+      "criterion_reached": false,
+      "examples_to_criterion": null,
+      "model_family": "real",
+      "latent_context": true,
+      "morphogenesis_enabled": false
+    },
+    {
+      "benchmark_id": "C3",
+      "family_id": "C",
+      "family_order": 2,
+      "difficulty_index": 3,
+      "task_key": "task_a",
+      "method_id": "growth-latent",
+      "seed": 13,
+      "expected_examples": 108,
+      "exact_matches": 53,
+      "exact_match_rate": 0.4907,
+      "mean_bit_accuracy": 0.6435,
+      "criterion_reached": true,
+      "examples_to_criterion": 8,
+      "model_family": "real",
+      "latent_context": true,
+      "morphogenesis_enabled": true
+    },
+    {
+      "benchmark_id": "C3",
+      "family_id": "C",
+      "family_order": 2,
+      "difficulty_index": 3,
+      "task_key": "task_b",
+      "method_id": "growth-latent",
+      "seed": 13,
+      "expected_examples": 108,
+      "exact_matches": 22,
+      "exact_match_rate": 0.2037,
+      "mean_bit_accuracy": 0.537,
+      "criterion_reached": false,
+      "examples_to_criterion": null,
+      "model_family": "real",
+      "latent_context": true,
+      "morphogenesis_enabled": true
+    },
+    {
+      "benchmark_id": "C3",
+      "family_id": "C",
+      "family_order": 2,
+      "difficulty_index": 3,
+      "task_key": "task_c",
+      "method_id": "growth-latent",
+      "seed": 13,
+      "expected_examples": 108,
+      "exact_matches": 36,
+      "exact_match_rate": 0.3333,
+      "mean_bit_accuracy": 0.5926,
+      "criterion_reached": false,
+      "examples_to_criterion": null,
+      "model_family": "real",
+      "latent_context": true,
+      "morphogenesis_enabled": true
+    },
+    {
+      "benchmark_id": "C4",
+      "family_id": "C",
+      "family_order": 2,
+      "difficulty_index": 4,
+      "task_key": "task_a",
+      "method_id": "fixed-latent",
+      "seed": 13,
+      "expected_examples": 216,
+      "exact_matches": 86,
+      "exact_match_rate": 0.3981,
+      "mean_bit_accuracy": 0.5787,
+      "criterion_reached": false,
+      "examples_to_criterion": null,
+      "model_family": "real",
+      "latent_context": true,
+      "morphogenesis_enabled": false
+    },
+    {
+      "benchmark_id": "C4",
+      "family_id": "C",
+      "family_order": 2,
+      "difficulty_index": 4,
+      "task_key": "task_b",
+      "method_id": "fixed-latent",
+      "seed": 13,
+      "expected_examples": 216,
+      "exact_matches": 44,
+      "exact_match_rate": 0.2037,
+      "mean_bit_accuracy": 0.544,
+      "criterion_reached": false,
+      "examples_to_criterion": null,
+      "model_family": "real",
+      "latent_context": true,
+      "morphogenesis_enabled": false
+    },
+    {
+      "benchmark_id": "C4",
+      "family_id": "C",
+      "family_order": 2,
+      "difficulty_index": 4,
+      "task_key": "task_c",
+      "method_id": "fixed-latent",
+      "seed": 13,
+      "expected_examples": 216,
+      "exact_matches": 76,
+      "exact_match_rate": 0.3519,
+      "mean_bit_accuracy": 0.6435,
+      "criterion_reached": false,
+      "examples_to_criterion": null,
+      "model_family": "real",
+      "latent_context": true,
+      "morphogenesis_enabled": false
+    },
+    {
+      "benchmark_id": "C4",
+      "family_id": "C",
+      "family_order": 2,
+      "difficulty_index": 4,
+      "task_key": "task_a",
+      "method_id": "growth-latent",
+      "seed": 13,
+      "expected_examples": 216,
+      "exact_matches": 85,
+      "exact_match_rate": 0.3935,
+      "mean_bit_accuracy": 0.5718,
+      "criterion_reached": false,
+      "examples_to_criterion": null,
+      "model_family": "real",
+      "latent_context": true,
+      "morphogenesis_enabled": true
+    },
+    {
+      "benchmark_id": "C4",
+      "family_id": "C",
+      "family_order": 2,
+      "difficulty_index": 4,
+      "task_key": "task_b",
+      "method_id": "growth-latent",
+      "seed": 13,
+      "expected_examples": 216,
+      "exact_matches": 39,
+      "exact_match_rate": 0.1806,
+      "mean_bit_accuracy": 0.5301,
+      "criterion_reached": false,
+      "examples_to_criterion": null,
+      "model_family": "real",
+      "latent_context": true,
+      "morphogenesis_enabled": true
+    },
+    {
+      "benchmark_id": "C4",
+      "family_id": "C",
+      "family_order": 2,
+      "difficulty_index": 4,
+      "task_key": "task_c",
+      "method_id": "growth-latent",
+      "seed": 13,
+      "expected_examples": 216,
+      "exact_matches": 77,
+      "exact_match_rate": 0.3565,
+      "mean_bit_accuracy": 0.6227,
+      "criterion_reached": false,
+      "examples_to_criterion": null,
+      "model_family": "real",
+      "latent_context": true,
+      "morphogenesis_enabled": true
+    }
+  ]
+}

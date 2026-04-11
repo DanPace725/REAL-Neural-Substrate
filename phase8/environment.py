@@ -8,7 +8,15 @@ from typing import Dict, Iterable, List, Sequence
 import json
 
 from .admission import AdmissionSubstrate
-from .models import FeedbackPulse, NodeRuntimeState, SignalPacket, SignalSpec
+from .models import (
+    DEFAULT_LOCAL_UNIT_PRESET,
+    FeedbackPulse,
+    LocalUnitState,
+    NodeRuntimeState,
+    SignalPacket,
+    SignalSpec,
+    resolve_pulse_local_unit_preset,
+)
 from .topology import GrowthProposal, MorphogenesisConfig, TopologyManager, TopologyState
 
 TRANSFORM_NAMES = ("identity", "rotate_left_1", "xor_mask_1010", "xor_mask_0101")
@@ -47,8 +55,10 @@ LATENT_CONTEXT_PROMOTION_STREAK = 2
 LATENT_CONTEXT_EVIDENCE_DECAY = 0.88
 LATENT_CONTEXT_ROUTE_GAIN = 0.08
 LATENT_CONTEXT_FEEDBACK_GAIN = 0.42
+LATENT_CONTEXT_SEQUENCE_GAIN = 0.30
 LATENT_CONTEXT_EVIDENCE_SATURATION = 0.50
 LATENT_EVIDENCE_CHANNELS = (
+    "source_sequence",
     "source_route",
     "downstream_route",
     "source_feedback",
@@ -72,6 +82,7 @@ CAPABILITY_POLICIES = (
     "growth-latent",
     "self-selected",
 )
+LOCAL_UNIT_MODES = ("legacy", "pulse_local_unit")
 
 
 def _edge_id(source_id: str, target_id: str) -> str:
@@ -80,6 +91,20 @@ def _edge_id(source_id: str, target_id: str) -> str:
 
 def _normalize_transform_name(transform_name: str | None) -> str:
     return str(transform_name or "identity")
+
+
+def _normalize_transform_belief(raw_scores: Dict[str, float] | None) -> Dict[str, float]:
+    scores = {
+        transform_name: max(0.0, float((raw_scores or {}).get(transform_name, 0.0)))
+        for transform_name in TRANSFORM_NAMES
+    }
+    total = sum(scores.values())
+    if total <= 1e-9:
+        return {transform_name: 0.0 for transform_name in TRANSFORM_NAMES}
+    return {
+        transform_name: scores[transform_name] / total
+        for transform_name in TRANSFORM_NAMES
+    }
 
 
 def _context_credit_key(transform_name: str, context_bit: int) -> str:
@@ -358,6 +383,7 @@ class LatentTaskState:
 class LatentContextTracker:
     task_states: Dict[str, LatentTaskState] = field(default_factory=dict)
     evidence_decay: float = LATENT_CONTEXT_EVIDENCE_DECAY
+    sequence_gain: float = LATENT_CONTEXT_SEQUENCE_GAIN
     route_gain: float = LATENT_CONTEXT_ROUTE_GAIN
     feedback_gain: float = LATENT_CONTEXT_FEEDBACK_GAIN
     confidence_threshold: float = LATENT_CONTEXT_CONFIDENCE_THRESHOLD
@@ -632,6 +658,32 @@ class LatentContextTracker:
                 )
         self._recompute(state)
 
+    def _apply_sequence_signal(
+        self,
+        state: LatentTaskState,
+        *,
+        context_estimate: int | None,
+        confidence: float,
+    ) -> None:
+        self._apply_decay(state)
+        context_ids = self._ensure_task_contexts(state)
+        channel_context = state.context_evidence_by_channel.setdefault(
+            "source_sequence",
+            {},
+        )
+        if context_estimate is None or confidence <= 0.0:
+            self._recompute(state)
+            return
+        resolved_context = int(context_estimate)
+        signal = self.sequence_gain * max(0.0, min(1.0, float(confidence)))
+        for context_bit in context_ids:
+            prior_value = float(channel_context.get(context_bit, 0.0))
+            if int(context_bit) == resolved_context:
+                channel_context[context_bit] = max(0.0, prior_value + signal)
+            else:
+                channel_context[context_bit] = max(0.0, prior_value * 0.55)
+        self._recompute(state)
+
     def record_route(
         self,
         task_id: str | None,
@@ -707,6 +759,11 @@ class LatentContextTracker:
         state.sequence_delta_bits = list(delta_bits[:4])
         state.sequence_change_ratio = sum(delta_bits) / max(len(delta_bits), 1)
         state.sequence_repeat_input = 1.0 if state.last_input_bits and current_bits == state.last_input_bits else 0.0
+        self._apply_sequence_signal(
+            state,
+            context_estimate=state.sequence_context_estimate,
+            confidence=state.sequence_context_confidence,
+        )
         state.last_packet_id = str(packet_id)
         state.last_input_bits = current_bits
         if current_parity is not None:
@@ -881,10 +938,13 @@ class CapabilityControlConfig:
     latent_activation_threshold: float = 0.44
     latent_visible_suppression_threshold: float = 0.58
     latent_maintenance_cost: float = 0.006
-    growth_support_decay: float = 0.90
-    growth_support_gain: float = 0.10
-    growth_activation_threshold: float = 0.62
-    growth_stability_threshold: float = 0.48
+    growth_support_decay: float = 0.94
+    growth_support_gain: float = 0.14
+    growth_activation_threshold: float = 0.52
+    growth_stability_threshold: float = 0.40
+    growth_request_threshold: float = 0.35
+    growth_request_soft_threshold: float = 0.22
+    growth_request_retention_cycles: int = 12
     growth_maintenance_cost: float = 0.005
 
 
@@ -937,6 +997,60 @@ class CapabilityState:
             growth_recruitment_cycles=[
                 int(value) for value in payload.get("growth_recruitment_cycles", [])
             ],
+        )
+
+
+@dataclass
+class GrowthIntentState:
+    requested: bool = False
+    request_cycle: int = -1
+    request_pressure: float = 0.0
+    request_readiness: float = 0.0
+    authorization_state: str = "auto"
+    authorization_cycle: int = -1
+    blocked_reason: str | None = None
+    blocked_streak: int = 0
+    authorized_stall_slices: int = 0
+    last_proposal_cycle: int = -1
+    request_reason_flags: Dict[str, float] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "requested": bool(self.requested),
+            "request_cycle": int(self.request_cycle),
+            "request_pressure": float(self.request_pressure),
+            "request_readiness": float(self.request_readiness),
+            "authorization_state": str(self.authorization_state),
+            "authorization_cycle": int(self.authorization_cycle),
+            "blocked_reason": self.blocked_reason,
+            "blocked_streak": int(self.blocked_streak),
+            "authorized_stall_slices": int(self.authorized_stall_slices),
+            "last_proposal_cycle": int(self.last_proposal_cycle),
+            "request_reason_flags": {
+                str(key): float(value)
+                for key, value in self.request_reason_flags.items()
+            },
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, object] | None) -> "GrowthIntentState":
+        if not payload:
+            return cls()
+        return cls(
+            requested=bool(payload.get("requested", False)),
+            request_cycle=int(payload.get("request_cycle", -1)),
+            request_pressure=float(payload.get("request_pressure", 0.0)),
+            request_readiness=float(payload.get("request_readiness", 0.0)),
+            authorization_state=str(payload.get("authorization_state", "auto")),
+            authorization_cycle=int(payload.get("authorization_cycle", -1)),
+            blocked_reason=payload.get("blocked_reason"),
+            blocked_streak=int(payload.get("blocked_streak", 0)),
+            authorized_stall_slices=int(payload.get("authorized_stall_slices", 0)),
+            last_proposal_cycle=int(payload.get("last_proposal_cycle", -1)),
+            request_reason_flags={
+                str(key): float(value)
+                for key, value in dict(payload.get("request_reason_flags", {})).items()
+            },
         )
 
 
@@ -999,6 +1113,10 @@ def _bit_match_ratio(observed_bits: Sequence[int], target_bits: Sequence[int]) -
     for observed, target in zip(observed_bits, target_bits):
         matched += 1 if int(observed) == int(target) else 0
     return matched / max(len(target_bits), 1)
+
+
+def _bits_to_key(bits: Sequence[int] | None) -> str:
+    return "".join(str(int(bit)) for bit in list(bits or []))
 
 
 def _quality_scaled_credit(bit_match_ratio: float, *, floor: float = TASK_CONTEXT_MATCH_FLOOR) -> float:
@@ -1076,6 +1194,7 @@ class RoutingEnvironment:
     topology_state: TopologyState | None = None
     morphogenesis_config: MorphogenesisConfig = field(default_factory=MorphogenesisConfig)
     source_sequence_context_enabled: bool = True
+    c_task_layer1_enabled: bool = False
     latent_transfer_split_enabled: bool = True
     transfer_adaptation_window: int = 10
     capability_policy: str = "fixed-visible"
@@ -1083,8 +1202,27 @@ class RoutingEnvironment:
     slow_growth_authorization: str = "auto"
     slow_weak_context_bit: int | None = None
     slow_weak_context_gap: float = 0.0
+    slow_c_task_source_hardening_shift: float = 0.0
+    slow_c_task_preserve_hardening_shift: float = 0.0
+    slow_c_task_preserve_bonus_scale: float = 1.0
+    slow_c_task_reopen_penalty_scale: float = 1.0
+    slow_c_task_weak_context_boost: float = 0.0
+    slow_c_task_atp_conservation_bias: float = 0.0
+    slow_c_task_route_cost_scale: float = 1.0
+    slow_c_task_recovery_scale: float = 1.0
+    slow_c_task_node_support_profiles: dict[str, dict[str, float]] = field(default_factory=dict)
+    local_unit_mode: str = "legacy"
+    local_unit_preset: str = DEFAULT_LOCAL_UNIT_PRESET
+    force_expected_transform_at_sink: bool = False
+    teacher_trace_mode: str = "off"
+    teacher_transform_policy: str = "source_then_identity"
+    teacher_force_nodes: tuple[str, ...] = field(default_factory=tuple)
+    c_task_layer1_mode: str = "legacy"
 
     def __post_init__(self) -> None:
+        if self.local_unit_mode not in LOCAL_UNIT_MODES:
+            raise ValueError(f"Unsupported local_unit_mode: {self.local_unit_mode}")
+        self.local_unit_preset = resolve_pulse_local_unit_preset(self.local_unit_preset).name
         if self.topology_state is None:
             self.topology_state = TopologyState.from_graph(
                 self.adjacency,
@@ -1136,6 +1274,14 @@ class RoutingEnvironment:
             node_id: self._initial_capability_state()
             for node_id in self.node_states
         }
+        self.local_unit_states: Dict[str, LocalUnitState] = {
+            node_id: self._initial_local_unit_state()
+            for node_id in self.node_states
+        }
+        self.growth_intent_states: Dict[str, GrowthIntentState] = {
+            node_id: GrowthIntentState()
+            for node_id in self.node_states
+        }
         self.carryover_task_ids: set[str] = set()
         self.transfer_adaptation_start_cycle = 0
 
@@ -1174,6 +1320,16 @@ class RoutingEnvironment:
             node_id: prior_capabilities.get(node_id, self._initial_capability_state())
             for node_id in self.node_states
         }
+        prior_local_units = getattr(self, "local_unit_states", {})
+        self.local_unit_states = {
+            node_id: prior_local_units.get(node_id, self._initial_local_unit_state())
+            for node_id in self.node_states
+        }
+        prior_growth_intents = getattr(self, "growth_intent_states", {})
+        self.growth_intent_states = {
+            node_id: prior_growth_intents.get(node_id, GrowthIntentState())
+            for node_id in self.node_states
+        }
 
     def _initial_capability_state(self) -> CapabilityState:
         latent_enabled = self.capability_policy in ("fixed-latent", "growth-latent")
@@ -1185,6 +1341,9 @@ class RoutingEnvironment:
             growth_support=1.0 if growth_enabled else 0.0,
             growth_enabled=growth_enabled,
         )
+
+    def _initial_local_unit_state(self) -> LocalUnitState:
+        return resolve_pulse_local_unit_preset(self.local_unit_preset).apply()
 
     def agent_ids(self) -> List[str]:
         return sorted(
@@ -1343,6 +1502,692 @@ class RoutingEnvironment:
             for node_id in self.node_states
         }
 
+    def export_local_unit_state(self) -> dict[str, object]:
+        return {
+            node_id: state.to_dict()
+            for node_id, state in self.local_unit_states.items()
+        }
+
+    def load_local_unit_state(self, payload: dict[str, object] | None) -> None:
+        payload = payload or {}
+        self.local_unit_states = {
+            node_id: LocalUnitState.from_dict(
+                dict(payload.get(node_id, {})) if node_id in payload else None
+            )
+            for node_id in self.node_states
+        }
+
+    def export_growth_intent_state(self) -> dict[str, object]:
+        return {
+            node_id: state.to_dict()
+            for node_id, state in self.growth_intent_states.items()
+        }
+
+    def load_growth_intent_state(self, payload: dict[str, object] | None) -> None:
+        payload = payload or {}
+        self.growth_intent_states = {
+            node_id: GrowthIntentState.from_dict(
+                dict(payload.get(node_id, {})) if node_id in payload else None
+            )
+            for node_id in self.node_states
+        }
+
+    def _pulse_mode_enabled(self) -> bool:
+        return self.local_unit_mode == "pulse_local_unit"
+
+    def local_unit_state_for(self, node_id: str) -> LocalUnitState:
+        return self.local_unit_states.setdefault(node_id, LocalUnitState())
+
+    def growth_intent_state_for(self, node_id: str) -> GrowthIntentState:
+        return self.growth_intent_states.setdefault(node_id, GrowthIntentState())
+
+    def _pulse_channel_key(self, neighbor_id: str, transform_name: str | None) -> str:
+        return f"{neighbor_id}:{_normalize_transform_name(transform_name)}"
+
+    def _pulse_delay_limit(
+        self,
+        *,
+        threshold: float,
+        accumulator: float,
+        ambiguity: float,
+        plasticity_gate: float,
+    ) -> int:
+        readiness = accumulator / max(threshold, 1e-6)
+        delay_pressure = max(0.0, 1.0 - readiness)
+        delay_pressure += 0.45 * max(0.0, min(1.0, ambiguity))
+        delay_pressure += 0.25 * max(0.0, 0.55 - max(0.0, min(1.0, plasticity_gate)))
+        return max(1, min(4, 1 + int(delay_pressure * 2.5)))
+
+    def _mean_local_accumulator(self, local_unit_state: LocalUnitState) -> float:
+        accumulators = list(local_unit_state.signal.accumulators.values())
+        if not accumulators:
+            return 0.0
+        return sum(float(value) for value in accumulators) / max(len(accumulators), 1)
+
+    def _count_local_refractory_channels(self, local_unit_state: LocalUnitState) -> int:
+        return sum(
+            1
+            for cooldown in local_unit_state.signal.cooldowns.values()
+            if int(cooldown) > 0
+        )
+
+    def _node_c_task_context_view(
+        self,
+        local_unit_state: LocalUnitState,
+    ) -> dict[str, float | str | None]:
+        context_state = local_unit_state.context
+        transform_belief = _normalize_transform_belief(context_state.transform_belief)
+        return {
+            "dominant_transform": context_state.dominant_transform,
+            "transform_confidence": max(
+                0.0,
+                min(1.0, float(context_state.transform_confidence)),
+            ),
+            "transform_belief": transform_belief,
+            "hypothesis_transform": context_state.hypothesis_transform,
+            "hypothesis_confidence": max(
+                0.0,
+                min(1.0, float(context_state.hypothesis_confidence)),
+            ),
+            "preserve_mode": 1.0 if context_state.preserve_mode else 0.0,
+            "preserve_pressure": max(
+                0.0,
+                min(1.0, float(context_state.preserve_pressure)),
+            ),
+            "reopen_pressure": max(
+                0.0,
+                min(1.0, float(context_state.reopen_pressure)),
+            ),
+            "contradiction_load": max(
+                0.0,
+                min(1.0, float(context_state.contradiction_load)),
+            ),
+            "commitment_age": float(max(0, int(context_state.commitment_age))),
+        }
+
+    def _update_c_task_local_context(
+        self,
+        node_id: str,
+        *,
+        packet: SignalPacket,
+        applied_transform: str,
+        expected_transform: str | None,
+        confidence_signal: float,
+        expected_signal: float,
+        ambiguity_signal: float,
+    ) -> None:
+        local_unit_state = self.local_unit_state_for(node_id)
+        context_state = local_unit_state.context
+        packet_belief = _normalize_transform_belief(packet.c_task_transform_belief)
+        context_state.transform_belief = dict(packet_belief)
+        context_state.hypothesis_transform = packet.c_task_hypothesis_transform
+        context_state.hypothesis_confidence = max(
+            context_state.hypothesis_confidence * 0.86,
+            float(packet.c_task_hypothesis_confidence),
+        )
+        preserve_mode_active = bool(packet.c_task_preserve_mode)
+        preserve_pressure = max(0.0, min(1.0, float(packet.c_task_preserve_pressure)))
+        reopen_pressure = max(0.0, min(1.0, float(packet.c_task_reopen_pressure)))
+        resolution_confidence = max(
+            0.0,
+            min(1.0, float(packet.c_task_resolution_confidence)),
+        )
+        if applied_transform == expected_transform or expected_signal >= 0.5:
+            context_state.dominant_transform = applied_transform
+            context_state.transform_confidence = max(
+                context_state.transform_confidence * 0.84,
+                resolution_confidence,
+                confidence_signal,
+            )
+            context_state.preserve_pressure = max(
+                context_state.preserve_pressure * 0.90,
+                preserve_pressure,
+            )
+            context_state.reopen_pressure = min(
+                reopen_pressure,
+                context_state.reopen_pressure * 0.45,
+            )
+            context_state.contradiction_load *= 0.55
+            context_state.commitment_age = min(8, context_state.commitment_age + 1)
+        elif context_state.dominant_transform is not None and applied_transform == "identity":
+            context_state.transform_confidence = max(
+                context_state.transform_confidence * 0.97,
+                0.82 * resolution_confidence,
+            )
+            context_state.preserve_pressure = max(
+                context_state.preserve_pressure * 0.98,
+                preserve_pressure,
+            )
+            context_state.reopen_pressure *= 0.42
+            context_state.contradiction_load *= 0.70
+            context_state.commitment_age = min(8, context_state.commitment_age + 1)
+        else:
+            context_state.reopen_pressure = max(
+                context_state.reopen_pressure * 0.78,
+                reopen_pressure,
+            )
+            context_state.preserve_pressure *= max(
+                0.72,
+                0.90 - 0.12 * context_state.reopen_pressure,
+            )
+            context_state.contradiction_load = max(
+                context_state.contradiction_load * 0.72,
+                ambiguity_signal,
+                context_state.reopen_pressure,
+            )
+            context_state.commitment_age = max(0, context_state.commitment_age - 1)
+        context_state.preserve_mode = bool(
+            preserve_mode_active
+            or (
+                context_state.preserve_pressure >= 0.42
+                and context_state.transform_confidence >= 0.35
+                and context_state.reopen_pressure + 0.08 < context_state.preserve_pressure
+            )
+        )
+        if (
+            context_state.transform_confidence < 0.10
+            and context_state.preserve_pressure < 0.12
+            and context_state.reopen_pressure < 0.12
+        ):
+            context_state.dominant_transform = None
+            context_state.hypothesis_transform = None
+            context_state.hypothesis_confidence *= 0.55
+
+    def _c_task_transform_belief_from_observation(
+        self,
+        observation: dict[str, float],
+        *,
+        packet: SignalPacket,
+    ) -> tuple[dict[str, float], str | None, float]:
+        prior = _normalize_transform_belief(packet.c_task_transform_belief)
+        scores: dict[str, float] = {}
+        for transform_name in TRANSFORM_NAMES:
+            score = 0.04
+            score += 0.55 * float(observation.get(f"expected_transform_{transform_name}", 0.0))
+            score += 0.16 * float(observation.get(f"history_transform_evidence_{transform_name}", 0.0))
+            score += 0.08 * float(observation.get(f"feedback_credit_{transform_name}", 0.0))
+            score += 0.05 * float(observation.get(f"task_transform_affinity_{transform_name}", 0.0))
+            score += 0.12 * float(prior.get(transform_name, 0.0))
+            if packet.c_task_hypothesis_transform == transform_name:
+                score += 0.10 * float(packet.c_task_hypothesis_confidence)
+            if packet.c_task_resolved_transform == transform_name:
+                score += 0.14 * float(packet.c_task_resolution_confidence)
+            scores[transform_name] = score
+        belief = _normalize_transform_belief(scores)
+        ranked = sorted(
+            belief.items(),
+            key=lambda item: (-item[1], item[0]),
+        )
+        top_name = ranked[0][0] if ranked else None
+        top_score = ranked[0][1] if ranked else 0.0
+        second_score = ranked[1][1] if len(ranked) > 1 else 0.0
+        confidence = max(
+            0.0,
+            min(
+                1.0,
+                0.55 * top_score
+                + 0.45 * max(0.0, top_score - second_score),
+            ),
+        )
+        return belief, top_name, confidence
+
+    def _local_unit_summary(self) -> dict[str, object]:
+        states = list(self.local_unit_states.values())
+        if not states:
+            return {
+                "local_unit_mode": self.local_unit_mode,
+                "local_unit_preset": self.local_unit_preset,
+                "pulse_fire_count_total": 0,
+                "suppressed_route_attempt_count_total": 0,
+                "mean_accumulator_level": 0.0,
+                "refractory_occupancy": 0.0,
+                "mean_ambiguity_reservoir": 0.0,
+                "mean_plasticity_gate": 0.0,
+                "mean_transform_confidence": 0.0,
+                "mean_preserve_pressure": 0.0,
+                "mean_reopen_pressure": 0.0,
+                "preserve_mode_node_ratio": 0.0,
+                "requesting_growth_nodes": 0,
+                "max_growth_request_pressure": 0.0,
+            }
+        mean_accumulator = sum(self._mean_local_accumulator(state) for state in states) / max(len(states), 1)
+        refractory_total = sum(
+            self._count_local_refractory_channels(state)
+            for state in states
+        )
+        mean_ambiguity = sum(
+            float(state.context.ambiguity_reservoir)
+            for state in states
+        ) / max(len(states), 1)
+        mean_plasticity_gate = sum(
+            float(state.plasticity.plasticity_gate)
+            for state in states
+        ) / max(len(states), 1)
+        mean_transform_confidence = sum(
+            float(state.context.transform_confidence)
+            for state in states
+        ) / max(len(states), 1)
+        mean_preserve_pressure = sum(
+            float(state.context.preserve_pressure)
+            for state in states
+        ) / max(len(states), 1)
+        mean_reopen_pressure = sum(
+            float(state.context.reopen_pressure)
+            for state in states
+        ) / max(len(states), 1)
+        request_pressures = [
+            float(state.plasticity.growth_request_pressure)
+            for state in states
+        ]
+        return {
+            "local_unit_mode": self.local_unit_mode,
+            "local_unit_preset": self.local_unit_preset,
+            "pulse_fire_count_total": sum(
+                int(state.signal.fired_route_count)
+                for state in states
+            ),
+            "suppressed_route_attempt_count_total": sum(
+                int(state.signal.suppressed_route_attempts)
+                for state in states
+            ),
+            "mean_accumulator_level": round(mean_accumulator, 4),
+            "refractory_occupancy": round(
+                refractory_total / max(len(states), 1),
+                4,
+            ),
+            "mean_ambiguity_reservoir": round(mean_ambiguity, 4),
+            "mean_plasticity_gate": round(mean_plasticity_gate, 4),
+            "mean_transform_confidence": round(mean_transform_confidence, 4),
+            "mean_preserve_pressure": round(mean_preserve_pressure, 4),
+            "mean_reopen_pressure": round(mean_reopen_pressure, 4),
+            "preserve_mode_node_ratio": round(
+                sum(1 for state in states if state.context.preserve_mode) / max(len(states), 1),
+                4,
+            ),
+            "requesting_growth_nodes": sum(
+                1
+                for pressure in request_pressures
+                if pressure >= self.capability_control_config.growth_request_threshold
+            ),
+            "max_growth_request_pressure": round(max(request_pressures), 4),
+        }
+
+    def _local_unit_growth_request(self, node_id: str) -> float:
+        local_unit_state = self.local_unit_states.get(node_id)
+        if local_unit_state is None:
+            return 0.0
+        return max(
+            0.0,
+            min(1.0, float(local_unit_state.plasticity.growth_request_pressure)),
+        )
+
+    def _refresh_growth_intent(
+        self,
+        node_id: str,
+        *,
+        observation: dict[str, float] | None = None,
+    ) -> GrowthIntentState:
+        intent = self.growth_intent_state_for(node_id)
+        capability = self.capability_states.get(node_id, self._initial_capability_state())
+        local_pressure = self._local_unit_growth_request(node_id)
+        active_observation = observation if observation is not None else self.observe_local(node_id)
+        contradiction = max(0.0, min(1.0, float(active_observation.get("contradiction_pressure", 0.0))))
+        overload = max(
+            0.0,
+            min(
+                1.0,
+                max(
+                    float(active_observation.get("queue_pressure", 0.0)),
+                    float(active_observation.get("ingress_backlog", 0.0)),
+                    float(active_observation.get("oldest_packet_age", 0.0)),
+                ),
+            ),
+        )
+        context_gap = max(
+            0.0,
+            1.0 - max(0.0, min(1.0, float(active_observation.get("context_growth_ready", 0.0)))),
+        )
+        prior_request_pressure = float(intent.request_pressure)
+        prior_request_readiness = float(intent.request_readiness)
+        request_pressure = max(
+            max(0.0, min(1.0, float(capability.growth_recruitment_pressure))),
+            local_pressure,
+        )
+        request_readiness = max(
+            0.0,
+            min(1.0, float(capability.growth_stabilization_readiness)),
+        )
+        latched_request_pressure = max(
+            request_pressure,
+            prior_request_pressure * (0.97 if intent.requested else 0.92),
+        )
+        latched_request_readiness = max(
+            request_readiness,
+            prior_request_readiness * (0.95 if intent.requested else 0.88),
+        )
+        requested_now = bool(
+            capability.growth_enabled
+            or latched_request_pressure >= self.capability_control_config.growth_request_threshold
+        )
+        if requested_now:
+            intent.requested = True
+            intent.request_cycle = self.current_cycle
+        elif intent.requested:
+            recent_request = (
+                intent.request_cycle >= 0
+                and (
+                    self.current_cycle - intent.request_cycle
+                ) <= self.capability_control_config.growth_request_retention_cycles
+            )
+            if not recent_request and intent.authorization_state not in {"authorize", "initiate"}:
+                intent.requested = False
+                intent.blocked_reason = None
+                intent.blocked_streak = 0
+                intent.authorized_stall_slices = 0
+                intent.authorization_state = "auto"
+                intent.authorization_cycle = -1
+        intent.request_pressure = max(0.0, min(1.0, latched_request_pressure))
+        intent.request_readiness = max(0.0, min(1.0, latched_request_readiness))
+        intent.request_reason_flags = {
+            "contradiction": round(contradiction, 4),
+            "overload": round(overload, 4),
+            "context_gap": round(context_gap, 4),
+            "local_pressure": round(local_pressure, 4),
+        }
+        return intent
+
+    def _apply_growth_authorization_to_intents(self, authorization: str) -> None:
+        resolved = str(authorization or "auto")
+        if resolved == "hold":
+            for intent in self.growth_intent_states.values():
+                intent.authorization_state = "hold"
+                intent.authorization_cycle = self.current_cycle
+            return
+
+        if resolved == "auto":
+            for intent in self.growth_intent_states.values():
+                if intent.authorization_state in {"authorize", "initiate"}:
+                    intent.authorized_stall_slices = 0
+                intent.authorization_state = "auto"
+                intent.authorization_cycle = -1
+            return
+
+        candidate_ids: list[str] = []
+        for node_id in self.node_states:
+            observation = self.observe_local(node_id)
+            intent = self._refresh_growth_intent(node_id, observation=observation)
+            if intent.requested:
+                candidate_ids.append(node_id)
+                continue
+            if resolved == "initiate":
+                score = max(
+                    intent.request_pressure,
+                    float(intent.request_reason_flags.get("context_gap", 0.0)) * 0.5
+                    + float(intent.request_reason_flags.get("overload", 0.0)) * 0.5,
+                )
+                if score >= 0.25:
+                    candidate_ids.append(node_id)
+
+        if resolved == "initiate" and not candidate_ids:
+            scored = []
+            for node_id in self.node_states:
+                observation = self.observe_local(node_id)
+                intent = self._refresh_growth_intent(node_id, observation=observation)
+                score = (
+                    0.45 * intent.request_pressure
+                    + 0.35 * float(intent.request_reason_flags.get("context_gap", 0.0))
+                    + 0.20 * float(intent.request_reason_flags.get("contradiction", 0.0))
+                )
+                scored.append((score, node_id))
+            scored.sort(reverse=True)
+            candidate_ids = [node_id for score, node_id in scored[:3] if score > 0.0]
+
+        for node_id, intent in self.growth_intent_states.items():
+            if node_id in candidate_ids:
+                if intent.authorization_state == resolved and intent.last_proposal_cycle < intent.authorization_cycle:
+                    intent.authorized_stall_slices += 1
+                else:
+                    intent.authorized_stall_slices = 0
+                intent.authorization_state = resolved
+                intent.authorization_cycle = self.current_cycle
+            elif resolved in {"authorize", "initiate"} and intent.authorization_state != "hold":
+                intent.authorization_state = "auto"
+                intent.authorization_cycle = -1
+                intent.authorized_stall_slices = 0
+
+    def growth_intent_summary(self) -> dict[str, object]:
+        states = list(self.growth_intent_states.items())
+        requesting = [
+            (node_id, state)
+            for node_id, state in states
+            if (
+                state.requested
+                or state.request_pressure >= self.capability_control_config.growth_request_threshold
+            )
+        ]
+        blocked = [
+            (node_id, state)
+            for node_id, state in states
+            if state.blocked_reason
+        ]
+        blocked_reason_counts: dict[str, int] = {}
+        for _, state in blocked:
+            reason = str(state.blocked_reason)
+            blocked_reason_counts[reason] = blocked_reason_counts.get(reason, 0) + 1
+        requesting.sort(key=lambda item: item[1].request_pressure, reverse=True)
+        blocked.sort(key=lambda item: item[1].blocked_streak, reverse=True)
+        authorized_without_proposal_count = sum(
+            1
+            for _, state in states
+            if state.authorization_state in {"authorize", "initiate"}
+            and state.last_proposal_cycle < state.authorization_cycle
+        )
+        authorized_stall_slices = max(
+            (state.authorized_stall_slices for _, state in states),
+            default=0,
+        )
+        return {
+            "requesting_nodes": len(requesting),
+            "top_requesting_nodes": [node_id for node_id, _ in requesting[:3]],
+            "top_blocked_nodes": [node_id for node_id, _ in blocked[:3]],
+            "blocked_reason_counts": blocked_reason_counts,
+            "authorized_without_proposal_count": int(authorized_without_proposal_count),
+            "authorized_stall_slices": int(authorized_stall_slices),
+        }
+
+    def _update_local_unit_route_state(
+        self,
+        node_id: str,
+        neighbor_id: str,
+        *,
+        transform_name: str | None,
+        observation: dict[str, float],
+    ) -> dict[str, object]:
+        local_unit_state = self.local_unit_state_for(node_id)
+        context_state = local_unit_state.context
+        plasticity_state = local_unit_state.plasticity
+        signal_state = local_unit_state.signal
+
+        ambiguity = max(
+            0.0,
+            min(1.0, float(observation.get("provisional_context_ambiguity", 0.0))),
+        )
+        commitment = max(
+            0.0,
+            min(1.0, float(observation.get("transform_commitment_margin", 0.0))),
+        )
+        latent_confidence = max(
+            0.0,
+            min(1.0, float(observation.get("latent_context_confidence", 0.0))),
+        )
+        queue_pressure = max(
+            0.0,
+            min(
+                1.0,
+                max(
+                    float(observation.get("queue_pressure", 0.0)),
+                    float(observation.get("ingress_backlog", 0.0)),
+                ),
+            ),
+        )
+        payoff_shortfall = max(
+            0.0,
+            1.0 - max(0.0, min(1.0, float(observation.get("last_feedback_amount", 0.0)))),
+        )
+        unresolved = ambiguity >= 0.35 or commitment <= 0.4
+        context_state.ambiguity_reservoir = max(
+            0.0,
+            min(
+                1.0,
+                0.70 * context_state.ambiguity_reservoir
+                + 0.30 * ambiguity
+                + 0.10 * max(0.0, 0.45 - commitment),
+            ),
+        )
+        context_state.commitment_margin = commitment
+        context_state.latent_confidence = latent_confidence
+        context_state.unresolved_streak = (
+            context_state.unresolved_streak + 1
+            if unresolved
+            else max(0, context_state.unresolved_streak - 1)
+        )
+
+        clarity = max(0.0, min(1.0, 0.55 * commitment + 0.45 * latent_confidence))
+        ambiguity_drag = max(
+            0.0,
+            min(1.0, 0.70 * context_state.ambiguity_reservoir + 0.30 * ambiguity),
+        )
+        plasticity_state.plasticity_gate = max(
+            0.0,
+            min(
+                1.0,
+                0.62 * plasticity_state.plasticity_gate
+                + 0.38 * max(0.0, clarity - 0.50 * ambiguity_drag),
+            ),
+        )
+        plasticity_state.promotion_ready = (
+            plasticity_state.plasticity_gate >= 0.55
+            and commitment >= 0.50
+            and ambiguity <= 0.35
+        )
+        plasticity_state.failed_resolution_streak = (
+            plasticity_state.failed_resolution_streak + 1
+            if unresolved and commitment < 0.30
+            else max(0, plasticity_state.failed_resolution_streak - 1)
+        )
+        plasticity_state.growth_request_pressure = max(
+            0.0,
+            min(
+                1.0,
+                0.55 * plasticity_state.growth_request_pressure
+                + 0.20 * context_state.ambiguity_reservoir
+                + 0.12 * min(1.0, context_state.unresolved_streak / 3.0)
+                + 0.10 * min(1.0, plasticity_state.failed_resolution_streak / 3.0)
+                + 0.14 * queue_pressure
+                + 0.08 * payoff_shortfall,
+            ),
+        )
+
+        channel_key = self._pulse_channel_key(neighbor_id, transform_name)
+        transform = _normalize_transform_name(transform_name)
+        route_support = 0.0
+        action_supports = observation.get("action_supports", {})
+        if isinstance(action_supports, dict):
+            neighbor_supports = action_supports.get(neighbor_id, {})
+            if isinstance(neighbor_supports, dict):
+                route_support = float(neighbor_supports.get(transform, 0.0))
+        evidence = max(
+            0.0,
+            min(
+                1.0,
+                0.38 * route_support
+                + 0.18 * float(observation.get(f"expected_transform_{transform}", 0.0))
+                + 0.16 * float(observation.get(f"task_transform_affinity_{transform}", 0.0))
+                + 0.10 * float(observation.get(f"source_sequence_transform_hint_{transform}", 0.0))
+                + 0.18 * max(0.0, 1.0 - context_state.ambiguity_reservoir),
+            ),
+        )
+        prior_accumulator = float(signal_state.accumulators.get(channel_key, 0.0))
+        accumulator = prior_accumulator * signal_state.accumulator_decay + evidence
+        signal_state.accumulators[channel_key] = max(0.0, min(1.5, accumulator))
+        threshold = max(
+            0.35,
+            min(
+                1.25,
+                signal_state.base_threshold
+                + 0.22 * context_state.ambiguity_reservoir
+                + 0.12 * max(0.0, 0.55 - plasticity_state.plasticity_gate),
+            ),
+        )
+        cooldown = int(signal_state.cooldowns.get(channel_key, 0))
+        ready = signal_state.accumulators[channel_key] >= threshold
+        delay_streak = int(signal_state.delay_streaks.get(channel_key, 0))
+        delay_limit = self._pulse_delay_limit(
+            threshold=threshold,
+            accumulator=float(signal_state.accumulators[channel_key]),
+            ambiguity=context_state.ambiguity_reservoir,
+            plasticity_gate=plasticity_state.plasticity_gate,
+        )
+        fired = cooldown <= 0 and ready
+        forced_release = cooldown <= 0 and not ready and delay_streak >= delay_limit
+        allowed = fired or forced_release
+        if allowed:
+            retained_charge = 0.0 if fired else min(
+                0.35,
+                0.22 * float(signal_state.accumulators[channel_key]),
+            )
+            signal_state.accumulators[channel_key] = retained_charge
+            signal_state.cooldowns[channel_key] = max(1, int(signal_state.cooldown_ticks))
+            signal_state.fired_route_count += 1
+            signal_state.last_fire_cycle = self.current_cycle
+            signal_state.last_fired_channel = channel_key
+            signal_state.delay_streaks.pop(channel_key, None)
+        else:
+            signal_state.suppressed_route_attempts += 1
+            if cooldown <= 0:
+                signal_state.delay_streaks[channel_key] = delay_streak + 1
+        reason = "ok"
+        if forced_release:
+            reason = "delayed_release"
+        elif cooldown > 0 and not allowed:
+            reason = "cooldown"
+        elif not allowed:
+            reason = "threshold"
+        return {
+            "allowed": allowed,
+            "reason": reason,
+            "channel_key": channel_key,
+            "threshold": threshold,
+            "accumulator": float(signal_state.accumulators.get(channel_key, 0.0)),
+            "delay_streak": int(signal_state.delay_streaks.get(channel_key, 0)),
+            "delay_limit": delay_limit,
+            "release_ready": bool(ready),
+            "forced_release": bool(forced_release),
+            "plasticity_gate": plasticity_state.plasticity_gate,
+            "growth_request_pressure": plasticity_state.growth_request_pressure,
+            "ambiguity_reservoir": context_state.ambiguity_reservoir,
+        }
+
+    def evaluate_route_action(
+        self,
+        node_id: str,
+        neighbor_id: str,
+        *,
+        transform_name: str | None = None,
+        observation: dict[str, float] | None = None,
+    ) -> dict[str, object]:
+        if not self._pulse_mode_enabled():
+            return {"allowed": True, "reason": "legacy"}
+        if node_id == self.source_id or neighbor_id == self.sink_id:
+            return {"allowed": True, "reason": "boundary"}
+        active_observation = observation if observation is not None else self.observe_local(node_id)
+        return self._update_local_unit_route_state(
+            node_id,
+            neighbor_id,
+            transform_name=transform_name,
+            observation=active_observation,
+        )
+
     def scrub_poisoned_runtime_state(
         self,
         *,
@@ -1403,6 +2248,45 @@ class RoutingEnvironment:
                 state.last_prediction_expected_delta *= 0.5
                 state.last_prediction_expected_match_ratio *= 0.5
                 state.last_prediction_error_magnitude *= 0.5
+
+        for local_unit_state in self.local_unit_states.values():
+            context_state = local_unit_state.context
+            if hard:
+                context_state.transform_belief = {}
+                context_state.hypothesis_transform = None
+                context_state.hypothesis_confidence = 0.0
+                context_state.dominant_transform = None
+                context_state.transform_confidence = 0.0
+                context_state.preserve_mode = False
+                context_state.preserve_pressure = 0.0
+                context_state.reopen_pressure = 0.0
+                context_state.contradiction_load = 0.0
+                context_state.commitment_age = 0
+            else:
+                context_state.transform_belief = {
+                    str(key): float(value) * contextual_scale
+                    for key, value in context_state.transform_belief.items()
+                    if float(value) * contextual_scale > 1e-6
+                }
+                context_state.hypothesis_confidence *= contextual_scale
+                context_state.transform_confidence *= contextual_scale
+                context_state.preserve_pressure *= contextual_scale
+                context_state.reopen_pressure *= debt_scale
+                context_state.contradiction_load *= debt_scale
+                context_state.commitment_age = max(
+                    0,
+                    int(round(context_state.commitment_age * 0.65)),
+                )
+                if context_state.hypothesis_confidence < 0.10:
+                    context_state.hypothesis_transform = None
+                if context_state.transform_confidence < 0.10:
+                    context_state.dominant_transform = None
+                context_state.preserve_mode = bool(
+                    context_state.preserve_mode
+                    and context_state.preserve_pressure >= 0.18
+                    and context_state.transform_confidence >= 0.18
+                    and context_state.reopen_pressure + 0.06 < context_state.preserve_pressure
+                )
 
         if hard:
             self.pending_feedback = []
@@ -1635,6 +2519,10 @@ class RoutingEnvironment:
                 + 0.18 * capability.latent_enabled * max(0.0, 1.0 - effective_latent_confidence)
                 - 0.10 * visible_reliability,
                 ),
+            )
+            growth_pressure = max(
+                growth_pressure,
+                0.55 * growth_pressure + 0.45 * self._local_unit_growth_request(node_id),
             )
             prior_growth_enabled = capability.growth_enabled
             slow_growth_authorization = str(self.slow_growth_authorization or "auto")
@@ -1975,6 +2863,8 @@ class RoutingEnvironment:
         latent_available = 1.0 if latent_snapshot.get("available") else 0.0
         latent_estimate = latent_snapshot.get("estimate")
         latent_confidence = float(latent_snapshot.get("confidence", 0.0))
+        channel_confidence = dict(latent_snapshot.get("channel_context_confidence", {}))
+        channel_estimate = dict(latent_snapshot.get("channel_context_estimate", {}))
         latent_resolution_weight = (
             self._latent_resolution_weight(latent_snapshot)
             if latent_available >= 0.5 and latent_estimate is not None
@@ -2015,8 +2905,42 @@ class RoutingEnvironment:
             effective_has_context = 1.0
             context_promotion_ready = 1.0 if latent_snapshot.get("promotion_ready") else 0.0
             context_growth_ready = 1.0 if latent_snapshot.get("growth_ready") else 0.0
+        local_unit_state = self.local_unit_state_for(node_id)
+        node_c_task_context = self._node_c_task_context_view(local_unit_state)
+        packet_preserve_mode = bool(
+            head_packet is not None and head_packet.c_task_preserve_mode
+        )
+        packet_preserve_pressure = (
+            float(head_packet.c_task_preserve_pressure)
+            if head_packet is not None
+            else 0.0
+        )
+        packet_reopen_pressure = (
+            float(head_packet.c_task_reopen_pressure)
+            if head_packet is not None
+            else 0.0
+        )
+        packet_transform_belief = _normalize_transform_belief(
+            head_packet.c_task_transform_belief if head_packet is not None else {}
+        )
+        packet_hypothesis_transform = (
+            str(head_packet.c_task_hypothesis_transform)
+            if head_packet is not None and head_packet.c_task_hypothesis_transform is not None
+            else None
+        )
+        packet_hypothesis_confidence = (
+            float(head_packet.c_task_hypothesis_confidence)
+            if head_packet is not None
+            else 0.0
+        )
+        packet_resolution_confidence = (
+            float(head_packet.c_task_resolution_confidence)
+            if head_packet is not None
+            else 0.0
+        )
         local = {
             "atp_ratio": state.atp / max(state.max_atp, 1e-9),
+            "node_is_source": 1.0 if node_id == self.source_id else 0.0,
             "inbox_load": min(1.0, len(self.inboxes[node_id]) / max(self.inbox_capacity, 1)),
             "reward_buffer": min(1.0, state.reward_buffer / max(state.max_atp, 1e-9)),
             "neighbor_density": len(self.neighbors_of(node_id)) / max(len(self.positions) - 1, 1),
@@ -2030,6 +2954,30 @@ class RoutingEnvironment:
             ),
             "has_packet": 1.0 if head_packet is not None else 0.0,
             "head_has_task": 1.0 if head_task_id is not None else 0.0,
+            "c_task_layer1_active": (
+                1.0
+                if (
+                    head_packet is not None
+                    and self.c_task_layer1_mode != "legacy"
+                    and self.c_task_layer1_enabled
+                )
+                else 0.0
+            ),
+            "c_task_preserve_mode": 1.0 if packet_preserve_mode else 0.0,
+            "c_task_preserve_pressure": packet_preserve_pressure,
+            "c_task_reopen_pressure": packet_reopen_pressure,
+            "c_task_resolution_confidence": packet_resolution_confidence,
+            "c_task_hypothesis_confidence": packet_hypothesis_confidence,
+            "c_task_resolution_depth": (
+                float(head_packet.c_task_resolution_depth)
+                if head_packet is not None
+                else 0.0
+            ),
+            "c_task_preserve_violation_count": (
+                float(head_packet.c_task_preserve_violation_count)
+                if head_packet is not None
+                else 0.0
+            ),
             "packet_has_context": packet_has_context,
             "head_transform_depth": (
                 min(1.0, len(head_packet.transform_trace) / 4.0)
@@ -2070,6 +3018,46 @@ class RoutingEnvironment:
             "source_sequence_context_confidence": float(
                 latent_snapshot.get("sequence_context_confidence", 0.0)
             ),
+            "source_sequence_channel_context_confidence": float(
+                channel_confidence.get("source_sequence", 0.0)
+            ),
+            "source_sequence_channel_context_estimate": (
+                float(channel_estimate.get("source_sequence"))
+                if channel_estimate.get("source_sequence") is not None
+                else 0.0
+            ),
+            "source_route_context_confidence": float(
+                channel_confidence.get("source_route", 0.0)
+            ),
+            "source_route_context_estimate": (
+                float(channel_estimate.get("source_route"))
+                if channel_estimate.get("source_route") is not None
+                else 0.0
+            ),
+            "source_feedback_context_confidence": float(
+                channel_confidence.get("source_feedback", 0.0)
+            ),
+            "source_feedback_context_estimate": (
+                float(channel_estimate.get("source_feedback"))
+                if channel_estimate.get("source_feedback") is not None
+                else 0.0
+            ),
+            "downstream_route_context_confidence": float(
+                channel_confidence.get("downstream_route", 0.0)
+            ),
+            "downstream_route_context_estimate": (
+                float(channel_estimate.get("downstream_route"))
+                if channel_estimate.get("downstream_route") is not None
+                else 0.0
+            ),
+            "downstream_feedback_context_confidence": float(
+                channel_confidence.get("downstream_feedback", 0.0)
+            ),
+            "downstream_feedback_context_estimate": (
+                float(channel_estimate.get("downstream_feedback"))
+                if channel_estimate.get("downstream_feedback") is not None
+                else 0.0
+            ),
             "source_sequence_prev_parity": (
                 float(latent_snapshot.get("sequence_prev_parity"))
                 if latent_snapshot.get("sequence_prev_parity") is not None
@@ -2108,6 +3096,28 @@ class RoutingEnvironment:
             else 0.0,
             "growth_stabilization_readiness": float(
                 self.capability_states.get(node_id, self._initial_capability_state()).growth_stabilization_readiness
+            ),
+            "local_unit_mode_pulse": 1.0 if self._pulse_mode_enabled() else 0.0,
+            "local_unit_preset_default": 1.0 if self.local_unit_preset == DEFAULT_LOCAL_UNIT_PRESET else 0.0,
+            "signal_mean_accumulator": self._mean_local_accumulator(local_unit_state),
+            "signal_refractory_occupancy": float(
+                self._count_local_refractory_channels(local_unit_state)
+            ),
+            "c_task_node_preserve_mode": float(node_c_task_context["preserve_mode"]),
+            "c_task_node_preserve_pressure": float(node_c_task_context["preserve_pressure"]),
+            "c_task_node_reopen_pressure": float(node_c_task_context["reopen_pressure"]),
+            "c_task_node_resolution_confidence": float(node_c_task_context["transform_confidence"]),
+            "c_task_node_hypothesis_confidence": float(
+                node_c_task_context["hypothesis_confidence"]
+            ),
+            "c_task_node_contradiction_load": float(node_c_task_context["contradiction_load"]),
+            "c_task_node_commitment_age": float(node_c_task_context["commitment_age"]),
+            "ambiguity_reservoir": float(local_unit_state.context.ambiguity_reservoir),
+            "plasticity_gate": float(local_unit_state.plasticity.plasticity_gate),
+            "growth_request_pressure": float(local_unit_state.plasticity.growth_request_pressure),
+            "local_unresolved_streak": float(local_unit_state.context.unresolved_streak),
+            "local_failed_resolution_streak": float(
+                local_unit_state.plasticity.failed_resolution_streak
             ),
             "effective_has_context": effective_has_context,
             "effective_context_bit": (
@@ -2152,9 +3162,38 @@ class RoutingEnvironment:
                 float(sequence_delta_bits[index]) if source_sequence_available >= 0.5 and index < len(sequence_delta_bits) else 0.0
             )
         for transform_name in TRANSFORM_NAMES:
+            local[f"c_task_transform_belief_{transform_name}"] = max(
+                0.0,
+                min(1.0, float(packet_transform_belief.get(transform_name, 0.0))),
+            )
+            local[f"c_task_hypothesis_transform_{transform_name}"] = (
+                1.0 if packet_hypothesis_transform == transform_name else 0.0
+            )
+            local[f"c_task_node_transform_belief_{transform_name}"] = max(
+                0.0,
+                min(
+                    1.0,
+                    float(
+                        dict(node_c_task_context.get("transform_belief", {})).get(
+                            transform_name,
+                            0.0,
+                        )
+                    ),
+                ),
+            )
+            local[f"c_task_node_hypothesis_transform_{transform_name}"] = (
+                1.0
+                if node_c_task_context.get("hypothesis_transform") == transform_name
+                else 0.0
+            )
             local[f"history_transform_evidence_{transform_name}"] = max(
                 0.0,
                 min(1.0, float(transform_evidence.get(transform_name, 0.0))),
+            )
+            local[f"c_task_resolved_transform_{transform_name}"] = (
+                1.0
+                if head_packet is not None and head_packet.c_task_resolved_transform == transform_name
+                else 0.0
             )
             if head_task_id is None:
                 affinity = 0.0
@@ -2277,6 +3316,46 @@ class RoutingEnvironment:
             local["slow_weak_context_bit"] = 0.0
             local["slow_weak_context_gap"] = 0.0
         local["slow_weak_context_match"] = weak_context_match
+        local["slow_c_task_source_hardening_shift"] = float(
+            self.slow_c_task_source_hardening_shift
+        )
+        local["slow_c_task_preserve_hardening_shift"] = float(
+            self.slow_c_task_preserve_hardening_shift
+        )
+        local["slow_c_task_preserve_bonus_scale"] = float(
+            self.slow_c_task_preserve_bonus_scale
+        )
+        local["slow_c_task_reopen_penalty_scale"] = float(
+            self.slow_c_task_reopen_penalty_scale
+        )
+        local["slow_c_task_weak_context_boost"] = float(
+            self.slow_c_task_weak_context_boost
+        )
+        local["slow_c_task_atp_conservation_bias"] = float(
+            self.slow_c_task_atp_conservation_bias
+        )
+        local["slow_c_task_route_cost_scale"] = float(
+            self.slow_c_task_route_cost_scale
+        )
+        local["slow_c_task_recovery_scale"] = float(
+            self.slow_c_task_recovery_scale
+        )
+        node_support = dict(self.slow_c_task_node_support_profiles.get(node_id, {}))
+        local["slow_c_task_node_support_atp_credit"] = float(
+            node_support.get("atp_credit", 0.0)
+        )
+        local["slow_c_task_node_support_recovery_scale"] = float(
+            node_support.get("recovery_scale", 1.0)
+        )
+        local["slow_c_task_node_support_route_cost_scale"] = float(
+            node_support.get("route_cost_scale", 1.0)
+        )
+        local["slow_c_task_node_support_source_hardening_shift"] = float(
+            node_support.get("source_hardening_shift", 0.0)
+        )
+        local["slow_c_task_node_support_weak_context_boost"] = float(
+            node_support.get("weak_context_boost", 0.0)
+        )
         payload_bits = head_packet.payload_bits if head_packet is not None else []
         for index in range(4):
             local[f"payload_bit_{index}"] = (
@@ -2502,14 +3581,25 @@ class RoutingEnvironment:
             return []
         capability = self.capability_states.get(node_id, self._initial_capability_state())
         slow_growth_authorization = str(self.slow_growth_authorization or "auto")
+        intent = self._refresh_growth_intent(node_id)
+        local_growth_request = self._local_unit_growth_request(node_id)
         bottom_up_growth_requested = bool(
             capability.growth_enabled
-            or capability.growth_recruitment_pressure >= 0.45
+            or capability.growth_recruitment_pressure
+            >= self.capability_control_config.growth_request_threshold
+            or local_growth_request >= self.capability_control_config.growth_request_threshold
+        )
+        effective_authorization = (
+            str(intent.authorization_state)
+            if str(intent.authorization_state) != "auto"
+            else slow_growth_authorization
         )
         if slow_growth_authorization == "hold":
+            intent.blocked_reason = "slow_hold"
+            intent.blocked_streak += 1
             return []
         top_down_growth_ready = (
-            slow_growth_authorization == "initiate"
+            effective_authorization == "initiate"
             and capability.growth_stabilization_readiness >= max(
                 0.35,
                 self.capability_control_config.growth_stability_threshold - 0.10,
@@ -2521,12 +3611,26 @@ class RoutingEnvironment:
             and not (
                 capability.growth_enabled
                 or top_down_growth_ready
-                or (slow_growth_authorization == "authorize" and bottom_up_growth_requested)
+                or (
+                    effective_authorization == "authorize"
+                    and (bottom_up_growth_requested or intent.requested)
+                )
+                or (
+                    effective_authorization == "initiate"
+                    and (
+                        intent.requested
+                        or intent.request_pressure
+                        >= self.capability_control_config.growth_request_soft_threshold
+                    )
+                )
             )
         ):
+            intent.blocked_reason = "authorization_missing"
+            intent.blocked_streak += 1
             return []
         state = self.state_for(node_id)
         observation = self.observe_local(node_id)
+        intent = self._refresh_growth_intent(node_id, observation=observation)
         node_spec = self.topology_state.node_specs.get(node_id)
         if node_spec is None:
             return []
@@ -2540,6 +3644,7 @@ class RoutingEnvironment:
             observation.get("queue_pressure", 0.0),
             observation.get("oldest_packet_age", 0.0),
             observation.get("ingress_backlog", 0.0),
+            local_growth_request,
         )
         energy_balance = float(node_spec.net_energy_recent)
         energy_surplus = float(observation.get("energy_surplus", 0.0))
@@ -2547,6 +3652,7 @@ class RoutingEnvironment:
         structurally_motivated = (
             contradiction >= self.morphogenesis_config.contradiction_threshold
             or overload >= self.morphogenesis_config.overload_threshold
+            or local_growth_request >= self.capability_control_config.growth_request_soft_threshold
         )
         feedback_gate = self.morphogenesis_config.routing_feedback_gate
         routing_has_feedback = (
@@ -2591,6 +3697,10 @@ class RoutingEnvironment:
                 or latent_context_unpromoted
             )
         )
+        if effective_authorization == "initiate" or (
+            effective_authorization == "authorize" and intent.requested
+        ):
+            context_gate_active = False
         anticipatory_threshold = self.morphogenesis_config.anticipatory_growth_backlog_threshold
         # Anticipatory growth fires under pre-overload pressure even without
         # ATP surplus — so positive_energy_streak is intentionally not required
@@ -2605,21 +3715,30 @@ class RoutingEnvironment:
             and not self.topology_state.max_dynamic_nodes_reached(self.morphogenesis_config)
             and routing_has_feedback
         )
-        if slow_growth_authorization == "authorize":
+        if effective_authorization == "authorize":
             growth_ready = (
                 growth_ready
                 or (
-                    bottom_up_growth_requested
+                    (bottom_up_growth_requested or intent.requested)
                     and routing_has_feedback
                     and not self.topology_state.max_dynamic_nodes_reached(self.morphogenesis_config)
                 )
             )
-        elif slow_growth_authorization == "initiate":
+        elif effective_authorization == "initiate":
             growth_ready = (
                 growth_ready
                 or (
                     top_down_growth_ready
                     and routing_has_feedback
+                )
+                or (
+                    (
+                        intent.requested
+                        or intent.request_pressure
+                        >= self.capability_control_config.growth_request_soft_threshold
+                    )
+                    and routing_has_feedback
+                    and not self.topology_state.max_dynamic_nodes_reached(self.morphogenesis_config)
                 )
             )
         latent_idle_growth_gate_active = (
@@ -2739,9 +3858,35 @@ class RoutingEnvironment:
                         "reason": "energetically_unsustainable",
                     }
                 )
+        if specs:
+            intent.blocked_reason = None
+            intent.blocked_streak = 0
+        else:
+            blocked_reasons: list[str] = []
+            if self.topology_state.max_dynamic_nodes_reached(self.morphogenesis_config):
+                blocked_reasons.append("max_dynamic_nodes_reached")
+            if backlog_crisis:
+                blocked_reasons.append("backlog_crisis")
+            if not low_local_pressure:
+                blocked_reasons.append("queue_window_closed")
+            if context_gate_active:
+                blocked_reasons.append("context_gate_active")
+            if latent_idle_growth_gate_active:
+                blocked_reasons.append("latent_idle_growth_gate")
+            if not routing_has_feedback:
+                blocked_reasons.append("feedback_gate")
+            if not structurally_motivated:
+                blocked_reasons.append("insufficient_structural_motivation")
+            if not growth_ready and not anticipatory_ready:
+                blocked_reasons.append("growth_not_ready")
+            if not blocked_reasons and effective_authorization in {"authorize", "initiate"}:
+                blocked_reasons.append("authorized_without_viable_target")
+            intent.blocked_reason = blocked_reasons[0] if blocked_reasons else None
+            intent.blocked_streak = intent.blocked_streak + 1 if blocked_reasons else 0
         return specs
 
     def queue_growth_proposal(self, node_id: str, action: str, *, score: float, cost: float) -> GrowthProposal:
+        intent = self.growth_intent_state_for(node_id)
         target_id = None
         slot = None
         if action.startswith("bud_edge:"):
@@ -2762,11 +3907,41 @@ class RoutingEnvironment:
             reason="queued_locally",
         )
         self.pending_growth_proposals.append(proposal)
+        intent.last_proposal_cycle = self.current_cycle
+        intent.blocked_reason = None
+        intent.blocked_streak = 0
+        intent.authorized_stall_slices = 0
         return proposal
+
+    def _effective_route_cost(
+        self,
+        node_id: str,
+        cost: float,
+        *,
+        packet: SignalPacket | None = None,
+    ) -> float:
+        effective_cost = float(cost)
+        candidate = packet
+        if candidate is None:
+            inbox = self.inboxes.get(node_id, [])
+            candidate = inbox[0] if inbox else None
+        if (
+            candidate is not None
+            and self.c_task_layer1_mode != "legacy"
+            and self.c_task_layer1_enabled
+        ):
+            effective_cost *= max(0.75, min(1.1, float(self.slow_c_task_route_cost_scale)))
+            node_support = self.slow_c_task_node_support_profiles.get(node_id, {})
+            effective_cost *= max(
+                0.75,
+                min(1.05, float(node_support.get("route_cost_scale", 1.0))),
+            )
+        return max(0.0, effective_cost)
 
     def route_available(self, node_id: str, neighbor_id: str, cost: float) -> bool:
         state = self.state_for(node_id)
-        if state.atp + 1e-9 < cost:
+        effective_cost = self._effective_route_cost(node_id, cost)
+        if state.atp + 1e-9 < effective_cost:
             return False
         if not self.inboxes[node_id]:
             return False
@@ -2779,9 +3954,12 @@ class RoutingEnvironment:
 
     def rest_node(self, node_id: str) -> float:
         state = self.state_for(node_id)
-        recovered = min(self.rest_gain, state.reward_buffer)
+        recovery_scale = max(0.85, min(1.35, float(self.slow_c_task_recovery_scale)))
+        node_support = self.slow_c_task_node_support_profiles.get(node_id, {})
+        recovery_scale *= max(0.85, min(1.2, float(node_support.get("recovery_scale", 1.0))))
+        recovered = min(self.rest_gain * recovery_scale, state.reward_buffer)
         if recovered <= 0.0:
-            recovered = self.ambient_gain
+            recovered = self.ambient_gain * recovery_scale
         state.atp = min(state.max_atp, state.atp + recovered)
         state.reward_buffer = max(0.0, state.reward_buffer - recovered)
         state.rest_count += 1
@@ -2806,6 +3984,74 @@ class RoutingEnvironment:
         packet.feedback_award = self.feedback_amount * packet.bit_match_ratio
         return packet.feedback_award
 
+    def _teacher_expected_transform(
+        self,
+        node_id: str,
+        neighbor_id: str,
+        packet: SignalPacket,
+    ) -> str | None:
+        expected_transform = _expected_transform_for_task(packet.task_id, packet.context_bit)
+        if expected_transform is None:
+            return None
+        policy = str(self.teacher_transform_policy or "source_then_identity")
+        if policy == "sink_only":
+            return expected_transform if neighbor_id == self.sink_id else "identity"
+        if policy == "source_only":
+            return expected_transform if node_id == self.source_id else None
+        return expected_transform if node_id == self.source_id else "identity"
+
+    def _teacher_should_force(
+        self,
+        node_id: str,
+        expected_transform: str | None,
+    ) -> bool:
+        if str(self.teacher_trace_mode or "off") != "force":
+            return False
+        if expected_transform is None:
+            return False
+        if not self.teacher_force_nodes:
+            return True
+        return node_id in self.teacher_force_nodes
+
+    def _record_teacher_trace_step(
+        self,
+        packet: SignalPacket,
+        *,
+        node_id: str,
+        neighbor_id: str,
+        chosen_transform: str,
+        applied_transform: str,
+        expected_transform: str | None,
+        pre_payload: Sequence[int],
+        post_payload: Sequence[int],
+        forced: bool,
+    ) -> None:
+        if str(self.teacher_trace_mode or "off") == "off":
+            return
+        expected_payload = (
+            _apply_transform(pre_payload, expected_transform)
+            if expected_transform is not None
+            else list(pre_payload)
+        )
+        packet.teacher_trace.append(
+            {
+                "hop_index": len(packet.teacher_trace),
+                "node_id": node_id,
+                "neighbor_id": neighbor_id,
+                "chosen_transform": chosen_transform,
+                "applied_transform": applied_transform,
+                "expected_transform": expected_transform,
+                "forced": bool(forced),
+                "pre_payload": list(pre_payload),
+                "post_payload": list(post_payload),
+                "expected_payload": list(expected_payload),
+                "payload_matches_expected": list(post_payload) == list(expected_payload),
+                "transform_matches_expected": (
+                    expected_transform is None or applied_transform == expected_transform
+                ),
+            }
+        )
+
     def route_signal(
         self,
         node_id: str,
@@ -2818,10 +4064,176 @@ class RoutingEnvironment:
             return {"success": False, "cost": 0.0, "delivered": False}
 
         self._prioritize_inbox(node_id)
+        observation_before = self.observe_local(node_id)
         packet = self.inboxes[node_id].pop(0)
-        transform = _normalize_transform_name(transform_name)
-        packet.payload_bits = _apply_transform(packet.payload_bits, transform)
-        packet.transform_trace.append(transform)
+        effective_cost = self._effective_route_cost(node_id, cost, packet=packet)
+        pre_payload = list(packet.payload_bits)
+        chosen_transform = _normalize_transform_name(transform_name)
+        applied_transform = chosen_transform
+        packet.selected_transform_trace.append(chosen_transform)
+        packet.forced_transform_applied = False
+        packet.forced_from_transform = None
+        packet.expected_transform_at_delivery = None
+        packet.substrate_bit_match_ratio = None
+        packet.substrate_matched_target = None
+        expected_transform = None
+        c_task_expected_transform = (
+            _expected_transform_for_task(packet.task_id, packet.context_bit)
+            if self.c_task_layer1_mode != "legacy" and self.c_task_layer1_enabled
+            else None
+        )
+        teacher_expected_transform = self._teacher_expected_transform(node_id, neighbor_id, packet)
+        teacher_forced = False
+        if self._teacher_should_force(node_id, teacher_expected_transform):
+            applied_transform = str(teacher_expected_transform)
+            teacher_forced = applied_transform != chosen_transform
+        if neighbor_id == self.sink_id:
+            expected_transform = _expected_transform_for_task(packet.task_id, packet.context_bit)
+            packet.expected_transform_at_delivery = expected_transform
+            if expected_transform is not None and packet.target_bits:
+                substrate_bits = _apply_transform(packet.payload_bits, chosen_transform)
+                substrate_ratio = _bit_match_ratio(substrate_bits, packet.target_bits)
+                packet.substrate_bit_match_ratio = substrate_ratio
+                packet.substrate_matched_target = substrate_ratio >= 1.0 - 1e-9
+            if (
+                self.force_expected_transform_at_sink
+                and expected_transform is not None
+                and chosen_transform != expected_transform
+            ):
+                applied_transform = expected_transform
+                packet.forced_transform_applied = True
+                packet.forced_from_transform = chosen_transform
+        packet.payload_bits = _apply_transform(packet.payload_bits, applied_transform)
+        if c_task_expected_transform is not None:
+            transform_belief, hypothesis_transform, hypothesis_confidence = (
+                self._c_task_transform_belief_from_observation(
+                    observation_before,
+                    packet=packet,
+                )
+            )
+            packet.c_task_transform_belief = dict(transform_belief)
+            packet.c_task_hypothesis_transform = hypothesis_transform
+            packet.c_task_hypothesis_confidence = hypothesis_confidence
+            expected_signal = max(
+                0.0,
+                min(
+                    1.0,
+                    float(observation_before.get(f"expected_transform_{applied_transform}", 0.0)),
+                ),
+            )
+            confidence_signal = max(
+                0.0,
+                min(
+                    1.0,
+                    0.45 * float(observation_before.get("packet_context_confidence", 0.0))
+                    + 0.25 * float(observation_before.get("effective_context_confidence", 0.0))
+                    + 0.30 * float(observation_before.get("transform_commitment_margin", 0.0)),
+                ),
+            )
+            ambiguity_signal = max(
+                0.0,
+                min(1.0, float(observation_before.get("provisional_context_ambiguity", 0.0))),
+            )
+            preserve_boost = max(
+                0.0,
+                min(
+                    1.0,
+                    0.18
+                    + 0.42 * confidence_signal
+                    + 0.28 * expected_signal
+                    - 0.18 * ambiguity_signal,
+                ),
+            )
+            reopen_boost = max(
+                0.0,
+                min(
+                    1.0,
+                    0.10
+                    + 0.28 * ambiguity_signal
+                    + 0.20 * max(0.0, 1.0 - confidence_signal),
+                ),
+            )
+            if applied_transform == c_task_expected_transform or expected_signal >= 0.5:
+                packet.c_task_resolved_transform = applied_transform
+                if packet.c_task_hypothesis_transform is None:
+                    packet.c_task_hypothesis_transform = applied_transform
+                packet.c_task_hypothesis_confidence = max(
+                    packet.c_task_hypothesis_confidence * 0.94,
+                    0.55 * packet.c_task_hypothesis_confidence + 0.25 * confidence_signal,
+                )
+                packet.c_task_resolution_confidence = max(
+                    packet.c_task_resolution_confidence * 0.82,
+                    confidence_signal,
+                )
+                packet.c_task_preserve_pressure = max(
+                    packet.c_task_preserve_pressure * 0.90,
+                    preserve_boost + 0.04 * packet.c_task_resolution_confidence,
+                )
+                packet.c_task_reopen_pressure = min(
+                    1.0,
+                    packet.c_task_reopen_pressure * 0.42,
+                )
+                if packet.c_task_resolution_source is None:
+                    packet.c_task_resolution_source = node_id
+                packet.c_task_resolution_depth = len(packet.transform_trace) + 1
+                if self.c_task_layer1_mode == "stabilized":
+                    packet.c_task_preserve_mode = packet.c_task_preserve_pressure >= 0.45
+            elif packet.c_task_resolved_transform is not None and applied_transform == "identity":
+                packet.c_task_preserve_pressure = max(
+                    packet.c_task_preserve_pressure * 0.98,
+                    0.24
+                    + 0.76 * packet.c_task_resolution_confidence
+                    + 0.20 * max(0.0, 1.0 - packet.c_task_reopen_pressure),
+                )
+                packet.c_task_reopen_pressure *= 0.36
+                if self.c_task_layer1_mode == "stabilized":
+                    packet.c_task_preserve_mode = packet.c_task_preserve_pressure >= 0.45
+            elif (
+                (packet.c_task_preserve_mode or packet.c_task_preserve_pressure >= 0.35)
+                and applied_transform != "identity"
+            ):
+                packet.c_task_preserve_violation_count += 1
+                preserve_protection = max(
+                    0.0,
+                    min(
+                        1.0,
+                        0.55 * packet.c_task_resolution_confidence
+                        + 0.45 * packet.c_task_preserve_pressure,
+                    ),
+                )
+                packet.c_task_reopen_pressure = max(
+                    packet.c_task_reopen_pressure * 0.72,
+                    reopen_boost
+                    + 0.04 * packet.c_task_preserve_violation_count
+                    - 0.10 * preserve_protection,
+                )
+                packet.c_task_preserve_pressure *= max(
+                    0.74,
+                    0.88 - 0.16 * packet.c_task_reopen_pressure,
+                )
+                if packet.c_task_reopen_pressure > packet.c_task_preserve_pressure + 0.28:
+                    packet.c_task_preserve_mode = False
+            self._update_c_task_local_context(
+                node_id,
+                packet=packet,
+                applied_transform=applied_transform,
+                expected_transform=c_task_expected_transform,
+                confidence_signal=confidence_signal,
+                expected_signal=expected_signal,
+                ambiguity_signal=ambiguity_signal,
+            )
+        self._record_teacher_trace_step(
+            packet,
+            node_id=node_id,
+            neighbor_id=neighbor_id,
+            chosen_transform=chosen_transform,
+            applied_transform=applied_transform,
+            expected_transform=teacher_expected_transform,
+            pre_payload=pre_payload,
+            post_payload=packet.payload_bits,
+            forced=teacher_forced,
+        )
+        packet.transform_trace.append(applied_transform)
         packet.hops.append(node_id)
         packet.edge_path.append(_edge_id(node_id, neighbor_id))
         packet.last_moved_cycle = self.current_cycle
@@ -2829,16 +4241,21 @@ class RoutingEnvironment:
             node_id,
             task_id=packet.task_id,
             context_bit=packet.context_bit,
-            transform_name=transform,
+            transform_name=applied_transform,
         )
         if self.topology_state is not None:
-            self.topology_state.record_edge_use(node_id, neighbor_id, self.current_cycle, cost=cost)
+            self.topology_state.record_edge_use(
+                node_id,
+                neighbor_id,
+                self.current_cycle,
+                cost=effective_cost,
+            )
 
         source_state = self.state_for(node_id)
-        source_state.atp = max(0.0, source_state.atp - cost)
+        source_state.atp = max(0.0, source_state.atp - effective_cost)
         source_state.routed_packets += 1
         if node_id == self.source_id:
-            self._source_cycle_action_cost += cost
+            self._source_cycle_action_cost += effective_cost
 
         if neighbor_id == self.sink_id:
             packet.hops.append(neighbor_id)
@@ -2861,10 +4278,13 @@ class RoutingEnvironment:
                 )
             return {
                 "success": True,
-                "cost": cost,
+                "cost": effective_cost,
                 "delivered": True,
                 "packet_id": packet.packet_id,
-                "transform": transform,
+                "transform": applied_transform,
+                "chosen_transform": chosen_transform,
+                "expected_transform": expected_transform,
+                "forced_transform_applied": packet.forced_transform_applied,
                 "feedback_award": feedback_award,
             }
 
@@ -2873,10 +4293,11 @@ class RoutingEnvironment:
         self._record_inbox_pressure()
         return {
             "success": True,
-            "cost": cost,
+            "cost": effective_cost,
             "delivered": False,
             "packet_id": packet.packet_id,
-            "transform": transform,
+            "transform": applied_transform,
+            "chosen_transform": chosen_transform,
         }
 
     def inhibit_neighbor(self, node_id: str, neighbor_id: str) -> dict:
@@ -2908,13 +4329,21 @@ class RoutingEnvironment:
                     remaining.append(pulse)
                 continue
             state = self.state_for(source_id)
-            state.atp = min(state.max_atp, state.atp + pulse.amount)
-            state.reward_buffer = min(state.max_atp, state.reward_buffer + pulse.amount)
+            recovery_scale = max(0.85, min(1.35, float(self.slow_c_task_recovery_scale)))
+            scaled_amount = pulse.amount * recovery_scale
+            state.atp = min(state.max_atp, state.atp + scaled_amount)
+            state.reward_buffer = min(state.max_atp, state.reward_buffer + scaled_amount)
             state.received_feedback += 1
-            state.last_feedback_amount = pulse.amount
+            state.last_feedback_amount = scaled_amount
             state.last_match_ratio = pulse.bit_match_ratio
             transform_name = pulse.next_transform() or "identity"
             credit_signal = min(1.0, pulse.amount / max(self.feedback_amount, 1e-9))
+            local_unit_state = self.local_unit_state_for(source_id)
+            plasticity_gate = (
+                float(local_unit_state.plasticity.plasticity_gate)
+                if self._pulse_mode_enabled()
+                else 1.0
+            )
             prior_credit = state.transform_credit.get(transform_name, 0.0)
             prior_debt = state.transform_debt.get(transform_name, 0.0)
             prior_provisional_credit = state.provisional_transform_credit.get(
@@ -2931,7 +4360,7 @@ class RoutingEnvironment:
             )
             if resolved_context_bit is None:
                 provisional_mix = 0.58
-                generic_mix = 0.18
+                generic_mix = 0.18 * max(0.25, plasticity_gate)
                 state.provisional_transform_credit[transform_name] = min(
                     1.0,
                     (1.0 - provisional_mix) * prior_provisional_credit
@@ -2997,6 +4426,7 @@ class RoutingEnvironment:
                     transform_name=transform_name,
                     resolved_context_bit=int(resolved_context_bit),
                 )
+                promotion_scale *= max(0.20, plasticity_gate)
                 weak_branch_match = (
                     self.slow_weak_context_bit is not None
                     and int(resolved_context_bit) == int(self.slow_weak_context_bit)
@@ -3252,7 +4682,7 @@ class RoutingEnvironment:
                     provisional_generic_mix = 0.55 + 0.18 * quality_credit
                     provisional_context_mix = 0.65 + 0.18 * quality_credit
                     generic_mix = (0.14 + 0.10 * quality_credit) * promotion_scale
-                    context_mix = 0.42 + 0.23 * quality_credit
+                    context_mix = (0.42 + 0.23 * quality_credit) * (0.35 + 0.65 * promotion_scale)
                     branch_mix = (0.24 + 0.14 * quality_credit) * (0.50 + 0.40 * promotion_scale)
                     if weak_branch_match and weak_branch_gap > 0.0:
                         provisional_generic_mix = min(
@@ -3264,8 +4694,8 @@ class RoutingEnvironment:
                             provisional_context_mix + 0.10 * weak_branch_gap,
                         )
                         branch_mix *= max(0.65, 1.0 - 0.25 * weak_branch_gap)
-                    context_branch_mix = 0.46 + 0.24 * quality_credit
-                    branch_context_mix = 0.34 + 0.24 * quality_credit
+                    context_branch_mix = (0.46 + 0.24 * quality_credit) * (0.35 + 0.65 * promotion_scale)
+                    branch_context_mix = (0.34 + 0.24 * quality_credit) * (0.35 + 0.65 * promotion_scale)
                     effective_credit = 0.55 * credit_signal + 0.45 * quality_credit
                     state.provisional_transform_credit[transform_name] = min(
                         1.0,
@@ -3409,6 +4839,57 @@ class RoutingEnvironment:
                 state.branch_context_credit[key] *= 0.94
                 if state.branch_context_credit[key] < 1e-4:
                     del state.branch_context_credit[key]
+        for local_unit_state in self.local_unit_states.values():
+            for channel_key in list(local_unit_state.signal.accumulators.keys()):
+                local_unit_state.signal.accumulators[channel_key] *= (
+                    local_unit_state.signal.accumulator_decay
+                )
+                if local_unit_state.signal.accumulators[channel_key] < 1e-4:
+                    del local_unit_state.signal.accumulators[channel_key]
+            for channel_key in list(local_unit_state.signal.cooldowns.keys()):
+                local_unit_state.signal.cooldowns[channel_key] = max(
+                    0,
+                    int(local_unit_state.signal.cooldowns[channel_key]) - 1,
+                )
+                if local_unit_state.signal.cooldowns[channel_key] <= 0:
+                    del local_unit_state.signal.cooldowns[channel_key]
+            for channel_key in list(local_unit_state.signal.delay_streaks.keys()):
+                local_unit_state.signal.delay_streaks[channel_key] = max(
+                    0,
+                    int(local_unit_state.signal.delay_streaks[channel_key]) - 1,
+                )
+                if local_unit_state.signal.delay_streaks[channel_key] <= 0:
+                    del local_unit_state.signal.delay_streaks[channel_key]
+            local_unit_state.context.ambiguity_reservoir *= 0.94
+            local_unit_state.context.latent_confidence *= 0.96
+            local_unit_state.context.transform_confidence *= 0.97
+            local_unit_state.context.preserve_pressure *= 0.97
+            local_unit_state.context.reopen_pressure *= 0.95
+            local_unit_state.context.contradiction_load *= 0.94
+            if local_unit_state.context.unresolved_streak > 0:
+                local_unit_state.context.unresolved_streak -= 1
+            if local_unit_state.context.commitment_age > 0:
+                local_unit_state.context.commitment_age -= 1
+            local_unit_state.context.preserve_mode = (
+                local_unit_state.context.preserve_mode
+                and local_unit_state.context.preserve_pressure >= 0.35
+                and local_unit_state.context.reopen_pressure + 0.05
+                < local_unit_state.context.preserve_pressure
+            )
+            if (
+                local_unit_state.context.transform_confidence < 0.08
+                and local_unit_state.context.preserve_pressure < 0.10
+                and local_unit_state.context.reopen_pressure < 0.10
+            ):
+                local_unit_state.context.dominant_transform = None
+            local_unit_state.plasticity.plasticity_gate *= 0.96
+            local_unit_state.plasticity.growth_request_pressure *= 0.97
+            if local_unit_state.plasticity.failed_resolution_streak > 0:
+                local_unit_state.plasticity.failed_resolution_streak -= 1
+            local_unit_state.plasticity.promotion_ready = (
+                local_unit_state.plasticity.promotion_ready
+                and local_unit_state.plasticity.plasticity_gate >= 0.55
+            )
         self._update_admission_substrate()
         self._update_capability_states()
         self._apply_capability_costs()
@@ -3469,12 +4950,55 @@ class RoutingEnvironment:
             "slow_growth_authorization": self.slow_growth_authorization,
             "slow_weak_context_bit": self.slow_weak_context_bit,
             "slow_weak_context_gap": round(float(self.slow_weak_context_gap), 4),
+            "slow_c_task_source_hardening_shift": round(
+                float(self.slow_c_task_source_hardening_shift), 4
+            ),
+            "slow_c_task_preserve_hardening_shift": round(
+                float(self.slow_c_task_preserve_hardening_shift), 4
+            ),
+            "slow_c_task_preserve_bonus_scale": round(
+                float(self.slow_c_task_preserve_bonus_scale), 4
+            ),
+            "slow_c_task_reopen_penalty_scale": round(
+                float(self.slow_c_task_reopen_penalty_scale), 4
+            ),
+            "slow_c_task_weak_context_boost": round(
+                float(self.slow_c_task_weak_context_boost), 4
+            ),
+            "slow_c_task_atp_conservation_bias": round(
+                float(self.slow_c_task_atp_conservation_bias), 4
+            ),
+            "slow_c_task_route_cost_scale": round(
+                float(self.slow_c_task_route_cost_scale), 4
+            ),
+            "slow_c_task_recovery_scale": round(
+                float(self.slow_c_task_recovery_scale), 4
+            ),
+            "slow_c_task_node_support_profiles": {
+                node_id: {
+                    key: round(float(value), 4)
+                    for key, value in profile.items()
+                }
+                for node_id, profile in self.slow_c_task_node_support_profiles.items()
+            },
             "capability_summary": self.capability_summary(),
+            "growth_intent_summary": self.growth_intent_summary(),
+            "local_unit_mode": self.local_unit_mode,
+            "local_unit_preset": self.local_unit_preset,
+            "source_sequence_context_enabled": self.source_sequence_context_enabled,
+            "c_task_layer1_enabled": self.c_task_layer1_enabled,
+            "force_expected_transform_at_sink": self.force_expected_transform_at_sink,
+            "teacher_trace_mode": self.teacher_trace_mode,
+            "teacher_transform_policy": self.teacher_transform_policy,
+            "teacher_force_nodes": list(self.teacher_force_nodes),
+            "c_task_layer1_mode": self.c_task_layer1_mode,
+            "local_unit_summary": self._local_unit_summary(),
         }
 
     def export_runtime_state(self) -> dict:
         return {
             "topology": self.topology_state.to_dict() if self.topology_state is not None else None,
+            "max_atp": float(self.max_atp),
             "node_states": {
                 node_id: asdict(state)
                 for node_id, state in self.node_states.items()
@@ -3502,10 +5026,33 @@ class RoutingEnvironment:
             "pending_growth_proposals": [asdict(proposal) for proposal in self.pending_growth_proposals],
             "latent_context_trackers": self.export_latent_context_state(),
             "capability_states": self.export_capability_state(),
+            "local_unit_states": self.export_local_unit_state(),
+            "growth_intent_states": self.export_growth_intent_state(),
             "capability_policy": self.capability_policy,
+            "local_unit_mode": self.local_unit_mode,
+            "local_unit_preset": self.local_unit_preset,
+            "source_sequence_context_enabled": self.source_sequence_context_enabled,
+            "c_task_layer1_enabled": self.c_task_layer1_enabled,
+            "force_expected_transform_at_sink": self.force_expected_transform_at_sink,
+            "teacher_trace_mode": self.teacher_trace_mode,
+            "teacher_transform_policy": self.teacher_transform_policy,
+            "teacher_force_nodes": list(self.teacher_force_nodes),
+            "c_task_layer1_mode": self.c_task_layer1_mode,
             "slow_growth_authorization": self.slow_growth_authorization,
             "slow_weak_context_bit": self.slow_weak_context_bit,
             "slow_weak_context_gap": self.slow_weak_context_gap,
+            "slow_c_task_source_hardening_shift": self.slow_c_task_source_hardening_shift,
+            "slow_c_task_preserve_hardening_shift": self.slow_c_task_preserve_hardening_shift,
+            "slow_c_task_preserve_bonus_scale": self.slow_c_task_preserve_bonus_scale,
+            "slow_c_task_reopen_penalty_scale": self.slow_c_task_reopen_penalty_scale,
+            "slow_c_task_weak_context_boost": self.slow_c_task_weak_context_boost,
+            "slow_c_task_atp_conservation_bias": self.slow_c_task_atp_conservation_bias,
+            "slow_c_task_route_cost_scale": self.slow_c_task_route_cost_scale,
+            "slow_c_task_recovery_scale": self.slow_c_task_recovery_scale,
+            "slow_c_task_node_support_profiles": {
+                node_id: dict(profile)
+                for node_id, profile in self.slow_c_task_node_support_profiles.items()
+            },
         }
 
     def load_runtime_state(self, payload: dict) -> None:
@@ -3513,9 +5060,41 @@ class RoutingEnvironment:
         if topology_payload:
             self.topology_state = TopologyState.from_dict(topology_payload)
             self.sync_topology()
+        self.max_atp = float(payload.get("max_atp", self.max_atp))
         self._next_packet_id = int(payload.get("next_packet_id", 1))
         self.packet_counter = itertools.count(self._next_packet_id)
         self.current_cycle = int(payload.get("current_cycle", 0))
+        self.local_unit_mode = str(payload.get("local_unit_mode", self.local_unit_mode))
+        self.local_unit_preset = resolve_pulse_local_unit_preset(
+            payload.get("local_unit_preset", self.local_unit_preset)
+        ).name
+        self.source_sequence_context_enabled = bool(
+            payload.get(
+                "source_sequence_context_enabled",
+                self.source_sequence_context_enabled,
+            )
+        )
+        self.c_task_layer1_enabled = bool(
+            payload.get("c_task_layer1_enabled", self.c_task_layer1_enabled)
+        )
+        self.force_expected_transform_at_sink = bool(
+            payload.get(
+                "force_expected_transform_at_sink",
+                self.force_expected_transform_at_sink,
+            )
+        )
+        self.teacher_trace_mode = str(
+            payload.get("teacher_trace_mode", self.teacher_trace_mode)
+        ).lower()
+        self.teacher_transform_policy = str(
+            payload.get("teacher_transform_policy", self.teacher_transform_policy)
+        )
+        self.teacher_force_nodes = tuple(
+            str(node_id) for node_id in payload.get("teacher_force_nodes", self.teacher_force_nodes)
+        )
+        self.c_task_layer1_mode = str(
+            payload.get("c_task_layer1_mode", self.c_task_layer1_mode)
+        ).lower()
 
         node_states = payload.get("node_states", {})
         for node_id, state_data in node_states.items():
@@ -3562,6 +5141,8 @@ class RoutingEnvironment:
             for proposal in payload.get("pending_growth_proposals", [])
         ]
         self.load_latent_context_state(payload.get("latent_context_trackers"))
+        self.load_local_unit_state(payload.get("local_unit_states"))
+        self.load_growth_intent_state(payload.get("growth_intent_states"))
         self.capability_policy = str(payload.get("capability_policy", self.capability_policy))
         self.slow_growth_authorization = str(
             payload.get("slow_growth_authorization", self.slow_growth_authorization),
@@ -3571,6 +5152,68 @@ class RoutingEnvironment:
         self.slow_weak_context_gap = float(
             payload.get("slow_weak_context_gap", self.slow_weak_context_gap),
         )
+        self.slow_c_task_source_hardening_shift = float(
+            payload.get(
+                "slow_c_task_source_hardening_shift",
+                self.slow_c_task_source_hardening_shift,
+            )
+        )
+        self.slow_c_task_preserve_hardening_shift = float(
+            payload.get(
+                "slow_c_task_preserve_hardening_shift",
+                self.slow_c_task_preserve_hardening_shift,
+            )
+        )
+        self.slow_c_task_preserve_bonus_scale = float(
+            payload.get(
+                "slow_c_task_preserve_bonus_scale",
+                self.slow_c_task_preserve_bonus_scale,
+            )
+        )
+        self.slow_c_task_reopen_penalty_scale = float(
+            payload.get(
+                "slow_c_task_reopen_penalty_scale",
+                self.slow_c_task_reopen_penalty_scale,
+            )
+        )
+        self.slow_c_task_weak_context_boost = float(
+            payload.get(
+                "slow_c_task_weak_context_boost",
+                self.slow_c_task_weak_context_boost,
+            )
+        )
+        self.slow_c_task_atp_conservation_bias = float(
+            payload.get(
+                "slow_c_task_atp_conservation_bias",
+                self.slow_c_task_atp_conservation_bias,
+            )
+        )
+        self.slow_c_task_route_cost_scale = float(
+            payload.get(
+                "slow_c_task_route_cost_scale",
+                self.slow_c_task_route_cost_scale,
+            )
+        )
+        self.slow_c_task_recovery_scale = float(
+            payload.get(
+                "slow_c_task_recovery_scale",
+                self.slow_c_task_recovery_scale,
+            )
+        )
+        node_support_profiles = payload.get(
+            "slow_c_task_node_support_profiles",
+            self.slow_c_task_node_support_profiles,
+        )
+        if isinstance(node_support_profiles, dict):
+            self.slow_c_task_node_support_profiles = {
+                str(node_id): {
+                    str(key): float(value)
+                    for key, value in profile.items()
+                    if isinstance(value, (int, float))
+                }
+                for node_id, profile in node_support_profiles.items()
+                if isinstance(profile, dict)
+            }
         self.load_capability_state(payload.get("capability_states"))
 
     def _feedback_pending_ratio(self, node_id: str) -> float:
@@ -3737,9 +5380,17 @@ class NativeSubstrateSystem:
         source_admission_max_rate: int | None = None,
         morphogenesis_config: MorphogenesisConfig | None = None,
         source_sequence_context_enabled: bool = True,
+        c_task_layer1_enabled: bool = False,
         latent_transfer_split_enabled: bool = True,
         capability_policy: str | None = None,
         capability_control_config: CapabilityControlConfig | None = None,
+        local_unit_mode: str = "legacy",
+        local_unit_preset: str = DEFAULT_LOCAL_UNIT_PRESET,
+        force_expected_transform_at_sink: bool = False,
+        teacher_trace_mode: str = "off",
+        teacher_transform_policy: str = "source_then_identity",
+        teacher_force_nodes: Sequence[str] | None = None,
+        c_task_layer1_mode: str = "legacy",
     ) -> None:
         from .node_agent import NodeAgent
 
@@ -3761,6 +5412,8 @@ class NativeSubstrateSystem:
             sink_id=sink_id,
         )
         self.capability_policy = resolved_policy
+        self.local_unit_mode = local_unit_mode
+        self.local_unit_preset = resolve_pulse_local_unit_preset(local_unit_preset).name
         self.capability_control_config = capability_control_config or CapabilityControlConfig()
         self.morphogenesis_config = morphogenesis_config or MorphogenesisConfig()
         if resolved_policy in ("growth-visible", "growth-latent", "self-selected"):
@@ -3780,13 +5433,22 @@ class NativeSubstrateSystem:
             topology_state=self.topology_state,
             morphogenesis_config=self.morphogenesis_config,
             source_sequence_context_enabled=source_sequence_context_enabled,
+            c_task_layer1_enabled=bool(c_task_layer1_enabled),
             latent_transfer_split_enabled=latent_transfer_split_enabled,
             capability_policy=resolved_policy,
             capability_control_config=self.capability_control_config,
+            local_unit_mode=local_unit_mode,
+            local_unit_preset=self.local_unit_preset,
+            force_expected_transform_at_sink=force_expected_transform_at_sink,
+            teacher_trace_mode=str(teacher_trace_mode).lower(),
+            teacher_transform_policy=str(teacher_transform_policy),
+            teacher_force_nodes=tuple(str(node_id) for node_id in list(teacher_force_nodes or [])),
+            c_task_layer1_mode=str(c_task_layer1_mode).lower(),
         )
         self.global_cycle = 0
         self.session_start_cycle = 0
         self.capability_timeline: List[dict[str, object]] = []
+        self.world_model_state: dict[str, object] = {}
         self.agents: Dict[str, NodeAgent] = {}
         for node_id in self.environment.agent_ids():
             self.ensure_agent(node_id)
@@ -4008,8 +5670,16 @@ class NativeSubstrateSystem:
                 utilized_dynamic_nodes += 1
             if spec.first_feedback_cycle is not None:
                 first_feedback_samples.append(max(0, spec.first_feedback_cycle - spec.created_cycle))
+        local_unit_summary = self.environment._local_unit_summary()
         return {
             "capability_policy": self.capability_policy,
+            "local_unit_mode": self.environment.local_unit_mode,
+            "local_unit_preset": self.environment.local_unit_preset,
+            "force_expected_transform_at_sink": self.environment.force_expected_transform_at_sink,
+            "teacher_trace_mode": self.environment.teacher_trace_mode,
+            "teacher_transform_policy": self.environment.teacher_transform_policy,
+            "teacher_force_nodes": list(self.environment.teacher_force_nodes),
+            "c_task_layer1_mode": self.environment.c_task_layer1_mode,
             "cycles": self.global_cycle,
             "injected_packets": self.environment.total_injected,
             "delivered_packets": len(delivered),
@@ -4047,6 +5717,24 @@ class NativeSubstrateSystem:
             "last_source_efficiency": round(self.environment.last_source_efficiency, 4),
             "exact_matches": exact_matches,
             "partial_matches": partial_matches,
+            "forced_choice_count": int(task_diagnostics["overall"].get("forced_choice_count", 0)),
+            "forced_choice_rescued_count": int(
+                task_diagnostics["overall"].get("forced_choice_rescued_count", 0)
+            ),
+            "forced_choice_still_failed_count": int(
+                task_diagnostics["overall"].get("forced_choice_still_failed_count", 0)
+            ),
+            "teacher_trace_packets": int(task_diagnostics["overall"].get("teacher_trace_packets", 0)),
+            "teacher_trace_hops": int(task_diagnostics["overall"].get("teacher_trace_hops", 0)),
+            "teacher_trace_forced_hops": int(
+                task_diagnostics["overall"].get("teacher_trace_forced_hops", 0)
+            ),
+            "teacher_trace_transform_mismatch_hops": int(
+                task_diagnostics["overall"].get("teacher_trace_transform_mismatch_hops", 0)
+            ),
+            "teacher_trace_payload_mismatch_hops": int(
+                task_diagnostics["overall"].get("teacher_trace_payload_mismatch_hops", 0)
+            ),
             "mean_bit_accuracy": round(
                 sum(packet.bit_match_ratio for packet in scored_packets)
                 / max(len(scored_packets), 1),
@@ -4154,6 +5842,7 @@ class NativeSubstrateSystem:
                 for node_id, snapshot in self.environment.capability_summary().items()
             },
             "capability_supports": self.environment.capability_summary(),
+            "local_unit_summary": local_unit_summary,
         }
 
     def _task_diagnostics(self, scored_packets: Sequence[SignalPacket]) -> dict[str, object]:
@@ -4175,6 +5864,17 @@ class NativeSubstrateSystem:
                 "mismatch_branch_counts": {},
                 "final_transform_counts": {},
                 "mismatch_transform_counts": {},
+                "forced_choice_count": 0,
+                "forced_choice_rescued_count": 0,
+                "forced_choice_still_failed_count": 0,
+                "substrate_transform_would_have_matched_count": 0,
+                "substrate_transform_would_have_failed_count": 0,
+                "teacher_trace_packets": 0,
+                "teacher_trace_hops": 0,
+                "teacher_trace_forced_hops": 0,
+                "teacher_trace_transform_mismatch_hops": 0,
+                "teacher_trace_payload_mismatch_hops": 0,
+                "teacher_trace_first_divergence_nodes": {},
             },
         }
         overall = diagnostics["overall"]
@@ -4204,6 +5904,17 @@ class NativeSubstrateSystem:
                     "mismatch_transform_counts": {},
                     "branch_counts": {},
                     "mismatch_branch_counts": {},
+                    "forced_choice_count": 0,
+                    "forced_choice_rescued_count": 0,
+                    "forced_choice_still_failed_count": 0,
+                    "substrate_transform_would_have_matched_count": 0,
+                    "substrate_transform_would_have_failed_count": 0,
+                    "teacher_trace_packets": 0,
+                    "teacher_trace_hops": 0,
+                    "teacher_trace_forced_hops": 0,
+                    "teacher_trace_transform_mismatch_hops": 0,
+                    "teacher_trace_payload_mismatch_hops": 0,
+                    "teacher_trace_first_divergence_nodes": {},
                 },
             )
             stats["count"] += 1
@@ -4212,6 +5923,50 @@ class NativeSubstrateSystem:
             self._increment_count(overall["final_transform_counts"], final_transform)
             self._increment_count(stats["branch_counts"], first_hop)
             self._increment_count(overall["branch_counts"], first_hop)
+            substrate_match = packet.substrate_matched_target
+            if substrate_match is True:
+                stats["substrate_transform_would_have_matched_count"] += 1
+                overall["substrate_transform_would_have_matched_count"] += 1
+            elif substrate_match is False:
+                stats["substrate_transform_would_have_failed_count"] += 1
+                overall["substrate_transform_would_have_failed_count"] += 1
+            if packet.forced_transform_applied:
+                stats["forced_choice_count"] += 1
+                overall["forced_choice_count"] += 1
+                if packet.matched_target and substrate_match is False:
+                    stats["forced_choice_rescued_count"] += 1
+                    overall["forced_choice_rescued_count"] += 1
+                elif not packet.matched_target:
+                    stats["forced_choice_still_failed_count"] += 1
+                    overall["forced_choice_still_failed_count"] += 1
+            teacher_trace = list(getattr(packet, "teacher_trace", []) or [])
+            if teacher_trace:
+                stats["teacher_trace_packets"] += 1
+                overall["teacher_trace_packets"] += 1
+                stats["teacher_trace_hops"] += len(teacher_trace)
+                overall["teacher_trace_hops"] += len(teacher_trace)
+                first_divergence = None
+                for step in teacher_trace:
+                    if bool(step.get("forced", False)):
+                        stats["teacher_trace_forced_hops"] += 1
+                        overall["teacher_trace_forced_hops"] += 1
+                    if not bool(step.get("transform_matches_expected", True)):
+                        stats["teacher_trace_transform_mismatch_hops"] += 1
+                        overall["teacher_trace_transform_mismatch_hops"] += 1
+                    if not bool(step.get("payload_matches_expected", True)):
+                        stats["teacher_trace_payload_mismatch_hops"] += 1
+                        overall["teacher_trace_payload_mismatch_hops"] += 1
+                        if first_divergence is None:
+                            first_divergence = str(step.get("node_id", "unknown"))
+                if first_divergence is not None:
+                    self._increment_count(
+                        stats["teacher_trace_first_divergence_nodes"],
+                        first_divergence,
+                    )
+                    self._increment_count(
+                        overall["teacher_trace_first_divergence_nodes"],
+                        first_divergence,
+                    )
 
             bit_match_ratio = float(packet.bit_match_ratio or 0.0)
             if packet.matched_target:
@@ -4483,6 +6238,7 @@ class NativeSubstrateSystem:
             "task_ids_seen": self._task_ids_seen(),
             "capability_policy": self.capability_policy,
             "capability_timeline": list(self.capability_timeline),
+            "world_model_state": dict(self.world_model_state),
         }
         manifest_path = target / "system_state.json"
         manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
@@ -4503,8 +6259,16 @@ class NativeSubstrateSystem:
             "topology": self.topology_state.to_dict(),
             "latent_context_trackers": self.environment.export_latent_context_state(),
             "capability_states": self.environment.export_capability_state(),
+            "local_unit_states": self.environment.export_local_unit_state(),
+            "growth_intent_states": self.environment.export_growth_intent_state(),
             "task_ids_seen": self._task_ids_seen(),
             "capability_policy": self.capability_policy,
+            "local_unit_mode": self.environment.local_unit_mode,
+            "local_unit_preset": self.environment.local_unit_preset,
+            "source_sequence_context_enabled": self.environment.source_sequence_context_enabled,
+            "c_task_layer1_enabled": self.environment.c_task_layer1_enabled,
+            "c_task_layer1_mode": self.environment.c_task_layer1_mode,
+            "world_model_state": dict(self.world_model_state),
         }
         manifest_path = target / "memory_state.json"
         manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
@@ -4525,8 +6289,16 @@ class NativeSubstrateSystem:
             "topology": self.topology_state.to_dict(),
             "latent_context_trackers": self.environment.export_latent_context_state(),
             "capability_states": self.environment.export_capability_state(),
+            "local_unit_states": self.environment.export_local_unit_state(),
+            "growth_intent_states": self.environment.export_growth_intent_state(),
             "task_ids_seen": self._task_ids_seen(),
             "capability_policy": self.capability_policy,
+            "local_unit_mode": self.environment.local_unit_mode,
+            "local_unit_preset": self.environment.local_unit_preset,
+            "source_sequence_context_enabled": self.environment.source_sequence_context_enabled,
+            "c_task_layer1_enabled": self.environment.c_task_layer1_enabled,
+            "c_task_layer1_mode": self.environment.c_task_layer1_mode,
+            "world_model_state": dict(self.world_model_state),
         }
         manifest_path = target / "substrate_state.json"
         manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
@@ -4542,6 +6314,27 @@ class NativeSubstrateSystem:
         self.session_start_cycle = self.global_cycle
         self.capability_policy = str(manifest.get("capability_policy", self.capability_policy))
         self.environment.capability_policy = self.capability_policy
+        self.environment.local_unit_mode = str(
+            manifest.get("local_unit_mode", self.environment.local_unit_mode)
+        )
+        self.environment.local_unit_preset = resolve_pulse_local_unit_preset(
+            manifest.get("local_unit_preset", self.environment.local_unit_preset)
+        ).name
+        self.environment.source_sequence_context_enabled = bool(
+            manifest.get(
+                "source_sequence_context_enabled",
+                self.environment.source_sequence_context_enabled,
+            )
+        )
+        self.environment.c_task_layer1_enabled = bool(
+            manifest.get(
+                "c_task_layer1_enabled",
+                self.environment.c_task_layer1_enabled,
+            )
+        )
+        self.environment.c_task_layer1_mode = str(
+            manifest.get("c_task_layer1_mode", self.environment.c_task_layer1_mode)
+        ).lower()
         topology_payload = manifest.get("topology")
         if topology_payload:
             self.topology_state = TopologyState.from_dict(topology_payload)
@@ -4553,10 +6346,13 @@ class NativeSubstrateSystem:
         )
         self.environment.load_latent_context_state(manifest.get("latent_context_trackers"))
         self.environment.load_capability_state(manifest.get("capability_states"))
+        self.environment.load_local_unit_state(manifest.get("local_unit_states"))
+        self.environment.load_growth_intent_state(manifest.get("growth_intent_states"))
         self.environment.configure_transfer_regime(
             task_ids_seen=manifest.get("task_ids_seen", []),
             start_cycle=self.global_cycle,
         )
+        self.world_model_state = dict(manifest.get("world_model_state", {}) or {})
         nodes_dir = target / "nodes"
         for node_id, agent in self.agents.items():
             agent.load_carryover(nodes_dir / f"{node_id}.json")
@@ -4572,6 +6368,27 @@ class NativeSubstrateSystem:
         self.session_start_cycle = self.global_cycle
         self.capability_policy = str(manifest.get("capability_policy", self.capability_policy))
         self.environment.capability_policy = self.capability_policy
+        self.environment.local_unit_mode = str(
+            manifest.get("local_unit_mode", self.environment.local_unit_mode)
+        )
+        self.environment.local_unit_preset = resolve_pulse_local_unit_preset(
+            manifest.get("local_unit_preset", self.environment.local_unit_preset)
+        ).name
+        self.environment.source_sequence_context_enabled = bool(
+            manifest.get(
+                "source_sequence_context_enabled",
+                self.environment.source_sequence_context_enabled,
+            )
+        )
+        self.environment.c_task_layer1_enabled = bool(
+            manifest.get(
+                "c_task_layer1_enabled",
+                self.environment.c_task_layer1_enabled,
+            )
+        )
+        self.environment.c_task_layer1_mode = str(
+            manifest.get("c_task_layer1_mode", self.environment.c_task_layer1_mode)
+        ).lower()
         topology_payload = manifest.get("topology")
         if topology_payload:
             self.topology_state = TopologyState.from_dict(topology_payload)
@@ -4583,10 +6400,13 @@ class NativeSubstrateSystem:
         )
         self.environment.load_latent_context_state(manifest.get("latent_context_trackers"))
         self.environment.load_capability_state(manifest.get("capability_states"))
+        self.environment.load_local_unit_state(manifest.get("local_unit_states"))
+        self.environment.load_growth_intent_state(manifest.get("growth_intent_states"))
         self.environment.configure_transfer_regime(
             task_ids_seen=manifest.get("task_ids_seen", []),
             start_cycle=self.global_cycle,
         )
+        self.world_model_state = dict(manifest.get("world_model_state", {}) or {})
         nodes_dir = target / "nodes"
         for node_id, agent in self.agents.items():
             agent.load_substrate_carryover(nodes_dir / f"{node_id}.json")
@@ -4610,6 +6430,7 @@ class NativeSubstrateSystem:
             start_cycle=self.global_cycle,
         )
         self.topology_state = self.environment.topology_state
+        self.world_model_state = dict(manifest.get("world_model_state", {}) or {})
         self.rebuild_agents_from_topology()
 
         nodes_dir = target / "nodes"

@@ -9,6 +9,8 @@ from .scenarios import (
     detour_resilience_topology,
     detour_resilience_workload,
     phase8_scenarios,
+    bounded_ternary_overlap_topology,
+    scenario_with_topology_mode,
     sustained_pressure_topology,
     sustained_pressure_workload,
 )
@@ -24,6 +26,13 @@ from .environment import CapabilityControlConfig
 from .forecasting import Phase8ForecastReadout
 from .hidden_regime import HiddenRegimeCase, HiddenRegimeTaskSpec, hidden_regime_suite_by_id
 from .models import FeedbackPulse, NodeRuntimeState, SignalPacket, SignalSpec
+from .models import (
+    DEFAULT_LOCAL_UNIT_PRESET,
+    PULSE_LOCAL_UNIT_PRESETS,
+    PulseLocalUnitPreset,
+    pulse_local_unit_preset_names,
+    resolve_pulse_local_unit_preset,
+)
 from .node_agent import NodeAgent
 from .substrate import ConnectionSubstrate, ConnectionSubstrateConfig
 from .lamination import (
@@ -59,6 +68,7 @@ __all__ = [
     "NodeSpec",
     "ScenarioSpec",
     "basic_demo_topology",
+    "bounded_ternary_overlap_topology",
     "branch_pressure_topology",
     "branch_pressure_workload",
     "cvt1_ceiling_topology",
@@ -78,11 +88,17 @@ __all__ = [
     "RoutingEnvironment",
     "SignalPacket",
     "SignalSpec",
+    "DEFAULT_LOCAL_UNIT_PRESET",
+    "PULSE_LOCAL_UNIT_PRESETS",
+    "PulseLocalUnitPreset",
     "TopologyEvent",
     "TopologyManager",
     "TopologyState",
     "hidden_regime_suite_by_id",
     "phase8_scenarios",
+    "pulse_local_unit_preset_names",
+    "resolve_pulse_local_unit_preset",
+    "scenario_with_topology_mode",
     "sustained_pressure_topology",
     "sustained_pressure_workload",
 ]

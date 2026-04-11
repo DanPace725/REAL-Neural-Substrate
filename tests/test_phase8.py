@@ -2158,6 +2158,41 @@ class TestCapabilityControl(unittest.TestCase):
         finally:
             shutil.rmtree(temp_dir, ignore_errors=True)
 
+    def test_world_model_state_survives_memory_carryover(self) -> None:
+        system = NativeSubstrateSystem(
+            adjacency={"n0": ("sink",)},
+            positions={"n0": 0, "sink": 1},
+            source_id="n0",
+            sink_id="sink",
+            selector_seed=73,
+            capability_policy="self-selected",
+        )
+        system.world_model_state = {
+            "last_top_hypothesis": "h2",
+            "last_action": "handoff_commit",
+            "hypotheses": {
+                "h2": {"support": 0.72},
+            },
+        }
+
+        temp_dir = ROOT / "tests_tmp" / f"world_model_state_{uuid.uuid4().hex}"
+        temp_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            system.save_memory_carryover(temp_dir)
+            restored = NativeSubstrateSystem(
+                adjacency={"n0": ("sink",)},
+                positions={"n0": 0, "sink": 1},
+                source_id="n0",
+                sink_id="sink",
+                selector_seed=19,
+                capability_policy="self-selected",
+            )
+            self.assertTrue(restored.load_memory_carryover(temp_dir))
+            self.assertEqual(restored.world_model_state["last_top_hypothesis"], "h2")
+            self.assertEqual(restored.world_model_state["last_action"], "handoff_commit")
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
     def test_self_selected_local_contradiction_can_recruit_latent(self) -> None:
         system = NativeSubstrateSystem(
             adjacency={"n0": ("sink",)},
@@ -2718,7 +2753,7 @@ class TestLatentContextProbe(unittest.TestCase):
         self.assertEqual(observed["source_sequence_available"], 0.0)
         self.assertTrue(all("target" not in key for key in observed))
 
-    def test_source_sequence_adapter_exposes_source_local_features_without_effective_context(self) -> None:
+    def test_source_sequence_adapter_seeds_provisional_latent_context_from_source_history(self) -> None:
         system = NativeSubstrateSystem(
             adjacency={"n0": ("sink",)},
             positions={"n0": 0, "sink": 1},
@@ -2749,10 +2784,13 @@ class TestLatentContextProbe(unittest.TestCase):
         system.environment.inject_packets((second_packet,), cycle=1)
 
         observed = system.environment.observe_local("n0")
-        self.assertEqual(observed["effective_has_context"], 0.0)
+        self.assertEqual(observed["latent_context_available"], 1.0)
+        self.assertEqual(observed["effective_has_context"], 1.0)
+        self.assertEqual(observed["effective_context_bit"], 0.0)
         self.assertEqual(observed["source_sequence_available"], 1.0)
         self.assertEqual(observed["source_sequence_prev_parity"], 0.0)
         self.assertGreater(observed["source_sequence_context_confidence"], 0.0)
+        self.assertGreater(observed["source_sequence_channel_context_confidence"], 0.0)
         self.assertGreater(observed["source_sequence_transform_hint_rotate_left_1"], 0.0)
         self.assertLess(observed["source_sequence_transform_hint_identity"], 0.0)
         self.assertEqual(observed["source_prev_bit_0"], 1.0)
@@ -3277,6 +3315,7 @@ class TestLatentTimecourseAnalysis(unittest.TestCase):
                 "context_promotion_ready": 0.0,
                 "context_growth_ready": 0.0,
                 "source_sequence_context_confidence": 0.80,
+                "source_sequence_channel_context_confidence": 0.45,
                 "source_route_context_confidence": 0.60,
                 "source_feedback_context_confidence": 0.10,
                 "downstream_mean_route_context_confidence": 0.20,
@@ -3299,6 +3338,7 @@ class TestLatentTimecourseAnalysis(unittest.TestCase):
                 "context_promotion_ready": 0.0,
                 "context_growth_ready": 0.0,
                 "source_sequence_context_confidence": 0.85,
+                "source_sequence_channel_context_confidence": 0.65,
                 "source_route_context_confidence": 0.70,
                 "source_feedback_context_confidence": 0.40,
                 "downstream_mean_route_context_confidence": 0.30,
@@ -3321,6 +3361,7 @@ class TestLatentTimecourseAnalysis(unittest.TestCase):
                 "context_promotion_ready": 1.0,
                 "context_growth_ready": 1.0,
                 "source_sequence_context_confidence": 0.90,
+                "source_sequence_channel_context_confidence": 0.75,
                 "source_route_context_confidence": 0.80,
                 "source_feedback_context_confidence": 0.20,
                 "downstream_mean_route_context_confidence": 0.35,
@@ -3350,9 +3391,11 @@ class TestLatentTimecourseAnalysis(unittest.TestCase):
         self.assertEqual(summary["delayed_correction_event_count"], 1)
         self.assertEqual(summary["route_wrong_transform_potentially_right_event_count"], 1)
         self.assertEqual(summary["route_right_transform_wrong_event_count"], 1)
+        self.assertAlmostEqual(summary["avg_source_sequence_channel_context_confidence"], 0.61667, places=4)
         self.assertAlmostEqual(summary["avg_source_route_context_confidence"], 0.7, places=5)
         self.assertAlmostEqual(summary["avg_source_feedback_context_confidence"], 0.23333, places=4)
         self.assertAlmostEqual(summary["avg_downstream_feedback_context_confidence"], 0.4, places=5)
+        self.assertAlmostEqual(summary["final_source_sequence_channel_context_confidence"], 0.75, places=5)
         self.assertAlmostEqual(summary["final_mean_bit_accuracy"], 0.75, places=5)
         self.assertEqual(summary["final_exact_matches"], 2)
 

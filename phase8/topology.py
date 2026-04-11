@@ -27,15 +27,15 @@ def _observed_context_ids(*mappings: Dict[str, float]) -> tuple[int, ...]:
 class MorphogenesisConfig:
     enabled: bool = False
     checkpoint_interval: int = 6
-    max_events_per_checkpoint: int = 1
-    max_dynamic_nodes: int = 4
+    max_events_per_checkpoint: int = 2
+    max_dynamic_nodes: int = 6
     frontier_hop_limit: int = 2
-    atp_surplus_threshold: float = 0.75
-    surplus_window: int = 3
-    contradiction_threshold: float = 0.55
-    overload_threshold: float = 0.60
+    atp_surplus_threshold: float = 0.62
+    surplus_window: int = 2
+    contradiction_threshold: float = 0.35
+    overload_threshold: float = 0.40
     energy_decay: float = 0.74
-    growth_energy_threshold: float = 0.03
+    growth_energy_threshold: float = 0.015
     prune_energy_threshold: float = -0.01
     apoptosis_energy_threshold: float = -0.03
     traffic_value_scale: float = 0.04
@@ -48,7 +48,7 @@ class MorphogenesisConfig:
     # exceeds this fraction even without full ATP surplus.  This enables
     # pre-provisioning before sustained-pressure overload.
     anticipatory_growth_backlog_threshold: float = 0.0
-    growth_queue_tolerance: int = 1
+    growth_queue_tolerance: int = 2
     growth_interrupt_urgency_threshold: float = 0.35
     edge_prune_ticks: int = 6
     isolation_ticks: int = 6

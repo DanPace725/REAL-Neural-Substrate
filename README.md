@@ -32,6 +32,8 @@ The point of this repo is not to reproduce standard deep learning with unfamilia
 
 The repo is an active research prototype, not a polished library. The most notable recent result is the REAL-native occupancy harness, where the current V3 configuration reached near-parity with the existing MLP benchmark on a real sensor dataset while still using local substrate dynamics rather than backpropagation. The transfer, latent-context, and morphogenesis experiments remain central parts of the project as well.
 
+If you are arriving from the ALIFE paper, treat the occupancy result in the paper as a historical March 2026 result rather than a claim about current `main`. The paper-aligned occupancy behavior is represented more closely by the March V3 artifacts in `docs/experiment_outputs/` and by a checkout or snapshot around commit `09f9b09` than by the evolving current codebase. Current `main` has continued to change after the paper-facing runs, so re-running the same command today may not reproduce the paper F1 exactly.
+
 ## For AI Coding Agents
 
 Before making changes, read `AGENTS.md`, then cross-reference the docs and trace files using the task's keywords so you understand the repo's scope, vision, current experimental state, and recent decisions. Do not jump straight into edits from surface-level code patterns alone; review the relevant synthesis notes, technical report sections, March 17 traces, and the March 19 anticipation/recognition/prediction synthesis when the change touches transfer, neural baselines, morphogenesis, topology scaling, latent-context behavior, or the REAL loop itself.
@@ -96,6 +98,8 @@ After `pip install -e .`, the same runners are also available as console scripts
 - `docs/reports/PLAIN_ENGLISH_OVERVIEW.md`: non-technical overview
 - `docs/traces/2026-03-19 1151 - Session Synthesis Anticipation Self Selection and Carryover.md`: March 19 synthesis covering anticipation, recognition, prediction, self-selection, and carryover hygiene
 - `docs/experiment_outputs/`: timestamped JSON experiment manifests
+- `docs/experiment_outputs/v3_best_real_seed13_summary.md`: March 2026 saved summary for the high-F1 occupancy run referenced during the paper-writing period
+- `docs/experiment_outputs/v3_best_real_seed13.json`: saved JSON manifest for that paper-aligned occupancy run
 - `docs/traces/`: implementation and decision traces, with `docs/traces/INDEX.md` as the entrypoint
 - `docs/visualizations/phase8_dashboard.html`: static Phase 8 dashboard snapshot carried over from the source workspace
 - `docs/visualizations/real_cycle.html`: saved cyclic-transfer visualization artifact

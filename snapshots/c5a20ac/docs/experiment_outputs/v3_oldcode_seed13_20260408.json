@@ -1,0 +1,325 @@
+{
+  "v3_config": {
+    "csv_path": "occupancy_baseline/data/occupancy_synth_v1.csv",
+    "window_size": 5,
+    "normalize": true,
+    "selector_seed": 13,
+    "feedback_amount": 0.18,
+    "eval_feedback_fraction": 1.0,
+    "packet_ttl": 8,
+    "forward_drain_cycles": 16,
+    "feedback_drain_cycles": 4,
+    "train_session_fraction": 0.7,
+    "max_train_sessions": null,
+    "max_eval_sessions": null,
+    "summary_only": true
+  },
+  "dataset_rows": 1344,
+  "total_episodes": 1340,
+  "total_sessions": 89,
+  "train_session_count": 62,
+  "eval_session_count": 27,
+  "co2_training_median": 0.974881,
+  "light_training_median": 1.045862,
+  "training_context_codes": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "train_inventory": {
+    "session_count": 62,
+    "by_label": {
+      "0": 31,
+      "1": 31
+    },
+    "by_context_code": {
+      "0": 24,
+      "1": 7,
+      "3": 24,
+      "2": 7
+    },
+    "episode_lengths": {
+      "min": 1,
+      "mean": 14.94,
+      "max": 76
+    },
+    "context_codes_by_label": {
+      "0": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "1": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  "eval_inventory": {
+    "session_count": 27,
+    "by_label": {
+      "0": 14,
+      "1": 13
+    },
+    "by_context_code": {
+      "3": 10,
+      "2": 1,
+      "0": 9,
+      "1": 7
+    },
+    "episode_lengths": {
+      "min": 1,
+      "mean": 15.33,
+      "max": 84
+    },
+    "context_codes_by_label": {
+      "0": [
+        0,
+        1,
+        3
+      ],
+      "1": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  "train_summary": {
+    "episode_count": 926,
+    "metrics": {
+      "accuracy": 0.908207343412527,
+      "precision": 0.8475177304964538,
+      "recall": 0.8505338078291815,
+      "f1": 0.8490230905861457,
+      "tp": 239.0,
+      "tn": 602.0,
+      "fp": 43.0,
+      "fn": 42.0
+    },
+    "mean_delivered_packets": 24.3132,
+    "mean_dropped_packets": 0.6868,
+    "mean_feedback_events": 18.108,
+    "mean_feedback_total": 3.2594,
+    "occupied_prediction_rate": 0.3045
+  },
+  "warm_eval_summary": {
+    "episode_count": 414,
+    "metrics": {
+      "accuracy": 0.9154589371980676,
+      "precision": 0.7888888888888889,
+      "recall": 0.8160919540229885,
+      "f1": 0.8022598870056497,
+      "tp": 71.0,
+      "tn": 308.0,
+      "fp": 19.0,
+      "fn": 16.0
+    },
+    "mean_delivered_packets": 24.2005,
+    "mean_dropped_packets": 0.7995,
+    "mean_feedback_events": 18.2005,
+    "mean_feedback_total": 3.2761,
+    "occupied_prediction_rate": 0.2174
+  },
+  "cold_eval_summary": {
+    "episode_count": 414,
+    "metrics": {
+      "accuracy": 0.9251207729468599,
+      "precision": 0.8181818181818182,
+      "recall": 0.8275862068965517,
+      "f1": 0.8228571428571428,
+      "tp": 72.0,
+      "tn": 311.0,
+      "fp": 16.0,
+      "fn": 15.0
+    },
+    "mean_delivered_packets": 24.0097,
+    "mean_dropped_packets": 0.9903,
+    "mean_feedback_events": 18.2029,
+    "mean_feedback_total": 3.2765,
+    "occupied_prediction_rate": 0.2126
+  },
+  "carryover_efficiency": {
+    "warm_delivery_curve": [
+      1.0,
+      0.92,
+      0.9512,
+      0.9067,
+      0.8,
+      0.9127,
+      0.912,
+      0.9867,
+      0.98,
+      0.9822,
+      1.0,
+      0.9533,
+      0.99,
+      0.94,
+      1.0,
+      0.976,
+      0.96,
+      0.9714,
+      0.9976,
+      0.94,
+      1.0,
+      0.9829,
+      0.9729,
+      0.9657,
+      0.92,
+      0.96,
+      0.9418
+    ],
+    "cold_delivery_curve": [
+      1.0,
+      1.0,
+      0.8834,
+      0.92,
+      0.84,
+      0.9418,
+      0.984,
+      0.9822,
+      0.96,
+      0.9911,
+      0.92,
+      0.9933,
+      0.92,
+      0.93,
+      0.96,
+      0.992,
+      1.0,
+      0.9943,
+      0.9915,
+      0.96,
+      0.96,
+      0.9943,
+      0.9681,
+      0.9657,
+      0.96,
+      0.99,
+      0.9764
+    ],
+    "efficiency_ratio_curve": [
+      1.0,
+      0.92,
+      1.0767,
+      0.9855,
+      0.9524,
+      0.9691,
+      0.9268,
+      1.0046,
+      1.0208,
+      0.991,
+      1.087,
+      0.9597,
+      1.0761,
+      1.0108,
+      1.0417,
+      0.9839,
+      0.96,
+      0.977,
+      1.0062,
+      0.9792,
+      1.0417,
+      0.9885,
+      1.005,
+      1.0,
+      0.9583,
+      0.9697,
+      0.9646
+    ],
+    "mean_efficiency_ratio": 0.9947,
+    "warm_sessions_to_80pct": 0,
+    "cold_sessions_to_80pct": 0,
+    "warm_delivery_at": {
+      "session_1": 1.0,
+      "session_5": 0.8,
+      "session_10": 0.9822,
+      "session_20": 0.94
+    },
+    "cold_delivery_at": {
+      "session_1": 1.0,
+      "session_5": 0.84,
+      "session_10": 0.9911,
+      "session_20": 0.96
+    }
+  },
+  "context_transfer_probe": {
+    "training_context_codes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "warm_seen_mean_delivery": 0.9564,
+    "warm_unseen_mean_delivery": null,
+    "cold_seen_mean_delivery": 0.9622,
+    "cold_unseen_mean_delivery": null,
+    "warm_seen_session_count": 27,
+    "warm_unseen_session_count": 0
+  },
+  "train_system_summary": {
+    "cycles": 34248,
+    "injected_packets": 23150,
+    "delivered_packets": 22514,
+    "delivery_ratio": 0.9725,
+    "dropped_packets": 636,
+    "drop_ratio": 0.0275,
+    "mean_latency": 3.3156,
+    "mean_route_cost": 0.0274,
+    "mean_feedback_award": 0.1341,
+    "node_atp_total": 6.0485,
+    "exact_matches": 16768,
+    "mean_bit_accuracy": 0.7448
+  },
+  "warm_system_summary": {
+    "cycles": 49742,
+    "injected_packets": 10350,
+    "delivered_packets": 10019,
+    "delivery_ratio": 0.968,
+    "dropped_packets": 331,
+    "drop_ratio": 0.032,
+    "mean_latency": 3.3577,
+    "mean_route_cost": 0.03019,
+    "mean_feedback_award": 0.1354,
+    "node_atp_total": 5.6444,
+    "exact_matches": 7535,
+    "mean_bit_accuracy": 0.7521
+  },
+  "cold_system_summary": {
+    "cycles": 15013,
+    "injected_packets": 10350,
+    "delivered_packets": 9940,
+    "delivery_ratio": 0.9604,
+    "dropped_packets": 410,
+    "drop_ratio": 0.0396,
+    "mean_latency": 3.187,
+    "mean_route_cost": 0.03027,
+    "mean_feedback_award": 0.1365,
+    "node_atp_total": 6.0707,
+    "exact_matches": 7536,
+    "mean_bit_accuracy": 0.7581
+  },
+  "manifest": {
+    "run_id": "v3_seed13_20260408T200708",
+    "run_at": "2026-04-08T20:07:08+00:00",
+    "git_sha": "c8d58f2",
+    "csv": "occupancy_baseline/data/occupancy_synth_v1.csv",
+    "selector_seed": 13,
+    "window_size": 5,
+    "train_session_fraction": 0.7,
+    "max_train_sessions": null,
+    "max_eval_sessions": null,
+    "workers": 2,
+    "feedback_amount": 0.18,
+    "eval_feedback_fraction": 1.0,
+    "packet_ttl": 8,
+    "summary_only": true,
+    "output_json": "docs/experiment_outputs/v3_oldcode_seed13_20260408.json",
+    "elapsed_seconds": 791.34402400002
+  }
+}

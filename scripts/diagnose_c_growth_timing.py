@@ -7,7 +7,7 @@ import uuid
 from pathlib import Path
 from typing import Dict, List
 
-from scripts.analyze_transfer_timecourse import _latent_timeline_summary
+from scripts.analyze_transfer_timecourse import _downstream_tracker_snapshot, _latent_timeline_summary
 from scripts.diagnose_c_family_real import _build_system_from_spec, _method_flags, _task_spec
 from scripts.ceiling_benchmark_suite import benchmark_suite_by_id
 from scripts.experiment_manifest import build_run_manifest, write_run_manifest
@@ -26,38 +26,166 @@ def _inject_for_cycle(system, spec, cycle: int) -> None:
         system.inject_signal(count=scheduled)
 
 
-def _source_growth_timing_record(system, *, cycle: int) -> dict[str, object]:
+def _task_id_hint(spec, fallback_task_key: str) -> str:
+    if spec.initial_signal_specs:
+        first = spec.initial_signal_specs[0]
+        if getattr(first, "task_id", None):
+            return str(first.task_id)
+    for scheduled_specs in dict(spec.signal_schedule_specs or {}).values():
+        if scheduled_specs:
+            first = scheduled_specs[0]
+            if getattr(first, "task_id", None):
+                return str(first.task_id)
+    return str(fallback_task_key)
+
+
+def _source_growth_timing_record(system, *, cycle: int, task_id_hint: str | None) -> dict[str, object]:
     source_id = system.environment.source_id
     observation = system.environment.observe_local(source_id)
+    focus_packet = system.environment._capability_focus_packet(source_id)
+    focus_task_id = focus_packet.task_id if focus_packet is not None else task_id_hint
+    latent_snapshot = system.environment._latent_snapshot(
+        source_id,
+        focus_task_id,
+        observe=False,
+        packet_id=focus_packet.packet_id if focus_packet is not None else None,
+        input_bits=focus_packet.input_bits if focus_packet is not None else None,
+    )
+    channel_confidence = dict(latent_snapshot.get("channel_context_confidence", {}))
+    channel_estimate = dict(latent_snapshot.get("channel_context_estimate", {}))
+    channel_context_evidence = dict(latent_snapshot.get("channel_context_evidence", {}))
+    downstream = _downstream_tracker_snapshot(system, task_id_hint=focus_task_id)
     growth_specs = system.environment.growth_action_specs(source_id)
     bud_specs = [spec for spec in growth_specs if str(spec.get("action", "")).startswith("bud_")]
-    summary = system.summarize()
+    latent_context_count = int(latent_snapshot.get("context_count", 2))
+    effective_context_threshold = float(
+        latent_snapshot.get("promotion_threshold", 0.0)
+        if latent_context_count <= 2
+        else observation.get("effective_context_threshold", 0.0)
+    )
+    latent_confidence = float(latent_snapshot.get("confidence", 0.0))
+    effective_has_context = (
+        1.0
+        if latent_snapshot.get("available")
+        and latent_snapshot.get("estimate") is not None
+        and latent_confidence >= effective_context_threshold
+        else 0.0
+    )
     return {
         "cycle": cycle,
-        "exact_matches": int(summary.get("exact_matches", 0)),
-        "mean_bit_accuracy": round(float(summary.get("mean_bit_accuracy", 0.0)), 5),
-        "latent_context_available": float(observation.get("latent_context_available", 0.0)),
-        "latent_context_estimate": float(observation.get("latent_context_estimate", 0.0)),
-        "latent_context_confidence": round(float(observation.get("latent_context_confidence", 0.0)), 5),
-        "effective_has_context": float(observation.get("effective_has_context", 0.0)),
-        "effective_context_bit": float(observation.get("effective_context_bit", 0.0)),
-        "effective_context_confidence": round(float(observation.get("effective_context_confidence", 0.0)), 5),
-        "effective_context_threshold": round(float(observation.get("effective_context_threshold", 0.0)), 5),
-        "context_promotion_ready": float(observation.get("context_promotion_ready", 0.0)),
-        "context_growth_ready": float(observation.get("context_growth_ready", 0.0)),
+        "exact_matches": 0,
+        "mean_bit_accuracy": 0.0,
+        "latent_context_available": 1.0 if latent_snapshot.get("available") else 0.0,
+        "latent_context_estimate": (
+            float(latent_snapshot.get("estimate"))
+            if latent_snapshot.get("estimate") is not None
+            else 0.0
+        ),
+        "latent_context_confidence": round(latent_confidence, 5),
+        "effective_has_context": effective_has_context,
+        "effective_context_bit": (
+            float(latent_snapshot.get("estimate"))
+            if effective_has_context >= 0.5 and latent_snapshot.get("estimate") is not None
+            else 0.0
+        ),
+        "effective_context_confidence": round(
+            latent_confidence if effective_has_context >= 0.5 else 0.0,
+            5,
+        ),
+        "effective_context_threshold": round(effective_context_threshold, 5),
+        "context_promotion_ready": 1.0 if latent_snapshot.get("promotion_ready") else 0.0,
+        "context_growth_ready": 1.0 if latent_snapshot.get("growth_ready") else 0.0,
         "source_sequence_available": float(observation.get("source_sequence_available", 0.0)),
         "source_sequence_context_estimate": float(observation.get("source_sequence_context_estimate", 0.0)),
         "source_sequence_context_confidence": round(
             float(observation.get("source_sequence_context_confidence", 0.0)),
             5,
         ),
+        "source_sequence_channel_context_confidence": round(
+            float(channel_confidence.get("source_sequence", 0.0)),
+            5,
+        ),
+        "source_sequence_channel_context_estimate": (
+            float(channel_estimate.get("source_sequence"))
+            if channel_estimate.get("source_sequence") is not None
+            else 0.0
+        ),
+        "source_route_context_confidence": round(
+            float(channel_confidence.get("source_route", 0.0)),
+            5,
+        ),
+        "source_feedback_context_confidence": round(
+            float(channel_confidence.get("source_feedback", 0.0)),
+            5,
+        ),
+        "source_sequence_context0_evidence": round(
+            float(dict(channel_context_evidence.get("source_sequence", {})).get(0, 0.0)),
+            5,
+        ),
+        "source_sequence_context1_evidence": round(
+            float(dict(channel_context_evidence.get("source_sequence", {})).get(1, 0.0)),
+            5,
+        ),
+        "source_sequence_context2_evidence": round(
+            float(dict(channel_context_evidence.get("source_sequence", {})).get(2, 0.0)),
+            5,
+        ),
+        "source_sequence_context3_evidence": round(
+            float(dict(channel_context_evidence.get("source_sequence", {})).get(3, 0.0)),
+            5,
+        ),
+        "source_route_context0_evidence": round(
+            float(dict(channel_context_evidence.get("source_route", {})).get(0, 0.0)),
+            5,
+        ),
+        "source_route_context1_evidence": round(
+            float(dict(channel_context_evidence.get("source_route", {})).get(1, 0.0)),
+            5,
+        ),
+        "source_route_context2_evidence": round(
+            float(dict(channel_context_evidence.get("source_route", {})).get(2, 0.0)),
+            5,
+        ),
+        "source_route_context3_evidence": round(
+            float(dict(channel_context_evidence.get("source_route", {})).get(3, 0.0)),
+            5,
+        ),
+        "source_feedback_context0_evidence": round(
+            float(dict(channel_context_evidence.get("source_feedback", {})).get(0, 0.0)),
+            5,
+        ),
+        "source_feedback_context1_evidence": round(
+            float(dict(channel_context_evidence.get("source_feedback", {})).get(1, 0.0)),
+            5,
+        ),
+        "source_feedback_context2_evidence": round(
+            float(dict(channel_context_evidence.get("source_feedback", {})).get(2, 0.0)),
+            5,
+        ),
+        "source_feedback_context3_evidence": round(
+            float(dict(channel_context_evidence.get("source_feedback", {})).get(3, 0.0)),
+            5,
+        ),
+        "downstream_mean_route_context_confidence": round(
+            float(downstream.get("downstream_mean_route_context_confidence", 0.0)),
+            5,
+        ),
+        "downstream_mean_feedback_context_confidence": round(
+            float(downstream.get("downstream_mean_feedback_context_confidence", 0.0)),
+            5,
+        ),
         "source_atp_ratio": round(float(observation.get("atp_ratio", 0.0)), 5),
+        "wrong_transform_family": 0.0,
+        "transform_unstable_across_inferred_context_boundary": 0.0,
+        "delayed_correction": 0.0,
+        "route_wrong_transform_potentially_right": 0.0,
+        "route_right_transform_wrong": 0.0,
         "growth_candidate_action_count": len(growth_specs),
         "bud_action_available_count": len(bud_specs),
         "bud_action_available": 1.0 if bud_specs else 0.0,
         "bud_action_labels": [str(spec.get("action")) for spec in bud_specs],
-        "dynamic_node_count": int(summary.get("dynamic_node_count", 0)),
-        "bud_successes": int(summary.get("bud_successes", 0)),
+        "dynamic_node_count": 0,
+        "bud_successes": 0,
     }
 
 
@@ -113,6 +241,7 @@ def evaluate_c_growth_timing(
     point = suite_lookup[benchmark_id]
     latent, morphogenesis = _method_flags(method_id)
     spec = _task_spec(point, task_key, latent=latent)
+    task_id_hint = _task_id_hint(spec, task_key)
 
     system = _build_system_from_spec(
         seed,
@@ -156,10 +285,42 @@ def evaluate_c_growth_timing(
 
     records: List[dict[str, object]] = []
     topology_records: List[dict[str, object]] = []
+    prior_overall = {
+        "wrong_transform_family": 0.0,
+        "transform_unstable_across_inferred_context_boundary": 0.0,
+        "delayed_correction": 0.0,
+        "route_wrong_transform_potentially_right": 0.0,
+        "route_right_transform_wrong": 0.0,
+    }
     for cycle in range(1, spec.cycles + 1):
         _inject_for_cycle(system, spec, cycle)
+        record = _source_growth_timing_record(system, cycle=cycle, task_id_hint=task_id_hint)
         report = system.run_global_cycle()
-        record = _source_growth_timing_record(system, cycle=cycle)
+        summary = system.summarize()
+        diagnostics = dict(summary.get("task_diagnostics", {}))
+        overall = dict(diagnostics.get("overall", {}))
+        record["exact_matches"] = int(summary.get("exact_matches", 0))
+        record["mean_bit_accuracy"] = round(float(summary.get("mean_bit_accuracy", 0.0)), 5)
+        record["dynamic_node_count"] = int(summary.get("dynamic_node_count", 0))
+        record["bud_successes"] = int(summary.get("bud_successes", 0))
+        record["wrong_transform_family"] = round(float(overall.get("wrong_transform_family", 0.0)), 5)
+        record["transform_unstable_across_inferred_context_boundary"] = round(
+            float(overall.get("transform_unstable_across_inferred_context_boundary", 0.0)),
+            5,
+        )
+        record["delayed_correction"] = round(float(overall.get("delayed_correction", 0.0)), 5)
+        record["route_wrong_transform_potentially_right"] = round(
+            float(overall.get("route_wrong_transform_potentially_right", 0.0)),
+            5,
+        )
+        record["route_right_transform_wrong"] = round(
+            float(overall.get("route_right_transform_wrong", 0.0)),
+            5,
+        )
+        for field, prior_value in prior_overall.items():
+            current_value = float(record.get(field, 0.0))
+            record[f"delta_{field}"] = round(max(0.0, current_value - prior_value), 5)
+            prior_overall[field] = current_value
         records.append(record)
         topology_records.append(
             {

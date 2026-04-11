@@ -22,6 +22,7 @@ class CFARSelector:
         stagnation_threshold: float = 0.005,
         guided_threshold: int = 12,
         budget_mode: bool = True,
+        rng: random.Random | None = None,
     ) -> None:
         self.exploration_rate = exploration_rate
         self.stagnation_window = stagnation_window
@@ -29,6 +30,7 @@ class CFARSelector:
         self.guided_threshold = guided_threshold
         self.budget_mode = budget_mode
         self.last_weakest_dimension: Optional[str] = None
+        self.rng = rng or random.Random()
 
     def select(self, available: List[str], history: List[CycleEntry]) -> Tuple[str, str]:
         if not available:
@@ -54,10 +56,10 @@ class CFARSelector:
             if abs(mean_delta) < self.stagnation_threshold:
                 rate = min(0.8, rate + 0.3)
 
-        if random.random() < rate:
+        if self.rng.random() < rate:
             return SelectionMode.FLUCTUATION
 
-        if len(history) >= self.guided_threshold and random.random() < 0.30:
+        if len(history) >= self.guided_threshold and self.rng.random() < 0.30:
             return SelectionMode.GUIDED
 
         return SelectionMode.CONSTRAINT
@@ -68,7 +70,7 @@ class CFARSelector:
             usage[e.action] = usage.get(e.action, 0) + 1
         max_used = max(usage.values()) if usage else 1
         weights = [max(1, max_used - usage.get(a, 0) + 1) for a in available]
-        return random.choices(available, weights=weights, k=1)[0]
+        return self.rng.choices(available, weights=weights, k=1)[0]
 
     def _mean_cost(self, history: List[CycleEntry]) -> float:
         return sum(e.cost_secs for e in history) / max(1, len(history))
@@ -88,7 +90,7 @@ class CFARSelector:
 
     def _exploit(self, available: List[str], history: List[CycleEntry]) -> str:
         if not history:
-            return random.choice(available)
+            return self.rng.choice(available)
 
         mean_cost = self._mean_cost(history)
 
@@ -142,6 +144,7 @@ class AnticipatorySelector(CFARSelector):
         prediction_margin_threshold: float = 0.05,
         predictive_weight: float = 1.0,
         retrospective_weight: float = 0.35,
+        rng: random.Random | None = None,
     ) -> None:
         super().__init__(
             exploration_rate=exploration_rate,
@@ -149,6 +152,7 @@ class AnticipatorySelector(CFARSelector):
             stagnation_threshold=stagnation_threshold,
             guided_threshold=guided_threshold,
             budget_mode=budget_mode,
+            rng=rng,
         )
         self.prediction_confidence_threshold = prediction_confidence_threshold
         self.uncertainty_tolerance = uncertainty_tolerance

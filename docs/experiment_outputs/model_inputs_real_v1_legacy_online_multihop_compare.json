@@ -1,0 +1,339 @@
+{
+  "config": {
+    "input_path": "..\\model_inputs\\chunks",
+    "train_fraction": 0.7,
+    "selector_seed": 13,
+    "feedback_amount": 0.18,
+    "eval_feedback_fraction": 1.0,
+    "packet_ttl": 8,
+    "forward_drain_cycles": 16,
+    "feedback_drain_cycles": 4,
+    "normalize_features": true,
+    "positive_delta_threshold": 0.0,
+    "max_train_scenarios": 2,
+    "max_eval_scenarios": 1,
+    "max_train_episodes_per_scenario": 10,
+    "max_eval_episodes_per_scenario": 10,
+    "topology_mode": "legacy",
+    "local_unit_mode": "legacy",
+    "local_unit_preset": "default",
+    "eval_mode": "fresh",
+    "context_mode": "online_running_context",
+    "summary_only": true
+  },
+  "scenario_inventory": {
+    "total_scenarios": 1000,
+    "train_scenarios": [
+      0,
+      1
+    ],
+    "eval_scenarios": [
+      700
+    ]
+  },
+  "feature_names": [
+    "gadf_abs_mean",
+    "gadf_diag_mean",
+    "gadf_mean",
+    "gadf_std",
+    "gasf_abs_mean",
+    "gasf_diag_mean",
+    "gasf_mean",
+    "gasf_std",
+    "prev_result_delta",
+    "result_value"
+  ],
+  "feature_stats": {
+    "result_value": {
+      "count": 1978,
+      "mean": -0.045257,
+      "std": 0.534666
+    },
+    "prev_result_delta": {
+      "count": 1978,
+      "mean": 0.000162,
+      "std": 0.747705
+    },
+    "gasf_mean": {
+      "count": 1978,
+      "mean": -0.649094,
+      "std": 0.101494
+    },
+    "gasf_std": {
+      "count": 1978,
+      "mean": 0.363268,
+      "std": 0.076973
+    },
+    "gasf_abs_mean": {
+      "count": 1978,
+      "mean": 0.695098,
+      "std": 0.071505
+    },
+    "gasf_diag_mean": {
+      "count": 1978,
+      "mean": -0.423417,
+      "std": 0.147632
+    },
+    "gadf_mean": {
+      "count": 1978,
+      "mean": 0.0,
+      "std": 0.0001
+    },
+    "gadf_std": {
+      "count": 1978,
+      "mean": 0.604054,
+      "std": 0.059613
+    },
+    "gadf_abs_mean": {
+      "count": 1978,
+      "mean": 0.502857,
+      "std": 0.059079
+    },
+    "gadf_diag_mean": {
+      "count": 1978,
+      "mean": 0.0,
+      "std": 0.0001
+    }
+  },
+  "context_profile": {
+    "trend_feature_name": "prev_result_delta",
+    "shape_feature_name": "gasf_abs_mean",
+    "trend_median": 0.00016177957532861482,
+    "shape_median": 0.695097803989013
+  },
+  "training_context_codes": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "majority_label": 0,
+  "train_episode_count": 20,
+  "eval_episode_count": 10,
+  "train_summary": {
+    "episode_count": 20,
+    "metrics": {
+      "accuracy": 0.5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0.0,
+      "tn": 10.0,
+      "fp": 0.0,
+      "fn": 10.0
+    },
+    "positive_label_rate": 0.5,
+    "positive_prediction_rate": 0.0,
+    "scenario_count": 2,
+    "mean_scenario_accuracy": 0.5,
+    "mean_prediction_confidence": 0.0,
+    "mean_delivered_packets": 10.0,
+    "mean_dropped_packets": 0.0,
+    "mean_feedback_events": 5.0
+  },
+  "primary_eval_mode": "fresh_session_eval",
+  "eval_summary": {
+    "episode_count": 10,
+    "metrics": {
+      "accuracy": 0.4,
+      "precision": 0.5,
+      "recall": 0.1667,
+      "f1": 0.25,
+      "tp": 1.0,
+      "tn": 3.0,
+      "fp": 1.0,
+      "fn": 5.0
+    },
+    "positive_label_rate": 0.6,
+    "positive_prediction_rate": 0.2,
+    "scenario_count": 1,
+    "mean_scenario_accuracy": 0.4,
+    "mean_prediction_confidence": 0.06,
+    "mean_delivered_packets": 10.0,
+    "mean_dropped_packets": 0.0,
+    "mean_feedback_events": 5.1
+  },
+  "eval_baselines": {
+    "majority_label": {
+      "episode_count": 10,
+      "metrics": {
+        "accuracy": 0.4,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0.0,
+        "tn": 4.0,
+        "fp": 0.0,
+        "fn": 6.0
+      },
+      "positive_label_rate": 0.6,
+      "positive_prediction_rate": 0.0
+    },
+    "repeat_last_delta_direction": {
+      "episode_count": 10,
+      "metrics": {
+        "accuracy": 0.4,
+        "precision": 0.5,
+        "recall": 0.5,
+        "f1": 0.5,
+        "tp": 3.0,
+        "tn": 1.0,
+        "fp": 3.0,
+        "fn": 3.0
+      },
+      "positive_label_rate": 0.6,
+      "positive_prediction_rate": 0.6
+    }
+  },
+  "eval_accuracy_deltas": {
+    "vs_majority_label": 0.0,
+    "vs_repeat_last_delta_direction": 0.0
+  },
+  "eval_protocols": {
+    "fresh_session_eval": {
+      "protocol_name": "fresh_session_eval",
+      "eval_episode_count": 10,
+      "eval_summary": {
+        "episode_count": 10,
+        "metrics": {
+          "accuracy": 0.4,
+          "precision": 0.5,
+          "recall": 0.1667,
+          "f1": 0.25,
+          "tp": 1.0,
+          "tn": 3.0,
+          "fp": 1.0,
+          "fn": 5.0
+        },
+        "positive_label_rate": 0.6,
+        "positive_prediction_rate": 0.2,
+        "scenario_count": 1,
+        "mean_scenario_accuracy": 0.4,
+        "mean_prediction_confidence": 0.06,
+        "mean_delivered_packets": 10.0,
+        "mean_dropped_packets": 0.0,
+        "mean_feedback_events": 5.1
+      },
+      "eval_baselines": {
+        "majority_label": {
+          "episode_count": 10,
+          "metrics": {
+            "accuracy": 0.4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0.0,
+            "tn": 4.0,
+            "fp": 0.0,
+            "fn": 6.0
+          },
+          "positive_label_rate": 0.6,
+          "positive_prediction_rate": 0.0
+        },
+        "repeat_last_delta_direction": {
+          "episode_count": 10,
+          "metrics": {
+            "accuracy": 0.4,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "tp": 3.0,
+            "tn": 1.0,
+            "fp": 3.0,
+            "fn": 3.0
+          },
+          "positive_label_rate": 0.6,
+          "positive_prediction_rate": 0.6
+        }
+      },
+      "eval_accuracy_deltas": {
+        "vs_majority_label": 0.0,
+        "vs_repeat_last_delta_direction": 0.0
+      },
+      "context_probe": {
+        "context_mode": "online_running_context",
+        "training_context_codes": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "eval_context_codes": [
+          0,
+          2
+        ],
+        "comparison_applicable": false,
+        "status": "not_applicable_all_eval_contexts_seen",
+        "seen_episode_count": 10,
+        "unseen_episode_count": 0,
+        "seen_accuracy": 0.4,
+        "unseen_accuracy": null
+      },
+      "system_summary": {
+        "cycles": 213,
+        "injected_packets": 300,
+        "delivered_packets": 300,
+        "delivery_ratio": 1.0,
+        "dropped_packets": 0,
+        "drop_ratio": 0.0,
+        "mean_latency": 3.01,
+        "mean_route_cost": 0.03619,
+        "mean_feedback_award": 0.0906,
+        "node_atp_total": 5.7125,
+        "exact_matches": 151,
+        "mean_bit_accuracy": 0.5033
+      }
+    }
+  },
+  "trained_system_summary": {
+    "cycles": 140,
+    "injected_packets": 200,
+    "delivered_packets": 200,
+    "delivery_ratio": 1.0,
+    "dropped_packets": 0,
+    "drop_ratio": 0.0,
+    "mean_latency": 3.0,
+    "mean_route_cost": 0.03759,
+    "mean_feedback_award": 0.09,
+    "node_atp_total": 5.6379,
+    "exact_matches": 100,
+    "mean_bit_accuracy": 0.5
+  },
+  "topology_mode": "legacy",
+  "local_unit_mode": "legacy",
+  "local_unit_preset": "default",
+  "context_mode": "online_running_context",
+  "eval_system_summary": {
+    "cycles": 213,
+    "injected_packets": 300,
+    "delivered_packets": 300,
+    "delivery_ratio": 1.0,
+    "dropped_packets": 0,
+    "drop_ratio": 0.0,
+    "mean_latency": 3.01,
+    "mean_route_cost": 0.03619,
+    "mean_feedback_award": 0.0906,
+    "node_atp_total": 5.7125,
+    "exact_matches": 151,
+    "mean_bit_accuracy": 0.5033
+  },
+  "eval_context_probe": {
+    "context_mode": "online_running_context",
+    "training_context_codes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "eval_context_codes": [
+      0,
+      2
+    ],
+    "comparison_applicable": false,
+    "status": "not_applicable_all_eval_contexts_seen",
+    "seen_episode_count": 10,
+    "unseen_episode_count": 0,
+    "seen_accuracy": 0.4,
+    "unseen_accuracy": null
+  }
+}

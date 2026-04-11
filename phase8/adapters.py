@@ -4,7 +4,7 @@ import random
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
 
-from .environment import RoutingEnvironment
+from .environment import RoutingEnvironment, _expected_transform_for_task
 from .substrate import ConnectionSubstrate, SUPPORTED_TRANSFORMS
 
 TRANSFORM_ACTIONS: Tuple[str, ...] = SUPPORTED_TRANSFORMS
@@ -47,6 +47,37 @@ class LocalNodeActionBackend:
         self.neighbor_ids = neighbor_ids
         self.substrate = substrate
 
+    def _c_task_reopen_surcharge(
+        self,
+        observation: Dict[str, float],
+        transform_name: str | None,
+    ) -> float:
+        if transform_name in (None, "identity"):
+            return 0.0
+        preserve_pressure = max(
+            0.0,
+            min(1.0, observation.get("c_task_preserve_pressure", 0.0)),
+        )
+        reopen_pressure = max(
+            0.0,
+            min(1.0, observation.get("c_task_reopen_pressure", 0.0)),
+        )
+        resolution_confidence = max(
+            0.0,
+            min(1.0, observation.get("c_task_resolution_confidence", 0.0)),
+        )
+        preserve_mode = observation.get("c_task_preserve_mode", 0.0) >= 0.5
+        protection = max(
+            0.0,
+            preserve_pressure + 0.40 * resolution_confidence - 0.45 * reopen_pressure,
+        )
+        if protection <= 0.10 and not preserve_mode:
+            return 0.0
+        return min(
+            0.07,
+            0.012 + 0.045 * protection + (0.015 if preserve_mode else 0.0),
+        )
+
     def _action_context(self, observation: Dict[str, float]) -> int | None:
         if observation.get("effective_has_context", 0.0) >= 0.5:
             return int(observation.get("effective_context_bit", 0.0))
@@ -61,6 +92,7 @@ class LocalNodeActionBackend:
         actions = ["rest"]
         local_inbox = len(self.environment.inboxes[self.node_id])
         observation = self.environment.observe_local(self.node_id)
+        head_packet = self.environment.inboxes[self.node_id][0] if local_inbox > 0 else None
         context_bit = self._action_context(observation)
         latent_downstream_transform_gate = (
             self.node_id != self.environment.source_id
@@ -83,11 +115,136 @@ class LocalNodeActionBackend:
                 or observation.get(f"task_transform_affinity_{transform_name}", 0.0) > 0.0
                 or observation.get(f"source_sequence_transform_hint_{transform_name}", 0.0) > 0.0
             }
+        c_task_active = (
+            head_packet is not None
+            and self.environment.c_task_layer1_mode != "legacy"
+            and self.environment.c_task_layer1_enabled
+        )
+        c_task_source_expected_transform = (
+            _expected_transform_for_task(head_packet.task_id, head_packet.context_bit)
+            if c_task_active and head_packet is not None
+            else None
+        )
+        c_task_mode = str(self.environment.c_task_layer1_mode or "legacy")
+        node_source_hardening_shift = float(
+            observation.get("slow_c_task_node_support_source_hardening_shift", 0.0)
+        )
+        node_weak_context_boost = float(
+            observation.get("slow_c_task_node_support_weak_context_boost", 0.0)
+        )
+        source_hardening_score = max(
+            0.0,
+            min(
+                1.0,
+                0.50 * observation.get("packet_context_confidence", 0.0)
+                + 0.30 * observation.get("transform_commitment_margin", 0.0)
+                + 0.20 * observation.get("expected_transform_available", 0.0),
+            ),
+        )
+        source_hardening_threshold = max(
+            0.42,
+            min(
+                0.68,
+                0.66 - 0.18 * observation.get("packet_context_confidence", 0.0),
+            ),
+        )
+        source_hardening_threshold = max(
+            0.25,
+            min(
+                0.78,
+                source_hardening_threshold
+                + float(observation.get("slow_c_task_source_hardening_shift", 0.0))
+                + node_source_hardening_shift
+                - 0.12
+                * float(observation.get("slow_c_task_weak_context_boost", 0.0))
+                * float(observation.get("slow_weak_context_match", 0.0))
+                - 0.12
+                * node_weak_context_boost
+                * float(observation.get("slow_weak_context_match", 0.0)),
+            ),
+        )
+        communicative_source_self_harden = (
+            c_task_active
+            and c_task_mode == "communicative"
+            and self.node_id == self.environment.source_id
+            and c_task_source_expected_transform not in {None, "identity"}
+            and source_hardening_score >= source_hardening_threshold
+        )
+        preserve_advantage = (
+            float(observation.get("c_task_preserve_pressure", 0.0))
+            - float(observation.get("c_task_reopen_pressure", 0.0))
+        )
+        preserve_hardening_threshold = (
+            max(
+                0.28,
+                min(
+                    0.62,
+                    0.58 - 0.24 * float(observation.get("c_task_resolution_confidence", 0.0)),
+                ),
+            )
+        )
+        preserve_hardening_threshold = max(
+            0.18,
+            min(
+                0.82,
+                preserve_hardening_threshold
+                + float(observation.get("slow_c_task_preserve_hardening_shift", 0.0))
+                + 0.10
+                * float(observation.get("slow_c_task_weak_context_boost", 0.0))
+                * float(observation.get("slow_weak_context_match", 0.0))
+                + 0.08
+                * node_weak_context_boost
+                * float(observation.get("slow_weak_context_match", 0.0)),
+            ),
+        )
+        communicative_preserve_self_harden = (
+            c_task_active
+            and c_task_mode == "communicative"
+            and preserve_advantage >= preserve_hardening_threshold
+            and float(observation.get("c_task_resolution_confidence", 0.0)) >= 0.35
+        )
+        preserve_identity_only = (
+            c_task_active
+            and head_packet is not None
+            and (
+                (
+                    self.environment.c_task_layer1_mode == "stabilized"
+                    and bool(head_packet.c_task_preserve_mode)
+                )
+                or communicative_preserve_self_harden
+            )
+        )
         for neighbor_id in self.neighbor_ids:
             route_cost = self.substrate.use_cost(neighbor_id)
             if self.environment.route_available(self.node_id, neighbor_id, route_cost):
-                actions.append(f"route:{neighbor_id}")
+                allow_plain_route = True
+                if (
+                    c_task_active
+                    and self.node_id == self.environment.source_id
+                    and c_task_source_expected_transform not in {None, "identity"}
+                    and (
+                        self.environment.c_task_layer1_mode == "stabilized"
+                        or communicative_source_self_harden
+                    )
+                ):
+                    allow_plain_route = False
+                if allow_plain_route:
+                    actions.append(f"route:{neighbor_id}")
                 for transform_name in TRANSFORM_ACTIONS:
+                    if preserve_identity_only and transform_name != "identity":
+                        continue
+                    if (
+                        c_task_active
+                        and not preserve_identity_only
+                        and self.node_id == self.environment.source_id
+                        and c_task_source_expected_transform not in {None, "identity"}
+                        and (
+                            self.environment.c_task_layer1_mode == "stabilized"
+                            or communicative_source_self_harden
+                        )
+                        and transform_name != c_task_source_expected_transform
+                    ):
+                        continue
                     if latent_downstream_transform_gate:
                         if allowed_hidden_transforms is None:
                             if transform_name != "identity":
@@ -95,6 +252,7 @@ class LocalNodeActionBackend:
                         elif transform_name != "identity" and transform_name not in allowed_hidden_transforms:
                             continue
                     transform_cost = self.substrate.use_cost(neighbor_id, transform_name, context_bit)
+                    transform_cost += self._c_task_reopen_surcharge(observation, transform_name)
                     if self.environment.route_available(self.node_id, neighbor_id, transform_cost):
                         actions.append(f"route_transform:{neighbor_id}:{transform_name}")
             neighbor_congestion = len(self.environment.inboxes.get(neighbor_id, []))
@@ -121,7 +279,33 @@ class LocalNodeActionBackend:
         if action.startswith("route:"):
             neighbor_id = action.split(":", 1)[1]
             cost = self.substrate.use_cost(neighbor_id)
+            observation = self.environment.observe_local(self.node_id)
+            pulse_gate = self.environment.evaluate_route_action(
+                self.node_id,
+                neighbor_id,
+                observation=observation,
+            )
+            if not pulse_gate.get("allowed", True):
+                return ActionOutcome(
+                    success=False,
+                    result={
+                        "action": action,
+                        "success": False,
+                        "cost": 0.0,
+                        "delivered": False,
+                        "suppressed": True,
+                        **pulse_gate,
+                    },
+                    cost_secs=0.0,
+                )
             result = self.environment.route_signal(self.node_id, neighbor_id, cost)
+            result.update({
+                "pulse_reason": pulse_gate.get("reason", "legacy"),
+                "pulse_forced_release": bool(pulse_gate.get("forced_release", False)),
+                "pulse_release_ready": bool(pulse_gate.get("release_ready", True)),
+                "pulse_delay_streak": int(pulse_gate.get("delay_streak", 0)),
+                "pulse_delay_limit": int(pulse_gate.get("delay_limit", 0)),
+            })
             return ActionOutcome(
                 success=bool(result["success"]),
                 result=result,
@@ -131,14 +315,41 @@ class LocalNodeActionBackend:
         if action.startswith("route_transform:"):
             _, neighbor_id, transform_name = action.split(":", 2)
             observation = self.environment.observe_local(self.node_id)
+            pulse_gate = self.environment.evaluate_route_action(
+                self.node_id,
+                neighbor_id,
+                transform_name=transform_name,
+                observation=observation,
+            )
+            if not pulse_gate.get("allowed", True):
+                return ActionOutcome(
+                    success=False,
+                    result={
+                        "action": action,
+                        "success": False,
+                        "cost": 0.0,
+                        "delivered": False,
+                        "suppressed": True,
+                        **pulse_gate,
+                    },
+                    cost_secs=0.0,
+                )
             context_bit = self._action_context(observation)
             cost = self.substrate.use_cost(neighbor_id, transform_name, context_bit)
+            cost += self._c_task_reopen_surcharge(observation, transform_name)
             result = self.environment.route_signal(
                 self.node_id,
                 neighbor_id,
                 cost,
                 transform_name=transform_name,
             )
+            result.update({
+                "pulse_reason": pulse_gate.get("reason", "legacy"),
+                "pulse_forced_release": bool(pulse_gate.get("forced_release", False)),
+                "pulse_release_ready": bool(pulse_gate.get("release_ready", True)),
+                "pulse_delay_streak": int(pulse_gate.get("delay_streak", 0)),
+                "pulse_delay_limit": int(pulse_gate.get("delay_limit", 0)),
+            })
             return ActionOutcome(
                 success=bool(result["success"]),
                 result=result,

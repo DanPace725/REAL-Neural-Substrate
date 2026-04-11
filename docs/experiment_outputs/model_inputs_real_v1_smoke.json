@@ -1,0 +1,188 @@
+{
+  "config": {
+    "input_path": "..\\model_inputs\\chunks",
+    "train_fraction": 0.7,
+    "selector_seed": 13,
+    "feedback_amount": 0.18,
+    "packet_ttl": 8,
+    "forward_drain_cycles": 16,
+    "feedback_drain_cycles": 4,
+    "normalize_features": true,
+    "positive_delta_threshold": 0.0,
+    "max_train_scenarios": 2,
+    "max_eval_scenarios": 1,
+    "max_train_episodes_per_scenario": 25,
+    "max_eval_episodes_per_scenario": 25,
+    "eval_mode": "fresh",
+    "summary_only": true
+  },
+  "scenario_inventory": {
+    "total_scenarios": 1000,
+    "train_scenarios": [
+      0,
+      1
+    ],
+    "eval_scenarios": [
+      700
+    ]
+  },
+  "feature_names": [
+    "gadf_abs_mean",
+    "gadf_diag_mean",
+    "gadf_mean",
+    "gadf_std",
+    "gasf_abs_mean",
+    "gasf_diag_mean",
+    "gasf_mean",
+    "gasf_std",
+    "prev_result_delta",
+    "result_value"
+  ],
+  "feature_stats": {
+    "result_value": {
+      "count": 1978,
+      "mean": -0.045257,
+      "std": 0.534666
+    },
+    "prev_result_delta": {
+      "count": 1978,
+      "mean": 0.000162,
+      "std": 0.747705
+    },
+    "gasf_mean": {
+      "count": 1978,
+      "mean": -0.649094,
+      "std": 0.101494
+    },
+    "gasf_std": {
+      "count": 1978,
+      "mean": 0.363268,
+      "std": 0.076973
+    },
+    "gasf_abs_mean": {
+      "count": 1978,
+      "mean": 0.695098,
+      "std": 0.071505
+    },
+    "gasf_diag_mean": {
+      "count": 1978,
+      "mean": -0.423417,
+      "std": 0.147632
+    },
+    "gadf_mean": {
+      "count": 1978,
+      "mean": 0.0,
+      "std": 0.0001
+    },
+    "gadf_std": {
+      "count": 1978,
+      "mean": 0.604054,
+      "std": 0.059613
+    },
+    "gadf_abs_mean": {
+      "count": 1978,
+      "mean": 0.502857,
+      "std": 0.059079
+    },
+    "gadf_diag_mean": {
+      "count": 1978,
+      "mean": 0.0,
+      "std": 0.0001
+    }
+  },
+  "majority_label": 0,
+  "train_episode_count": 50,
+  "eval_episode_count": 25,
+  "train_summary": {
+    "episode_count": 50,
+    "metrics": {
+      "accuracy": 0.52,
+      "precision": 1.0,
+      "recall": 0.04,
+      "f1": 0.0769,
+      "tp": 1.0,
+      "tn": 25.0,
+      "fp": 0.0,
+      "fn": 24.0
+    },
+    "positive_label_rate": 0.5,
+    "positive_prediction_rate": 0.02,
+    "scenario_count": 2,
+    "mean_scenario_accuracy": 0.52,
+    "mean_prediction_confidence": 0.004,
+    "mean_delivered_packets": 10.0,
+    "mean_dropped_packets": 0.0,
+    "mean_feedback_events": 5.02
+  },
+  "eval_summary": {
+    "episode_count": 25,
+    "metrics": {
+      "accuracy": 0.4,
+      "precision": 0.4286,
+      "recall": 0.2143,
+      "f1": 0.2857,
+      "tp": 3.0,
+      "tn": 7.0,
+      "fp": 4.0,
+      "fn": 11.0
+    },
+    "positive_label_rate": 0.56,
+    "positive_prediction_rate": 0.28,
+    "scenario_count": 1,
+    "mean_scenario_accuracy": 0.4,
+    "mean_prediction_confidence": 0.174,
+    "mean_delivered_packets": 5.6,
+    "mean_dropped_packets": 4.4,
+    "mean_feedback_events": 0.0
+  },
+  "eval_baselines": {
+    "majority_label": {
+      "episode_count": 25,
+      "metrics": {
+        "accuracy": 0.44,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0.0,
+        "tn": 11.0,
+        "fp": 0.0,
+        "fn": 14.0
+      },
+      "positive_label_rate": 0.56,
+      "positive_prediction_rate": 0.0
+    },
+    "repeat_last_delta_direction": {
+      "episode_count": 25,
+      "metrics": {
+        "accuracy": 0.32,
+        "precision": 0.3846,
+        "recall": 0.3571,
+        "f1": 0.3704,
+        "tp": 5.0,
+        "tn": 3.0,
+        "fp": 8.0,
+        "fn": 9.0
+      },
+      "positive_label_rate": 0.56,
+      "positive_prediction_rate": 0.52
+    }
+  },
+  "eval_accuracy_deltas": {
+    "vs_majority_label": -0.04,
+    "vs_repeat_last_delta_direction": 0.08
+  },
+  "trained_system_summary": {
+    "cycles": 351,
+    "injected_packets": 500,
+    "delivered_packets": 500,
+    "delivery_ratio": 1.0,
+    "dropped_packets": 0,
+    "drop_ratio": 0.0,
+    "mean_latency": 3.002,
+    "mean_route_cost": 0.03692,
+    "mean_feedback_award": 0.0904,
+    "node_atp_total": 6.1941,
+    "exact_matches": 251,
+    "mean_bit_accuracy": 0.502
+  }
+}

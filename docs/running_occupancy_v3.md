@@ -2,6 +2,12 @@
 
 All commands are run from the repo root.
 
+## Historical note for ALIFE readers
+
+The occupancy result discussed during the ALIFE paper-writing window is a March 2026 result, not a promise about current `main`. If you are trying to line up with the paper, the closest practical reference points are the saved artifacts in `docs/experiment_outputs/v3_best_real_seed13_summary.md` and `docs/experiment_outputs/v3_best_real_seed13.json`, plus a checkout or snapshot around commit `09f9b09`.
+
+Current `main` has continued to evolve since that paper-facing run. The same V3 command family may therefore produce different F1 values today, even when the seed and headline settings match the saved configuration. Treat the saved March artifacts as the paper record, and treat current `main` as a later research branch of the occupancy work.
+
 ## Quick reference
 
 | Goal | Command |

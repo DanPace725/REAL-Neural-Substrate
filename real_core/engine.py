@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import inspect
+import random
 from math import isfinite
 from typing import Any, Dict, Optional
 
@@ -69,11 +70,14 @@ class RealCoreEngine:
         session_history: Optional[SessionHistory] = None,
         session_state_store: Optional[SessionStateStore] = None,
         session_budget: float = float("inf"),
+        selector_seed: int | None = None,
     ) -> None:
         self.observer = observer
         self.actions = actions
         self.coherence = coherence
-        self.selector = selector or CFARSelector()
+        self.selector = selector or CFARSelector(
+            rng=random.Random(selector_seed) if selector_seed is not None else None
+        )
         self.mesh = mesh or TiltRegulatoryMesh()
         self.memory = memory or EpisodicMemory(maxlen=500)
         self.substrate = substrate

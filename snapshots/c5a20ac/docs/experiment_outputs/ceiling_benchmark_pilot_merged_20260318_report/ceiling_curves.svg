@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="420" viewBox="0 0 1100 420">
+<rect width="100%" height="100%" fill="#f7f4eb"/>
+<style>text{font-family:Georgia,serif;fill:#1f1d1a}.small{font-size:12px}.label{font-size:15px;font-weight:bold}</style>
+<text x="28" y="30" class="label">Ceiling Curves by Family (Mean Bit Accuracy)</text>
+<rect x="40" y="60" width="296" height="320" fill="none" stroke="#c9c2b3"/>
+<text x="40" y="52" class="label">Family A</text>
+<line x1="40" y1="380.0" x2="336" y2="380.0" stroke="#e3ddcf"/>
+<text x="14" y="384.0" class="small">0.0</text>
+<line x1="40" y1="316.0" x2="336" y2="316.0" stroke="#e3ddcf"/>
+<text x="14" y="320.0" class="small">0.2</text>
+<line x1="40" y1="252.0" x2="336" y2="252.0" stroke="#e3ddcf"/>
+<text x="14" y="256.0" class="small">0.4</text>
+<line x1="40" y1="188.0" x2="336" y2="188.0" stroke="#e3ddcf"/>
+<text x="14" y="192.0" class="small">0.6</text>
+<line x1="40" y1="124.0" x2="336" y2="124.0" stroke="#e3ddcf"/>
+<text x="14" y="128.0" class="small">0.8</text>
+<line x1="40" y1="60.0" x2="336" y2="60.0" stroke="#e3ddcf"/>
+<text x="14" y="64.0" class="small">1.0</text>
+<text x="67.0" y="398" class="small">A1</text>
+<text x="141.0" y="398" class="small">A2</text>
+<text x="215.0" y="398" class="small">A3</text>
+<text x="289.0" y="398" class="small">A4</text>
+<polyline fill="none" stroke="#115f5f" stroke-width="3" points="77.0,206.2 151.0,194.3 225.0,175.7 299.0,168.3"/>
+<text x="67.0" y="398" class="small">A1</text>
+<text x="141.0" y="398" class="small">A2</text>
+<text x="215.0" y="398" class="small">A3</text>
+<text x="289.0" y="398" class="small">A4</text>
+<polyline fill="none" stroke="#c65d2e" stroke-width="3" points="77.0,212.1 151.0,220.0 225.0,210.0 299.0,207.0"/>
+<text x="67.0" y="398" class="small">A1</text>
+<text x="141.0" y="398" class="small">A2</text>
+<text x="215.0" y="398" class="small">A3</text>
+<text x="289.0" y="398" class="small">A4</text>
+<polyline fill="none" stroke="#7c2732" stroke-width="3" points="77.0,208.2 151.0,184.9 225.0,182.1 299.0,190.8"/>
+<polyline fill="none" stroke="#272343" stroke-width="3" stroke-dasharray="6 4" points="77.0,201.7 151.0,198.8 225.0,187.6 299.0,177.4"/>
+<rect x="406" y="60" width="296" height="320" fill="none" stroke="#c9c2b3"/>
+<text x="406" y="52" class="label">Family B</text>
+<line x1="406" y1="380.0" x2="702" y2="380.0" stroke="#e3ddcf"/>
+<text x="380" y="384.0" class="small">0.0</text>
+<line x1="406" y1="316.0" x2="702" y2="316.0" stroke="#e3ddcf"/>
+<text x="380" y="320.0" class="small">0.2</text>
+<line x1="406" y1="252.0" x2="702" y2="252.0" stroke="#e3ddcf"/>
+<text x="380" y="256.0" class="small">0.4</text>
+<line x1="406" y1="188.0" x2="702" y2="188.0" stroke="#e3ddcf"/>
+<text x="380" y="192.0" class="small">0.6</text>
+<line x1="406" y1="124.0" x2="702" y2="124.0" stroke="#e3ddcf"/>
+<text x="380" y="128.0" class="small">0.8</text>
+<line x1="406" y1="60.0" x2="702" y2="60.0" stroke="#e3ddcf"/>
+<text x="380" y="64.0" class="small">1.0</text>
+<text x="433.0" y="398" class="small">B1</text>
+<text x="507.0" y="398" class="small">B2</text>
+<text x="581.0" y="398" class="small">B3</text>
+<text x="655.0" y="398" class="small">B4</text>
+<polyline fill="none" stroke="#115f5f" stroke-width="3" points="443.0,175.7 517.0,157.6 591.0,165.3 665.0,165.0"/>
+<text x="433.0" y="398" class="small">B1</text>
+<text x="507.0" y="398" class="small">B2</text>
+<text x="581.0" y="398" class="small">B3</text>
+<text x="655.0" y="398" class="small">B4</text>
+<polyline fill="none" stroke="#c65d2e" stroke-width="3" points="443.0,204.2 517.0,209.8 591.0,193.0 665.0,196.1"/>
+<text x="433.0" y="398" class="small">B1</text>
+<text x="507.0" y="398" class="small">B2</text>
+<text x="581.0" y="398" class="small">B3</text>
+<text x="655.0" y="398" class="small">B4</text>
+<polyline fill="none" stroke="#7c2732" stroke-width="3" points="443.0,182.1 517.0,165.0 591.0,165.7 665.0,187.9"/>
+<polyline fill="none" stroke="#272343" stroke-width="3" stroke-dasharray="6 4" points="443.0,187.6 517.0,157.7 591.0,186.2 665.0,176.3"/>
+<rect x="772" y="60" width="296" height="320" fill="none" stroke="#c9c2b3"/>
+<text x="772" y="52" class="label">Family C</text>
+<line x1="772" y1="380.0" x2="1068" y2="380.0" stroke="#e3ddcf"/>
+<text x="746" y="384.0" class="small">0.0</text>
+<line x1="772" y1="316.0" x2="1068" y2="316.0" stroke="#e3ddcf"/>
+<text x="746" y="320.0" class="small">0.2</text>
+<line x1="772" y1="252.0" x2="1068" y2="252.0" stroke="#e3ddcf"/>
+<text x="746" y="256.0" class="small">0.4</text>
+<line x1="772" y1="188.0" x2="1068" y2="188.0" stroke="#e3ddcf"/>
+<text x="746" y="192.0" class="small">0.6</text>
+<line x1="772" y1="124.0" x2="1068" y2="124.0" stroke="#e3ddcf"/>
+<text x="746" y="128.0" class="small">0.8</text>
+<line x1="772" y1="60.0" x2="1068" y2="60.0" stroke="#e3ddcf"/>
+<text x="746" y="64.0" class="small">1.0</text>
+<text x="799.0" y="398" class="small">C1</text>
+<text x="873.0" y="398" class="small">C2</text>
+<text x="947.0" y="398" class="small">C3</text>
+<text x="1021.0" y="398" class="small">C4</text>
+<polyline fill="none" stroke="#115f5f" stroke-width="3" points="809.0,175.7 883.0,184.3 957.0,223.1 1031.0,217.9"/>
+<text x="799.0" y="398" class="small">C1</text>
+<text x="873.0" y="398" class="small">C2</text>
+<text x="947.0" y="398" class="small">C3</text>
+<text x="1021.0" y="398" class="small">C4</text>
+<polyline fill="none" stroke="#c65d2e" stroke-width="3" points="809.0,204.2 883.0,209.6 957.0,209.3 1031.0,217.7"/>
+<text x="799.0" y="398" class="small">C1</text>
+<text x="873.0" y="398" class="small">C2</text>
+<text x="947.0" y="398" class="small">C3</text>
+<text x="1021.0" y="398" class="small">C4</text>
+<polyline fill="none" stroke="#7c2732" stroke-width="3" points="809.0,182.1 883.0,202.6 957.0,225.1 1031.0,225.6"/>
+<polyline fill="none" stroke="#272343" stroke-width="3" stroke-dasharray="6 4" points="809.0,187.6 883.0,211.8 957.0,204.4 1031.0,210.4"/>
+<line x1="840" y1="34" x2="864" y2="34" stroke="#115f5f" stroke-width="3"/>
+<text x="872" y="38" class="small">fixed-visible</text>
+<line x1="840" y1="52" x2="864" y2="52" stroke="#c65d2e" stroke-width="3"/>
+<text x="872" y="56" class="small">fixed-latent</text>
+<line x1="840" y1="70" x2="864" y2="70" stroke="#7c2732" stroke-width="3"/>
+<text x="872" y="74" class="small">growth-visible</text>
+<line x1="840" y1="88" x2="864" y2="88" stroke="#272343" stroke-width="3" stroke-dasharray="6 4"/>
+<text x="872" y="92" class="small">best NN</text>
+</svg>

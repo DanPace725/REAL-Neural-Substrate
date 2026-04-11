@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from statistics import mean
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, Sequence
 
 from real_core import (
     GradientSliceRegulator,
@@ -11,12 +11,14 @@ from real_core import (
     LaminatedRunResult,
     LearningSliceRegulator,
     REALSliceRegulator,
+    REALWorldModel,
     RegulatorySignal,
     SliceExecutionPlan,
     SliceSummary,
 )
 
-from .environment import NativeSubstrateSystem, _expected_transform_for_task
+from .environment import NativeSubstrateSystem, TRANSFORM_NAMES, _expected_transform_for_task
+from .models import DEFAULT_LOCAL_UNIT_PRESET
 from .scenarios import ScenarioSpec
 
 
@@ -54,6 +56,9 @@ class Phase8SliceRunner:
         self._applied_signal_meta: dict[str, object] = {}
         self._last_slice_primary_metric: float | None = None
         self._skip_slice_end_consolidation = False
+        self.world_model_state: dict[str, object] = dict(
+            getattr(self.system, "world_model_state", {}) or {}
+        )
         self.system.environment.slow_growth_authorization = "auto"
 
     def run_slice(
@@ -257,6 +262,10 @@ class Phase8SliceRunner:
             "scenario_primed": self._scenario_primed,
             "carryovers": carryovers,
             "capability_policy": self.system.capability_policy,
+            "local_unit_mode": self.system.environment.local_unit_mode,
+            "local_unit_preset": self.system.environment.local_unit_preset,
+            "max_atp": float(self.system.environment.max_atp),
+            "world_model_state": dict(getattr(self.system, "world_model_state", {}) or {}),
         }
 
     def restore_fast_state(self, snapshot: Dict[str, Any]) -> None:
@@ -271,6 +280,24 @@ class Phase8SliceRunner:
             self.scenario,
             seed=self._seed,
             capability_policy=capability_policy,
+            local_unit_mode=str(
+                snapshot.get(
+                    "local_unit_mode",
+                    runtime_state.get("local_unit_mode", "legacy"),
+                )
+            ),
+            local_unit_preset=str(
+                snapshot.get(
+                    "local_unit_preset",
+                    runtime_state.get("local_unit_preset", DEFAULT_LOCAL_UNIT_PRESET),
+                )
+            ),
+            max_atp=float(
+                snapshot.get(
+                    "max_atp",
+                    runtime_state.get("max_atp", self.system.environment.max_atp),
+                )
+            ),
         )
         rebuilt.global_cycle = int(snapshot.get("global_cycle", rebuilt.global_cycle))
         rebuilt.session_start_cycle = int(
@@ -281,6 +308,7 @@ class Phase8SliceRunner:
         rebuilt.environment.capability_policy = capability_policy
         rebuilt.topology_state = rebuilt.environment.topology_state
         rebuilt.capability_timeline = list(snapshot.get("capability_timeline", []))
+        rebuilt.world_model_state = dict(snapshot.get("world_model_state", {}) or {})
         rebuilt.rebuild_agents_from_topology()
         for node_id, carryover in dict(snapshot.get("carryovers", {})).items():
             agent = rebuilt.agents.get(node_id)
@@ -298,6 +326,7 @@ class Phase8SliceRunner:
             self._last_slice_primary_metric,
         )
         self._scenario_primed = bool(snapshot.get("scenario_primed", self._scenario_primed))
+        self.world_model_state = dict(getattr(self.system, "world_model_state", {}) or {})
 
     def _slice_primary_metric(self, summary: SliceSummary) -> float:
         floor_accuracy = float(
@@ -443,6 +472,7 @@ class Phase8SliceRunner:
                 elif growth_drive <= 0.12:
                     growth_authorization = "hold"
         self.system.environment.slow_growth_authorization = growth_authorization
+        self.system.environment._apply_growth_authorization_to_intents(growth_authorization)
         weak_context_bit = signal.bias_updates.get("weak_context_bit")
         self.system.environment.slow_weak_context_bit = (
             int(weak_context_bit) if weak_context_bit is not None else None
@@ -450,6 +480,52 @@ class Phase8SliceRunner:
         self.system.environment.slow_weak_context_gap = float(
             signal.bias_updates.get("weak_context_gap", 0.0),
         )
+        c_task_profile = signal_meta.get("c_task_regulatory_profile", {})
+        if not isinstance(c_task_profile, dict):
+            c_task_profile = {}
+        self.system.environment.slow_c_task_source_hardening_shift = float(
+            c_task_profile.get("source_hardening_shift", 0.0)
+        )
+        self.system.environment.slow_c_task_preserve_hardening_shift = float(
+            c_task_profile.get("preserve_hardening_shift", 0.0)
+        )
+        self.system.environment.slow_c_task_preserve_bonus_scale = float(
+            c_task_profile.get("preserve_bonus_scale", 1.0)
+        )
+        self.system.environment.slow_c_task_reopen_penalty_scale = float(
+            c_task_profile.get("reopen_penalty_scale", 1.0)
+        )
+        self.system.environment.slow_c_task_weak_context_boost = float(
+            c_task_profile.get("weak_context_boost", 0.0)
+        )
+        self.system.environment.slow_c_task_atp_conservation_bias = float(
+            c_task_profile.get("atp_conservation_bias", 0.0)
+        )
+        self.system.environment.slow_c_task_route_cost_scale = float(
+            c_task_profile.get("route_cost_scale", 1.0)
+        )
+        self.system.environment.slow_c_task_recovery_scale = float(
+            c_task_profile.get("recovery_scale", 1.0)
+        )
+        node_support_profile = signal_meta.get("c_task_node_support_profile", {})
+        if not isinstance(node_support_profile, dict):
+            node_support_profile = {}
+        self.system.environment.slow_c_task_node_support_profiles = {
+            str(node_id): {
+                str(key): float(value)
+                for key, value in profile.items()
+                if isinstance(value, (int, float))
+            }
+            for node_id, profile in node_support_profile.items()
+            if isinstance(profile, dict)
+        }
+        for node_id, profile in self.system.environment.slow_c_task_node_support_profiles.items():
+            atp_credit = max(0.0, float(profile.get("atp_credit", 0.0)))
+            if atp_credit <= 0.0 or node_id not in self.system.environment.node_states:
+                continue
+            state = self.system.environment.state_for(node_id)
+            state.atp = min(state.max_atp, state.atp + atp_credit)
+            state.reward_buffer = min(state.max_atp, state.reward_buffer + atp_credit * 0.5)
 
         # Store the signal's metadata so _build_slice_summary can record what was applied.
         self._applied_signal_meta = signal_meta
@@ -459,6 +535,11 @@ class Phase8SliceRunner:
             "applied_context_pressure": self._context_pressure,
             "applied_reset_flags": dict(signal.reset_flags),
             "applied_reframe_flags": dict(signal.reframe_flags),
+            "applied_c_task_regulatory_profile": dict(c_task_profile),
+            "applied_c_task_node_support_profile": {
+                node_id: dict(profile)
+                for node_id, profile in self.system.environment.slow_c_task_node_support_profiles.items()
+            },
         })
 
         # Mode switch: rebuild the system but preserve learned substrate state
@@ -561,6 +642,13 @@ class Phase8SliceRunner:
             self.scenario,
             seed=self._seed,
             capability_policy=capability_policy,
+            local_unit_mode=str(
+                saved_runtime_state.get("local_unit_mode", "legacy")
+            ),
+            local_unit_preset=str(
+                saved_runtime_state.get("local_unit_preset", DEFAULT_LOCAL_UNIT_PRESET)
+            ),
+            max_atp=float(saved_runtime_state.get("max_atp", self.system.environment.max_atp)),
         )
         rebuilt.global_cycle = saved_global_cycle
         rebuilt.session_start_cycle = saved_session_start_cycle
@@ -699,7 +787,12 @@ class Phase8SliceRunner:
         start_summary: dict[str, object],
         end_summary: dict[str, object],
     ) -> SliceSummary:
-        cycle_entries = self._entries_for_cycle_window(start_cycle, end_cycle)
+        cycle_entries_by_agent = self._entries_for_cycle_window_by_agent(start_cycle, end_cycle)
+        cycle_entries = [
+            entry
+            for agent_entries in cycle_entries_by_agent.values()
+            for entry in agent_entries
+        ]
         route_entries = [
             entry
             for entry in cycle_entries
@@ -717,6 +810,40 @@ class Phase8SliceRunner:
             1
             for packet in delivered_packets
             if packet.bit_match_ratio is not None and 0.0 < float(packet.bit_match_ratio) < 1.0
+        )
+        forced_choice_count = sum(
+            1 for packet in delivered_packets if bool(getattr(packet, "forced_transform_applied", False))
+        )
+        forced_choice_rescued_count = sum(
+            1
+            for packet in delivered_packets
+            if bool(getattr(packet, "forced_transform_applied", False))
+            and bool(packet.matched_target)
+            and getattr(packet, "substrate_matched_target", None) is False
+        )
+        forced_choice_still_failed_count = sum(
+            1
+            for packet in delivered_packets
+            if bool(getattr(packet, "forced_transform_applied", False))
+            and not bool(packet.matched_target)
+        )
+        teacher_trace_packets = sum(
+            1 for packet in delivered_packets if bool(getattr(packet, "teacher_trace", []))
+        )
+        teacher_trace_hops = sum(
+            len(list(getattr(packet, "teacher_trace", []) or [])) for packet in delivered_packets
+        )
+        teacher_trace_forced_hops = sum(
+            sum(1 for step in list(getattr(packet, "teacher_trace", []) or []) if bool(step.get("forced", False)))
+            for packet in delivered_packets
+        )
+        teacher_trace_payload_mismatch_hops = sum(
+            sum(
+                1
+                for step in list(getattr(packet, "teacher_trace", []) or [])
+                if not bool(step.get("payload_matches_expected", True))
+            )
+            for packet in delivered_packets
         )
         mean_bit_accuracy = (
             mean(float(packet.bit_match_ratio or 0.0) for packet in delivered_packets)
@@ -742,7 +869,7 @@ class Phase8SliceRunner:
             if cycle_entries
             else 0.0
         )
-        final_coherence = self._final_coherence_for_slice(cycle_entries)
+        final_coherence = self._final_coherence_for_slice(cycle_entries_by_agent)
 
         ambiguity_samples = [
             float(entry.state_before.get("provisional_context_ambiguity", 0.0))
@@ -813,6 +940,12 @@ class Phase8SliceRunner:
             if hidden_packet_commitment_margin_samples
             else 0.0
         )
+        source_route_breakdown = self._source_route_breakdown(cycle_entries_by_agent)
+        last_route_state = (
+            dict(route_entries[-1].state_before)
+            if route_entries and isinstance(route_entries[-1].state_before, dict)
+            else {}
+        )
 
         # Per-context accuracy
         context_accuracy: dict[str, float] = {}
@@ -823,6 +956,26 @@ class Phase8SliceRunner:
         for ctx_key, pkts in ctx_packets.items():
             ctx_acc = mean(float(p.bit_match_ratio or 0.0) for p in pkts)
             context_accuracy[f"context_{ctx_key}"] = round(ctx_acc, 4)
+        c_task_preserve_pressures = [
+            float(getattr(packet, "c_task_preserve_pressure", 0.0))
+            for packet in delivered_packets
+            if getattr(packet, "c_task_resolved_transform", None) is not None
+        ]
+        c_task_reopen_pressures = [
+            float(getattr(packet, "c_task_reopen_pressure", 0.0))
+            for packet in delivered_packets
+            if getattr(packet, "c_task_resolved_transform", None) is not None
+        ]
+        c_task_resolution_confidences = [
+            float(getattr(packet, "c_task_resolution_confidence", 0.0))
+            for packet in delivered_packets
+            if getattr(packet, "c_task_resolved_transform", None) is not None
+        ]
+        c_task_preserve_mode_packets = sum(
+            1
+            for packet in delivered_packets
+            if bool(getattr(packet, "c_task_preserve_mode", False))
+        )
         worst_context_accuracy = (
             min(context_accuracy.values())
             if context_accuracy
@@ -877,6 +1030,30 @@ class Phase8SliceRunner:
 
         forecast_metrics = self._forecast_metrics(cycle_entries)
         growth_request = self._growth_request_summary()
+        c_task_node_evidence = self._c_task_node_evidence(cycle_entries_by_agent)
+        c_task_regime_summary = self._c_task_regime_summary(
+            delivered_packets=delivered_packets,
+            route_entries=route_entries,
+            source_route_breakdown=source_route_breakdown,
+            context_accuracy=context_accuracy,
+            node_evidence=c_task_node_evidence,
+        )
+        start_local_unit = dict(start_summary.get("local_unit_summary", {}))
+        end_local_unit = dict(end_summary.get("local_unit_summary", {}))
+        teacher_context = None
+        teacher_confidence = 0.0
+        if float(last_route_state.get("effective_has_context", 0.0)) >= 0.5:
+            teacher_context = int(round(float(last_route_state.get("effective_context_bit", 0.0))))
+            teacher_confidence = float(last_route_state.get("effective_context_confidence", 0.0))
+        elif (
+            float(last_route_state.get("visible_context_exposed", 0.0)) >= 0.5
+            and float(last_route_state.get("packet_context_confidence", 0.0)) > 0.0
+        ):
+            teacher_context = int(round(float(last_route_state.get("packet_context_bit", 0.0))))
+            teacher_confidence = float(last_route_state.get("packet_context_confidence", 0.0))
+        elif float(last_route_state.get("source_sequence_available", 0.0)) >= 0.5:
+            teacher_context = int(round(float(last_route_state.get("source_sequence_context_estimate", 0.0))))
+            teacher_confidence = float(last_route_state.get("source_sequence_context_confidence", 0.0))
         intervention_payoff_trend = self._intervention_payoff_trend(
             forecast_metrics=forecast_metrics,
             fallback_metric=mean_bit_accuracy,
@@ -914,6 +1091,7 @@ class Phase8SliceRunner:
             context_accuracy=context_accuracy,
             mode_used=self._current_mode,
             metadata={
+                **self._applied_signal_meta,
                 "packets_evaluated": packets_evaluated,
                 "final_accuracy": round(mean_bit_accuracy, 4),
                 "mean_bit_accuracy": round(mean_bit_accuracy, 4),
@@ -925,6 +1103,58 @@ class Phase8SliceRunner:
                 "max_provisional_context_ambiguity": round(float(max_provisional_ambiguity), 4),
                 "mean_transform_commitment_margin": round(float(mean_commitment_margin), 4),
                 "min_transform_commitment_margin": round(float(min_commitment_margin), 4),
+                "force_expected_transform_at_sink": bool(
+                    self.system.environment.force_expected_transform_at_sink
+                ),
+                "forced_choice_count": int(forced_choice_count),
+                "forced_choice_rescued_count": int(forced_choice_rescued_count),
+                "forced_choice_still_failed_count": int(forced_choice_still_failed_count),
+                "teacher_trace_mode": str(self.system.environment.teacher_trace_mode),
+                "teacher_transform_policy": str(self.system.environment.teacher_transform_policy),
+                "teacher_force_nodes": list(self.system.environment.teacher_force_nodes),
+                "teacher_trace_packets": int(teacher_trace_packets),
+                "teacher_trace_hops": int(teacher_trace_hops),
+                "teacher_trace_forced_hops": int(teacher_trace_forced_hops),
+                "teacher_trace_payload_mismatch_hops": int(
+                    teacher_trace_payload_mismatch_hops
+                ),
+                "source_sequence_context_estimate": round(
+                    float(last_route_state.get("source_sequence_context_estimate", -1.0)),
+                    4,
+                ),
+                "source_sequence_context_confidence": round(
+                    float(last_route_state.get("source_sequence_context_confidence", 0.0)),
+                    4,
+                ),
+                "source_sequence_channel_context_confidence": round(
+                    float(
+                        last_route_state.get(
+                            "source_sequence_channel_context_confidence",
+                            0.0,
+                        )
+                    ),
+                    4,
+                ),
+                "source_route_context_estimate": round(
+                    float(last_route_state.get("source_route_context_estimate", -1.0)),
+                    4,
+                ),
+                "source_route_context_confidence": round(
+                    float(last_route_state.get("source_route_context_confidence", 0.0)),
+                    4,
+                ),
+                "source_feedback_context_estimate": round(
+                    float(last_route_state.get("source_feedback_context_estimate", -1.0)),
+                    4,
+                ),
+                "source_feedback_context_confidence": round(
+                    float(last_route_state.get("source_feedback_context_confidence", 0.0)),
+                    4,
+                ),
+                "world_model_teacher_hypothesis": (
+                    float(teacher_context) if teacher_context is not None else None
+                ),
+                "world_model_teacher_confidence": round(float(teacher_confidence), 4),
                 "hidden_packet_route_count": len(hidden_packet_route_entries),
                 "hidden_packet_mean_provisional_context_ambiguity": round(
                     float(hidden_packet_mean_ambiguity),
@@ -942,30 +1172,526 @@ class Phase8SliceRunner:
                     float(hidden_packet_min_commitment_margin),
                     4,
                 ),
+                "source_route_breakdown": source_route_breakdown,
+                "c_task_regime_summary": c_task_regime_summary,
                 "capability_policy": self.system.capability_policy,
+                "c_task_layer1_mode": str(self.system.environment.c_task_layer1_mode),
+                "c_task_mean_preserve_pressure": round(
+                    float(mean(c_task_preserve_pressures)) if c_task_preserve_pressures else 0.0,
+                    4,
+                ),
+                "c_task_mean_reopen_pressure": round(
+                    float(mean(c_task_reopen_pressures)) if c_task_reopen_pressures else 0.0,
+                    4,
+                ),
+                "c_task_mean_resolution_confidence": round(
+                    float(mean(c_task_resolution_confidences)) if c_task_resolution_confidences else 0.0,
+                    4,
+                ),
+                "c_task_preserve_mode_packet_ratio": round(
+                    float(c_task_preserve_mode_packets) / max(len(delivered_packets), 1),
+                    4,
+                ),
+                "local_unit_mode": self.system.environment.local_unit_mode,
+                "local_unit_preset": self.system.environment.local_unit_preset,
+                "pulse_fire_count": int(
+                    float(end_local_unit.get("pulse_fire_count_total", 0.0))
+                    - float(start_local_unit.get("pulse_fire_count_total", 0.0))
+                ),
+                "suppressed_route_attempts": int(
+                    float(end_local_unit.get("suppressed_route_attempt_count_total", 0.0))
+                    - float(start_local_unit.get("suppressed_route_attempt_count_total", 0.0))
+                ),
+                "mean_accumulator_level": round(
+                    float(end_local_unit.get("mean_accumulator_level", 0.0)),
+                    4,
+                ),
+                "refractory_occupancy": round(
+                    float(end_local_unit.get("refractory_occupancy", 0.0)),
+                    4,
+                ),
+                "mean_ambiguity_reservoir": round(
+                    float(end_local_unit.get("mean_ambiguity_reservoir", 0.0)),
+                    4,
+                ),
+                "mean_plasticity_gate": round(
+                    float(end_local_unit.get("mean_plasticity_gate", 0.0)),
+                    4,
+                ),
+                "requesting_growth_nodes": int(
+                    float(end_local_unit.get("requesting_growth_nodes", 0.0))
+                ),
+                "max_growth_request_pressure": round(
+                    float(end_local_unit.get("max_growth_request_pressure", 0.0)),
+                    4,
+                ),
                 "context_pressure": self._context_pressure,
                 "growth_request": growth_request,
                 "forecast_metrics": forecast_metrics,
                 "intervention_payoff_trend": intervention_payoff_trend,
-                **self._applied_signal_meta,
             },
         )
         return summary
 
-    def _entries_for_cycle_window(self, start_cycle: int, end_cycle: int) -> list[object]:
-        entries = []
-        for agent in self.system.agents.values():
-            for entry in agent.engine.memory.entries:
-                if start_cycle < entry.cycle <= end_cycle:
-                    entries.append(entry)
-        return entries
+    def _source_route_breakdown(
+        self,
+        cycle_entries_by_agent: dict[str, list[object]],
+    ) -> dict[str, object]:
+        source_id = self.system.environment.source_id
+        source_entries = cycle_entries_by_agent.get(source_id, [])
+        if not source_entries:
+            return {}
 
-    def _final_coherence_for_slice(self, cycle_entries: list[object]) -> float:
-        latest_by_agent: Dict[str, float] = {}
+        def _context_key(entry: object) -> str:
+            state_before = getattr(entry, "state_before", {})
+            if not isinstance(state_before, dict):
+                return "context_none"
+            if float(state_before.get("effective_has_context", 0.0)) >= 0.5:
+                return f"context_{int(round(float(state_before.get('effective_context_bit', 0.0))))}"
+            if float(state_before.get("packet_has_context", 0.0)) >= 0.5:
+                return f"context_{int(round(float(state_before.get('packet_context_bit', state_before.get('head_context_bit', 0.0)))))}"
+            if float(state_before.get("head_has_context", 0.0)) >= 0.5:
+                return f"context_{int(round(float(state_before.get('head_context_bit', 0.0))))}"
+            return "context_none"
+
+        def _action_parts(action: str) -> tuple[str | None, str]:
+            if action.startswith("route_transform:"):
+                parts = action.split(":")
+                if len(parts) == 3:
+                    return parts[1], parts[2]
+            if action.startswith("route:"):
+                return action.split(":", 1)[1], "identity"
+            return None, "identity"
+
+        source_entries = [
+            entry
+            for entry in source_entries
+            if (
+                str(getattr(entry, "action", "")).startswith("route:")
+                or str(getattr(entry, "action", "")).startswith("route_transform:")
+            )
+        ]
+        if not source_entries:
+            return {}
+
+        breakdown: dict[str, dict[str, dict[str, int]]] = {}
+        for entry in source_entries:
+            context_key = _context_key(entry)
+            neighbor_id, transform_name = _action_parts(str(getattr(entry, "action", "")))
+            if neighbor_id is None:
+                continue
+            payload = breakdown.setdefault(
+                context_key,
+                {
+                    "routes": {},
+                    "transforms": {},
+                    "route_transforms": {},
+                },
+            )
+            routes = payload["routes"]
+            transforms = payload["transforms"]
+            route_transforms = payload["route_transforms"]
+            routes[neighbor_id] = int(routes.get(neighbor_id, 0)) + 1
+            transforms[transform_name] = int(transforms.get(transform_name, 0)) + 1
+            route_transform_key = f"{neighbor_id}|{transform_name}"
+            route_transforms[route_transform_key] = int(
+                route_transforms.get(route_transform_key, 0)
+            ) + 1
+        return breakdown
+
+    def _c_task_regime_summary(
+        self,
+        *,
+        delivered_packets: list[object],
+        route_entries: list[object],
+        source_route_breakdown: dict[str, object],
+        context_accuracy: dict[str, float],
+        node_evidence: dict[str, object],
+    ) -> dict[str, object]:
+        if str(self.system.environment.c_task_layer1_mode or "legacy") == "legacy":
+            return {}
+        if not str(self.benchmark_family).upper().startswith("C"):
+            return {}
+
+        context_counts: dict[str, int] = {}
+        for packet in delivered_packets:
+            key = f"context_{packet.context_bit}" if getattr(packet, "context_bit", None) is not None else "context_none"
+            context_counts[key] = context_counts.get(key, 0) + 1
+        if context_accuracy:
+            weak_context_key = min(
+                context_accuracy,
+                key=lambda key: float(context_accuracy.get(key, 0.0)),
+            )
+            strong_context_key = max(
+                context_accuracy,
+                key=lambda key: float(context_accuracy.get(key, 0.0)),
+            )
+        else:
+            weak_context_key = "context_none"
+            strong_context_key = "context_none"
+        weak_accuracy = float(context_accuracy.get(weak_context_key, 0.0))
+        strong_accuracy = float(context_accuracy.get(strong_context_key, weak_accuracy))
+        delivered_max = max(context_counts.values()) if context_counts else 0
+        delivered_min = min(context_counts.values()) if context_counts else 0
+        coverage_ratio = (
+            float(delivered_min) / max(float(delivered_max), 1.0)
+            if delivered_max > 0
+            else 0.0
+        )
+
+        source_counts: dict[str, int] = {}
+        for context_key, payload in source_route_breakdown.items():
+            if not isinstance(payload, dict):
+                continue
+            routes = payload.get("routes", {})
+            if isinstance(routes, dict):
+                source_counts[str(context_key)] = int(sum(int(v) for v in routes.values()))
+        source_max = max(source_counts.values()) if source_counts else 0
+        source_min = min(source_counts.values()) if source_counts else 0
+        source_balance = (
+            float(source_min) / max(float(source_max), 1.0)
+            if source_max > 0
+            else 0.0
+        )
+
+        source_ready = 0
+        source_total = 0
+        preserve_ready = 0
+        preserve_total = 0
+        preserve_identity = 0
+        preserve_actions = 0
+        low_atp_routes = 0
+        c_task_routes = 0
+        packet_hypothesis_confidences: list[float] = []
+        node_hypothesis_confidences: list[float] = []
+        hypothesis_margins: list[float] = []
+        hypothesis_alignment = 0
+        hypothesis_alignment_total = 0
+        for entry in route_entries:
+            state_before = getattr(entry, "state_before", {})
+            if not isinstance(state_before, dict):
+                continue
+            if float(state_before.get("c_task_layer1_active", 0.0)) < 0.5:
+                continue
+            c_task_routes += 1
+            packet_hypothesis_confidences.append(
+                max(
+                    0.0,
+                    min(1.0, float(state_before.get("c_task_hypothesis_confidence", 0.0))),
+                )
+            )
+            node_hypothesis_confidences.append(
+                max(
+                    0.0,
+                    min(1.0, float(state_before.get("c_task_node_hypothesis_confidence", 0.0))),
+                )
+            )
+            packet_beliefs = sorted(
+                (
+                    max(
+                        0.0,
+                        min(
+                            1.0,
+                            float(state_before.get(f"c_task_transform_belief_{name}", 0.0)),
+                        ),
+                    )
+                    for name in TRANSFORM_NAMES
+                ),
+                reverse=True,
+            )
+            if packet_beliefs:
+                top_belief = packet_beliefs[0]
+                second_belief = packet_beliefs[1] if len(packet_beliefs) > 1 else 0.0
+                hypothesis_margins.append(max(0.0, top_belief - second_belief))
+            expected_transform = next(
+                (
+                    name
+                    for name in TRANSFORM_NAMES
+                    if float(state_before.get(f"expected_transform_{name}", 0.0)) >= 0.5
+                ),
+                None,
+            )
+            hypothesis_transform = next(
+                (
+                    name
+                    for name in TRANSFORM_NAMES
+                    if float(state_before.get(f"c_task_hypothesis_transform_{name}", 0.0)) >= 0.5
+                ),
+                None,
+            )
+            if hypothesis_transform is None:
+                hypothesis_transform = next(
+                    (
+                        name
+                        for name in TRANSFORM_NAMES
+                        if float(
+                            state_before.get(f"c_task_node_hypothesis_transform_{name}", 0.0)
+                        )
+                        >= 0.5
+                    ),
+                    None,
+                )
+            if expected_transform is not None and hypothesis_transform is not None:
+                hypothesis_alignment_total += 1
+                if expected_transform == hypothesis_transform:
+                    hypothesis_alignment += 1
+            if float(state_before.get("atp_ratio", 0.0)) < 0.18:
+                low_atp_routes += 1
+            transform_name = "identity"
+            action = str(getattr(entry, "action", ""))
+            if action.startswith("route_transform:"):
+                parts = action.split(":")
+                if len(parts) == 3:
+                    transform_name = parts[2]
+            is_source = float(state_before.get("node_is_source", 0.0)) >= 0.5
+            if is_source:
+                if float(state_before.get("expected_transform_available", 0.0)) >= 0.5:
+                    source_total += 1
+                    packet_confidence = max(
+                        0.0,
+                        min(1.0, float(state_before.get("packet_context_confidence", 0.0))),
+                    )
+                    hardening_score = max(
+                        0.0,
+                        min(
+                            1.0,
+                            0.50 * packet_confidence
+                            + 0.30 * max(
+                                0.0,
+                                min(
+                                    1.0,
+                                    float(
+                                        state_before.get(
+                                            "transform_commitment_margin",
+                                            0.0,
+                                        )
+                                    ),
+                                ),
+                            )
+                            + 0.20 * max(
+                                0.0,
+                                min(
+                                    1.0,
+                                    float(
+                                        state_before.get(
+                                            "expected_transform_available",
+                                            0.0,
+                                        )
+                                    ),
+                                ),
+                            ),
+                        ),
+                    )
+                    hardening_threshold = max(
+                        0.42,
+                        min(0.68, 0.66 - 0.18 * packet_confidence),
+                    )
+                    if hardening_score >= hardening_threshold:
+                        source_ready += 1
+            else:
+                resolution_confidence = max(
+                    0.0,
+                    min(
+                        1.0,
+                        float(state_before.get("c_task_resolution_confidence", 0.0)),
+                    ),
+                )
+                preserve_advantage = (
+                    float(state_before.get("c_task_preserve_pressure", 0.0))
+                    - float(state_before.get("c_task_reopen_pressure", 0.0))
+                )
+                hardening_threshold = max(
+                    0.28,
+                    min(0.62, 0.58 - 0.24 * resolution_confidence),
+                )
+                preserve_total += 1
+                if (
+                    preserve_advantage >= hardening_threshold
+                    and resolution_confidence >= 0.35
+                ):
+                    preserve_ready += 1
+                if (
+                    float(state_before.get("c_task_preserve_pressure", 0.0)) >= 0.10
+                    or float(state_before.get("c_task_preserve_mode", 0.0)) >= 0.5
+                ):
+                    preserve_actions += 1
+                    if transform_name == "identity":
+                        preserve_identity += 1
+
+        return {
+            "packets_evaluated": int(len(delivered_packets)),
+            "context_gap": round(max(0.0, strong_accuracy - weak_accuracy), 4),
+            "weak_context_key": str(weak_context_key),
+            "weak_context_accuracy": round(weak_accuracy, 4),
+            "strong_context_key": str(strong_context_key),
+            "strong_context_accuracy": round(strong_accuracy, 4),
+            "context_coverage_ratio": round(coverage_ratio, 4),
+            "source_context_balance": round(source_balance, 4),
+            "source_self_hardening_ready_ratio": round(
+                float(source_ready) / max(source_total, 1),
+                4,
+            ),
+            "preserve_hardening_ready_ratio": round(
+                float(preserve_ready) / max(preserve_total, 1),
+                4,
+            ),
+            "preserve_identity_action_ratio": round(
+                float(preserve_identity) / max(preserve_actions, 1),
+                4,
+            ),
+            "low_atp_route_ratio": round(
+                float(low_atp_routes) / max(c_task_routes, 1),
+                4,
+            ),
+            "mean_preserve_pressure": round(
+                float(mean(
+                    float(getattr(packet, "c_task_preserve_pressure", 0.0))
+                    for packet in delivered_packets
+                    if getattr(packet, "c_task_resolved_transform", None) is not None
+                ))
+                if any(
+                    getattr(packet, "c_task_resolved_transform", None) is not None
+                    for packet in delivered_packets
+                )
+                else 0.0,
+                4,
+            ),
+            "mean_reopen_pressure": round(
+                float(mean(
+                    float(getattr(packet, "c_task_reopen_pressure", 0.0))
+                    for packet in delivered_packets
+                    if getattr(packet, "c_task_resolved_transform", None) is not None
+                ))
+                if any(
+                    getattr(packet, "c_task_resolved_transform", None) is not None
+                    for packet in delivered_packets
+                )
+                else 0.0,
+                4,
+            ),
+            "mean_resolution_confidence": round(
+                float(mean(
+                    float(getattr(packet, "c_task_resolution_confidence", 0.0))
+                    for packet in delivered_packets
+                    if getattr(packet, "c_task_resolved_transform", None) is not None
+                ))
+                if any(
+                    getattr(packet, "c_task_resolved_transform", None) is not None
+                    for packet in delivered_packets
+                )
+                else 0.0,
+                4,
+            ),
+            "preserve_mode_packet_ratio": round(
+                float(
+                    sum(
+                        1
+                        for packet in delivered_packets
+                        if bool(getattr(packet, "c_task_preserve_mode", False))
+                    )
+                )
+                / max(len(delivered_packets), 1),
+                4,
+            ),
+            "mean_hypothesis_confidence": round(
+                float(mean(packet_hypothesis_confidences))
+                if packet_hypothesis_confidences
+                else 0.0,
+                4,
+            ),
+            "mean_node_hypothesis_confidence": round(
+                float(mean(node_hypothesis_confidences))
+                if node_hypothesis_confidences
+                else 0.0,
+                4,
+            ),
+            "mean_hypothesis_margin": round(
+                float(mean(hypothesis_margins))
+                if hypothesis_margins
+                else 0.0,
+                4,
+            ),
+            "hypothesis_alignment_ratio": round(
+                float(hypothesis_alignment) / max(hypothesis_alignment_total, 1),
+                4,
+            ),
+            "node_evidence": node_evidence,
+        }
+
+    def _c_task_node_evidence(
+        self,
+        cycle_entries_by_agent: dict[str, list[object]],
+    ) -> dict[str, object]:
+        if str(self.system.environment.c_task_layer1_mode or "legacy") == "legacy":
+            return {}
+        if not str(self.benchmark_family).upper().startswith("C"):
+            return {}
+
+        evidence: dict[str, dict[str, float]] = {}
+        for node_id, agent_entries in cycle_entries_by_agent.items():
+            node_routes = 0
+            low_atp_routes = 0
+            preserve_violation_routes = 0
+            for entry in agent_entries:
+                if not (
+                    entry.action.startswith("route:")
+                    or entry.action.startswith("route_transform:")
+                ):
+                    continue
+                state_before = getattr(entry, "state_before", {})
+                if not isinstance(state_before, dict):
+                    continue
+                if float(state_before.get("c_task_layer1_active", 0.0)) < 0.5:
+                    continue
+                node_routes += 1
+                if float(state_before.get("atp_ratio", 0.0)) < 0.18:
+                    low_atp_routes += 1
+                transform_name = "identity"
+                if entry.action.startswith("route_transform:"):
+                    parts = entry.action.split(":")
+                    if len(parts) == 3:
+                        transform_name = parts[2]
+                preserve_active = (
+                    float(state_before.get("c_task_preserve_mode", 0.0)) >= 0.5
+                    or float(state_before.get("c_task_preserve_pressure", 0.0)) >= 0.35
+                )
+                if preserve_active and transform_name != "identity":
+                    preserve_violation_routes += 1
+            if node_routes <= 0:
+                continue
+            evidence[node_id] = {
+                "c_task_routes": float(node_routes),
+                "low_atp_routes": float(low_atp_routes),
+                "low_atp_ratio": round(float(low_atp_routes) / max(node_routes, 1), 4),
+                "preserve_violation_routes": float(preserve_violation_routes),
+                "preserve_violation_ratio": round(
+                    float(preserve_violation_routes) / max(node_routes, 1),
+                    4,
+                ),
+            }
+        return evidence
+
+    def _entries_for_cycle_window_by_agent(
+        self,
+        start_cycle: int,
+        end_cycle: int,
+    ) -> dict[str, list[object]]:
+        entries_by_agent: dict[str, list[object]] = {}
         for node_id, agent in self.system.agents.items():
-            relevant = [entry for entry in agent.engine.memory.entries if entry in cycle_entries]
-            if relevant:
-                latest_by_agent[node_id] = float(relevant[-1].coherence)
+            agent_entries = [
+                entry
+                for entry in agent.engine.memory.entries
+                if start_cycle < entry.cycle <= end_cycle
+            ]
+            if agent_entries:
+                entries_by_agent[node_id] = agent_entries
+        return entries_by_agent
+
+    def _final_coherence_for_slice(self, cycle_entries_by_agent: dict[str, list[object]]) -> float:
+        latest_by_agent: Dict[str, float] = {}
+        for node_id, agent_entries in cycle_entries_by_agent.items():
+            if agent_entries:
+                latest_by_agent[node_id] = float(agent_entries[-1].coherence)
         if latest_by_agent:
             return mean(latest_by_agent.values())
         return 0.0
@@ -1045,6 +1771,8 @@ class Phase8SliceRunner:
 
     def _growth_request_summary(self) -> dict[str, object]:
         capability_states = list(self.system.environment.capability_states.values())
+        local_unit_summary = dict(self.system.environment._local_unit_summary())
+        growth_intent_summary = dict(self.system.environment.growth_intent_summary())
         if not capability_states:
             return {
                 "authorization": str(self.system.environment.slow_growth_authorization),
@@ -1055,6 +1783,20 @@ class Phase8SliceRunner:
                 "mean_pressure": 0.0,
                 "max_readiness": 0.0,
                 "mean_readiness": 0.0,
+                "local_requesting_nodes": int(local_unit_summary.get("requesting_growth_nodes", 0)),
+                "local_max_pressure": round(
+                    float(local_unit_summary.get("max_growth_request_pressure", 0.0)),
+                    4,
+                ),
+                "top_requesting_nodes": list(growth_intent_summary.get("top_requesting_nodes", [])),
+                "top_blocked_nodes": list(growth_intent_summary.get("top_blocked_nodes", [])),
+                "blocked_reason_counts": dict(growth_intent_summary.get("blocked_reason_counts", {})),
+                "authorized_without_proposal_count": int(
+                    growth_intent_summary.get("authorized_without_proposal_count", 0)
+                ),
+                "authorized_stall_slices": int(
+                    growth_intent_summary.get("authorized_stall_slices", 0)
+                ),
             }
         pressures = [
             float(state.growth_recruitment_pressure)
@@ -1067,7 +1809,8 @@ class Phase8SliceRunner:
         requesting_nodes = sum(
             1
             for state in capability_states
-            if state.growth_recruitment_pressure >= 0.45
+            if state.growth_recruitment_pressure
+            >= self.system.environment.capability_control_config.growth_request_threshold
             or state.growth_enabled
         )
         active_growth_nodes = sum(
@@ -1077,13 +1820,33 @@ class Phase8SliceRunner:
         )
         return {
             "authorization": str(self.system.environment.slow_growth_authorization),
-            "requesting_nodes": requesting_nodes,
+            "requesting_nodes": max(
+                requesting_nodes,
+                int(local_unit_summary.get("requesting_growth_nodes", 0)),
+            ),
             "active_growth_nodes": active_growth_nodes,
             "pending_proposals": len(self.system.environment.pending_growth_proposals),
-            "max_pressure": round(max(pressures), 4),
+            "max_pressure": round(
+                max(max(pressures), float(local_unit_summary.get("max_growth_request_pressure", 0.0))),
+                4,
+            ),
             "mean_pressure": round(mean(pressures), 4),
             "max_readiness": round(max(readiness), 4),
             "mean_readiness": round(mean(readiness), 4),
+            "local_requesting_nodes": int(local_unit_summary.get("requesting_growth_nodes", 0)),
+            "local_max_pressure": round(
+                float(local_unit_summary.get("max_growth_request_pressure", 0.0)),
+                4,
+            ),
+            "top_requesting_nodes": list(growth_intent_summary.get("top_requesting_nodes", [])),
+            "top_blocked_nodes": list(growth_intent_summary.get("top_blocked_nodes", [])),
+            "blocked_reason_counts": dict(growth_intent_summary.get("blocked_reason_counts", {})),
+            "authorized_without_proposal_count": int(
+                growth_intent_summary.get("authorized_without_proposal_count", 0)
+            ),
+            "authorized_stall_slices": int(
+                growth_intent_summary.get("authorized_stall_slices", 0)
+            ),
         }
 
     def _primary_forecast_metric(
@@ -1220,12 +1983,23 @@ def build_system_for_scenario(
     *,
     seed: int,
     capability_policy: str = "self-selected",
+    source_sequence_context_enabled: bool = True,
+    local_unit_mode: str = "legacy",
+    local_unit_preset: str = DEFAULT_LOCAL_UNIT_PRESET,
+    max_atp: float = 1.0,
+    force_expected_transform_at_sink: bool = False,
+    teacher_trace_mode: str = "off",
+    teacher_transform_policy: str = "source_then_identity",
+    teacher_force_nodes: Sequence[str] | None = None,
+    c_task_layer1_enabled: bool = False,
+    c_task_layer1_mode: str = "legacy",
 ) -> NativeSubstrateSystem:
     return NativeSubstrateSystem(
         adjacency=scenario.adjacency,
         positions=scenario.positions,
         source_id=scenario.source_id,
         sink_id=scenario.sink_id,
+        max_atp=max_atp,
         selector_seed=seed,
         packet_ttl=scenario.packet_ttl,
         source_admission_policy=scenario.source_admission_policy,
@@ -1233,6 +2007,15 @@ def build_system_for_scenario(
         source_admission_min_rate=scenario.source_admission_min_rate,
         source_admission_max_rate=scenario.source_admission_max_rate,
         capability_policy=capability_policy,
+        source_sequence_context_enabled=source_sequence_context_enabled,
+        local_unit_mode=local_unit_mode,
+        local_unit_preset=local_unit_preset,
+        force_expected_transform_at_sink=force_expected_transform_at_sink,
+        teacher_trace_mode=teacher_trace_mode,
+        teacher_transform_policy=teacher_transform_policy,
+        teacher_force_nodes=teacher_force_nodes,
+        c_task_layer1_enabled=c_task_layer1_enabled,
+        c_task_layer1_mode=c_task_layer1_mode,
     )
 
 
@@ -1243,15 +2026,38 @@ def evaluate_laminated_scenario(
     task_key: str,
     seed: int,
     capability_policy: str = "self-selected",
+    local_unit_mode: str = "legacy",
+    local_unit_preset: str = DEFAULT_LOCAL_UNIT_PRESET,
+    max_atp: float = 1.0,
+    force_expected_transform_at_sink: bool = False,
+    teacher_trace_mode: str = "off",
+    teacher_transform_policy: str = "source_then_identity",
+    teacher_force_nodes: Sequence[str] | None = None,
+    c_task_layer1_mode: str = "legacy",
     initial_cycle_budget: int = 8,
     safety_limit: int = 200,
     accuracy_threshold: float = 0.0,
     regulator_type: str = "heuristic",
+    world_model_enabled: bool = True,
+    world_model_assistance_mode: str = "off",
+    world_model_assistance_confidence_threshold: float = 0.45,
 ) -> dict[str, object]:
+    source_sequence_context_enabled = str(benchmark_family).upper() != "A"
+    c_task_layer1_enabled = str(benchmark_family).upper() == "C"
     laminated_system = build_system_for_scenario(
         scenario,
         seed=seed,
         capability_policy=capability_policy,
+        source_sequence_context_enabled=source_sequence_context_enabled,
+        local_unit_mode=local_unit_mode,
+        local_unit_preset=local_unit_preset,
+        max_atp=max_atp,
+        force_expected_transform_at_sink=force_expected_transform_at_sink,
+        teacher_trace_mode=teacher_trace_mode,
+        teacher_transform_policy=teacher_transform_policy,
+        teacher_force_nodes=teacher_force_nodes,
+        c_task_layer1_enabled=c_task_layer1_enabled,
+        c_task_layer1_mode=c_task_layer1_mode,
     )
     runner = Phase8SliceRunner(
         laminated_system,
@@ -1274,6 +2080,11 @@ def evaluate_laminated_scenario(
         regulator,
         initial_cycle_budget=initial_cycle_budget,
         safety_limit=safety_limit,
+        world_model_enabled=world_model_enabled,
+        world_model=REALWorldModel(
+            assistance_mode=world_model_assistance_mode,
+            assistance_confidence_threshold=world_model_assistance_confidence_threshold,
+        ),
     )
     laminated_result: LaminatedRunResult = controller.run()
 
@@ -1292,6 +2103,20 @@ def evaluate_laminated_scenario(
 
     return {
         "laminated_summary": runner.system.summarize(),
+        "local_unit_mode": local_unit_mode,
+        "local_unit_preset": local_unit_preset,
+        "force_expected_transform_at_sink": bool(force_expected_transform_at_sink),
+        "teacher_trace_mode": str(teacher_trace_mode),
+        "teacher_transform_policy": str(teacher_transform_policy),
+        "teacher_force_nodes": [str(node_id) for node_id in list(teacher_force_nodes or [])],
+        "c_task_layer1_mode": str(c_task_layer1_mode),
+        "world_model_enabled": bool(world_model_enabled),
+        "source_sequence_context_enabled": bool(source_sequence_context_enabled),
+        "c_task_layer1_enabled": bool(c_task_layer1_enabled),
+        "world_model_assistance_mode": str(world_model_assistance_mode),
+        "world_model_assistance_confidence_threshold": float(
+            world_model_assistance_confidence_threshold
+        ),
         "experience_log": experience_log,
         "laminated_run": {
             "final_decision": laminated_result.final_decision.value,

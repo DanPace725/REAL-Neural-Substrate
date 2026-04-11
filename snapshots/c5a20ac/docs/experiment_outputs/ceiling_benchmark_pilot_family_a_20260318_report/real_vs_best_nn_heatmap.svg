@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="570" height="226" viewBox="0 0 570 226">
+<rect width="100%" height="100%" fill="#f7f4eb"/>
+<style>text{font-family:Georgia,serif;fill:#1f1d1a}.small{font-size:12px}.label{font-size:15px;font-weight:bold}</style>
+<text x="20" y="28" class="label">REAL vs Best NN Heatmap (Bit-Accuracy Delta)</text>
+<text x="128" y="58" class="small">fixed-visible</text>
+<text x="278" y="58" class="small">fixed-latent</text>
+<text x="428" y="58" class="small">growth-visible</text>
+<text x="20" y="92" class="small">A1</text>
+<rect x="120" y="70" width="142" height="28" fill="rgb(248,234,217)" stroke="#c9c2b3"/>
+<text x="130" y="92" class="small">+0.014</text>
+<rect x="270" y="70" width="142" height="28" fill="rgb(242,224,206)" stroke="#c9c2b3"/>
+<text x="280" y="92" class="small">+0.032</text>
+<rect x="420" y="70" width="142" height="28" fill="rgb(246,231,213)" stroke="#c9c2b3"/>
+<text x="430" y="92" class="small">+0.020</text>
+<text x="20" y="126" class="small">A2</text>
+<rect x="120" y="104" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="130" y="126" class="small">+-0.014</text>
+<rect x="270" y="104" width="142" height="28" fill="rgb(232,204,183)" stroke="#c9c2b3"/>
+<text x="280" y="126" class="small">+0.066</text>
+<rect x="420" y="104" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="430" y="126" class="small">+-0.043</text>
+<text x="20" y="160" class="small">A3</text>
+<rect x="120" y="138" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="130" y="160" class="small">+-0.037</text>
+<rect x="270" y="138" width="142" height="28" fill="rgb(231,202,181)" stroke="#c9c2b3"/>
+<text x="280" y="160" class="small">+0.070</text>
+<rect x="420" y="138" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="430" y="160" class="small">+-0.017</text>
+<text x="20" y="194" class="small">A4</text>
+<rect x="120" y="172" width="142" height="28" fill="rgb(253,243,227)" stroke="#c9c2b3"/>
+<text x="130" y="194" class="small">+-0.028</text>
+<rect x="270" y="172" width="142" height="28" fill="rgb(224,188,167)" stroke="#c9c2b3"/>
+<text x="280" y="194" class="small">+0.093</text>
+<rect x="420" y="172" width="142" height="28" fill="rgb(239,218,199)" stroke="#c9c2b3"/>
+<text x="430" y="194" class="small">+0.042</text>
+</svg>

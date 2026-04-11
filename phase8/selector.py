@@ -59,6 +59,11 @@ class Phase8Selector:
     # the correct transform family based purely on the task label, without
     # relaxing the context-promotion gate in the consolidation pipeline.
     hidden_task_affinity_weight: float = 0.14
+    c_task_source_resolve_bonus: float = 0.42
+    c_task_source_wrong_transform_penalty: float = 0.34
+    c_task_preserve_identity_bonus: float = 0.58
+    c_task_preserve_rewrite_penalty: float = 0.52
+    c_task_reopen_cost_penalty: float = 0.24
     capture_route_breakdowns: bool = False
     _current_selection_context: SelectionContext | None = field(
         default=None,
@@ -165,6 +170,10 @@ class Phase8Selector:
             min(1.0, observation.get("transform_commitment_margin", 1.0)),
         )
         ambiguity_exploration = 0.14 * ambiguity + 0.10 * max(0.0, 1.0 - commitment_margin)
+        ambiguity_exploration += 0.08 * max(
+            0.0,
+            min(1.0, observation.get("c_task_reopen_pressure", 0.0)),
+        )
         transfer_exploration = 0.0
         if (
             self.node_id == self.environment.source_id
@@ -426,6 +435,11 @@ class Phase8Selector:
         partial_context_sequence_bonus = 0.0
         partial_context_sequence_penalty = 0.0
         transform_recognition_confirmation = 0.0
+        c_task_source_resolve_bonus = 0.0
+        c_task_source_resolve_penalty = 0.0
+        c_task_preserve_bonus = 0.0
+        c_task_preserve_penalty = 0.0
+        c_task_reopen_cost_penalty = 0.0
         if self.environment.topology_state is not None:
             neighbor_spec = self.environment.topology_state.node_specs.get(neighbor_id)
             if neighbor_spec is not None and neighbor_spec.dynamic:
@@ -539,6 +553,164 @@ class Phase8Selector:
                     * max(0.0, -source_sequence_hint)
                 )
                 hidden_wrong_family_penalty += partial_context_sequence_penalty
+        c_task_layer1_active = observation.get("c_task_layer1_active", 0.0) >= 0.5
+        c_task_preserve_mode = observation.get("c_task_preserve_mode", 0.0) >= 0.5
+        c_task_preserve_pressure = max(
+            0.0,
+            min(1.0, observation.get("c_task_preserve_pressure", 0.0)),
+        )
+        c_task_reopen_pressure = max(
+            0.0,
+            min(1.0, observation.get("c_task_reopen_pressure", 0.0)),
+        )
+        c_task_resolution_confidence = max(
+            0.0,
+            min(1.0, observation.get("c_task_resolution_confidence", 0.0)),
+        )
+        if c_task_layer1_active:
+            packet_hypothesis_confidence = max(
+                0.0,
+                min(1.0, float(observation.get("c_task_hypothesis_confidence", 0.0))),
+            )
+            node_hypothesis_confidence = max(
+                0.0,
+                min(1.0, float(observation.get("c_task_node_hypothesis_confidence", 0.0))),
+            )
+            hypothesis_confidence = max(
+                packet_hypothesis_confidence,
+                0.85 * node_hypothesis_confidence,
+            )
+            hypothesis_transform_match = (
+                observation.get(f"c_task_hypothesis_transform_{transform_name}", 0.0) >= 0.5
+                or observation.get(f"c_task_node_hypothesis_transform_{transform_name}", 0.0) >= 0.5
+            )
+            transform_belief = max(
+                0.0,
+                min(
+                    1.0,
+                    max(
+                        float(observation.get(f"c_task_transform_belief_{transform_name}", 0.0)),
+                        0.85 * float(
+                            observation.get(
+                                f"c_task_node_transform_belief_{transform_name}",
+                                0.0,
+                            )
+                        ),
+                    ),
+                ),
+            )
+            c_task_mode = str(self.environment.c_task_layer1_mode or "legacy")
+            c_task_preserve_bonus_scale = max(
+                0.5,
+                float(observation.get("slow_c_task_preserve_bonus_scale", 1.0)),
+            )
+            c_task_reopen_penalty_scale = max(
+                0.5,
+                float(observation.get("slow_c_task_reopen_penalty_scale", 1.0)),
+            )
+            c_task_weak_context_boost = max(
+                0.0,
+                float(observation.get("slow_c_task_weak_context_boost", 0.0)),
+            )
+            c_task_atp_conservation_bias = max(
+                0.0,
+                float(observation.get("slow_c_task_atp_conservation_bias", 0.0)),
+            )
+            weak_context_match = max(
+                0.0,
+                min(1.0, float(observation.get("slow_weak_context_match", 0.0))),
+            )
+            atp_ratio = max(0.0, min(1.0, float(observation.get("atp_ratio", 0.0))))
+            expected_transform_match = observation.get(
+                f"expected_transform_{transform_name}",
+                0.0,
+            ) >= 0.5
+            effective_preserve_pressure = max(
+                0.0,
+                c_task_preserve_pressure - 0.20 * c_task_reopen_pressure,
+            )
+            if c_task_preserve_mode or effective_preserve_pressure >= 0.12:
+                if transform_name == "identity":
+                    c_task_preserve_bonus = (
+                        self.c_task_preserve_identity_bonus
+                        * max(
+                            0.25,
+                            (0.45 + 0.45 * c_task_resolution_confidence)
+                            * (0.45 + effective_preserve_pressure),
+                        )
+                    )
+                    c_task_preserve_bonus *= c_task_preserve_bonus_scale
+                else:
+                    c_task_preserve_penalty = (
+                        self.c_task_preserve_rewrite_penalty
+                        * max(
+                            0.22,
+                            (0.40 + 0.45 * c_task_resolution_confidence)
+                            * (0.35 + effective_preserve_pressure),
+                        )
+                    )
+                    c_task_preserve_penalty *= c_task_reopen_penalty_scale
+            elif (
+                self.node_id == self.environment.source_id
+                and observation.get("expected_transform_available", 0.0) >= 0.5
+            ):
+                if expected_transform_match:
+                    c_task_source_resolve_bonus = (
+                        self.c_task_source_resolve_bonus
+                        * max(
+                            0.25 if c_task_mode == "communicative" else 0.40,
+                            0.45
+                            + 0.35 * observation.get("packet_context_confidence", 0.0)
+                            + 0.20 * context_weight,
+                        )
+                    )
+                    c_task_source_resolve_bonus += (
+                        0.14 + 0.10 * context_weight
+                    ) * c_task_weak_context_boost * weak_context_match
+                elif transform_name == "identity":
+                    c_task_source_resolve_penalty = (
+                        self.c_task_source_wrong_transform_penalty
+                        * (0.45 if c_task_mode == "communicative" else 0.72)
+                    )
+                else:
+                    c_task_source_resolve_penalty = (
+                        self.c_task_source_wrong_transform_penalty
+                        * (0.55 if c_task_mode == "communicative" else 1.0)
+                    )
+                if hypothesis_transform_match and hypothesis_confidence >= 0.50:
+                    c_task_source_resolve_bonus += (
+                        0.06 + 0.08 * transform_belief
+                    ) * hypothesis_confidence
+            if c_task_mode == "communicative" and c_task_reopen_pressure >= 0.30:
+                if transform_name != "identity":
+                    c_task_preserve_penalty *= max(0.35, 1.0 - 0.95 * c_task_reopen_pressure)
+                if expected_transform_match:
+                    c_task_source_resolve_bonus *= 0.88 + 0.18 * c_task_reopen_pressure
+            if transform_name != "identity":
+                protection = max(
+                    0.0,
+                    c_task_preserve_pressure
+                    + 0.40 * c_task_resolution_confidence
+                    - 0.45 * c_task_reopen_pressure,
+                )
+                if c_task_preserve_mode or protection > 0.10:
+                    c_task_reopen_cost_penalty = (
+                        self.c_task_reopen_cost_penalty
+                        * max(0.15, min(1.0, protection))
+                    )
+                    c_task_reopen_cost_penalty *= c_task_reopen_penalty_scale
+                if c_task_atp_conservation_bias > 0.0:
+                    c_task_reopen_cost_penalty += (
+                        0.20
+                        * c_task_atp_conservation_bias
+                        * max(0.0, 0.45 - atp_ratio)
+                    )
+            elif c_task_atp_conservation_bias > 0.0 and c_task_preserve_mode:
+                c_task_preserve_bonus += (
+                    0.16
+                    * c_task_atp_conservation_bias
+                    * max(0.0, 0.45 - atp_ratio)
+                )
         if context_bit is not None:
             (
                 raw_context_action_support,
@@ -753,6 +925,8 @@ class Phase8Selector:
             "branch_context_bonus_term": branch_context_bonus,
             "branch_transform_bonus_term": branch_transform_bonus,
             "branch_escape_bonus_term": branch_escape_bonus,
+            "c_task_source_resolve_bonus_term": c_task_source_resolve_bonus,
+            "c_task_preserve_bonus_term": c_task_preserve_bonus,
             "urgency_term": 0.20 * urgency,
             "ingress_backlog_term": 0.10 * ingress_backlog,
             "congestion_penalty_term": -0.22 * congestion,
@@ -770,6 +944,9 @@ class Phase8Selector:
             "partial_context_sequence_penalty_term": -partial_context_sequence_penalty,
             "visible_task_incompatibility_penalty_term": -visible_task_incompatibility_penalty,
             "competition_penalty_term": -competition_penalty,
+            "c_task_source_resolve_penalty_term": -c_task_source_resolve_penalty,
+            "c_task_preserve_penalty_term": -c_task_preserve_penalty,
+            "c_task_reopen_cost_penalty_term": -c_task_reopen_cost_penalty,
             "stale_penalty_term": -stale_penalty,
             "competition_bonus_term": competition_bonus,
             "ambiguity_hold_bonus_term": 0.10

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Dict, Sequence, Tuple
 
 from .models import SignalSpec
+
+TOPOLOGY_MODES = ("legacy", "bounded_overlap_13715")
 
 
 def basic_demo_topology() -> tuple[Dict[str, tuple[str, ...]], Dict[str, int], str, str]:
@@ -104,6 +106,64 @@ def detour_resilience_workload() -> Tuple[int, int, Dict[int, int]]:
         16: 2,
     }
     return cycles, initial_packets, packet_schedule
+
+
+def bounded_ternary_overlap_topology(
+    layer_widths: Sequence[int] = (3, 7, 15),
+) -> tuple[Dict[str, tuple[str, ...]], Dict[str, int], str, str]:
+    """Bounded overlap graph with widths 1,3,7,15,... and 3-child fanout."""
+    source_id = "n0"
+    sink_id = "sink"
+    positions: Dict[str, int] = {source_id: 0}
+    adjacency: Dict[str, tuple[str, ...]] = {}
+    layers: list[list[str]] = []
+    next_id = 1
+
+    for layer_index, width in enumerate(layer_widths, start=1):
+        layer_nodes = [f"n{next_id + offset}" for offset in range(width)]
+        next_id += width
+        layers.append(layer_nodes)
+        for node_id in layer_nodes:
+            positions[node_id] = layer_index
+    positions[sink_id] = len(layer_widths) + 1
+
+    if not layers:
+        adjacency[source_id] = (sink_id,)
+        adjacency[sink_id] = ()
+        return adjacency, positions, source_id, sink_id
+
+    adjacency[source_id] = tuple(layers[0])
+    for current_layer, next_layer in zip(layers, layers[1:]):
+        for node_index, node_id in enumerate(current_layer):
+            start = min(max(0, 2 * node_index), max(len(next_layer) - 3, 0))
+            adjacency[node_id] = tuple(next_layer[start:start + min(3, len(next_layer))])
+
+    for node_id in layers[-1]:
+        adjacency[node_id] = (sink_id,)
+    adjacency[sink_id] = ()
+    return adjacency, positions, source_id, sink_id
+
+
+def scenario_with_topology_mode(
+    scenario: "ScenarioSpec",
+    topology_mode: str = "legacy",
+) -> "ScenarioSpec":
+    if topology_mode == "legacy":
+        return scenario
+    if topology_mode != "bounded_overlap_13715":
+        raise ValueError(f"Unsupported topology mode: {topology_mode}")
+    adjacency, positions, source_id, sink_id = bounded_ternary_overlap_topology()
+    topology_depth = max(int(position) for position in positions.values())
+    return replace(
+        scenario,
+        name=f"{scenario.name}_{topology_mode}",
+        description=f"{scenario.description} [{topology_mode} topology]",
+        adjacency=adjacency,
+        positions=positions,
+        source_id=source_id,
+        sink_id=sink_id,
+        packet_ttl=max(int(scenario.packet_ttl), topology_depth * 4),
+    )
 
 
 def _bits4(value: int) -> list[int]:

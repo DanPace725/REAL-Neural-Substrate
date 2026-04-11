@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m scripts.diagnose_c_family_real --benchmarks C3 C4 --seeds 13 --skip-transfer)",
+      "Bash(python -m scripts.diagnose_c_family_real --benchmarks C3 C4 --seeds 13)",
+      "Bash(find 'C:\\\\Users\\\\nscha\\\\Coding\\\\Relationally Embedded Allostatic Learning\\\\REAL-Neural-Substrate\\\\docs\\\\experiment_outputs' -name ceiling_benchmark_pilot_family_*.json -type f)",
+      "Bash(python3:*)",
+      "Bash(python -c \":*)"
+    ]
+  }
+}

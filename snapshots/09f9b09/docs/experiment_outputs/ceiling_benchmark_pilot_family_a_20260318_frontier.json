@@ -1,0 +1,15 @@
+{
+  "families": {
+    "A": {
+      "ceiling_band": null,
+      "last_pre_collapse": null,
+      "best_nn_by_band": {
+        "A1": "causal-transformer",
+        "A2": "causal-transformer",
+        "A3": "causal-transformer",
+        "A4": "causal-transformer"
+      }
+    }
+  },
+  "earliest_global_ceiling": null
+}

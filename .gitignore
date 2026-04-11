@@ -4,3 +4,10 @@ __pycache__/
 .coverage
 tests_tmp/
 
+# Generated session state (persists across runs, not source code)
+trace_domain/lexicon_state.json
+trace_domain/regulator_state.json
+trace_domain/substrate_state.json
+docs/traces/organization.json
+docs/traces/organized/
+

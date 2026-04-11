@@ -13,7 +13,13 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from phase8 import evaluate_laminated_scenario, hidden_regime_suite_by_id
+from phase8 import (
+    DEFAULT_LOCAL_UNIT_PRESET,
+    evaluate_laminated_scenario,
+    hidden_regime_suite_by_id,
+    pulse_local_unit_preset_names,
+    scenario_with_topology_mode,
+)
 from scripts.experiment_manifest import build_run_manifest, write_run_manifest
 
 EXPERIMENT_OUTPUTS_DIR = Path(__file__).parent.parent / "docs" / "experiment_outputs"
@@ -34,13 +40,21 @@ def _auto_output_path(
     accuracy_threshold: float,
     regulator_type: str,
     run_stamp: str,
+    local_unit_mode: str,
+    local_unit_preset: str,
+    topology_mode: str,
+    max_atp: float,
 ) -> Path:
     policy_slug = capability_policy.replace("-", "_")
+    local_unit_slug = "" if local_unit_mode == "legacy" else f"_{local_unit_mode}"
+    local_unit_preset_slug = "" if local_unit_preset == DEFAULT_LOCAL_UNIT_PRESET else f"_{local_unit_preset}"
+    topology_slug = "" if topology_mode == "legacy" else f"_{topology_mode}"
+    atp_slug = "" if abs(float(max_atp) - 1.0) < 1e-9 else f"_atp{str(float(max_atp)).replace('.', 'p')}"
     thresh_slug = f"_t{str(accuracy_threshold).replace('.', '')}" if accuracy_threshold > 0.0 else ""
     reg_slug = f"_{regulator_type}" if regulator_type != "real" else ""
     filename = (
         f"{run_stamp}_hidden_regime_{benchmark_id.lower()}_{task_key}_{observable}"
-        f"_{policy_slug}_b{initial_cycle_budget}_s{safety_limit}{thresh_slug}{reg_slug}_seed{seed}.json"
+        f"_{policy_slug}{local_unit_slug}{local_unit_preset_slug}{topology_slug}{atp_slug}_b{initial_cycle_budget}_s{safety_limit}{thresh_slug}{reg_slug}_seed{seed}.json"
     )
     return EXPERIMENT_OUTPUTS_DIR / filename
 
@@ -57,15 +71,23 @@ def _auto_suite_output_path(
     accuracy_threshold: float,
     regulator_type: str,
     run_stamp: str,
+    local_unit_mode: str,
+    local_unit_preset: str,
+    topology_mode: str,
+    max_atp: float,
 ) -> Path:
     bench_slug = "all" if len(benchmark_ids) > 3 else "_".join(item.lower() for item in benchmark_ids)
     task_slug = "all_tasks" if len(task_keys) > 1 else task_keys[0]
     policy_slug = capability_policy.replace("-", "_")
+    local_unit_slug = "" if local_unit_mode == "legacy" else f"_{local_unit_mode}"
+    local_unit_preset_slug = "" if local_unit_preset == DEFAULT_LOCAL_UNIT_PRESET else f"_{local_unit_preset}"
+    topology_slug = "" if topology_mode == "legacy" else f"_{topology_mode}"
+    atp_slug = "" if abs(float(max_atp) - 1.0) < 1e-9 else f"_atp{str(float(max_atp)).replace('.', 'p')}"
     thresh_slug = f"_t{str(accuracy_threshold).replace('.', '')}" if accuracy_threshold > 0.0 else ""
     reg_slug = f"_{regulator_type}" if regulator_type != "real" else ""
     filename = (
         f"{run_stamp}_hidden_regime_suite_{bench_slug}_{task_slug}_{observable}"
-        f"_{policy_slug}_b{initial_cycle_budget}_s{safety_limit}{thresh_slug}{reg_slug}_seed{seed}.json"
+        f"_{policy_slug}{local_unit_slug}{local_unit_preset_slug}{topology_slug}{atp_slug}_b{initial_cycle_budget}_s{safety_limit}{thresh_slug}{reg_slug}_seed{seed}.json"
     )
     return EXPERIMENT_OUTPUTS_DIR / filename
 
@@ -82,6 +104,10 @@ def evaluate_hidden_regime_benchmark(
     regulator_type: str = "real",
     safety_limit: int = 200,
     output_path: Path | None = None,
+    local_unit_mode: str = "legacy",
+    local_unit_preset: str = DEFAULT_LOCAL_UNIT_PRESET,
+    topology_mode: str = "legacy",
+    max_atp: float = 1.0,
 ) -> dict[str, object]:
     suite = hidden_regime_suite_by_id()
     if benchmark_id not in suite:
@@ -94,12 +120,16 @@ def evaluate_hidden_regime_benchmark(
 
     task = case.tasks[task_key]
     scenario = task.hidden_scenario if observable == "hidden" else task.visible_scenario
+    scenario = scenario_with_topology_mode(scenario, topology_mode)
     result = evaluate_laminated_scenario(
         scenario,
         benchmark_family="HR",
         task_key=task_key,
         seed=seed,
         capability_policy=capability_policy,
+        local_unit_mode=local_unit_mode,
+        local_unit_preset=local_unit_preset,
+        max_atp=max_atp,
         initial_cycle_budget=initial_cycle_budget,
         safety_limit=safety_limit,
         accuracy_threshold=accuracy_threshold,
@@ -111,6 +141,12 @@ def evaluate_hidden_regime_benchmark(
             "task_key": task_key,
             "observable": observable,
             "capability_policy": capability_policy,
+            "local_unit_mode": local_unit_mode,
+            "local_unit_preset": local_unit_preset,
+            "topology_mode": topology_mode,
+            "max_atp": max_atp,
+            "topology_node_count": len(scenario.positions),
+            "topology_depth": max(int(position) for position in scenario.positions.values()),
             "seed": seed,
             "case": {
                 "label": case.label,
@@ -119,7 +155,7 @@ def evaluate_hidden_regime_benchmark(
                 "sequence_memory_window": case.sequence_memory_window,
                 "pass_count": case.pass_count,
                 "expected_examples": case.expected_examples,
-                "topology_name": case.topology_name,
+                "topology_name": topology_mode if topology_mode != "legacy" else case.topology_name,
                 "task_id": task.task_id,
             },
         }
@@ -134,6 +170,10 @@ def evaluate_hidden_regime_benchmark(
                 "task_key": task_key,
                 "observable": observable,
                 "capability_policy": capability_policy,
+                "local_unit_mode": local_unit_mode,
+                "local_unit_preset": local_unit_preset,
+                "topology_mode": topology_mode,
+                "max_atp": max_atp,
                 "initial_cycle_budget": initial_cycle_budget,
                 "accuracy_threshold": accuracy_threshold,
                 "regulator_type": regulator_type,
@@ -154,12 +194,14 @@ def _compact_row(benchmark_id: str, task_key: str, result: dict[str, object]) ->
     regime_count = result.get("case", {}).get("regime_cardinality", "?")
 
     final_acc = 0.0
+    floor_acc = 0.0
     forecast_str = ""
     payoff_str = ""
     if slices_data:
         last = slices_data[-1]
         metadata = last.get("metadata", {})
-        final_acc = float(metadata.get("mean_bit_accuracy", 0.0))
+        final_acc = float(metadata.get("final_accuracy", metadata.get("mean_bit_accuracy", 0.0)))
+        floor_acc = float(metadata.get("floor_accuracy", 0.0))
         forecast_metrics = metadata.get("forecast_metrics", {})
         forecast_acc = forecast_metrics.get("forecast_accuracy")
         resolved_count = forecast_metrics.get("resolved_forecast_count", 0)
@@ -174,7 +216,7 @@ def _compact_row(benchmark_id: str, task_key: str, result: dict[str, object]) ->
 
     return (
         f"  {benchmark_id:4s} {task_key:6s} {observable:7s} regimes={regime_count} "
-        f"final={final_acc:.3f} slices={len(slices_data)} [{decision}]"
+        f"final={final_acc:.3f} floor={floor_acc:.3f} slices={len(slices_data)} [{decision}]"
         f"{forecast_str}{payoff_str}"
     )
 
@@ -216,6 +258,31 @@ def main() -> None:
         default="self-selected",
         choices=("self-selected", "fixed-latent", "growth-visible", "growth-latent"),
         help="Initial capability policy. self-selected keeps the slow layer free to switch policies over slices.",
+    )
+    parser.add_argument(
+        "--local-unit-mode",
+        choices=("legacy", "pulse_local_unit"),
+        default="legacy",
+        help="Opt-in Phase 8 local-unit runtime mode. Use pulse_local_unit for the C/HR pilot.",
+    )
+    parser.add_argument(
+        "--local-unit-preset",
+        choices=pulse_local_unit_preset_names(),
+        default=DEFAULT_LOCAL_UNIT_PRESET,
+        help="Named pulse-local-unit preset. Only affects pulse_local_unit mode.",
+    )
+    parser.add_argument(
+        "--topology-mode",
+        choices=("legacy", "bounded_overlap_13715"),
+        default="legacy",
+        help="Opt-in topology override for hidden-regime runs.",
+    )
+    parser.add_argument(
+        "--max-atp",
+        dest="max_atp",
+        type=float,
+        default=1.0,
+        help="Per-node ATP capacity for this run. Values above 1.0 give nodes more energy headroom.",
     )
     parser.add_argument(
         "--reg",
@@ -280,6 +347,10 @@ def main() -> None:
                         accuracy_threshold=args.accuracy_threshold,
                         regulator_type=args.regulator_type,
                         run_stamp=run_stamp,
+                        local_unit_mode=args.local_unit_mode,
+                        local_unit_preset=args.local_unit_preset,
+                        topology_mode=args.topology_mode,
+                        max_atp=args.max_atp,
                     )
                 )
             run_results.append(
@@ -294,6 +365,10 @@ def main() -> None:
                     regulator_type=args.regulator_type,
                     safety_limit=args.safety_limit,
                     output_path=output_path,
+                    local_unit_mode=args.local_unit_mode,
+                    local_unit_preset=args.local_unit_preset,
+                    topology_mode=args.topology_mode,
+                    max_atp=args.max_atp,
                 )
             )
 
@@ -310,6 +385,10 @@ def main() -> None:
                 accuracy_threshold=args.accuracy_threshold,
                 regulator_type=args.regulator_type,
                 run_stamp=run_stamp,
+                local_unit_mode=args.local_unit_mode,
+                local_unit_preset=args.local_unit_preset,
+                topology_mode=args.topology_mode,
+                max_atp=args.max_atp,
             )
             if not args.output or len(run_results) == 1
             else Path(args.output)
@@ -322,6 +401,10 @@ def main() -> None:
                 "task_keys": task_keys,
                 "observable": args.observable,
                 "capability_policy": args.capability_policy,
+                "local_unit_mode": args.local_unit_mode,
+                "local_unit_preset": args.local_unit_preset,
+                "topology_mode": args.topology_mode,
+                "max_atp": args.max_atp,
                 "initial_cycle_budget": args.budget,
                 "accuracy_threshold": args.accuracy_threshold,
                 "regulator_type": args.regulator_type,

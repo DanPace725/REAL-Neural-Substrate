@@ -1,0 +1,28 @@
+ python -m scripts.run_occupancy_real_v3 `
+   --selector-seed 13 `
+   --eval-mode fresh_session_eval `
+   --topology-mode multihop_routing `
+      --context-mode online_running_context `
+      --ingress-mode direct_injection `
+      --train-session-fraction 0.7 `
+      --window-size 5 `
+      --feedback-amount 0.18 `
+      --eval-feedback-fraction 1.0 `
+      --packet-ttl 8 `
+      --summary-only  --max-train-sessions 15 --max-eval-sessions 5 --workers 2 `
+      --output-json docs/experiment_outputs/v3_diag_seed13_fresh_direct_20260408_2.json
+
+
+      python -m scripts.run_occupancy_real_v3 `
+  --selector-seed 13 `
+  --eval-mode fresh_session_eval `
+  --topology-mode multihop_routing `
+  --context-mode online_running_context `
+  --ingress-mode admission_source `
+  --train-session-fraction 0.7 `
+  --window-size 5 `
+  --feedback-amount 0.18 `
+  --eval-feedback-fraction 1.0 `
+  --packet-ttl 8 `
+  --summary-only --workers 2 `
+  --output-json docs/experiment_outputs/v3_diag_seed13_fresh_admission_20260408_2.json
