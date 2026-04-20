@@ -42,7 +42,8 @@
       "Bash(python -m pytest tests/test_phase8.py tests/test_lamination.py tests/test_phase8_lamination.py tests/test_real_core.py -x -q --rootdir=. --override-ini=\"tool.pytest.ini_options=\")",
       "Bash(python -m unittest tests.test_lamination tests.test_real_core -v)",
       "Bash(python -m unittest tests.test_phase8_lamination tests.test_latent_growth_gate tests.test_latent_route_transform_gate -v)",
-      "Bash(python -m unittest tests.test_experiment_manifest tests.test_hidden_regime_forecasting -v)"
+      "Bash(python -m unittest tests.test_experiment_manifest tests.test_hidden_regime_forecasting -v)",
+      "Bash(wc -l real_core/*.py phase8/*.py)"
     ]
   }
 }
